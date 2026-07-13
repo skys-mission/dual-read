@@ -1,0 +1,15 @@
+# Dual Read maintainers
+
+# Default owners for the whole repository. Replace/add GitHub usernames or
+# org teams before enabling required CODEOWNER reviews.
+* @skys-mission
+
+# Extension and E2E
+/extension/ @skys-mission
+
+# Server
+/server/ @skys-mission
+
+# CI / supply chain
+/.github/ @skys-mission
+/scripts/ @skys-mission

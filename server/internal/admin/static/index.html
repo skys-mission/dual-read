@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <title>Dual Read Proxy</title>
+  <link rel="stylesheet" href="static/style.css" />
+</head>
+<body>
+  <div id="loginOverlay" class="login-overlay" role="dialog" aria-modal="true" aria-labelledby="loginTitle" hidden>
+    <form id="loginForm" class="login-card">
+      <div class="login-mark" aria-hidden="true">DR</div>
+      <div>
+        <p class="eyebrow">DUAL READ PROXY</p>
+        <h2 id="loginTitle">登录管理控制台</h2>
+        <p class="login-copy">输入 Admin 口令以继续。口令仅用于本次会话，不会写入浏览器存储或 URL。</p>
+      </div>
+      <div class="field">
+        <label for="loginToken">Admin Token</label>
+        <input id="loginToken" type="password" autocomplete="current-password" placeholder="输入管理口令" required />
+      </div>
+      <p id="loginError" class="form-error" aria-live="polite"></p>
+      <button type="submit" class="btn btn-primary btn-block">安全登录</button>
+    </form>
+  </div>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">DR</div>
+        <div>
+          <strong>Dual Read</strong>
+          <span>Proxy Console</span>
+        </div>
+      </div>
+
+      <nav class="nav-list" id="tabs" aria-label="主导航">
+        <button type="button" class="tab nav-item active" data-tab="monitor" aria-current="page">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 20 20"><path d="M3 10h3l2-5 4 10 2-5h3"/></svg>
+          </span>
+          <span>运行概览</span>
+        </button>
+        <button type="button" class="tab nav-item" data-tab="settings">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 20 20"><path d="M4 5h12M6 10h8M8 15h4"/><circle cx="8" cy="5" r="1.5"/><circle cx="12" cy="10" r="1.5"/><circle cx="10" cy="15" r="1.5"/></svg>
+          </span>
+          <span>服务设置</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-status">
+        <div class="status-line">
+          <span class="status-dot" id="sidebarStatusDot"></span>
+          <span id="sidebarStatus">正在连接服务</span>
+        </div>
+        <span class="version" id="serverVersion">Dual Read Server</span>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow" id="pageEyebrow">PROXY STATUS</p>
+          <h1 id="pageTitle">运行概览</h1>
+          <p class="page-description" id="subtitle">正在读取服务状态…</p>
+        </div>
+        <div class="top-actions">
+          <button id="refresh" type="button" class="btn btn-secondary">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 8a6 6 0 1 0 .2 3M16 4v4h-4"/></svg>
+            <span>刷新</span>
+          </button>
+          <button id="logoutBtn" type="button" class="btn btn-ghost">退出</button>
+        </div>
+      </header>
+
+      <main class="content">
+        <section id="panel-monitor">
+          <section class="hero-panel">
+            <div>
+              <div class="health-title">
+                <span class="health-indicator" id="healthIndicator"></span>
+                <span id="healthLabel">服务检查中</span>
+              </div>
+              <p id="healthDetail">正在建立与 Proxy Server 的连接</p>
+            </div>
+            <div class="endpoint-box">
+              <span>插件 Proxy API 地址</span>
+              <div class="copy-field">
+                <code id="proxyEndpoint">—</code>
+                <button type="button" class="icon-button" id="copyEndpoint" title="复制 API 地址" aria-label="复制 API 地址">
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="7" y="7" width="9" height="9" rx="2"/><path d="M13 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/></svg>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section class="metric-grid" id="cards" aria-label="核心指标"></section>
+
+          <section class="dashboard-grid">
+            <article class="panel runtime-panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">CONFIGURATION</p>
+                  <h2>运行配置</h2>
+                </div>
+                <button type="button" class="text-button" data-go-settings>管理设置</button>
+              </div>
+              <div class="summary-list" id="config"></div>
+            </article>
+
+            <article class="panel guide-panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">QUICK START</p>
+                  <h2>插件连接</h2>
+                </div>
+              </div>
+              <ol class="steps">
+                <li><span>1</span><div><strong>复制 API 地址</strong><p>填写到插件的 Proxy API Base。</p></div></li>
+                <li><span>2</span><div><strong>填写 Client Key</strong><p>公网部署必须为插件分配独立 Key。</p></div></li>
+                <li><span>3</span><div><strong>测试连接</strong><p>插件会自动验证模型和服务可用性。</p></div></li>
+              </ol>
+            </article>
+          </section>
+
+          <section class="panel requests-panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">REQUEST ACTIVITY</p>
+                <h2>最近请求</h2>
+              </div>
+              <span class="live-note"><span></span>每 5 秒自动更新</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>时间</th><th>请求 ID</th><th>状态</th><th>缓存</th><th>延迟</th><th>模型</th><th>用户</th><th>错误</th>
+                  </tr>
+                </thead>
+                <tbody id="recent"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section id="panel-settings" hidden>
+          <div id="settingsBanner" class="banner" hidden role="status" aria-live="polite"></div>
+
+          <form id="settingsForm" class="settings-form">
+            <section class="panel settings-section">
+              <div class="section-heading">
+                <div class="section-number">01</div>
+                <div>
+                  <p class="eyebrow">UPSTREAM</p>
+                  <h2>上游模型服务</h2>
+                  <p>所有翻译请求最终发送到此 OpenAI 兼容接口。</p>
+                </div>
+              </div>
+              <div class="field-grid">
+                <div class="field field-wide">
+                  <label for="llmBase">API 地址</label>
+                  <input id="llmBase" type="url" required placeholder="https://api.deepseek.com" spellcheck="false" />
+                  <p class="field-help">填写服务根地址，无需添加 <code>/v1/chat/completions</code>。</p>
+                </div>
+                <div class="field">
+                  <label for="modelDefault">默认模型</label>
+                  <input id="modelDefault" type="text" placeholder="deepseek-v4-flash" spellcheck="false" />
+                </div>
+                <div class="field">
+                  <label for="llmKey">上游 API Key</label>
+                  <input id="llmKey" type="password" placeholder="留空则保持不变" autocomplete="new-password" />
+                  <p class="field-help" id="llmKeyHint"></p>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel settings-section">
+              <div class="section-heading row-head">
+                <div class="section-heading-main">
+                  <div class="section-number">02</div>
+                  <div>
+                    <p class="eyebrow">ACCESS CONTROL</p>
+                    <h2>插件 Client Key</h2>
+                    <p>为每位用户或每台设备分配独立凭据，便于鉴权和排查请求。</p>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" id="addClient">
+                  <span aria-hidden="true">＋</span> 添加用户
+                </button>
+              </div>
+              <div class="security-callout" id="clientSecurityNote">
+                公网部署必须至少配置一个 Client Key；无 Key 模式仅适合本机使用。
+              </div>
+              <div class="table-wrap client-table-wrap">
+                <table class="client-table">
+                  <thead><tr><th>标识名称</th><th>Client Key</th><th class="actions">操作</th></tr></thead>
+                  <tbody id="clientRows"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="panel settings-section">
+              <div class="section-heading">
+                <div class="section-number">03</div>
+                <div>
+                  <p class="eyebrow">CACHE</p>
+                  <h2>响应缓存</h2>
+                  <p>单机使用本地内存；多实例部署使用 Redis / Valkey 共享结果。</p>
+                </div>
+              </div>
+              <div class="cache-grid">
+                <article class="cache-card">
+                  <div class="cache-card-head">
+                    <div>
+                      <span class="cache-type">L1</span>
+                      <h3>本地内存</h3>
+                      <p>低延迟，随 Server 实例独立存储。</p>
+                    </div>
+                    <label class="switch">
+                      <input id="cacheLocalEnabled" type="checkbox" />
+                      <span aria-hidden="true"></span>
+                      <em>启用</em>
+                    </label>
+                  </div>
+                  <div class="field-grid compact">
+                    <div class="field"><label for="cacheLocalTTL">过期时间</label><input id="cacheLocalTTL" type="text" placeholder="10m" /></div>
+                    <div class="field"><label for="cacheLocalMaxMB">容量上限</label><div class="input-suffix"><input id="cacheLocalMaxMB" type="number" min="16" placeholder="256" /><span>MB</span></div></div>
+                  </div>
+                </article>
+                <article class="cache-card">
+                  <div class="cache-card-head">
+                    <div>
+                      <span class="cache-type">L2</span>
+                      <h3>Redis / Valkey</h3>
+                      <p>跨实例共享，适合公网和集群部署。</p>
+                    </div>
+                    <label class="switch">
+                      <input id="cacheValkeyEnabled" type="checkbox" />
+                      <span aria-hidden="true"></span>
+                      <em>启用</em>
+                    </label>
+                  </div>
+                  <div class="field"><label for="cacheValkeyAddr">服务地址</label><input id="cacheValkeyAddr" type="text" placeholder="127.0.0.1:6379" spellcheck="false" /></div>
+                  <div class="field"><label for="cacheValkeyPassword">访问密码</label><input id="cacheValkeyPassword" type="password" placeholder="留空则保持不变" autocomplete="new-password" /><p class="field-help" id="cacheValkeyPasswordHint"></p></div>
+                  <div class="field-grid compact">
+                    <div class="field"><label for="cacheValkeyTTL">过期时间</label><input id="cacheValkeyTTL" type="text" placeholder="24h" /></div>
+                    <div class="field"><label for="cacheValkeyDB">数据库</label><input id="cacheValkeyDB" type="number" min="0" placeholder="0" /></div>
+                  </div>
+                </article>
+              </div>
+              <p class="restart-note">本地缓存开关与容量修改需要重启；Redis / Valkey 配置会立即连接并自动重试。</p>
+            </section>
+
+            <section class="panel settings-section">
+              <div class="section-heading">
+                <div class="section-number">04</div>
+                <div>
+                  <p class="eyebrow">SECURITY & OPERATIONS</p>
+                  <h2>安全与运行</h2>
+                  <p>保护管理控制台，并控制服务端日志详细程度。</p>
+                </div>
+              </div>
+              <div class="field-grid">
+                <div class="field">
+                  <label for="adminToken">Admin 访问口令</label>
+                  <input id="adminToken" type="password" placeholder="留空则保持不变" autocomplete="new-password" />
+                  <p class="field-help" id="adminTokenHint">公网部署时务必设置。</p>
+                </div>
+                <div class="field">
+                  <label for="logLevel">日志级别</label>
+                  <select id="logLevel">
+                    <option value="debug">Debug — 调试详情</option>
+                    <option value="info">Info — 常规运行</option>
+                    <option value="warn">Warn — 仅警告</option>
+                    <option value="error">Error — 仅错误</option>
+                  </select>
+                </div>
+              </div>
+              <details class="advanced-info">
+                <summary>查看运行文件与版本信息</summary>
+                <p id="bootstrapInfo"></p>
+              </details>
+            </section>
+
+            <div class="form-actions">
+              <span id="formState" class="form-state">配置已同步</span>
+              <div>
+                <button type="button" class="btn btn-ghost" id="reloadSettings">放弃修改</button>
+                <button type="submit" class="btn btn-primary" id="saveSettings">保存配置</button>
+              </div>
+            </div>
+          </form>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" hidden role="status" aria-live="polite"></div>
+  <script src="static/admin.js"></script>
+</body>
+</html>

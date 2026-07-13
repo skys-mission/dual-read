@@ -1,0 +1,114 @@
+# Dual Read Server — local / shared Compose stacks
+#
+# Standalone:
+#   export OPENAI_API_KEY=sk-xxx
+#   export DUAL_READ_ADMIN_TOKEN=$(openssl rand -hex 16)
+#   docker compose up --build
+#
+# With Valkey:
+#   docker compose --profile valkey up --build
+#
+# Behind Caddy TLS (see deploy/Caddyfile):
+#   docker compose --profile tls up --build
+
+name: dual-read
+
+services:
+  dual-read-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dual-read-server:local
+    restart: unless-stopped
+    ports:
+      # Publish on host loopback only by default — the container holds a real
+      # upstream API key, and an unauthenticated LAN exposure is a quota-theft
+      # proxy. Set DUAL_READ_PUBLISH_ADDR=0.0.0.0 deliberately (with auth/TLS)
+      # for LAN/shared deployments.
+      - "${DUAL_READ_PUBLISH_ADDR:-127.0.0.1}:${DUAL_READ_PUBLISH_PORT:-8080}:8080"
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?set OPENAI_API_KEY}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.deepseek.com}
+      DUAL_READ_ALLOW_PRIVATE_UPSTREAM: ${DUAL_READ_ALLOW_PRIVATE_UPSTREAM:-false}
+      DUAL_READ_HOST: "0.0.0.0"
+      DUAL_READ_PORT: "8080"
+      DUAL_READ_DATA_DIR: /app/data
+      DUAL_READ_LOG_LEVEL: ${DUAL_READ_LOG_LEVEL:-info}
+      DUAL_READ_ADMIN_TOKEN: ${DUAL_READ_ADMIN_TOKEN:?set DUAL_READ_ADMIN_TOKEN}
+      # Public bind requires auth OR explicit insecure override.
+      DUAL_READ_AUTH_ENABLED: ${DUAL_READ_AUTH_ENABLED:-false}
+      DUAL_READ_ALLOW_INSECURE_PUBLIC: ${DUAL_READ_ALLOW_INSECURE_PUBLIC:-true}
+      DUAL_READ_METRICS_ENABLED: ${DUAL_READ_METRICS_ENABLED:-true}
+      DUAL_READ_METRICS_TOKEN: ${DUAL_READ_METRICS_TOKEN:-}
+      DUAL_READ_CACHE_VALKEY: ${DUAL_READ_CACHE_VALKEY:-false}
+      DUAL_READ_VALKEY_ADDR: ${DUAL_READ_VALKEY_ADDR:-valkey:6379}
+      # Per-IP limiting behind the bundled Caddy proxy (tls profile): trust
+      # forwarded client IPs from the Docker internal network.
+      DUAL_READ_LIMITS_TRUSTED_PROXIES: ${DUAL_READ_LIMITS_TRUSTED_PROXIES:-}
+    volumes:
+      - dual_read_data:/app/data
+    # Production-shaped defaults: read-only root + writable data/tmp.
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/livez"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    depends_on:
+      valkey:
+        condition: service_healthy
+        required: false
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    restart: unless-stopped
+    profiles: ["valkey"]
+    command: ["valkey-server", "--save", "", "--appendonly", "no"]
+    volumes:
+      - valkey_data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Deterministic OpenAI-compatible upstream used only by acceptance tests.
+  mock-upstream:
+    profiles: ["test"]
+    build:
+      context: ./testdata/mock-upstream
+    image: dual-read-mock-upstream:local
+    read_only: true
+    tmpfs:
+      - /tmp:size=8m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+
+  # Optional: attach the server to Valkey by enabling both profiles.
+  #   DUAL_READ_CACHE_VALKEY=true docker compose --profile valkey up --build
+  # The server resolves DUAL_READ_VALKEY_ADDR=valkey:6379 on the default network.
+
+  caddy:
+    image: caddy:2-alpine
+    profiles: ["tls"]
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - dual-read-server
+
+volumes:
+  dual_read_data:
+  valkey_data:
+  caddy_data:
+  caddy_config:

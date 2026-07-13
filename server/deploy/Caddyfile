@@ -1,0 +1,43 @@
+# TLS reverse proxy in front of dual-read-server (Compose profile: tls)
+#
+# 1. Edit the site address below (or use :443 with a local cert for lab use).
+# 2. docker compose --profile tls up --build
+# 3. Point DNS / hosts at this host; open https://dual-read.example.com/admin
+#
+# For a quick local TLS lab without public DNS, use the tls_internal block.
+#
+# Per-IP rate limiting: without trusted-proxies config every request shares
+# the proxy's bucket. Set DUAL_READ_LIMITS_TRUSTED_PROXIES to the Compose
+# internal network before `up`, e.g.:
+#   export DUAL_READ_LIMITS_TRUSTED_PROXIES=172.16.0.0/12
+# (Caddy sends X-Forwarded-For automatically; the server only trusts it from
+# these CIDRs.)
+
+{
+	# Uncomment for local ACME challenges behind NAT if needed:
+	# email you@example.com
+}
+
+dual-read.example.com {
+	encode gzip
+
+	# Upstream is the Compose service name on the internal network.
+	reverse_proxy dual-read-server:8080 {
+		header_up X-Request-Id {http.request.uuid}
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+		-Server
+	}
+}
+
+# Local lab (self-signed / internal CA) — use https://localhost
+:443 {
+	tls internal
+	reverse_proxy dual-read-server:8080
+}

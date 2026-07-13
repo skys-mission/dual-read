@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- WXT reads this entrypoint option when generating options_ui. -->
+  <meta name="manifest.open_in_tab" content="true" />
+  <title data-i18n="optionsTitle">Dual Read Options</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="page-header">
+      <div class="brand-mark" aria-hidden="true">
+        <span></span>
+        <span></span>
+      </div>
+      <div>
+        <h1 data-i18n="optionsTitle">Dual Read Options</h1>
+        <p class="page-subtitle" data-i18n="optionsSubtitle">Configure API connection and translation defaults.</p>
+      </div>
+    </header>
+
+    <div class="settings-layout">
+      <nav class="section-nav" aria-label="Settings sections" data-i18n-aria-label="optionsNavLabel">
+        <a href="#section-connection" data-section-nav="section-connection" data-i18n="navConnection">Connection</a>
+        <a href="#section-reading" data-section-nav="section-reading" data-i18n="navReading">Translation &amp; display</a>
+        <a href="#section-sites" data-section-nav="section-sites" data-i18n="navSites">Sites</a>
+        <a href="#section-data" data-section-nav="section-data" data-i18n="navData">Data &amp; privacy</a>
+      </nav>
+
+      <form id="optionsForm" class="page-body">
+      <!-- Connection -->
+      <section id="section-connection" class="section-card" tabindex="-1">
+        <div class="section-head">
+          <h2 data-i18n="sectionConnection">Connection</h2>
+          <p class="hint" data-i18n="apiBaseHint">Both connection routes use the OpenAI V1 protocol.</p>
+        </div>
+        <aside id="connectionSetupHint" class="setup-hint" hidden aria-live="polite">
+          <strong data-i18n="connectionNotConfigured">Connection required</strong>
+          <span data-i18n="connectionNotConfiguredHint">Add your API details, then test and save the connection before translating.</span>
+        </aside>
+
+        <div class="field">
+          <label for="connectionMode" data-i18n="connectionMode">Connection route</label>
+          <select id="connectionMode" name="connectionMode">
+            <option value="direct" data-i18n="connectionModeDirect">Direct API (DeepSeek default)</option>
+            <option value="proxy" data-i18n="connectionModeProxy">Dual Read Proxy</option>
+          </select>
+          <p class="hint" id="connectionModeHint"></p>
+        </div>
+
+        <div class="field">
+          <label for="apiBase" data-i18n="apiBaseUrl">API base URL</label>
+          <input type="url" id="apiBase" name="apiBase" required data-i18n-placeholder="apiBasePlaceholder" placeholder="https://api.deepseek.com" />
+        </div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label for="apiKey" data-i18n="apiKey">API key</label>
+            <input type="password" id="apiKey" name="apiKey" data-i18n-placeholder="apiKeyPlaceholder" placeholder="sk-..." autocomplete="off" />
+            <p class="hint" id="apiKeyHint" data-i18n="apiKeyDirectHint">Required for a direct API connection.</p>
+          </div>
+          <div class="field">
+            <label for="model" data-i18n="model">Model</label>
+            <input type="text" id="model" name="model" data-i18n-placeholder="modelPlaceholder" placeholder="deepseek-v4-flash" />
+          </div>
+        </div>
+
+        <div class="connection-controls">
+          <div class="key-storage-control">
+            <label class="inline-check">
+              <input type="checkbox" id="rememberApiKey" checked />
+              <span data-i18n="rememberApiKey">Remember API key on this device</span>
+            </label>
+            <p class="hint" data-i18n="rememberApiKeyHint">Uncheck to keep the key only for this browser session.</p>
+          </div>
+          <div class="connection-test-control">
+            <button type="button" id="testConnectionBtn" class="btn-secondary" data-i18n="testConnection">Test connection</button>
+            <span id="testConnectionStatus" class="save-status" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <details class="advanced" id="advancedConnection">
+          <summary data-i18n="advancedConnection">Advanced: custom HTTP headers</summary>
+          <p class="hint" data-i18n="customHeadersHint">Optional headers sent with every API request. API key Authorization takes precedence.</p>
+          <div class="section-head-row advanced-toolbar">
+            <span></span>
+            <button type="button" id="addHeaderBtn" class="btn-secondary btn-sm" data-i18n="addHeader">Add header</button>
+          </div>
+          <div id="customHeadersEditor" class="header-editor">
+            <div class="header-editor-columns">
+              <span data-i18n="headerName">Header name</span>
+              <span data-i18n="headerValue">Value</span>
+              <span class="sr-only" data-i18n="removeHeader">Remove</span>
+            </div>
+            <div id="customHeaderRows" class="header-rows"></div>
+            <div id="customHeadersEmpty" class="empty-state" hidden>
+              <span data-i18n="customHeadersEmpty">No custom headers yet. Click “Add header” to create one.</span>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- Reading -->
+      <section id="section-reading" class="section-card" tabindex="-1">
+        <div class="section-head">
+          <h2 data-i18n="sectionReading">Translation &amp; display</h2>
+          <p class="hint" data-i18n="sectionReadingHint">Choose how the extension is displayed and how new pages are translated. Site rules can override translation defaults.</p>
+        </div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label for="uiLocale" data-i18n="uiLocale">Interface language</label>
+            <select id="uiLocale" name="uiLocale">
+              <option value="en" data-i18n="uiLanguageEn">English</option>
+              <option value="zh-CN" data-i18n="uiLanguageZhCN">Simplified Chinese</option>
+              <option value="zh-TW" data-i18n="uiLanguageZhTW">Traditional Chinese</option>
+              <option value="ru" data-i18n="uiLanguageRu">Russian</option>
+              <option value="es" data-i18n="uiLanguageEs">Spanish</option>
+              <option value="fr" data-i18n="uiLanguageFr">French</option>
+            </select>
+            <p class="hint" data-i18n="uiLocaleHint">This changes extension pages and in-page controls. The browser controls the extension name shown in its own UI.</p>
+          </div>
+          <div class="field">
+            <label for="targetLang" data-i18n="targetLanguage">Target language</label>
+            <select id="targetLang" name="targetLang">
+              <option value="zh-CN" data-i18n="targetLanguageZhCN">Simplified Chinese</option>
+              <option value="en" data-i18n="targetLanguageEn">English</option>
+              <option value="ru" data-i18n="targetLanguageRu">Russian</option>
+              <option value="es" data-i18n="targetLanguageEs">Spanish</option>
+              <option value="fr" data-i18n="targetLanguageFr">French</option>
+            </select>
+            <p class="hint" data-i18n="targetLanguageHint">This is the language translated page text will use; it does not change the extension interface.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="mode" data-i18n="translationMode">Translation mode</label>
+          <select id="mode" name="mode">
+            <option value="bilingual" data-i18n="modeBilingual">Bilingual</option>
+            <option value="replace" data-i18n="modeReplace">Replace</option>
+          </select>
+          <p class="hint" data-i18n="translationModeHint">Bilingual keeps the original and adds a translation. Replace hides the original until you restore it.</p>
+        </div>
+
+        <details class="advanced" id="advancedReading">
+          <summary data-i18n="advancedReading">Advanced: scheduling</summary>
+          <p class="hint" data-i18n="advancedReadingHint">Leave defaults unless you hit rate limits or timeouts.</p>
+          <div class="field-grid">
+            <div class="field">
+              <label for="maxConcurrent" data-i18n="maxConcurrent">Max concurrent batches</label>
+              <input type="number" id="maxConcurrent" name="maxConcurrent" min="1" max="8" step="1" />
+              <p class="hint" data-i18n="maxConcurrentHint">Default 3. Choose between 1 and 8.</p>
+            </div>
+            <div class="field">
+              <label for="batchSize" data-i18n="batchSize">Segments per batch</label>
+              <input type="number" id="batchSize" name="batchSize" min="1" max="20" step="1" />
+              <p class="hint" data-i18n="batchSizeHint">Default 6. Choose between 1 and 20.</p>
+            </div>
+          </div>
+          <button type="button" id="resetScheduleBtn" class="btn-secondary btn-sm" data-i18n="restoreScheduleDefaults">Restore scheduling defaults</button>
+        </details>
+      </section>
+
+      <!-- Sites -->
+      <section id="section-sites" class="section-card" tabindex="-1">
+        <div class="section-head section-head-row">
+          <div>
+            <h2 data-i18n="sectionSites">Sites</h2>
+            <p class="hint" data-i18n="siteRulesHintCards">Use one exact hostname per rule. Auto-translate asks for site access when you save; never translate always takes precedence.</p>
+          </div>
+          <button type="button" id="addSiteRuleBtn" class="btn-secondary btn-sm" data-i18n="addSiteRule">Add site</button>
+        </div>
+
+        <div id="siteRuleRows" class="site-cards"></div>
+        <div id="siteRulesEmpty" class="empty-state empty-state-block" hidden>
+          <span data-i18n="siteRulesEmpty">No site rules yet. Toggle “Auto-translate this site” in the popup, or add one here.</span>
+        </div>
+      </section>
+
+      <!-- Data & privacy -->
+      <section id="section-data" class="section-card" tabindex="-1">
+        <div class="section-head">
+          <h2 data-i18n="sectionData">Data &amp; privacy</h2>
+          <p class="hint" data-i18n="sectionDataHint">Translated page text is sent only to your configured API. API keys and custom headers stay on this device; non-secret preferences may sync with your browser account.</p>
+        </div>
+        <ul class="privacy-list">
+          <li data-i18n="privacyTextDestination">Visible page text is sent only to the API endpoint you configure.</li>
+          <li data-i18n="privacySecretsLocal">API keys and custom HTTP headers stay on this device and are not browser-synced.</li>
+          <li data-i18n="privacyNoCloud">Dual Read does not operate a translation cloud of its own.</li>
+        </ul>
+
+        <div class="data-block">
+          <h3 data-i18n="sectionCache">Translation cache</h3>
+          <p class="hint" data-i18n="cacheHint">Translations are cached locally to avoid re-sending identical text.</p>
+          <button type="button" id="clearCacheBtn" class="btn-secondary" data-i18n="clearCache">Clear cache</button>
+        </div>
+
+        <div class="data-block">
+          <h3 data-i18n="sectionImportExport">Import / export</h3>
+          <div class="actions-inline">
+            <button type="button" id="exportBtn" class="btn-secondary" data-i18n="exportSettings">Export</button>
+            <button type="button" id="importBtn" class="btn-secondary" data-i18n="importSettings">Import</button>
+            <input type="file" id="importFile" accept="application/json,.json" hidden />
+          </div>
+          <label class="inline-check">
+            <input type="checkbox" id="includeSecrets" />
+            <span data-i18n="includeSecrets">Include API key in export</span>
+          </label>
+          <label class="inline-check">
+            <input type="checkbox" id="includeCustomHeaders" />
+            <span data-i18n="includeCustomHeaders">Include custom HTTP headers in export</span>
+          </label>
+          <p class="hint" data-i18n="exportPrivacyHint">API keys and custom headers can grant access to your provider. They are excluded unless you explicitly include them.</p>
+        </div>
+      </section>
+
+      <div class="actions sticky-actions" id="stickyActions">
+        <button type="submit" id="saveBtn" class="btn-primary" data-i18n="save" disabled>Save</button>
+        <button type="button" id="discardBtn" class="btn-secondary" data-i18n="discardChanges" disabled>Discard</button>
+        <span id="dirtyBadge" class="dirty-badge" hidden data-i18n="unsavedChanges">Unsaved changes</span>
+        <span id="saveStatus" class="save-status" aria-live="polite"></span>
+      </div>
+      </form>
+    </div>
+    <dialog id="importPreviewDialog" class="import-dialog" aria-labelledby="importPreviewTitle">
+      <form method="dialog">
+        <h2 id="importPreviewTitle" data-i18n="importPreviewTitle">Review imported settings</h2>
+        <p id="importPreviewSummary" class="hint"></p>
+        <ul id="importPreviewChanges" class="import-preview-list"></ul>
+        <div class="actions">
+          <button type="submit" value="cancel" class="btn-secondary" data-i18n="cancel">Cancel</button>
+          <button type="submit" value="confirm" class="btn-primary" data-i18n="confirmImport">Import settings</button>
+        </div>
+      </form>
+    </dialog>
+  </div>
+
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>

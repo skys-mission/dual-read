@@ -1,0 +1,106 @@
+name: Nightly
+
+on:
+  schedule:
+    # 16:00 UTC ≈ 00:00 China — after weekday main CI noise
+    - cron: '0 16 * * *'
+  workflow_dispatch:
+    inputs:
+      strict:
+        description: 'Run PERF_STRICT (hard ceilings)'
+        type: boolean
+        default: true
+      full:
+        description: 'Run PERF_FULL (20k longtask + 30× SPA heap)'
+        type: boolean
+        default: true
+
+concurrency:
+  group: nightly-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  perf-lab:
+    name: Perf lab (STRICT / FULL)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: extension
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+      - id: flags
+        name: Resolve STRICT / FULL flags
+        working-directory: .
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "strict=${{ inputs.strict }}" >> "$GITHUB_OUTPUT"
+            echo "full=${{ inputs.full }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "strict=true" >> "$GITHUB_OUTPUT"
+            echo "full=true" >> "$GITHUB_OUTPUT"
+          fi
+      - run: npm ci
+      - name: Type-check
+        run: npm run compile
+      - name: Build (Chrome)
+        run: npm run build
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Perf lab STRICT
+        if: steps.flags.outputs.strict == 'true' && steps.flags.outputs.full != 'true'
+        env:
+          PERF_STRICT: '1'
+        run: npm run e2e:perf
+      - name: Perf lab STRICT + FULL
+        if: steps.flags.outputs.full == 'true'
+        env:
+          PERF_STRICT: '1'
+          PERF_FULL: '1'
+        run: npm run e2e:perf:full
+      - name: Perf lab (default budgets only)
+        if: steps.flags.outputs.strict != 'true' && steps.flags.outputs.full != 'true'
+        run: npm run e2e:perf
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: nightly-perf-report
+          path: |
+            extension/test-results/
+            extension/playwright-report/
+          if-no-files-found: ignore
+
+  release-dry-run:
+    name: Release dry-run (no publish)
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          go-version: '1.25.12'
+          cache-dependency-path: server/go.sum
+      - name: Release dry-run
+        run: |
+          chmod +x ./scripts/release-dry-run.sh
+          ./scripts/release-dry-run.sh
+      - name: Upload dry-run bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: release-dry-run
+          path: dist/release/
+          if-no-files-found: error

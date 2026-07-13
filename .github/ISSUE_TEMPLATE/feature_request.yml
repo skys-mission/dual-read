@@ -1,0 +1,36 @@
+name: Feature request
+description: Propose a change that improves bilingual reading reliability or usability
+title: "[feat] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Dual Read prioritizes a **reliable, low-permission bilingual reading engine**.
+        PDF / subtitles / TTS / Safari are out of scope for now—please explain user need first.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user pain does this address? (not “competitors have it”)
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Ideal behavior from a novice user’s point of view.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope checks
+      options:
+        - label: Does not require install-time access to all websites
+        - label: Does not send data to a Dual Read–operated cloud by default
+        - label: I am willing to help with tests or docs

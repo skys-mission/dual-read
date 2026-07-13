@@ -1,0 +1,257 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: Release gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - id: meta
+        run: |
+          V="${GITHUB_REF_NAME#v}"
+          echo "version=${V}" >> "$GITHUB_OUTPUT"
+          echo "Resolved version=${V}"
+      - name: Version / CHANGELOG gate
+        # Must run BEFORE the version sync below: under Actions a mismatch is
+        # always fatal, so checking after syncing would never fail.
+        run: |
+          chmod +x ./scripts/check-release-version.sh
+          VERSION="${{ steps.meta.outputs.version }}" ./scripts/check-release-version.sh
+      - name: Sync extension version from tag
+        run: |
+          chmod +x ./scripts/set-release-version.sh
+          VERSION="${{ steps.meta.outputs.version }}" ./scripts/set-release-version.sh
+      - name: Store consistency
+        run: |
+          chmod +x ./scripts/check-store-consistency.sh
+          ./scripts/check-store-consistency.sh
+
+  extension:
+    name: Extension zips
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: extension
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+      - name: Sync extension version from tag
+        working-directory: .
+        run: |
+          chmod +x ./scripts/set-release-version.sh
+          VERSION="${{ needs.gate.outputs.version }}" ./scripts/set-release-version.sh
+      - run: npm ci
+      - run: npm run compile
+      - run: npm test
+      - run: npm run lint
+      - run: npm run zip
+      - run: npm run zip:firefox
+      - name: Artifact policy
+        working-directory: .
+        run: |
+          chmod +x ./scripts/check-extension-artifacts.sh
+          ./scripts/check-extension-artifacts.sh
+      - name: AMO sources package
+        working-directory: .
+        run: |
+          chmod +x ./scripts/package-amo-sources.sh
+          VERSION="${{ needs.gate.outputs.version }}" ./scripts/package-amo-sources.sh
+      # Single-path uploads only: multi-path artifacts are rooted at their
+      # least common ancestor, which would nest paths and break the flat
+      # copies in the publish job.
+      - name: Upload extension zips
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: extension-${{ needs.gate.outputs.version }}
+          path: extension/output/*.zip
+          if-no-files-found: error
+      - name: Upload AMO sources
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: amo-sources-${{ needs.gate.outputs.version }}
+          path: dist/store/*-amo-sources.zip
+          if-no-files-found: error
+
+  server:
+    name: Server binaries
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          go-version: '1.25.12'
+          cache-dependency-path: server/go.sum
+      - name: Test
+        working-directory: server
+        run: |
+          go vet ./...
+          go test ./...
+      - name: Build multi-arch binaries
+        env:
+          VERSION: ${{ needs.gate.outputs.version }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          export SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
+          chmod +x ./scripts/build-server.sh
+          ./scripts/build-server.sh
+          ./dist/server/dual-read-server-linux-amd64 version
+      - name: Upload server artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: server-${{ needs.gate.outputs.version }}
+          path: dist/server/
+          if-no-files-found: error
+
+  sbom:
+    name: SBOM
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          go-version: '1.25.12'
+          cache-dependency-path: server/go.sum
+      - name: Sync extension version from tag
+        run: |
+          chmod +x ./scripts/set-release-version.sh
+          VERSION="${{ needs.gate.outputs.version }}" ./scripts/set-release-version.sh
+      - working-directory: extension
+        run: npm ci
+      - run: |
+          chmod +x ./scripts/generate-sbom.sh
+          ./scripts/generate-sbom.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: sbom-${{ needs.gate.outputs.version }}
+          path: dist/sbom/
+          if-no-files-found: error
+
+  docker:
+    name: GHCR multi-arch image
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository_owner }}/dual-read-server
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+      - uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable=${{ !contains(github.ref_name, '-') }}
+      - name: Resolve build date
+        id: builddate
+        # tag-push payloads carry no head_commit; derive from git instead.
+        run: echo "ts=$(git log -1 --format=%cI)" >> "$GITHUB_OUTPUT"
+      - id: build
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: ./server
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ needs.gate.outputs.version }}
+            COMMIT=${{ github.sha }}
+            DATE=${{ steps.builddate.outputs.ts }}
+      - name: Attest container image
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+
+  publish:
+    name: GitHub Release + attest
+    needs: [gate, extension, server, sbom, docker]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Download artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          path: _artifacts
+      - name: Layout dist/
+        run: |
+          mkdir -p extension/output dist/server dist/sbom dist/store
+          cp _artifacts/extension-${{ needs.gate.outputs.version }}/*.zip extension/output/
+          cp _artifacts/amo-sources-${{ needs.gate.outputs.version }}/*-amo-sources.zip dist/store/
+          cp -R _artifacts/server-${{ needs.gate.outputs.version }}/. dist/server/
+          cp -R _artifacts/sbom-${{ needs.gate.outputs.version }}/. dist/sbom/
+          ls -laR _artifacts
+      - name: Assemble release bundle
+        run: |
+          chmod +x ./scripts/assemble-release.sh
+          VERSION="${{ needs.gate.outputs.version }}" ./scripts/assemble-release.sh
+      - name: Attest release subjects
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
+        with:
+          subject-checksums: dist/release/SHA256SUMS
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
+        with:
+          name: Dual Read ${{ needs.gate.outputs.version }}
+          body_path: dist/release/RELEASE_NOTES.md
+          files: dist/release/*
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(needs.gate.outputs.version, '-') }}

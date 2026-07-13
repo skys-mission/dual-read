@@ -1,0 +1,39 @@
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  default: none
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - misspell
+    - unconvert
+    - durationcheck
+    - errorlint
+    - nilerr
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+    rules:
+      # Test teardown / env cleanup: Close/Unsetenv errors are noise.
+      - path: _test\.go$
+        linters:
+          - errcheck
+      # defer resp.Body.Close() is idiomatic across net/http call sites.
+      - text: '\.Close\(\)'
+        linters:
+          - errcheck
+
+formatters:
+  enable:
+    - gofmt
+  exclusions:
+    generated: lax

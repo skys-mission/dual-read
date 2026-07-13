@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="extName">Dual Read</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="popup-header">
+    <h1 id="popupHeading" data-i18n="extName">Dual Read</h1>
+  </header>
+
+  <main class="popup-body" aria-labelledby="popupHeading">
+    <div class="status-row" role="status" aria-live="polite">
+      <span id="statusText">Ready</span>
+      <span id="countText"></span>
+    </div>
+
+    <div class="progress" id="progressWrap" hidden
+      role="progressbar"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="0"
+      data-i18n-aria-label="progressLabel"
+      aria-label="Translation progress">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="control-group">
+      <label for="targetLang" data-i18n="targetLanguage">Target language</label>
+      <select id="targetLang">
+        <option value="zh-CN" data-i18n="targetLanguageZhCN">Simplified Chinese</option>
+        <option value="en" data-i18n="targetLanguageEn">English</option>
+        <option value="ru" data-i18n="targetLanguageRu">Russian</option>
+        <option value="es" data-i18n="targetLanguageEs">Spanish</option>
+        <option value="fr" data-i18n="targetLanguageFr">French</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label for="mode" data-i18n="translationMode">Translation mode</label>
+      <select id="mode">
+        <option value="bilingual" data-i18n="modeBilingual">Bilingual</option>
+        <option value="replace" data-i18n="modeReplace">Replace</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label for="sitePolicy" data-i18n="sitePolicy">This site</label>
+      <select id="sitePolicy">
+        <option value="global" data-i18n="sitePolicyGlobal">Use global settings</option>
+        <option value="auto" data-i18n="sitePolicyAuto">Auto-translate</option>
+        <option value="never" data-i18n="sitePolicyNever">Never translate</option>
+      </select>
+      <p class="hint" id="sitePolicyHint" data-i18n="sitePolicyPopupHint">Auto-translate needs permission for this site.</p>
+    </div>
+
+    <div class="button-row">
+      <button type="button" id="primaryBtn" class="primary" data-i18n="translatePage">Translate page</button>
+    </div>
+    <div class="button-row secondary-row" id="secondaryRow" hidden>
+      <button type="button" id="secondaryBtn" data-i18n="restoreOriginal">Restore original</button>
+    </div>
+
+    <div class="link-row">
+      <a href="#" id="optionsLink" data-i18n="openSettings">Settings</a>
+    </div>
+  </main>
+
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>

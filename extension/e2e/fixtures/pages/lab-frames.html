@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Dual Read Lab — Frames</title>
+  <style>
+    body { font-family: Georgia, serif; max-width: 48rem; margin: 2rem auto; }
+    iframe { width: 100%; height: 8rem; border: 1px solid #ccc; margin: 0.5rem 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1 id="title">Parent Frame Lab</h1>
+    <p id="parent-p">Parent page paragraph before iframes.</p>
+    <iframe id="same" title="same-origin child" src="./lab-frames-child.html"></iframe>
+    <!-- src set at runtime to a different loopback port (cross-origin barrier). -->
+    <iframe id="cross" title="cross-origin child" src="about:blank"></iframe>
+  </main>
+</body>
+</html>
