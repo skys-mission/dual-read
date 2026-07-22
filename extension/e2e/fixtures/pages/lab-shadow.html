@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Dual Read Lab — Shadow DOM</title>
+  <style>body { font-family: Georgia, serif; max-width: 40rem; margin: 2rem auto; }</style>
+</head>
+<body>
+  <main>
+    <h1 id="title">Light DOM Heading</h1>
+    <p id="light-p">Light DOM paragraph outside the shadow tree.</p>
+    <div id="host"></div>
+    <div id="editor" contenteditable="true">Editable lab text must stay intact.</div>
+  </main>
+  <script>
+    const host = document.getElementById('host');
+    const sr = host.attachShadow({ mode: 'open' });
+    sr.innerHTML = '<p id="shadow-p">Open shadow paragraph unique marker.</p>';
+  </script>
+</body>
+</html>

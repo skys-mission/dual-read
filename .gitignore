@@ -1,0 +1,74 @@
+# Build outputs
+/dist/
+*.zip
+*.tar.gz
+
+# Extension (WXT) build + tooling
+/extension/node_modules/
+/extension/output/
+/extension/.output/
+/extension/.wxt/
+/extension/test-results/
+/extension/playwright-report/
+/extension/blob-report/
+/extension/playwright/.cache/
+/extension/coverage/
+
+# Extension: local-only / never package
+/extension/manifest.json
+/extension/dev-settings.json
+/extension/public/dev-settings.json
+
+# Accidental leftover (WXT public dir is extension/public/)
+/public/
+
+# Env / secrets (defense in depth; also gated by check-extension-artifacts)
+.env
+.env.*
+!.env.example
+!.env.*.example
+**/credentials.json
+**/*.pem
+
+# MCP server configuration (local overrides, may contain secrets)
+.mcp.json
+
+# Go server
+/server/dual-read-server
+/server/tmp/
+/server/data/
+/server/coverage.out
+/server/coverage.html
+/data/
+*.test
+coverage.out
+*.coverprofile
+coverage/
+
+# Runtime config (UI-managed, local secrets)
+**/runtime.json
+**/runtime.json.tmp
+
+# Logs / OS / IDE
+*.log
+.idea/
+.vscode/
+.cursor/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Local agent instructions (not part of the published project)
+/AGENTS.md
+CLAUDE.md
+.cursorrules
+.windsurfrules
+.claude/
+.opencode/
+.aider*
+.cline/
+.continue/
+.codex/
+.gemini/
+.github/copilot-instructions.md

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="onboardingTitle">Welcome to Dual Read</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="page-header">
+      <p class="eyebrow" data-i18n="extName">Dual Read</p>
+      <h1 data-i18n="onboardingTitle">Welcome to Dual Read</h1>
+      <p class="page-subtitle" data-i18n="onboardingSubtitle">Three short steps to your first bilingual page.</p>
+      <ol class="steps" aria-label="Setup progress" data-i18n-aria-label="onboardingStepsLabel">
+        <li id="stepDot1" class="is-active">1</li>
+        <li id="stepDot2">2</li>
+        <li id="stepDot3">3</li>
+      </ol>
+    </header>
+
+    <section id="panel1" class="panel section-card" data-step="1">
+      <h2 id="step1heading" data-i18n="onboardStep1Title">Choose a connection route</h2>
+      <p class="hint" data-i18n="onboardStep1Hint">Direct API and Dual Read Proxy use the same OpenAI V1 protocol. Page text is sent only to the endpoint you configure.</p>
+
+      <div class="actions">
+        <button type="button" id="step1Next" class="btn-primary" data-i18n="onboardContinue">Continue</button>
+      </div>
+    </section>
+
+    <section id="panel2" class="panel section-card" data-step="2" hidden>
+      <h2 data-i18n="onboardStep2Title">Connect and test</h2>
+      <p class="hint" id="step2Hint" data-i18n="onboardStep2Hint">Fill in the endpoint, then run a tiny test translation.</p>
+
+      <div class="field">
+        <label for="connectionMode" data-i18n="connectionMode">Connection route</label>
+        <select id="connectionMode">
+          <option value="direct" data-i18n="connectionModeDirect">Direct API (DeepSeek default)</option>
+          <option value="proxy" data-i18n="connectionModeProxy">Dual Read Proxy</option>
+        </select>
+        <p class="hint" id="connectionModeHint"></p>
+      </div>
+
+      <div class="field">
+        <label for="apiBase" data-i18n="apiBaseUrl">API base URL</label>
+        <input type="url" id="apiBase" placeholder="https://api.deepseek.com" autocomplete="off" />
+      </div>
+
+      <div class="field-grid">
+        <div class="field">
+          <label for="apiKey" data-i18n="apiKey">API key</label>
+          <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="model" data-i18n="model">Model</label>
+          <input type="text" id="model" placeholder="deepseek-v4-flash" autocomplete="off" />
+        </div>
+      </div>
+
+      <div class="actions-inline">
+        <button type="button" id="testBtn" class="btn-secondary" data-i18n="testConnection">Test connection</button>
+      </div>
+      <p id="testStatus" class="test-status" role="status" aria-live="polite"></p>
+
+      <div class="actions">
+        <button type="button" id="step2Back" class="btn-secondary" data-i18n="onboardBack">Back</button>
+        <button type="button" id="step2Next" class="btn-primary" data-i18n="onboardContinue">Continue</button>
+      </div>
+    </section>
+
+    <section id="panel3" class="panel section-card" data-step="3" hidden>
+      <h2 data-i18n="onboardStep3Title">Privacy</h2>
+      <ul class="privacy-list">
+        <li data-i18n="onboardPrivacy1">Visible page text you translate is sent to the API base above.</li>
+        <li data-i18n="onboardPrivacy2">Your API key stays in this browser. Extension storage is not encrypted.</li>
+        <li data-i18n="onboardPrivacy3">Dual Read does not operate a translation cloud of its own.</li>
+      </ul>
+
+      <label class="switch-row">
+        <input type="checkbox" id="rememberKey" checked />
+        <span data-i18n="rememberApiKey">Remember API key on this device</span>
+      </label>
+      <p class="hint" data-i18n="rememberApiKeyHint">Uncheck to keep the key only for this browser session.</p>
+
+      <div class="actions">
+        <button type="button" id="step3Back" class="btn-secondary" data-i18n="onboardBack">Back</button>
+        <button type="button" id="finishBtn" class="btn-primary" data-i18n="onboardFinish">Start translating</button>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>

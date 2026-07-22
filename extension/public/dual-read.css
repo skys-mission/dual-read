@@ -1,0 +1,329 @@
+/* Shared typography — CJK + Latin, inherit page size scale.
+   Inline companions may wrap at normal language boundaries when a sidebar or
+   menu constrains their host. Block-only "anywhere" wrapping stays below. */
+.dual-read-target,
+.dual-read-target--inner,
+.dual-read-target--inline,
+.dual-read-nav-sub,
+.dual-read-target--compact {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell,
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei",
+    "Noto Sans SC", "Source Han Sans SC", "WenQuanYi Micro Hei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  /* Resist host-page layout that would float / absolutize / rotate companions. */
+  position: static !important;
+  float: none !important;
+  clear: none !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  animation: dual-read-fade-in 0.18s ease-out;
+}
+
+/* ── Inline companion (Immersive-style): same-line muted suffix ── */
+.dual-read-target--inline,
+.dual-read-nav-sub,
+.dual-read-target--compact,
+nav .dual-read-nav-sub,
+aside .dual-read-nav-sub,
+[role="navigation"] .dual-read-nav-sub,
+[role="menubar"] .dual-read-nav-sub,
+[role="menu"] .dual-read-nav-sub {
+  display: inline !important;
+  box-sizing: border-box;
+  width: auto !important;
+  height: auto !important;
+  max-width: none !important;
+  margin: 0;
+  padding: 0;
+  border: none;
+  font-size: 1em;
+  line-height: inherit;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  vertical-align: baseline;
+  white-space: normal !important;
+  word-break: keep-all !important;
+  overflow-wrap: normal !important;
+  text-wrap: wrap;
+  hyphens: auto;
+  color: color-mix(in srgb, currentColor 88%, transparent);
+}
+
+/* Links / buttons: inline suffix on the SAME line (Immersive: "Premium 高级版") */
+.dual-read-target--inner,
+a .dual-read-target--inner,
+button .dual-read-target--inner {
+  display: inline !important;
+  width: auto !important;
+  height: auto !important;
+  max-width: none !important;
+  margin: 0;
+  padding: 0;
+  border: none;
+  font-size: 1em;
+  line-height: inherit;
+  font-weight: 400;
+  vertical-align: baseline;
+  white-space: normal !important;
+  word-break: keep-all !important;
+  overflow-wrap: normal !important;
+  text-wrap: wrap;
+  hyphens: auto;
+  color: color-mix(in srgb, currentColor 90%, transparent);
+}
+
+/* Compact controls (marked by the renderer) stay on one horizontal line.
+   Ordinary nav/sidebar links are left unmarked so a narrow column can wrap. */
+[data-dual-read-nowrap="true"] {
+  white-space: nowrap !important;
+}
+
+[data-dual-read-nowrap="true"] .dual-read-target--inner,
+[data-dual-read-nowrap="true"] .dual-read-target--inline,
+[data-dual-read-nowrap="true"] .dual-read-nav-sub,
+[data-dual-read-nowrap="true"] .dual-read-target--compact {
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  text-wrap: nowrap;
+}
+
+/*
+ * Flex/inline-flex hosts: original text + companion share one flex item so the
+ * translation wraps as "Involved 参与" (Immersive), not a sideways sibling of a
+ * stacked original. For compact CTAs the host is marked nowrap, so the same
+ * wrapper expands the painted button around icon + original + translation.
+ */
+.dual-read-flow {
+  display: inline !important;
+  position: static !important;
+  float: none !important;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  vertical-align: baseline;
+  white-space: inherit;
+}
+
+a[data-dual-read-done] .dual-read-target--inner {
+  text-align: inherit;
+}
+
+/* ── Block companion: long prose below original (nested <span> inside host) ──
+   Inherit host typography so the translation shares the same visual metrics as
+   the original (Immersive dual-mode). Only mute color + open a new line. */
+.dual-read-target:not(.dual-read-target--inline):not(.dual-read-target--inner):not(.dual-read-nav-sub):not(.dual-read-target--compact),
+span.dual-read-target:not(.dual-read-target--inline):not(.dual-read-target--inner):not(.dual-read-nav-sub):not(.dual-read-target--compact) {
+  display: block !important;
+  box-sizing: border-box;
+  width: auto;
+  max-width: 100%;
+  margin: 0.12em 0 0.2em;
+  padding: 0;
+  border: none;
+  /* Cancel inherited first-line indent so nested companions align to the
+     content edge like Immersive afterend siblings would. */
+  text-indent: 0 !important;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  font-style: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  /* Preserve the source host's line-composition algorithm. Pages increasingly
+     use `text-wrap: balance` for hero copy/headings; forcing `pretty` here makes
+     the translation fill the entire max-width while the source stays balanced. */
+  white-space: inherit;
+  text-wrap: inherit;
+  word-break: inherit;
+  overflow-wrap: inherit;
+  hyphens: inherit;
+  color: color-mix(in srgb, currentColor 84%, transparent);
+}
+
+/* Rich bilingual companions keep inline links/code from the cloned skeleton. */
+.dual-read-target a,
+.dual-read-target--inner a,
+.dual-read-target--inline a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+}
+
+.dual-read-target code,
+.dual-read-target kbd,
+.dual-read-target samp,
+.dual-read-target--inner code,
+.dual-read-target--inline code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.92em;
+}
+
+/* When nested inside a flex/grid host, force a full-row track so the
+   translation sits below the original instead of being squeezed sideways. */
+.dual-read-target--break {
+  flex: 0 0 100% !important;
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+h1 > .dual-read-target,
+h2 > .dual-read-target,
+h3 > .dual-read-target,
+h1 + .dual-read-target,
+h2 + .dual-read-target,
+h3 + .dual-read-target {
+  font-size: inherit;
+  line-height: inherit;
+  margin: 0.1em 0 0.18em;
+  color: color-mix(in srgb, currentColor 86%, transparent);
+}
+
+h4 > .dual-read-target,
+h5 > .dual-read-target,
+h6 > .dual-read-target,
+h4 + .dual-read-target,
+h5 + .dual-read-target,
+h6 + .dual-read-target {
+  font-size: inherit;
+  margin: 0.08em 0 0.16em;
+}
+
+p > .dual-read-target,
+p + .dual-read-target {
+  margin-top: 0.1em;
+  margin-bottom: 0.2em;
+}
+
+/* Block-layout card/title links: companion nests inside the <a> and must open
+   a new line under the original (not a mid-line suffix). */
+a > .dual-read-target:not(.dual-read-target--inline):not(.dual-read-target--inner):not(.dual-read-nav-sub):not(.dual-read-target--compact) {
+  display: block !important;
+  width: auto !important;
+  max-width: 100%;
+  margin: 0.1em 0 0.16em;
+  text-indent: 0 !important;
+}
+
+/* List hosts: companion stays in the content box so the translation aligns
+   under the original text, not flush under the marker. Prefer nested
+   `li >`; legacy `li +` siblings are reparented by repairStructure. */
+li > .dual-read-target:not(.dual-read-target--inline):not(.dual-read-target--inner):not(.dual-read-nav-sub):not(.dual-read-target--compact),
+[role="listitem"] > .dual-read-target:not(.dual-read-target--inline):not(.dual-read-target--inner):not(.dual-read-nav-sub):not(.dual-read-target--compact) {
+  display: block !important;
+  width: auto !important;
+  max-width: 100%;
+  margin-top: 0.05em;
+  margin-bottom: 0.18em;
+  margin-inline: 0;
+  box-sizing: border-box;
+}
+
+/* When the page used list-style-position:inside, force outside for the
+   bilingual session so the nested block lines up with the text run. */
+li[data-dual-read-list-outside="true"],
+[role="listitem"][data-dual-read-list-outside="true"] {
+  list-style-position: outside !important;
+}
+
+.wy-breadcrumbs .dual-read-target,
+.breadcrumbs .dual-read-target,
+[role="navigation"] .dual-read-target {
+  font-size: 0.97em;
+  margin: 0.05em 0 0.16em;
+}
+
+.dual-read-original-hidden {
+  display: none !important;
+}
+
+.dual-read-replace-text {
+  display: inline;
+  font: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  white-space: normal;
+}
+
+.dual-read-error {
+  display: block !important;
+  position: static !important;
+  float: none !important;
+  writing-mode: horizontal-tb !important;
+  transform: none !important;
+  margin: 0.35em 0;
+  padding: 0.25em 0.55em;
+  font-size: 0.85em;
+  font-style: normal;
+  cursor: help;
+  color: #b91c1c;
+  background-color: color-mix(in srgb, #b91c1c 6%, transparent);
+  border-left: 2px solid #b91c1c;
+  border-radius: 0 4px 4px 0;
+  animation: dual-read-fade-in 0.2s ease-out;
+}
+
+@keyframes dual-read-fade-in {
+  /* Opacity-only: never animate transform/size (would amplify CLS). */
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dual-read-target,
+  .dual-read-target--inner,
+  .dual-read-target--inline,
+  .dual-read-nav-sub,
+  .dual-read-target--compact,
+  .dual-read-error {
+    animation: none !important;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .dual-read-target:not(.dual-read-target--inline):not(.dual-read-target--inner):not(.dual-read-nav-sub):not(.dual-read-target--compact) {
+    color: color-mix(in srgb, currentColor 88%, transparent);
+  }
+
+  h1 > .dual-read-target,
+  h2 > .dual-read-target,
+  h3 > .dual-read-target,
+  h1 + .dual-read-target,
+  h2 + .dual-read-target,
+  h3 + .dual-read-target {
+    color: color-mix(in srgb, currentColor 90%, transparent);
+  }
+
+  .dual-read-target--inline,
+  .dual-read-nav-sub,
+  nav .dual-read-nav-sub,
+  aside .dual-read-nav-sub,
+  [role="navigation"] .dual-read-nav-sub {
+    color: color-mix(in srgb, currentColor 92%, transparent);
+  }
+
+  a .dual-read-target--inner,
+  button .dual-read-target--inner {
+    color: color-mix(in srgb, currentColor 94%, transparent);
+  }
+
+  .dual-read-error {
+    color: #fca5a5;
+    background-color: color-mix(in srgb, #fca5a5 8%, transparent);
+    border-left-color: #fca5a5;
+  }
+}

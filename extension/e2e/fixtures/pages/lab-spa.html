@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Dual Read Lab — SPA</title>
+  <style>body { font-family: Georgia, serif; max-width: 40rem; margin: 2rem auto; }</style>
+</head>
+<body>
+  <main id="app">
+    <h1 id="title">SPA Page One Title</h1>
+    <p id="body">First SPA paragraph content for indexing.</p>
+    <button type="button" id="nav">Navigate to page two</button>
+  </main>
+  <script>
+    document.getElementById('nav').addEventListener('click', () => {
+      history.pushState({ page: 2 }, '', location.pathname + '?p=2');
+      document.getElementById('app').innerHTML =
+        '<h1 id="title">SPA Page Two Title</h1>' +
+        '<p id="body">Second SPA paragraph after client navigation.</p>';
+    });
+  </script>
+</body>
+</html>

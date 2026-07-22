@@ -1,0 +1,59 @@
+name: Bug report
+description: Something is broken or behaves incorrectly
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please avoid pasting API keys or personal page content.
+        Security issues → [private advisory](https://github.com/skys-mission/dual-read/security/advisories/new).
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - Extension (Chrome / Edge)
+        - Extension (Firefox)
+        - dual-read-server
+        - Docs / CI
+        - Unsure
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version / commit
+      description: Extension version, server binary tag, or git commit SHA.
+      placeholder: e.g. main @ abc1234
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Expected vs actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. …
+        2. …
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      placeholder: |
+        OS:
+        Browser:
+        Node / Go (if relevant):
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / screenshots
+      description: Redact secrets. Prefer extension service-worker logs or server stderr.

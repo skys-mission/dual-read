@@ -1,0 +1,13 @@
+# Build context is server/
+.git
+.gitignore
+**/*_test.go
+**/testdata/
+data/
+docs/
+deploy/
+docker-compose*.yml
+.dockerignore
+*.md
+dist/
+output/

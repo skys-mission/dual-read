@@ -1,0 +1,193 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pr-title:
+    name: PR title (conventional commit)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Validate PR title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if ! echo "$PR_TITLE" | grep -qP '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?!?: .{1,}'; then
+            echo "::error::PR title must follow Conventional Commits: type(scope): description"
+            echo "  Examples: feat(extension): add dark mode, fix(server): cache race"
+            exit 1
+          fi
+          echo "PR title OK: $PR_TITLE"
+
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/dependency-review-action@595b5aeba73380359d98a5e087f648dbb0edce1b # v4.7.0
+        with:
+          comment-summary-in-pr: always
+          fail-on-severity: high
+
+  extension:
+    name: Extension (WXT / TypeScript)
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: extension
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          go-version: '1.25.12'
+          cache-dependency-path: server/go.sum
+      - run: npm ci
+      - name: Type-check
+        run: npm run compile
+      - name: ESLint
+        run: npm run lint
+      - name: npm audit (runtime)
+        working-directory: .
+        run: |
+          chmod +x ./scripts/check-npm-audit.sh
+          ./scripts/check-npm-audit.sh
+      - name: Unit tests
+        run: npm test
+      - name: Build (Chrome)
+        run: npm run build
+      - name: Build (Firefox)
+        run: npm run build:firefox
+      - name: Artifact policy (no secrets / dev markers)
+        working-directory: .
+        run: |
+          chmod +x ./scripts/check-extension-artifacts.sh
+          ./scripts/check-extension-artifacts.sh
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium firefox
+      - name: E2E Chromium (popup + translate + DOM lab + perf)
+        run: npx playwright test --project=chromium-ext
+      - name: E2E Firefox (addon load + translate main path)
+        run: npx playwright test --project=firefox-ext
+
+  server:
+    name: Server (Go)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      valkey:
+        image: valkey/valkey:8-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "valkey-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      DUAL_READ_TEST_VALKEY_ADDR: 127.0.0.1:6379
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          go-version: '1.25.12'
+          cache-dependency-path: server/go.sum
+      - name: Vet
+        run: go vet ./...
+      - name: golangci-lint
+        working-directory: .
+        run: |
+          chmod +x ./scripts/check-golangci.sh
+          ./scripts/check-golangci.sh
+      - name: Test (race)
+        run: go test -race ./...
+      - name: Coverage floor (server/runtime/metrics ≠ 0%)
+        working-directory: .
+        run: |
+          chmod +x ./scripts/check-server-coverage.sh
+          ./scripts/check-server-coverage.sh
+      - name: govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
+
+  store:
+    name: Store listing consistency
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Store consistency (privacy / permissions / listing)
+        run: |
+          chmod +x ./scripts/check-store-consistency.sh
+          ./scripts/check-store-consistency.sh
+
+  sbom:
+    name: SBOM (extension + server)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          go-version: '1.25.12'
+          cache-dependency-path: server/go.sum
+      - name: Install extension deps (for npm sbom)
+        working-directory: extension
+        run: npm ci
+      - name: Generate SBOM + checksums
+        run: |
+          chmod +x ./scripts/generate-sbom.sh
+          ./scripts/generate-sbom.sh
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: sbom
+          path: dist/sbom/
+          if-no-files-found: error
+
+  server-docker:
+    name: Server Docker smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - name: Build + smoke (non-root, read-only, chat cache)
+        run: |
+          chmod +x ./scripts/docker-smoke.sh
+          ./scripts/docker-smoke.sh
+      - name: Compose + Valkey integration smoke
+        run: |
+          chmod +x ./scripts/docker-valkey-smoke.sh
+          ./scripts/docker-valkey-smoke.sh

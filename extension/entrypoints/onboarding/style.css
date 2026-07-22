@@ -1,0 +1,252 @@
+:root {
+  --bg: #f3f4f6;
+  --surface: #ffffff;
+  --fg: #111827;
+  --muted: #4b5563;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-text: #ffffff;
+  --border: #e5e7eb;
+  --ok: #047857;
+  --ok-bg: #ecfdf5;
+  --danger: #dc2626;
+  --danger-bg: #fef2f2;
+  --radius: 10px;
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 28px 16px 48px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--fg);
+  background: var(--bg);
+}
+
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.page-header { margin-bottom: 20px; }
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.page-header h1 {
+  margin: 0 0 6px;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+  margin: 0 0 16px;
+  color: var(--muted);
+}
+
+.steps {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.steps li {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  background: #e5e7eb;
+}
+
+.steps li.is-active {
+  color: var(--primary-text);
+  background: var(--primary);
+}
+
+.steps li.is-done {
+  color: var(--ok);
+  background: var(--ok-bg);
+}
+
+.section-card {
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.section-card h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.hint {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.choice {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.choice:has(input:checked) {
+  border-color: var(--primary);
+  background: #eff6ff;
+}
+
+.choice input { margin-top: 4px; }
+
+.choice strong {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.choice-desc {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.field { margin-bottom: 14px; }
+
+.field label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
+  background: #fff;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 560px) {
+  .field-grid { grid-template-columns: 1fr; }
+}
+
+.actions,
+.actions-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.actions { margin-top: 8px; justify-content: flex-end; }
+.actions-inline { margin-bottom: 10px; }
+
+.btn-primary,
+.btn-secondary {
+  appearance: none;
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 14px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--primary-text);
+}
+
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-primary:disabled,
+.btn-secondary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #fff;
+  color: var(--fg);
+  border: 1px solid var(--border);
+}
+
+.test-status {
+  min-height: 1.4em;
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+
+.test-status.is-ok { color: var(--ok); }
+.test-status.is-error { color: var(--danger); }
+
+.privacy-list {
+  margin: 0 0 16px;
+  padding-left: 18px;
+  color: var(--fg);
+}
+
+.privacy-list li { margin-bottom: 8px; }
+
+.switch-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible,
+.choice:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

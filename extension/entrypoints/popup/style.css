@@ -1,0 +1,185 @@
+:root {
+  --bg: #ffffff;
+  --fg: #1f2937;
+  --muted: #6b7280;
+  --primary: #2563eb;
+  --primary-text: #ffffff;
+  --border: #e5e7eb;
+  --track: #eef2ff;
+  --radius: 6px;
+  --width: 280px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: var(--width);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  color: var(--fg);
+  background: var(--bg);
+}
+
+.popup-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.popup-header h1 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.popup-body {
+  padding: 12px 16px;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.progress {
+  height: 4px;
+  margin-bottom: 12px;
+  border-radius: 999px;
+  background: var(--track);
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0;
+  background: var(--primary);
+  transition: width 0.25s ease;
+}
+
+.control-group {
+  margin-bottom: 10px;
+}
+
+.control-group label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.control-group select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.hint {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 4px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.switch-row input {
+  width: 15px;
+  height: 15px;
+}
+
+.button-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.secondary-row {
+  margin-top: 8px;
+}
+
+button {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--fg);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+button.primary {
+  background: var(--primary);
+  color: var(--primary-text);
+  border-color: var(--primary);
+}
+
+button:hover {
+  opacity: 0.92;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.link-row {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.link-row a {
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.link-row a:hover {
+  text-decoration: underline;
+}
+
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-bar {
+    transition: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  button,
+  select {
+    border-width: 2px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1f2937;
+    --fg: #f3f4f6;
+    --muted: #9ca3af;
+    --border: #374151;
+    --track: #374151;
+  }
+}

@@ -1,0 +1,619 @@
+{
+  "extName": {
+    "message": "Dual Read Translator"
+  },
+  "extDescription": {
+    "message": "Bilingual or replacement page translation using any OpenAI-compatible API."
+  },
+  "cmdToggleTranslate": {
+    "message": "Translate / restore the current page"
+  },
+  "cmdToggleMode": {
+    "message": "Switch between bilingual and replace mode"
+  },
+  "translatePage": {
+    "message": "Translate page"
+  },
+  "restoreOriginal": {
+    "message": "Restore original"
+  },
+  "modeBilingual": {
+    "message": "Bilingual"
+  },
+  "modeReplace": {
+    "message": "Replace"
+  },
+  "targetLanguage": {
+    "message": "Target language"
+  },
+  "siteAuto": {
+    "message": "Auto-translate this site"
+  },
+  "optionsTitle": {
+    "message": "Dual Read Settings"
+  },
+  "apiBaseUrl": {
+    "message": "API base URL"
+  },
+  "connectionMode": {
+    "message": "Connection route"
+  },
+  "connectionModeDirect": {
+    "message": "Direct API (DeepSeek default)"
+  },
+  "connectionModeProxy": {
+    "message": "Dual Read Proxy"
+  },
+  "apiKey": {
+    "message": "API key"
+  },
+  "model": {
+    "message": "Model"
+  },
+  "defaultMode": {
+    "message": "Default translation mode"
+  },
+  "save": {
+    "message": "Save"
+  },
+  "saved": {
+    "message": "Saved"
+  },
+  "errorNoText": {
+    "message": "No text selected"
+  },
+  "errorTranslationFailed": {
+    "message": "Translation failed"
+  },
+  "contextMenuTranslateSelection": {
+    "message": "Translate selection"
+  },
+  "overlayTitle": {
+    "message": "Translation"
+  },
+  "overlayCopy": {
+    "message": "Copy"
+  },
+  "overlayClose": {
+    "message": "Close"
+  },
+  "statusReady": {
+    "message": "Ready"
+  },
+  "statusTranslating": {
+    "message": "Translating..."
+  },
+  "statusDone": {
+    "message": "Done"
+  },
+  "statusWatching": {
+    "message": "Watching for new content"
+  },
+  "statusRestored": {
+    "message": "Restored"
+  },
+  "statusError": {
+    "message": "Error"
+  },
+  "statusTranslated": {
+    "message": "$1 translated"
+  },
+  "statusProgress": {
+    "message": "$1 / $2 translated"
+  },
+  "statusTranslatedWithFailed": {
+    "message": "$1 translated, $2 failed"
+  },
+  "statusNoContent": {
+    "message": "No translatable content"
+  },
+  "statusRestricted": {
+    "message": "Cannot translate this page"
+  },
+  "errorContentScript": {
+    "message": "Failed to inject content script"
+  },
+  "exportSettings": {
+    "message": "Export"
+  },
+  "importSettings": {
+    "message": "Import"
+  },
+  "includeSecrets": {
+    "message": "Include API key in export"
+  },
+  "exported": {
+    "message": "Exported"
+  },
+  "imported": {
+    "message": "Imported"
+  },
+  "importFailed": {
+    "message": "Import failed"
+  },
+  "sectionCache": {
+    "message": "Translation cache"
+  },
+  "cacheHint": {
+    "message": "Translations are cached locally to avoid re-sending identical text. Clearing frees storage and forces fresh translations."
+  },
+  "clearCache": {
+    "message": "Clear cache"
+  },
+  "cacheCleared": {
+    "message": "Cache cleared"
+  },
+  "sectionSiteRules": {
+    "message": "Site rules"
+  },
+  "siteRulesHint": {
+    "message": "Per-site overrides. Auto-translate applies on load; blacklisted sites are never translated."
+  },
+  "addSiteRule": {
+    "message": "Add site"
+  },
+  "siteHost": {
+    "message": "Host"
+  },
+  "ruleAuto": {
+    "message": "Auto"
+  },
+  "ruleDisabled": {
+    "message": "Off"
+  },
+  "siteRulesEmpty": {
+    "message": "No site rules yet. Toggle “Auto-translate this site” in the popup, or add one here."
+  },
+  "optionsSubtitle": {
+    "message": "Connect an API and choose translation defaults."
+  },
+  "sectionApi": {
+    "message": "API connection"
+  },
+  "apiBaseHint": {
+    "message": "Both connection routes use the OpenAI V1 protocol."
+  },
+  "apiKeyHint": {
+    "message": "Required by your API provider."
+  },
+  "apiKeyDirectHint": {
+    "message": "Required for a direct API connection."
+  },
+  "apiKeyProxyHint": {
+    "message": "Optional when the proxy manages upstream credentials."
+  },
+  "connectionModeDirectHint": {
+    "message": "The extension sends requests directly to your API. An API key is required."
+  },
+  "connectionModeProxyHint": {
+    "message": "Uses the Dual Read proxy in this repository. It defaults to this device; replace the API base URL with its remote address when needed. An API key is optional unless the proxy requires one."
+  },
+  "customHeaders": {
+    "message": "Custom HTTP headers"
+  },
+  "customHeadersHint": {
+    "message": "Optional headers sent with every API request. They stay on this device. API key Authorization takes precedence."
+  },
+  "customHeadersEmpty": {
+    "message": "No custom headers yet. Click “Add header” to create one."
+  },
+  "customHeadersInvalid": {
+    "message": "Please check header names and values. Names must be unique and filled when a value is set."
+  },
+  "addHeader": {
+    "message": "Add header"
+  },
+  "headerName": {
+    "message": "Header name"
+  },
+  "headerValue": {
+    "message": "Value"
+  },
+  "headerValuePlaceholder": {
+    "message": "Header value"
+  },
+  "removeHeader": {
+    "message": "Remove"
+  },
+  "translationMode": {
+    "message": "Translation mode"
+  },
+  "maxConcurrent": {
+    "message": "Max concurrent batches"
+  },
+  "batchSize": {
+    "message": "Segments per batch"
+  },
+  "maxConcurrentHint": {
+    "message": "Default 3. Higher values finish long pages faster but may trigger API rate limits or timeouts."
+  },
+  "batchSizeHint": {
+    "message": "Default 6. Smaller batches return faster; larger batches save API calls but increase the risk of malformed JSON responses."
+  },
+  "providerPreset": {
+    "message": "Provider preset"
+  },
+  "presetDualRead": {
+    "message": "Dual Read Server (local)"
+  },
+  "presetDualReadHint": {
+    "message": "Uses your local server. Base URL should end with /v1. API key is usually optional."
+  },
+  "presetDeepSeek": {
+    "message": "DeepSeek"
+  },
+  "presetDeepSeekHint": {
+    "message": "Direct DeepSeek API. Requires an API key."
+  },
+  "presetOpenAI": {
+    "message": "OpenAI API"
+  },
+  "presetOpenAIHint": {
+    "message": "OpenAI or any compatible /v1 endpoint. Requires an API key."
+  },
+  "presetOllama": {
+    "message": "Ollama (local)"
+  },
+  "presetOllamaHint": {
+    "message": "Local Ollama OpenAI-compatible API. Key usually optional."
+  },
+  "presetCustom": {
+    "message": "Custom"
+  },
+  "presetCustomHint": {
+    "message": "Enter any OpenAI-compatible base URL manually."
+  },
+  "testConnection": {
+    "message": "Test connection"
+  },
+  "fixV1": {
+    "message": "Add /v1 to URL"
+  },
+  "connTesting": {
+    "message": "Testing connection…"
+  },
+  "connOk": {
+    "message": "Connected"
+  },
+  "connOkMs": {
+    "message": "Connected ($1 ms)"
+  },
+  "connV1Fixed": {
+    "message": "Updated URL to include /v1. Test again."
+  },
+  "connConfigRequired": {
+    "message": "Add an API base URL and key."
+  },
+  "connPermissionRequired": {
+    "message": "Browser permission for this API host was denied."
+  },
+  "connEndpointInsecure": {
+    "message": "Remote endpoints must use HTTPS."
+  },
+  "connAuthInvalid": {
+    "message": "API key rejected (unauthorized)."
+  },
+  "connModelNotFound": {
+    "message": "Model not found or endpoint path is wrong."
+  },
+  "connRateLimited": {
+    "message": "Rate limited. Try again shortly."
+  },
+  "connTimeout": {
+    "message": "Connection timed out."
+  },
+  "connUnavailable": {
+    "message": "Upstream server unavailable."
+  },
+  "connMalformed": {
+    "message": "Got a response, but it was not usable."
+  },
+  "connMissingV1": {
+    "message": "This looks like a server root. Add /v1 to the API base URL."
+  },
+  "connNetworkError": {
+    "message": "Could not reach the API. Check the URL and that the server is running."
+  },
+  "errConfigRequired": {
+    "message": "Connect an API before translating."
+  },
+  "errPermissionRequired": {
+    "message": "Browser permission for this API host was denied."
+  },
+  "errEndpointInsecure": {
+    "message": "Remote endpoints must use HTTPS."
+  },
+  "errAuthInvalid": {
+    "message": "API key rejected."
+  },
+  "errModelNotFound": {
+    "message": "Model not found or endpoint path is wrong."
+  },
+  "errRateLimited": {
+    "message": "Rate limited. Try again shortly."
+  },
+  "errTimeout": {
+    "message": "Translation timed out."
+  },
+  "errUnavailable": {
+    "message": "Translation service unavailable."
+  },
+  "errMalformed": {
+    "message": "Got a response, but it was not usable."
+  },
+  "errPageRestricted": {
+    "message": "This page type cannot be translated (browser-restricted)."
+  },
+  "errPageUnsupported": {
+    "message": "This page is not available for translation."
+  },
+  "errSessionCancelled": {
+    "message": "Translation was cancelled."
+  },
+  "errMissingV1": {
+    "message": "API base URL is missing /v1."
+  },
+  "errNetwork": {
+    "message": "Could not reach the API."
+  },
+  "errUnknown": {
+    "message": "Translation failed."
+  },
+  "errActionOpenSetup": {
+    "message": "Open setup to connect an API."
+  },
+  "errActionGrantPermission": {
+    "message": "Allow access to the API host, then retry."
+  },
+  "errActionUseHttps": {
+    "message": "Switch the API base to HTTPS."
+  },
+  "errActionCheckKey": {
+    "message": "Check your API key in Options."
+  },
+  "errActionCheckModel": {
+    "message": "Check the model name and /v1 path."
+  },
+  "errActionWaitRetry": {
+    "message": "Wait a moment, then retry from the popup."
+  },
+  "errActionRetry": {
+    "message": "Retry from the popup."
+  },
+  "errActionFixV1": {
+    "message": "Add /v1 to the API base URL."
+  },
+  "statusConfigRequired": {
+    "message": "Connect an API before translating"
+  },
+  "statusSiteDisabled": {
+    "message": "This site is disabled in Dual Read"
+  },
+  "statusPartial": {
+    "message": "$1 translated, $2 failed"
+  },
+  "stopTranslate": {
+    "message": "Stop"
+  },
+  "retryFailed": {
+    "message": "Retry failed"
+  },
+  "openSetup": {
+    "message": "Set up connection"
+  },
+  "onboardingTitle": {
+    "message": "Welcome to Dual Read"
+  },
+  "onboardingSubtitle": {
+    "message": "Three short steps to your first bilingual page."
+  },
+  "onboardStep1Title": {
+    "message": "Choose a connection route"
+  },
+  "onboardStep1Hint": {
+    "message": "Direct API and Dual Read Proxy use the same OpenAI V1 protocol. Page text is sent only to the endpoint you configure."
+  },
+  "onboardPathServer": {
+    "message": "Local Dual Read Server"
+  },
+  "onboardPathServerDesc": {
+    "message": "Best for privacy and shared cache. Runs on your machine. API key usually optional."
+  },
+  "onboardPathDirect": {
+    "message": "My AI API (DeepSeek / OpenAI-compatible)"
+  },
+  "onboardPathDirectDesc": {
+    "message": "Text goes to your configured cloud or self-hosted model. Requires an API key."
+  },
+  "onboardPathLater": {
+    "message": "Skip for now"
+  },
+  "onboardPathLaterDesc": {
+    "message": "Browse the options later. Translation stays disabled until you connect."
+  },
+  "onboardStep2Title": {
+    "message": "Connect and test"
+  },
+  "onboardStep2Hint": {
+    "message": "Fill in the endpoint, then run a tiny test translation."
+  },
+  "onboardStep3Title": {
+    "message": "Privacy"
+  },
+  "onboardPrivacy1": {
+    "message": "Visible page text you translate is sent to the API base above."
+  },
+  "onboardPrivacy2": {
+    "message": "Your API key stays in this browser. Extension storage is not encrypted."
+  },
+  "onboardPrivacy3": {
+    "message": "Dual Read does not operate a translation cloud of its own."
+  },
+  "rememberApiKey": {
+    "message": "Remember API key on this device"
+  },
+  "rememberApiKeyHint": {
+    "message": "Uncheck to keep the key only for this browser session."
+  },
+  "onboardContinue": {
+    "message": "Continue"
+  },
+  "onboardBack": {
+    "message": "Back"
+  },
+  "onboardFinish": {
+    "message": "Start translating"
+  },
+  "progressLabel": {
+    "message": "Translation progress"
+  },
+  "optionsNavLabel": {
+    "message": "Settings sections"
+  },
+  "navConnection": {
+    "message": "Connection"
+  },
+  "navReading": {
+    "message": "Reading"
+  },
+  "navSites": {
+    "message": "Sites"
+  },
+  "navData": {
+    "message": "Data & privacy"
+  },
+  "sectionConnection": {
+    "message": "Connection"
+  },
+  "sectionReading": {
+    "message": "Translation & display"
+  },
+  "sectionReadingHint": {
+    "message": "Choose interface and translation defaults for new pages. Site rules can override translation defaults."
+  },
+  "sectionSites": {
+    "message": "Sites"
+  },
+  "sectionData": {
+    "message": "Data & privacy"
+  },
+  "sectionDataHint": {
+    "message": "Translated text goes only to your configured API. API keys and custom headers stay on this device; non-secret preferences may sync with your browser account."
+  },
+  "sectionImportExport": {
+    "message": "Import / export"
+  },
+  "advancedConnection": {
+    "message": "Advanced: custom HTTP headers"
+  },
+  "advancedReading": {
+    "message": "Advanced: scheduling"
+  },
+  "advancedReadingHint": {
+    "message": "Leave defaults unless you hit rate limits or timeouts."
+  },
+  "uiLocale": {
+    "message": "Interface language"
+  },
+  "siteRulesHintCards": {
+    "message": "Use one exact hostname per rule. Auto-translate asks for site access when you save; never translate takes precedence."
+  },
+  "sitePolicy": {
+    "message": "Site policy"
+  },
+  "sitePolicyGlobal": {
+    "message": "Use global settings"
+  },
+  "sitePolicyAuto": {
+    "message": "Auto-translate"
+  },
+  "sitePolicyNever": {
+    "message": "Never translate"
+  },
+  "siteUseGlobal": {
+    "message": "Use global default"
+  },
+  "removeSite": {
+    "message": "Remove"
+  },
+  "discardChanges": {
+    "message": "Discard changes"
+  },
+  "unsavedChanges": {
+    "message": "Unsaved changes"
+  },
+  "discarded": {
+    "message": "Changes discarded"
+  },
+  "confirmClearCache": {
+    "message": "Clear all cached translations on this device?"
+  },
+  "confirmExportSecrets": {
+    "message": "This export includes your API key. Save it only somewhere private. Continue?"
+  },
+  "apiBasePlaceholder": {
+    "message": "https://api.deepseek.com"
+  },
+  "apiKeyPlaceholder": {
+    "message": "sk-..."
+  },
+  "modelPlaceholder": {
+    "message": "deepseek-v4-flash"
+  },
+  "connectionNotConfigured": {
+    "message": "Connection required"
+  },
+  "connectionNotConfiguredHint": {
+    "message": "Add your API details, then test and save the connection before translating."
+  },
+  "uiLanguageEn": {"message": "English"},
+  "uiLanguageZhCN": {"message": "Simplified Chinese"},
+  "uiLanguageZhTW": {"message": "Traditional Chinese"},
+  "uiLanguageRu": {"message": "Russian"},
+  "uiLanguageEs": {"message": "Spanish"},
+  "uiLanguageFr": {"message": "French"},
+  "uiLocaleHint": {
+    "message": "This changes extension pages and in-page controls. The browser controls the extension name shown in its own UI."
+  },
+  "targetLanguageZhCN": {"message": "Simplified Chinese"},
+  "targetLanguageEn": {"message": "English"},
+  "targetLanguageRu": {"message": "Russian"},
+  "targetLanguageEs": {"message": "Spanish"},
+  "targetLanguageFr": {"message": "French"},
+  "targetLanguageHint": {
+    "message": "This is the language translated page text will use; it does not change the extension interface."
+  },
+  "translationModeHint": {
+    "message": "Bilingual keeps the original and adds a translation. Replace hides the original until you restore it."
+  },
+  "restoreScheduleDefaults": {"message": "Restore scheduling defaults"},
+  "siteHostHint": {"message": "Use one exact hostname, such as example.com. Paths, ports, and wildcards are not supported."},
+  "errApiBaseRequired": {"message": "Enter an API base URL."},
+  "errApiBaseInvalid": {"message": "Enter a valid API base URL."},
+  "errSiteHostRequired": {"message": "Enter a hostname for every site rule."},
+  "errSiteHostInvalid": {"message": "Use an exact hostname without a path, port, or wildcard."},
+  "errSiteHostDuplicate": {"message": "Each site rule needs a different hostname."},
+  "errSchedulingRange": {"message": "Enter a whole number from $1 to $2."},
+  "sitePermissionDenied": {"message": "Site access was not granted, so auto-translate was not enabled."},
+  "privacyTextDestination": {"message": "Visible page text is sent only to the API endpoint you configure."},
+  "privacySecretsLocal": {"message": "API keys and custom HTTP headers stay on this device and are not browser-synced."},
+  "privacyNoCloud": {"message": "Dual Read does not operate a translation cloud of its own."},
+  "includeCustomHeaders": {"message": "Include custom HTTP headers in export"},
+  "exportPrivacyHint": {"message": "API keys and custom headers can grant access to your provider. They are excluded unless you explicitly include them."},
+  "confirmExportCustomHeaders": {"message": "This export includes custom HTTP headers, which may contain credentials. Save it only somewhere private. Continue?"},
+  "importPreviewTitle": {"message": "Review imported settings"},
+  "importPreviewSummary": {"message": "Only the listed values will change. Private values that are not listed stay on this device."},
+  "importWillUpdate": {"message": "Update: $1"},
+  "importWillKeep": {"message": "Keep unchanged: $1"},
+  "confirmImport": {"message": "Import settings"},
+  "confirmImportOverwrite": {"message": "Import the listed settings? Existing private values that are absent from the file will stay unchanged."},
+  "cancel": {"message": "Cancel"},
+  "presetGroupLocal": {"message": "Local services"},
+  "presetGroupCloud": {"message": "Cloud providers"},
+  "presetGroupCompatible": {"message": "Compatible or custom endpoints"},
+  "sitePolicyPopupHint": {"message": "Auto-translate needs permission for this site."},
+  "openSettings": {"message": "Settings"},
+  "onboardingStepsLabel": {"message": "Setup progress"},
+  "statusTranslatedItems_one": {"message": "$1 segment translated"},
+  "statusTranslatedItems_other": {"message": "$1 segments translated"}
+}
