@@ -28,18 +28,18 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
-    "@eslint/js": "^9.22.0",
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.61.1",
-    "@types/chrome": "^0.0.270",
-    "eslint": "^9.22.0",
-    "jsdom": "^25.0.1",
+    "@types/chrome": "^0.2.2",
+    "eslint": "^10.7.0",
+    "jsdom": "^29.1.1",
     "playwright-webextext": "^0.0.5",
-    "typescript": "^5.6.3",
-    "typescript-eslint": "^8.26.1",
-    "vitest": "^2.1.5",
-    "wxt": "^0.19.13"
+    "typescript": "^7.0.2",
+    "typescript-eslint": "^8.65.0",
+    "vitest": "^4.1.10",
+    "wxt": "^0.20.27"
   },
   "dependencies": {
-    "zod": "^3.23.8"
+    "zod": "^4.4.3"
   }
 }
