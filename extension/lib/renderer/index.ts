@@ -338,7 +338,6 @@ function mount(el: HTMLElement, kind: UnitKind): HTMLElement {
     nestCompanionInHost(el, node);
     markListContentBox(el);
     markFlexBreak(el, node);
-    reserveBlockShell(el, node);
   }
   return node;
 }
@@ -451,7 +450,13 @@ function stripOursFromTree(root: Element): void {
  * list (source predicates pruned differently) — caller degrades to plain text
  * rather than risking misaligned translations.
  */
-function renderRich(unit: TranslationUnit, slots: string[], mode: TranslationMode, opts?: RenderOpts): boolean {
+function renderRich(
+  unit: TranslationUnit,
+  slots: string[],
+  mode: TranslationMode,
+  opts: RenderOpts | undefined,
+  onBlock: (host: HTMLElement, node: HTMLElement) => void,
+): boolean {
   const { el, kind } = unit;
 
   const skeleton = buildSafeRichSkeleton(el);
@@ -486,7 +491,7 @@ function renderRich(unit: TranslationUnit, slots: string[], mode: TranslationMod
 
   applyTranslationLang(node, opts);
   finalizeInlineCompanion(el, node, kind);
-  if (kind === 'block') stabilizeBlockShell(node);
+  if (kind === 'block') onBlock(el, node);
   el.setAttribute(DONE, 'true');
   el.setAttribute(MODE, 'bilingual');
   return true;
@@ -610,11 +615,19 @@ export function isEffectivelyUnchanged(
   return normalizeComparableText(unit.text) === normalizeComparableText(asPlainText(payload));
 }
 
-export function render(
+/**
+ * Mount + fill a translation companion, deferring the block shell measurement
+ * to `onBlock`. All DOM *writes* (insert, text, attrs) run inline; the only
+ * layout *reads* (getBoundingClientRect in reserveBlockShell/stabilizeBlockShell)
+ * are invoked via `onBlock` so a batch caller can run them all together after
+ * every unit has been written — collapsing N forced layouts into one.
+ */
+function renderCore(
   unit: TranslationUnit,
   payload: TranslationPayload,
   mode: TranslationMode,
-  opts?: RenderOpts,
+  opts: RenderOpts | undefined,
+  onBlock: (host: HTMLElement, node: HTMLElement) => void,
 ): void {
   const { el, kind } = unit;
 
@@ -634,7 +647,7 @@ export function render(
       : unit.rich.slots.length === 1
         ? [payload]
         : null;
-    if (slots && slots.length === unit.rich.slots.length && renderRich(unit, slots, mode, opts)) {
+    if (slots && slots.length === unit.rich.slots.length && renderRich(unit, slots, mode, opts, onBlock)) {
       return;
     }
     // Slot count / skeleton parity mismatch — degrade to plain text rather
@@ -669,9 +682,98 @@ export function render(
   applyTranslationLang(node, opts);
   node.textContent = kind === 'nav' || kind === 'inline' || kind === 'inner' ? `\u200b\u00a0${text}` : text;
   finalizeInlineCompanion(el, node, kind);
-  if (kind === 'block') stabilizeBlockShell(node);
+  if (kind === 'block') onBlock(el, node);
   el.setAttribute(DONE, 'true');
   el.setAttribute(MODE, 'bilingual');
+}
+
+/** Single-unit render: reserve + stabilize the block shell synchronously. */
+export function render(
+  unit: TranslationUnit,
+  payload: TranslationPayload,
+  mode: TranslationMode,
+  opts?: RenderOpts,
+): void {
+  renderCore(unit, payload, mode, opts, (host, node) => {
+    reserveBlockShell(host, node);
+    stabilizeBlockShell(node);
+  });
+}
+
+/**
+ * Render a batch while avoiding layout thrashing. mount + fill (DOM writes)
+ * run for every unit first, then block-shell stabilization is split into
+ * alternating read/write passes so getBoundingClientRect reads are never
+ * interleaved with style writes. This lets the browser coalesce the forced
+ * layouts into a constant number per batch instead of one per block.
+ */
+export function renderBatch(
+  items: ReadonlyArray<{ unit: TranslationUnit; payload: TranslationPayload }>,
+  mode: TranslationMode,
+  opts?: RenderOpts,
+): void {
+  const pending: Array<{ host: HTMLElement; node: HTMLElement }> = [];
+  for (const { unit, payload } of items) {
+    try {
+      renderCore(unit, payload, mode, opts, (host, node) => {
+        pending.push({ host, node });
+      });
+    } catch (err) {
+      console.error('[Dual Read] render:', err);
+    }
+  }
+  // Shell stabilization is split into read/write passes so the browser settles
+  // layout a constant number of times per batch instead of once per block:
+  //   1. read every host rect → compute reserved floor (no writes between reads)
+  //   2. write every reserved minHeight + SHELL attr (no reads between writes)
+  //   3. read every companion rect → decide keep/clear (no writes between reads)
+  //   4. write the final minHeight decisions.
+  // Inline companions (inner/nav/compact/err) are skipped, matching reserveBlockShell.
+  const reserved: Array<{ node: HTMLElement; value: number }> = [];
+  for (const { host, node } of pending) {
+    if (
+      node.classList.contains(P_INNER)
+      || node.classList.contains(P_INLINE)
+      || node.classList.contains(P_COMPACT)
+      || node.classList.contains(P_NAV_SUB)
+      || node.classList.contains(CLS_ERR)
+      || node.getAttribute(SHELL)
+    ) {
+      continue;
+    }
+    let hostH = 0;
+    try {
+      hostH = host.getBoundingClientRect().height;
+    } catch {
+      /* jsdom / detached */
+    }
+    if (!(hostH > 0)) continue;
+    const value = Math.min(SHELL_MAX_PX, Math.max(SHELL_MIN_PX, Math.round(hostH * SHELL_HEIGHT_RATIO)));
+    reserved.push({ node, value });
+  }
+  for (const { node, value } of reserved) {
+    node.style.minHeight = `${value}px`;
+    node.setAttribute(SHELL, String(value));
+  }
+  // Now that every reserved floor is applied, measure filled heights together.
+  const stabilize: Array<{ node: HTMLElement; keep: boolean; value: number }> = [];
+  for (const { node, value } of reserved) {
+    let h = 0;
+    try {
+      h = node.getBoundingClientRect().height || node.scrollHeight;
+    } catch {
+      /* jsdom / detached */
+    }
+    stabilize.push({ node, keep: h < value * (1 - SHELL_STABILIZE_SLACK), value });
+  }
+  for (const { node, keep, value } of stabilize) {
+    if (keep) {
+      node.style.minHeight = `${value}px`;
+    } else {
+      node.style.minHeight = '';
+      node.removeAttribute(SHELL);
+    }
+  }
 }
 
 /** Compact in-page failure label. No controls — retry lives in the popup. */
