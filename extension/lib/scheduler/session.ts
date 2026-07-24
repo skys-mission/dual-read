@@ -1,7 +1,7 @@
 import type { PublicSessionConfig, TranslateStatus, TranslationPayload, TranslationUnit } from '../types';
 import { collectUnits, collectUnitsAsync, mutationHasNewContent, mutationIndexDelta } from '../collector';
 import { yieldToMain } from '../runtime/yield';
-import { render, renderError, restoreDom, clearNode, restoreUnit } from '../renderer';
+import { renderBatch, renderError, restoreDom, clearNode, restoreUnit } from '../renderer';
 import { lookup, store } from '../cache';
 import { isLikelyAlreadyTarget } from '../provider';
 import { translateBatchViaPort, isAbortError } from '../messaging';
@@ -365,13 +365,9 @@ export class ContentSession {
     }
     const mode = this.config.mode ?? 'bilingual';
     const opts = this.renderOpts();
-    for (const { unit, payload } of items) {
-      try {
-        render(unit, payload, mode, opts);
-      } catch (err) {
-        console.error('[Dual Read] render:', err);
-      }
-    }
+    // Batch render: mount+fill all units, then stabilize block shells in
+    // read/write passes so the browser coalesces forced layouts across the batch.
+    renderBatch(items, mode, opts);
   }
 
   private bufferRender(unit: TranslationUnit, payload: TranslationPayload): void {

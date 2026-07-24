@@ -2,7 +2,7 @@
   "name": "dual-read-extension",
   "description": "Dual Read — bilingual/replacement page translation via any OpenAI-compatible API.",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "license": "Apache-2.0",
   "scripts": {
