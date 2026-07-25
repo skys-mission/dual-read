@@ -700,18 +700,69 @@ export function render(
   });
 }
 
+/** A block companion whose reserved floor was applied but not yet settled. */
+export interface ShellReservation {
+  node: HTMLElement;
+  value: number;
+}
+
+/** keep/clear outcome for one reserved shell, from the read pass. */
+interface ShellDecision {
+  node: HTMLElement;
+  keep: boolean;
+  value: number;
+}
+
+/**
+ * Read pass of shell stabilization: measure every filled companion and decide
+ * whether the reserved floor must stay. Call while layout is clean (frame
+ * start, before any DOM write of the frame) so the reads cost no forced layout.
+ */
+export function readShellDecisions(
+  reserved: ReadonlyArray<ShellReservation>,
+): ShellDecision[] {
+  const decisions: ShellDecision[] = [];
+  for (const { node, value } of reserved) {
+    let h = 0;
+    try {
+      h = node.getBoundingClientRect().height || node.scrollHeight;
+    } catch {
+      /* jsdom / detached */
+    }
+    decisions.push({ node, keep: h < value * (1 - SHELL_STABILIZE_SLACK), value });
+  }
+  return decisions;
+}
+
+/** Write pass of shell stabilization — no layout reads. */
+export function applyShellDecisions(decisions: ReadonlyArray<ShellDecision>): void {
+  for (const { node, keep, value } of decisions) {
+    if (keep) {
+      node.style.minHeight = `${value}px`;
+    } else {
+      node.style.minHeight = '';
+      node.removeAttribute(SHELL);
+    }
+  }
+}
+
 /**
  * Render a batch while avoiding layout thrashing. mount + fill (DOM writes)
- * run for every unit first, then block-shell stabilization is split into
- * alternating read/write passes so getBoundingClientRect reads are never
- * interleaved with style writes. This lets the browser coalesce the forced
- * layouts into a constant number per batch instead of one per block.
+ * run for every unit first, then reserved floors are applied in one write
+ * pass. Host heights come from `preMeasuredHostHeights` (read by the caller
+ * while layout was still clean); without it they are measured inline, which
+ * forces one layout per batch.
+ *
+ * Returns the applied reservations WITHOUT settling them: the caller settles
+ * via readShellDecisions + applyShellDecisions at the start of a later frame,
+ * so a translate flush performs zero forced synchronous layouts.
  */
 export function renderBatch(
   items: ReadonlyArray<{ unit: TranslationUnit; payload: TranslationPayload }>,
   mode: TranslationMode,
   opts?: RenderOpts,
-): void {
+  preMeasuredHostHeights?: ReadonlyMap<HTMLElement, number>,
+): ShellReservation[] {
   const pending: Array<{ host: HTMLElement; node: HTMLElement }> = [];
   for (const { unit, payload } of items) {
     try {
@@ -722,14 +773,9 @@ export function renderBatch(
       console.error('[Dual Read] render:', err);
     }
   }
-  // Shell stabilization is split into read/write passes so the browser settles
-  // layout a constant number of times per batch instead of once per block:
-  //   1. read every host rect → compute reserved floor (no writes between reads)
-  //   2. write every reserved minHeight + SHELL attr (no reads between writes)
-  //   3. read every companion rect → decide keep/clear (no writes between reads)
-  //   4. write the final minHeight decisions.
+  // Apply every reserved floor in one write pass (no reads between writes).
   // Inline companions (inner/nav/compact/err) are skipped, matching reserveBlockShell.
-  const reserved: Array<{ node: HTMLElement; value: number }> = [];
+  const reserved: ShellReservation[] = [];
   for (const { host, node } of pending) {
     if (
       node.classList.contains(P_INNER)
@@ -741,39 +787,21 @@ export function renderBatch(
     ) {
       continue;
     }
-    let hostH = 0;
-    try {
-      hostH = host.getBoundingClientRect().height;
-    } catch {
-      /* jsdom / detached */
+    let hostH = preMeasuredHostHeights?.get(host) ?? 0;
+    if (!(hostH > 0)) {
+      try {
+        hostH = host.getBoundingClientRect().height;
+      } catch {
+        /* jsdom / detached */
+      }
     }
     if (!(hostH > 0)) continue;
     const value = Math.min(SHELL_MAX_PX, Math.max(SHELL_MIN_PX, Math.round(hostH * SHELL_HEIGHT_RATIO)));
-    reserved.push({ node, value });
-  }
-  for (const { node, value } of reserved) {
     node.style.minHeight = `${value}px`;
     node.setAttribute(SHELL, String(value));
+    reserved.push({ node, value });
   }
-  // Now that every reserved floor is applied, measure filled heights together.
-  const stabilize: Array<{ node: HTMLElement; keep: boolean; value: number }> = [];
-  for (const { node, value } of reserved) {
-    let h = 0;
-    try {
-      h = node.getBoundingClientRect().height || node.scrollHeight;
-    } catch {
-      /* jsdom / detached */
-    }
-    stabilize.push({ node, keep: h < value * (1 - SHELL_STABILIZE_SLACK), value });
-  }
-  for (const { node, keep, value } of stabilize) {
-    if (keep) {
-      node.style.minHeight = `${value}px`;
-    } else {
-      node.style.minHeight = '';
-      node.removeAttribute(SHELL);
-    }
-  }
+  return reserved;
 }
 
 /** Compact in-page failure label. No controls — retry lives in the popup. */

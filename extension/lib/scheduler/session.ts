@@ -1,7 +1,16 @@
 import type { PublicSessionConfig, TranslateStatus, TranslationPayload, TranslationUnit } from '../types';
 import { collectUnits, collectUnitsAsync, mutationHasNewContent, mutationIndexDelta } from '../collector';
 import { yieldToMain } from '../runtime/yield';
-import { renderBatch, renderError, restoreDom, clearNode, restoreUnit } from '../renderer';
+import {
+  renderBatch,
+  renderError,
+  restoreDom,
+  clearNode,
+  restoreUnit,
+  readShellDecisions,
+  applyShellDecisions,
+  type ShellReservation,
+} from '../renderer';
 import { lookup, store } from '../cache';
 import { isLikelyAlreadyTarget } from '../provider';
 import { translateBatchViaPort, isAbortError } from '../messaging';
@@ -307,6 +316,7 @@ export class ContentSession {
     if (this.renderTimer) clearTimeout(this.renderTimer);
     this.renderTimer = null;
     this.renderBuf = [];
+    this.pendingShells = [];
     this.disconnectPorts();
     this.io?.disconnect();
     this.registry?.dispose();
@@ -368,28 +378,55 @@ export class ContentSession {
     return adaptiveBatchSize(base, this.consecutiveFailures);
   }
 
+  /**
+   * Block-shell floors applied last frame, settled at the start of the next
+   * flush frame (read pass runs while layout is still clean → no forced layout).
+   */
+  private pendingShells: ShellReservation[] = [];
+
   private flushRenders(): void {
+    // Frame-start order matters — every layout read happens before the frame's
+    // first DOM write, so no read forces a synchronous layout:
+    //   1. read last frame's filled shell heights (clean layout)
+    //   2. pre-measure this flush's block host heights (still clean)
+    //   3. apply shell keep/clear writes + render chunks (writes only)
+    const settling = this.pendingShells;
+    this.pendingShells = [];
+    const decisions = settling.length ? readShellDecisions(settling) : [];
+
     const items = this.renderBuf;
     this.renderBuf = [];
-    if (!items.length) return;
     if (this.disposed && this.disposeReason === 'restore') {
       // DOM is about to be restored; skip pending paints.
       return;
     }
+
+    const measured = new Map<HTMLElement, number>();
+    for (const { unit } of items) {
+      if (unit.kind !== 'block' || measured.has(unit.el)) continue;
+      try {
+        measured.set(unit.el, unit.el.getBoundingClientRect().height);
+      } catch {
+        /* jsdom / detached */
+      }
+    }
+
+    if (decisions.length) applyShellDecisions(decisions);
+
+    if (!items.length) return;
     const mode = this.config.mode ?? 'bilingual';
     const opts = this.renderOpts();
-    // Batch render: mount+fill all units, then stabilize block shells in
-    // read/write passes so the browser coalesces forced layouts across the batch.
     // Time-slice oversized flushes across frames: render in fixed small chunks
-    // (each chunk keeps its own read/write passes) and hand the remainder to
-    // the next frame once the soft CPU budget is spent, so every rAF task
-    // stays under the Long Task floor even on slow shared-CPU machines.
+    // and hand the remainder to the next frame once the soft CPU budget is
+    // spent, so every rAF task stays under the Long Task floor even on slow
+    // shared-CPU machines. Shell reservations returned by renderBatch are
+    // settled at the start of the next flush frame.
     const sliceEnd = performance.now() + RENDER_SLICE_MS;
     let done = 0;
     while (done < items.length) {
       const chunk = items.slice(done, done + RENDER_CHUNK_SIZE);
       done += chunk.length;
-      renderBatch(chunk, mode, opts);
+      this.pendingShells.push(...renderBatch(chunk, mode, opts, measured));
       if (done >= items.length) break;
       if (performance.now() < sliceEnd) continue;
       // Re-queue the remainder ahead of anything buffered since, then yield
@@ -397,6 +434,10 @@ export class ContentSession {
       this.renderBuf = items.slice(done).concat(this.renderBuf);
       requestAnimationFrame(() => this.flushRenders());
       return;
+    }
+    // Settle this frame's shells at the next frame start (clean-layout reads).
+    if (this.pendingShells.length) {
+      requestAnimationFrame(() => this.flushRenders());
     }
   }
 

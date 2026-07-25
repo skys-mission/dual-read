@@ -44,12 +44,12 @@ export const PERF_BUDGETS: PerfBudgets = PERF_STRICT
       // (default-CI ceiling is 300).
       index5kMs: 220,
       // 50ms is Chrome's Long Task definition on reference hardware. On shared
-      // runners a translate frame on the 20k page costs ~3 full-document
-      // layouts (2 forced sync in renderBatch shell passes + 1 rendering step)
-      // because in-flow companions reflow everything below the insert; that
-      // floor measured 67ms. JS is already time-sliced (RENDER_SLICE_MS), so
-      // 100 gates real regressions (the pre-batch-render code produced 1211ms)
-      // without demanding sub-layout-floor frames from slow VMs.
+      // runners a translate frame on the 20k page still costs one full-document
+      // layout in the rendering step (in-flow companions reflow everything
+      // below the insert) on top of the time-sliced render JS; shell reserve /
+      // settle reads are all done on clean layout so no forced sync layouts
+      // remain. 100 gates real regressions (the pre-batch-render code produced
+      // 1211ms) without demanding sub-layout-floor frames from slow VMs.
       longTask20kMs: 100,
       mutationMs: 16,
       // Bilingual companions have intrinsic height; ~40 first-screen blocks push
