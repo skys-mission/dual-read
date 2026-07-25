@@ -1117,10 +1117,19 @@ export async function collectUnitsAsync(
     }
   }
 
+  // Rank does one getBoundingClientRect per unit — slice it like the passes
+  // above so a 20k-unit sort cannot form a Long Task on its own.
+  const ranked: Array<{ u: TranslationUnit; r: number }> = [];
+  for (const u of units) {
+    const tRank = performance.now();
+    ranked.push({ u, r: rank(u) });
+    sliceMark = tRank;
+    await bump();
+  }
   const tSort = performance.now();
-  const sorted = sortUnitsByRank(units);
+  ranked.sort((a, b) => a.r - b.r);
   cpuMs += performance.now() - tSort;
-  return { units: sorted, cpuMs };
+  return { units: ranked.map((x) => x.u), cpuMs };
   });
 }
 
