@@ -16,9 +16,25 @@ Chromium E2E + unit gates for Dual Read’s page-impact budgets.
 STRICT ceilings are calibrated for the shared ubuntu-latest runners that
 nightly.yml uses (measured floor + headroom), not for dev machines: the 5k
 index measures ~180ms active CPU there (~61ms locally), and a 20k translate
-frame costs ~3 full-document layouts (2 forced sync in `renderBatch` shell
-passes + 1 rendering step) because in-flow companions reflow everything below
-the insert — 50ms is only attainable on reference hardware.
+frame costs one full-document layout in the rendering step (in-flow companions
+reflow everything below the insert) on top of the time-sliced render JS —
+50ms is only attainable on reference hardware.
+
+### Render flush frames
+
+Translate paints are structured so no frame performs a forced synchronous
+layout (`flushRenders` in `lib/scheduler/session.ts`):
+
+1. **Frame-start reads on clean layout** — settle last frame's shell floors
+   (`readShellDecisions`) and pre-measure this flush's block host heights,
+   all before the frame's first DOM write.
+2. **Writes only** — `applyShellDecisions`, then `renderBatch` chunks
+   (mount + fill + reserve floors) under a 24ms soft CPU budget
+   (`RENDER_SLICE_MS`); oversized flushes continue next frame.
+3. **Deferred settle** — shell reservations returned by `renderBatch` are
+   settled at the start of the next flush frame, when reads are free again.
+
+The only layout left per frame is the browser's own rendering step.
 
 ### CLS mitigations
 
