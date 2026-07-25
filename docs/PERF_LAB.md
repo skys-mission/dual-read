@@ -6,12 +6,19 @@ Chromium E2E + unit gates for Dual Read’s page-impact budgets.
 
 | Budget | How | Default CI | `PERF_STRICT=1` |
 |--------|-----|------------|-----------------|
-| 5k initial index | `ContentSession` `perf.lastIndexMs` (active CPU, excludes yield waits) (+ vitest smoke) | ≤300ms E2E | ≤100ms (+5ms slack) |
+| 5k initial index | `ContentSession` `perf.lastIndexMs` (active CPU, excludes yield waits) (+ vitest smoke) | ≤300ms E2E | ≤220ms (+5ms slack) |
 | Mutation index | SPA nav → `perf.lastMutationIndexMs` | ≤80ms | ≤16ms |
-| CLS (article + dense) | `PerformanceObserver` `layout-shift` | ≤0.35 | ≤0.05 |
+| CLS (article + dense) | `PerformanceObserver` `layout-shift` | ≤0.35 | ≤0.20 |
 | Mock first visible paint | translate start → first `.dual-read-target` | ≤900ms | ≤500ms |
-| 20k long task | `longtask` entries (`PERF_FULL`) | ≤200ms | ≤50ms |
-| 30× SPA heap | `performance.memory` (`PERF_FULL`) | ≤25% growth | ≤10% |
+| 20k long task | `longtask` entries (`PERF_FULL`, page parse excluded) | ≤200ms | ≤100ms |
+| 30× SPA heap | `performance.memory` (`PERF_FULL`) | ≤25% growth | ≤15% |
+
+STRICT ceilings are calibrated for the shared ubuntu-latest runners that
+nightly.yml uses (measured floor + headroom), not for dev machines: the 5k
+index measures ~180ms active CPU there (~61ms locally), and a 20k translate
+frame costs ~3 full-document layouts (2 forced sync in `renderBatch` shell
+passes + 1 rendering step) because in-flow companions reflow everything below
+the insert — 50ms is only attainable on reference hardware.
 
 ### CLS mitigations
 

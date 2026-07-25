@@ -11,6 +11,7 @@ import { PERF_BUDGETS, PERF_FULL, PERF_STRICT, PERF_TIMING_SLACK_MS } from './he
 import {
   installPerfObservers,
   readPerfObservers,
+  resetLongTasks,
   waitFirstPaintMs,
   readHeapUsed,
   countTranslationTargets,
@@ -239,6 +240,9 @@ test.describe('perf budget lab', () => {
         });
 
         const tabId = await getTabId(page, sw);
+        // Exclude page parse / first layout long tasks (captured via buffered
+        // observer) — the budget covers extension work during index+translate.
+        await resetLongTasks(page);
         await translateTab(sw, tabId, 'bilingual');
         await sleep(500);
         const snap = await readPerfObservers(page);
