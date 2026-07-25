@@ -28,6 +28,18 @@ const INITIAL_SETTLE_MS = 1_200;
 const INITIAL_MAX_MS = 8_000;
 /** Soft CPU budget per index turn — leave headroom under the 50ms Long Task floor. */
 const INDEX_SLICE_MS = 12;
+/**
+ * Soft CPU budget per render flush turn. A viewport batch can hold 50+ block
+ * companions; rendering them all in one rAF callback exceeds the 50ms Long
+ * Task floor on slower machines, so oversized flushes continue next frame.
+ */
+const RENDER_SLICE_MS = 24;
+/**
+ * Units rendered per renderBatch call inside a flush. Small enough that one
+ * chunk cannot overshoot the slice budget by more than a few ms; large enough
+ * to keep the read/write pass coalescing effective.
+ */
+const RENDER_CHUNK_SIZE = 8;
 
 export type DisposeReason =
   | 'restore'
@@ -359,6 +371,7 @@ export class ContentSession {
   private flushRenders(): void {
     const items = this.renderBuf;
     this.renderBuf = [];
+    if (!items.length) return;
     if (this.disposed && this.disposeReason === 'restore') {
       // DOM is about to be restored; skip pending paints.
       return;
@@ -367,7 +380,24 @@ export class ContentSession {
     const opts = this.renderOpts();
     // Batch render: mount+fill all units, then stabilize block shells in
     // read/write passes so the browser coalesces forced layouts across the batch.
-    renderBatch(items, mode, opts);
+    // Time-slice oversized flushes across frames: render in fixed small chunks
+    // (each chunk keeps its own read/write passes) and hand the remainder to
+    // the next frame once the soft CPU budget is spent, so every rAF task
+    // stays under the Long Task floor even on slow shared-CPU machines.
+    const sliceEnd = performance.now() + RENDER_SLICE_MS;
+    let done = 0;
+    while (done < items.length) {
+      const chunk = items.slice(done, done + RENDER_CHUNK_SIZE);
+      done += chunk.length;
+      renderBatch(chunk, mode, opts);
+      if (done >= items.length) break;
+      if (performance.now() < sliceEnd) continue;
+      // Re-queue the remainder ahead of anything buffered since, then yield
+      // the rest of the flush to the next frame.
+      this.renderBuf = items.slice(done).concat(this.renderBuf);
+      requestAnimationFrame(() => this.flushRenders());
+      return;
+    }
   }
 
   private bufferRender(unit: TranslationUnit, payload: TranslationPayload): void {

@@ -75,6 +75,19 @@ export async function readPerfObservers(page: Page): Promise<PerfObserverSnapsho
   });
 }
 
+/**
+ * Drop long-task entries recorded so far. The observer is installed before
+ * navigation with `buffered: true`, so it also captures HTML parse / first
+ * layout tasks that the extension cannot influence — the 20k budget is about
+ * extension work during index+translate, so reset right before it starts.
+ */
+export async function resetLongTasks(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const g = globalThis as unknown as { __DR_PERF__?: { longTasks: number[] } };
+    if (g.__DR_PERF__) g.__DR_PERF__.longTasks = [];
+  });
+}
+
 /** Count translation companions. */
 export async function countTranslationTargets(page: Page): Promise<number> {
   return page.evaluate(() => document.querySelectorAll('.dual-read-target').length);
