@@ -18,6 +18,13 @@
 
 **隐私一句话：** Dual Read **默认零遥测**；页面文字只发往**你配置的** LLM / 自建服务端；项目方不收集浏览内容或 API Key。详见 [PRIVACY.md](PRIVACY.md)。
 
+## 浏览器商店
+
+| 浏览器 | 状态 |
+|---|---|
+| Firefox | 已上架：[从 Firefox 浏览器附加组件安装 Dual Read](https://addons.mozilla.org/zh-CN/firefox/addon/dual-read-translator/) |
+| Microsoft Edge | 正在审核中。 |
+
 ---
 
 ## 目录
@@ -25,6 +32,7 @@
 - [为什么选择 Dual Read？](#为什么选择-dual-read)
 - [特性](#特性)
 - [快速开始](#快速开始)
+- [浏览器商店](#浏览器商店)
 - [服务端配置](#服务端配置toml)
 - [Make 命令](#make-命令)
 - [验证](#验证)

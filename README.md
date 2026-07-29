@@ -22,6 +22,13 @@ The extension translates pages through any OpenAI-compatible API. The server add
 
 **Privacy in one line:** Dual Read has **zero telemetry by default**. Page text goes only to **the LLM / server you configure**. See [PRIVACY.md](PRIVACY.md).
 
+## Browser stores
+
+| Browser | Status |
+|---|---|
+| Firefox | Available: [Install Dual Read from Firefox Add-ons](https://addons.mozilla.org/zh-CN/firefox/addon/dual-read-translator/) |
+| Microsoft Edge | Under review. |
+
 <!-- TODO: add a screenshot or GIF here -->
 <!-- ![Dual Read demo](docs/assets/demo.gif) -->
 
@@ -32,6 +39,7 @@ The extension translates pages through any OpenAI-compatible API. The server add
 - [Why Dual Read?](#why-dual-read)
 - [Features](#features)
 - [Quick Start](#quick-start)
+- [Browser stores](#browser-stores)
 - [Documentation](#documentation)
 - [CI & Quality Gates](#ci--quality-gates)
 - [Make Targets](#make-targets-common)
