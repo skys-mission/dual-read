@@ -7,6 +7,21 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-08-04
+
+### Changed
+
+- Renderer performance: eliminate batch layout thrashing via read/write
+  passes, time-slice render flush and rank sort across frames, and settle
+  block shells on clean layout — zero forced synchronous layouts.
+- E2E perf lab: exclude page parse from the 20k longtask gate and
+  calibrate strict budgets.
+
+### Added
+
+- Store listings: Firefox Add-ons and Microsoft Edge Add-ons install
+  links in README (EN / zh-CN).
+
 ## [0.1.0] - 2026-07-23
 
 Initial public release.
