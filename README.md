@@ -27,7 +27,7 @@ The extension translates pages through any OpenAI-compatible API. The server add
 | Browser | Status |
 |---|---|
 | Firefox | Available: [Install Dual Read from Firefox Add-ons](https://addons.mozilla.org/zh-CN/firefox/addon/dual-read-translator/) |
-| Microsoft Edge | Under review. |
+| Microsoft Edge | Available: [Install Dual Read from Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/hpkdnnlmodeggabfieondnamlmamibik) |
 
 <!-- TODO: add a screenshot or GIF here -->
 <!-- ![Dual Read demo](docs/assets/demo.gif) -->

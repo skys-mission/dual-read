@@ -23,7 +23,7 @@
 | 浏览器 | 状态 |
 |---|---|
 | Firefox | 已上架：[从 Firefox 浏览器附加组件安装 Dual Read](https://addons.mozilla.org/zh-CN/firefox/addon/dual-read-translator/) |
-| Microsoft Edge | 正在审核中。 |
+| Microsoft Edge | 已上架：[从 Microsoft Edge 加载项安装 Dual Read](https://microsoftedge.microsoft.com/addons/detail/hpkdnnlmodeggabfieondnamlmamibik) |
 
 ---
 
