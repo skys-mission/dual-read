@@ -21,8 +21,10 @@ updates:
         versions: ">= 3"
       - dependency-name: wxt
         versions: ">= 0.20"
+      # @types/chrome 的 patch bump 也会破坏编译（0.0.270→0.0.332 把 lastError 改为
+      # 只读，mock 直接赋值报 TS2540），冻结在当前版本，升级并入迁移任务。
       - dependency-name: "@types/chrome"
-        versions: ">= 0.1"
+        versions: ">= 0.0.271"
       - dependency-name: eslint
         versions: ">= 10"
       - dependency-name: "@eslint/js"
