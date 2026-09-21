@@ -12,6 +12,23 @@ updates:
       # 待 typescript-eslint 跟进后删除本条，TS 大版本升级手动处理。
       - dependency-name: typescript
         versions: ">= 6"
+      # 以下 major 升级需配套改功能/测试代码（2026-09-21 验证：vitest5/@types/chrome0.3/wxt0.21
+      # 引起 39 处 TS 错误，且 @types/node 掉出依赖树），先屏蔽 major 让组 PR 保持绿色，
+      # 迁移见单独任务；迁移完成后删除对应条目。
+      - dependency-name: vitest
+        versions: ">= 5"
+      - dependency-name: wxt
+        versions: ">= 0.20"
+      - dependency-name: "@types/chrome"
+        versions: ">= 0.3.0"
+      - dependency-name: eslint
+        versions: ">= 10"
+      - dependency-name: "@eslint/js"
+        versions: ">= 10"
+      - dependency-name: jsdom
+        versions: ">= 30"
+      - dependency-name: zod
+        versions: ">= 4"
     groups:
       extension-deps:
         patterns:
