@@ -27,15 +27,15 @@
     "probe:live:firefox": "node tools/live-translate-probe/run.mjs --browser=firefox"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.12.1",
-    "@eslint/js": "^9.22.0",
-    "@playwright/test": "^1.61.1",
+    "@axe-core/playwright": "^4.13.0",
+    "@eslint/js": "^9.39.5",
+    "@playwright/test": "^1.63.0",
     "@types/chrome": "^0.0.270",
     "eslint": "^9.22.0",
     "jsdom": "^25.0.1",
     "playwright-webextext": "^0.0.5",
-    "typescript": "^5.6.3",
-    "typescript-eslint": "^8.26.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.70.0",
     "vitest": "^2.1.5",
     "wxt": "^0.19.13"
   },
