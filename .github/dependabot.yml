@@ -7,6 +7,11 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 5
+    ignore:
+      # typescript-eslint@8 的 peer 范围是 typescript <6.1，TS 6/7 大版本会 ERESOLVE；
+      # 待 typescript-eslint 跟进后删除本条，TS 大版本升级手动处理。
+      - dependency-name: typescript
+        versions: ">= 6"
     groups:
       extension-deps:
         patterns:
