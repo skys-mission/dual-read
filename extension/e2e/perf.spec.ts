@@ -6,6 +6,7 @@ import {
   translateTab,
   stopWatchTab,
   getTabStatus,
+  restoreTab,
 } from './helpers/ext-control';
 import { PERF_BUDGETS, PERF_FULL, PERF_STRICT, PERF_TIMING_SLACK_MS } from './helpers/perf-budgets';
 import {
@@ -274,47 +275,110 @@ test.describe('perf budget lab', () => {
           .poll(async () => countTranslationTargets(page), { timeout: 15_000 })
           .toBeGreaterThan(0);
 
-        await page.evaluate(() => {
-          const g = globalThis as unknown as { gc?: () => void };
-          g.gc?.();
-        });
+        const navigate = async (n: number) => {
+          await page.evaluate((iteration) => {
+            const app = document.getElementById('app');
+            if (!app) return;
+            history.pushState({ n: iteration }, '', `${location.pathname}?n=${iteration}`);
+            app.innerHTML =
+              `<h1 id="title">SPA Iter ${iteration}</h1>` +
+              `<p id="body">SPA heap probe paragraph number ${iteration} with unique text.</p>` +
+              `<button type="button" id="nav">Navigate</button>`;
+          }, n);
+          await sleep(400);
+          return getTabStatus(sw, tabId);
+        };
+        // Exercise mutation indexing, cache events and request teardown before
+        // taking the baseline; first-use compilation is not retained DOM growth.
+        for (let i = -5; i < 0; i++) await navigate(i);
         const baseline = await readHeapUsed(page);
-        test.skip(baseline == null, 'performance.memory unavailable');
+        expect(baseline).not.toBeNull();
 
         let lastTotal = Number((await getTabStatus(sw, tabId)).total) || 0;
         for (let i = 0; i < PERF_BUDGETS.spaNavCount; i++) {
-          await page.evaluate((n) => {
-            const app = document.getElementById('app');
-            if (!app) return;
-            history.pushState({ n }, '', `${location.pathname}?n=${n}`);
-            app.innerHTML =
-              `<h1 id="title">SPA Iter ${n}</h1>` +
-              `<p id="body">SPA heap probe paragraph number ${n} with unique text.</p>` +
-              `<button type="button" id="nav">Navigate</button>`;
-          }, i);
-          await sleep(400);
-          const st = await getTabStatus(sw, tabId);
+          const st = await navigate(i);
           const total = Number(st.total) || 0;
           expect(total).toBeGreaterThanOrEqual(lastTotal);
           lastTotal = total;
         }
 
-        await page.evaluate(() => {
-          const g = globalThis as unknown as { gc?: () => void };
-          g.gc?.();
-        });
         const after = await readHeapUsed(page);
         expect(after).not.toBeNull();
         const growth = (after! - baseline!) / baseline!;
         expect(
           growth,
-          `heap growth ${(growth * 100).toFixed(1)}% exceeds ${(PERF_BUDGETS.spaHeapGrowth * 100).toFixed(0)}%`,
+          `retained heap ${baseline} → ${after}; growth ${(growth * 100).toFixed(1)}% exceeds ${(PERF_BUDGETS.spaHeapGrowth * 100).toFixed(0)}%`,
         ).toBeLessThanOrEqual(PERF_BUDGETS.spaHeapGrowth);
 
         await stopWatchTab(sw, tabId);
       } finally {
         await mock.close();
       }
+    });
+
+    test('30× rich replace SPA nav, split/normalize and attributes: heap growth within budget', async ({ extContext, extensionId, sw }) => {
+      test.setTimeout(180_000);
+      const mock = await startMockServer();
+      try {
+        await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+        const page = await extContext.newPage();
+        await page.goto(mock.fixtureUrl('lab-spa.html'));
+        const tabId = await getTabId(page, sw);
+        const replacePage = (n: number) => page.evaluate((iteration) => {
+          document.querySelector('#app')!.innerHTML =
+            `<p id="rich"><strong>First source ${iteration}<!-- marker -->second source</strong> for <a href="/before">details</a>.</p>`;
+        }, n);
+        await replacePage(-6);
+        await translateTab(sw, tabId, 'replace');
+        const navigate = async (n: number) => {
+          await replacePage(n);
+          await expect(page.locator('#rich > strong')).toHaveText(`译:First source ${n}译:second source`);
+          await page.evaluate((iteration) => {
+            const copy = document.querySelector('#rich > strong')!;
+            copy.normalize();
+            (copy.firstChild as Text).insertData(`译:First source ${iteration}`.length, ' appended ');
+          }, n);
+          await expect(page.locator('#rich > strong')).toContainText(`译:First source ${n} appended`);
+          // The edited merged Text already contains that prefix. Wait for
+          // retranslation to rebuild separate slots before moving just one.
+          await expect.poll(() => page.evaluate(() => document.querySelector('#rich > strong')!.childNodes.length)).toBe(2);
+          await expect.poll(() => getTabStatus(sw, tabId)).toMatchObject({ count: 1, total: 1, failed: 0 });
+          // Move a retained slot into a page-owned survivor before the next
+          // navigation, exercising the shared history outside rich hosts.
+          await page.evaluate((iteration) => {
+            const fresh = document.createElement('p');
+            fresh.id = 'fresh';
+            fresh.append('Fresh source ');
+            document.querySelector('#app')!.appendChild(fresh);
+            const strong = document.querySelector('#rich > strong')!;
+            const length = strong.firstChild!.nodeValue!.length;
+            strong.normalize();
+            (strong.firstChild as Text).splitText(length);
+            document.querySelector('#rich > a')!.setAttribute('href', `/updated-${iteration}`);
+            fresh.appendChild(strong.firstChild!);
+            fresh.normalize();
+          }, n);
+          await expect(page.locator('#fresh')).toContainText(`译:Fresh source First source ${n} appended`);
+          await expect(page.locator('#rich > a')).toHaveAttribute('href', `/updated-${n}`);
+          await expect.poll(() => getTabStatus(sw, tabId)).toMatchObject({ count: 2, total: 2, failed: 0 });
+        };
+        // Warm shared document history and cross-host transfers before measuring
+        // detached replacement trees across subsequent SPA navigations.
+        for (let i = -5; i < 0; i++) await navigate(i);
+        const baseline = await readHeapUsed(page);
+        expect(baseline).not.toBeNull();
+        for (let i = 0; i < PERF_BUDGETS.spaNavCount; i++) await navigate(i);
+        const after = await readHeapUsed(page);
+        expect(after).not.toBeNull();
+        const growth = (after! - baseline!) / baseline!;
+        expect(growth,
+          `rich replace retained heap ${baseline} → ${after}; growth ${(growth * 100).toFixed(1)}% exceeds ${(PERF_BUDGETS.spaHeapGrowth * 100).toFixed(0)}%`,
+        ).toBeLessThanOrEqual(PERF_BUDGETS.spaHeapGrowth);
+        await restoreTab(sw, tabId);
+        await expect(page.locator('#rich')).toHaveText('second source for details.');
+        await expect(page.locator('#rich > a')).toHaveAttribute('href', `/updated-${PERF_BUDGETS.spaNavCount - 1}`);
+        await expect(page.locator('#fresh')).toHaveText(`Fresh source First source ${PERF_BUDGETS.spaNavCount - 1} appended`);
+      } finally { await mock.close(); }
     });
   });
 });

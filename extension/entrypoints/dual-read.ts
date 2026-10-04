@@ -156,7 +156,7 @@ export default defineUnlistedScript(() => {
     try {
       const beforeId = getActiveSession()?.id;
       const [tr] = await translateBatchViaPort([text], {
-        sessionId: config.sessionId,
+        config,
         signal: controller.signal,
       });
       if (disposed || controller.signal.aborted) {

@@ -91,7 +91,6 @@ export function mutationHasNewContent(mutations: MutationRecord[]): boolean {
   for (const m of mutations) {
     if (m.type === 'characterData') {
       const text = m.target as Text;
-      if (!text.nodeValue?.trim()) continue;
       const p = text.parentElement;
       // Ignore edits inside our chrome / editable fields. DONE hosts still
       // need invalidation when their *source* text nodes change (SPA updates).
@@ -168,7 +167,7 @@ export interface MutationIndexDelta {
   added: TranslationUnit[];
   /** Previously indexed hosts that left the document. */
   removed: HTMLElement[];
-  /** Indexed hosts whose source text nodes changed (need clear + re-index). */
+  /** Indexed hosts whose source text or children changed (need clear + re-index). */
   invalidated: HTMLElement[];
 }
 
@@ -179,6 +178,7 @@ export interface MutationIndexDelta {
 export function mutationIndexDelta(
   mutations: MutationRecord[],
   knownHosts: Iterable<HTMLElement>,
+  sourceChanged?: (host: HTMLElement) => boolean,
 ): MutationIndexDelta {
   const known = new Set<HTMLElement>();
   for (const h of knownHosts) known.add(h);
@@ -186,26 +186,37 @@ export function mutationIndexDelta(
   const removed = new Set<HTMLElement>();
   const invalidated = new Set<HTMLElement>();
 
+  const invalidateAncestors = (node: Node): void => {
+    let el = node.nodeType === Node.ELEMENT_NODE ? node as Element : node.parentElement;
+    if (!el || el.closest(OURS_SEL) || el.closest(EDITABLE)) return;
+    while (el) {
+      const host = el as HTMLElement;
+      if (known.has(host) && (!sourceChanged || sourceChanged(host))) invalidated.add(host);
+      el = el.parentElement;
+    }
+  };
+
   for (const m of mutations) {
     for (const n of Array.from(m.removedNodes)) {
       if (n.nodeType !== 1) continue;
       const el = n as HTMLElement;
       for (const host of known) {
-        if (host === el || (typeof el.contains === 'function' && el.contains(host))) {
+        if (!host.isConnected && (host === el || el.contains(host))) {
           removed.add(host);
         }
       }
-      if (known.has(el)) removed.add(el);
     }
 
     if (m.type === 'characterData') {
-      const text = m.target as Text;
-      for (const host of known) {
-        if (removed.has(host)) continue;
-        if (host === text.parentElement || host.contains(text)) {
-          invalidated.add(host);
-        }
-      }
+      invalidateAncestors(m.target);
+    } else if (m.type === 'childList') {
+      // A textContent/replaceChildren update replaces text nodes rather than
+      // emitting characterData. Ignore pure companion writes; the session's
+      // source snapshot also filters renderer moves and rich replacements.
+      const changed = [...m.addedNodes, ...m.removedNodes].some((n) =>
+        n.nodeType === Node.TEXT_NODE || (n instanceof Element && !isOursElement(n)),
+      );
+      if (changed) invalidateAncestors(m.target);
     }
   }
 

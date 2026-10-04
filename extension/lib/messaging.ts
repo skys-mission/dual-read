@@ -8,6 +8,8 @@ export interface BatchRequestMsg {
   action: 'translateBatch';
   requestId: string;
   sessionId: string;
+  targetLang: PublicSessionConfig['targetLang'];
+  providerFingerprint: string;
   texts: string[];
 }
 
@@ -70,13 +72,13 @@ export { isAbortError };
  */
 export function translateBatchViaPort(
   texts: string[],
-  opts?: {
-    sessionId?: string;
+  opts: {
+    config: Pick<PublicSessionConfig, 'sessionId' | 'targetLang' | 'providerFingerprint'>;
     ports?: Set<chrome.runtime.Port>;
     signal?: AbortSignal;
   },
 ): Promise<string[]> {
-  const sessionId = opts?.sessionId || 'anonymous';
+  const { sessionId, targetLang, providerFingerprint } = opts.config;
   const ports = opts?.ports;
   const signal = opts?.signal;
   const requestId = newRequestId();
@@ -134,7 +136,7 @@ export function translateBatchViaPort(
     }, PORT_TIMEOUT_MS);
 
     port.onMessage.addListener((m: unknown) => {
-      if (!isBatchResult(m) || m.requestId !== requestId) return;
+      if (!isBatchResult(m) || m.requestId !== requestId || m.sessionId !== sessionId) return;
       if (m.success) finish(resolve as never, m.translations ?? []);
       else {
         const code = m.code || 'UNKNOWN';
@@ -164,6 +166,8 @@ export function translateBatchViaPort(
         action: 'translateBatch',
         requestId,
         sessionId,
+        targetLang,
+        providerFingerprint,
         texts,
       } satisfies BatchRequestMsg);
     } catch (err) {

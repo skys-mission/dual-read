@@ -7,14 +7,28 @@ import {
 import { isCompactControlHost } from '../dom-role';
 import { collectSlotTextNodes, collectVisibleTextNodes } from '../collector';
 import { buildSafeRichSkeleton } from './rich';
+import { captureRichReplacement, forgetRichReplacement, restoreMovedRichNodes, restoreRichReplacement, type RichReplacementNode } from './rich-replace';
+import { walkOpenShadowRoots } from '../roots';
+import { ensureTranslationStyles, removeTranslationStyles } from './styles';
 
 export { buildSafeRichSkeleton, sanitizeHref, isForbiddenAttr } from './rich';
+export { restoreMovedRichNodes } from './rich-replace';
 
 const P_NAV_SUB = `${P}-nav-sub`;
 const P_INLINE = `${P}-target--inline`;
 const P_COMPACT = `${P}-target--compact`;
 const P_INNER = `${P}-target--inner`;
 const LIST_HOST = 'li, [role="listitem"]';
+const richReplacementNodes = new WeakMap<HTMLElement, RichReplacementNode[]>();
+const companions = new WeakMap<Element, Element>();
+const companionHosts = new WeakMap<Element, Element>();
+interface TextReplacement {
+  host: HTMLElement;
+  visible: HTMLElement;
+  stashes: HTMLElement[];
+}
+const textReplacements = new WeakMap<HTMLElement, TextReplacement>();
+const textReplacementNodes = new WeakMap<Element, TextReplacement>();
 
 /** Fraction of host height reserved for the empty bilingual block shell. */
 const SHELL_HEIGHT_RATIO = 0.85;
@@ -36,19 +50,20 @@ function applyTranslationLang(node: HTMLElement, opts?: RenderOpts): void {
   else node.removeAttribute('lang');
 }
 
-function stashAndReplaceText(nodes: Text[], translation: string, opts?: RenderOpts): HTMLElement {
+function stashAndReplaceText(host: HTMLElement, nodes: Text[], translation: string, opts?: RenderOpts): HTMLElement {
   // Stash each source text node in place. Runs of one segment may be separated
   // by interactive chrome (link/button), and restore must rebuild the exact
   // original sequence — a single combined stash would relocate trailing runs.
   let firstStash: HTMLElement | null = null;
+  const stashes: HTMLElement[] = [];
   for (const n of nodes) {
     const stash = document.createElement('span');
     stash.className = HIDE;
     stash.setAttribute(STASH_TEXT, 'true');
-    stash.textContent = n.nodeValue ?? '';
     n.parentNode?.insertBefore(stash, n);
+    stash.appendChild(n);
+    stashes.push(stash);
     firstStash ??= stash;
-    n.remove();
   }
 
   const visible = document.createElement('span');
@@ -64,6 +79,9 @@ function stashAndReplaceText(nodes: Text[], translation: string, opts?: RenderOp
 
   visible.setAttribute(DONE, 'true');
   visible.setAttribute(MODE, 'replace');
+  const replacement = { host, visible, stashes };
+  textReplacements.set(host, replacement);
+  textReplacementNodes.set(visible, replacement);
   return visible;
 }
 
@@ -105,6 +123,19 @@ function restoreLanguageAttrs(el: HTMLElement): void {
 }
 
 function restoreTextReplace(visible: Element): void {
+  const replacement = textReplacementNodes.get(visible);
+  if (replacement) {
+    for (const stash of replacement.stashes) {
+      const parent = stash.parentNode;
+      if (!parent) continue; // The page replaced this source subtree entirely.
+      while (stash.firstChild) parent.insertBefore(stash.firstChild, stash);
+      stash.remove();
+    }
+    visible.remove();
+    textReplacements.delete(replacement.host);
+    textReplacementNodes.delete(visible);
+    return;
+  }
   // Reverse every stash owned by this replacement (one per source text node).
   const parent = visible.parentElement;
   if (!parent) return;
@@ -117,19 +148,31 @@ function restoreTextReplace(visible: Element): void {
 }
 
 function restoreReplaceOn(el: HTMLElement): void {
-  findNode(el)?.remove();
+  restoreMovedRichNodes([el]);
+  const companion = findNode(el);
+  if (companion) removeCompanion(companion);
 
   const allStash = el.querySelector(`:scope > .${HIDE}[${STASH_ALL}]`);
   if (allStash) {
     // Rich replace stashes originals, then appends a filled skeleton as siblings
     // (no dual-read-target wrapper). Drop those translation siblings before
     // unpacking the stash — otherwise restore leaves original+translation.
-    for (const child of Array.from(el.childNodes)) {
-      if (child !== allStash) child.parentNode?.removeChild(child);
+    const translated = richReplacementNodes.get(el);
+    if (translated) {
+      restoreRichReplacement(el, allStash, translated);
+    } else if (el.hasAttribute(STASH_LANGUAGE_ATTRS)) {
+      // Legacy rich replacements can survive an extension reload without our
+      // node map. Plain replacements have only a companion, removed above;
+      // their other siblings are page content and must survive restoration.
+      for (const child of Array.from(el.childNodes)) {
+        if (child !== allStash) el.removeChild(child);
+      }
     }
     while (allStash.firstChild) el.insertBefore(allStash.firstChild, allStash);
     allStash.remove();
   }
+  richReplacementNodes.delete(el);
+  forgetRichReplacement(el);
 
   el.querySelectorAll(`:scope .${HIDE}[${STASH_TEXT}]`).forEach((stash) => {
     const visible = stash.nextElementSibling;
@@ -205,8 +248,8 @@ function markListContentBox(host: HTMLElement): void {
 }
 
 /** Remove nodes wrongly inserted between caption|a and ul|ol (breaks doc-theme CSS). */
-export function repairStructure(): void {
-  for (const host of Array.from(document.querySelectorAll('p.caption, p[role="heading"], li'))) {
+export function repairStructure(root: ParentNode = document): void {
+  for (const host of Array.from(root.querySelectorAll('p.caption, p[role="heading"], li'))) {
     const anchor = host.matches('li') ? host.querySelector(':scope > a[href]') : host;
     if (!anchor) continue;
     let s = anchor.nextElementSibling;
@@ -214,14 +257,14 @@ export function repairStructure(): void {
       if (isOursCompanion(s)) {
         const r = s;
         s = s.nextElementSibling;
-        r.remove();
+        removeCompanion(r);
       } else break;
     }
   }
 
   // Reparent legacy afterend companions back into the preceding list item so
   // translations inherit list indentation (aligned newline under the text).
-  for (const host of Array.from(document.querySelectorAll(LIST_HOST))) {
+  for (const host of Array.from(root.querySelectorAll(LIST_HOST))) {
     const next = host.nextElementSibling;
     if (!next || !isOursCompanion(next)) continue;
     host.appendChild(next);
@@ -229,15 +272,39 @@ export function repairStructure(): void {
   }
 }
 
+function rememberCompanion(host: Element, node: Element): Element {
+  companions.set(host, node);
+  companionHosts.set(node, host);
+  return node;
+}
+
+function removeCompanion(node: Element): void {
+  const host = companionHosts.get(node);
+  if (host && companions.get(host) === node) companions.delete(host);
+  companionHosts.delete(node);
+  node.remove();
+}
+
+function ownsCompanion(host: Element, node: Element): boolean {
+  const owner = companionHosts.get(node);
+  if (owner) return owner === host;
+  // Legacy companions have no in-memory owner. A nested translated host is
+  // still an ownership boundary, including across extension reinjection.
+  const nestedHost = node.parentElement?.closest(`[${DONE}], [${MODE}]`);
+  return !nestedHost || nestedHost === host || !host.contains(nestedHost);
+}
+
 function findNode(el: Element): Element | null {
+  const owned = companions.get(el);
+  if (owned?.parentNode && (el.contains(owned) || el.nextElementSibling === owned)) return owned;
   // Prefer a companion nested inside the host (current Immersive-aligned mount).
-  const nested = el.querySelector(
+  const nested = Array.from(el.querySelectorAll(
     `:scope > .${CLS_BLOCK}, :scope > .${CLS_ERR}, :scope .${P_NAV_SUB}, :scope .${P_INLINE}, :scope .${P_COMPACT}, :scope .${P_INNER}`,
-  );
-  if (nested) return nested;
+  )).find((node) => ownsCompanion(el, node));
+  if (nested) return rememberCompanion(el, nested);
   // Outside-mounted companions (painted CTAs) and legacy block afterend siblings.
   const next = el.nextElementSibling;
-  if (next && isOursCompanion(next)) return next;
+  if (next && isOursCompanion(next) && ownsCompanion(el, next)) return rememberCompanion(el, next);
   return null;
 }
 
@@ -246,7 +313,7 @@ function mountInlineTranslation(el: HTMLElement, kind: UnitKind): HTMLElement {
   let node = findNode(el) as HTMLElement | null;
   if (node?.classList.contains(CLS_ERR)) {
     // A stale error badge must not share the host with a fresh translation.
-    node.remove();
+    removeCompanion(node);
     node = null;
   }
   if (node) {
@@ -256,6 +323,7 @@ function mountInlineTranslation(el: HTMLElement, kind: UnitKind): HTMLElement {
   }
 
   node = document.createElement('span');
+  rememberCompanion(el, node);
   node.className = cls;
   node.setAttribute('dir', 'auto');
   placeInlineCompanion(el, node);
@@ -305,7 +373,7 @@ function mount(el: HTMLElement, kind: UnitKind): HTMLElement {
   let node = findNode(el) as HTMLElement | null;
   if (node?.classList.contains(CLS_ERR)) {
     // A stale error badge must not share the host with a fresh translation.
-    node.remove();
+    removeCompanion(node);
     node = null;
   }
   if (node) {
@@ -322,6 +390,7 @@ function mount(el: HTMLElement, kind: UnitKind): HTMLElement {
 
   // Always use <span>: valid phrasing content inside <p>/<h*>, display via CSS.
   node = document.createElement('span');
+  rememberCompanion(el, node);
   node.className = cls;
   node.setAttribute('dir', 'auto');
 
@@ -459,7 +528,8 @@ function renderRich(
 ): boolean {
   const { el, kind } = unit;
 
-  const skeleton = buildSafeRichSkeleton(el);
+  const originals = mode === 'replace' ? new Map<Node, Node>() : undefined;
+  const skeleton = buildSafeRichSkeleton(el, originals);
   stripOursFromTree(skeleton);
   if (collectSlotTextNodes(skeleton).length !== slots.length) return false;
   fillTextSlots(skeleton, slots);
@@ -468,6 +538,7 @@ function renderRich(
     // Stash original children so restoreDom can undo; show filled skeleton in place.
     stashLanguageAttrs(el);
     hideAllChildren(el);
+    richReplacementNodes.set(el, captureRichReplacement(skeleton, originals!, el));
     while (skeleton.firstChild) el.appendChild(skeleton.firstChild);
     el.setAttribute(DONE, 'true');
     el.setAttribute(MODE, 'replace');
@@ -630,6 +701,7 @@ function renderCore(
   onBlock: (host: HTMLElement, node: HTMLElement) => void,
 ): void {
   const { el, kind } = unit;
+  ensureTranslationStyles(el.getRootNode());
 
   if (isEffectivelyUnchanged(unit, payload)) {
     // Mark the unit as processed so a new session does not collect it again.
@@ -658,12 +730,12 @@ function renderCore(
 
   if (mode === 'replace') {
     if (unit.segment && unit.nodes?.length) {
-      stashAndReplaceText(unit.nodes, text, opts);
+      stashAndReplaceText(el, unit.nodes, text, opts);
       return;
     }
     if (kind === 'inner') {
       const nodes = collectVisibleTextNodes(el);
-      if (nodes.length) stashAndReplaceText(nodes, text, opts);
+      if (nodes.length) stashAndReplaceText(el, nodes, text, opts);
       else el.appendChild(document.createTextNode(text));
       el.setAttribute(DONE, 'true');
       el.setAttribute(MODE, 'replace');
@@ -828,7 +900,7 @@ export function clearNode(el: HTMLElement): void {
   const n = findNode(el);
   if (n) {
     clearBlockShell(n);
-    n.remove();
+    removeCompanion(n);
   }
   unwrapInlineFlows(el);
 }
@@ -845,11 +917,14 @@ export function restoreUnit(el: HTMLElement): void {
     return;
   }
 
+  const textReplacement = textReplacements.get(el);
+  if (textReplacement) restoreTextReplace(textReplacement.visible);
+
   const hadReplace = el.getAttribute(MODE) === 'replace';
   const n = findNode(el);
   if (n) {
     clearBlockShell(n);
-    n.remove();
+    removeCompanion(n);
   }
   unwrapInlineFlows(el);
   if (hadReplace) {
@@ -866,19 +941,32 @@ export function restoreUnit(el: HTMLElement): void {
 
 /** Full-page restore. Safe to call repeatedly. */
 export function restoreDom(): void {
-  repairStructure();
-  document.querySelectorAll<HTMLElement>(`[${DONE}]`).forEach((el) => {
+  const roots = [document, ...walkOpenShadowRoots(document)];
+  restoreMovedRichNodes(roots);
+  for (const root of roots) {
+    restoreRoot(root);
+    removeTranslationStyles(root);
+  }
+}
+
+/** Includes translated Web Components, which document selectors cannot reach. */
+export function hasTranslatedDom(): boolean {
+  return [document, ...walkOpenShadowRoots(document)].some((root) => Boolean(root.querySelector(`[${DONE}]`)));
+}
+
+function restoreRoot(root: ParentNode): void {
+  repairStructure(root);
+  root.querySelectorAll<HTMLElement>(`[${DONE}]`).forEach((el) => {
     restoreUnit(el);
   });
   // Second pass: replace-text chrome may not carry DONE on the host.
-  document.querySelectorAll<HTMLElement>(`.${CLS_REPLACE}`).forEach((el) => {
+  root.querySelectorAll<HTMLElement>(`.${CLS_REPLACE}`).forEach((el) => {
     restoreUnit(el);
   });
   // Error badges carry no DONE marker on their host — sweep them directly.
-  document.querySelectorAll(`.${CLS_ERR}`).forEach((n) => n.remove());
+  root.querySelectorAll(`.${CLS_ERR}`).forEach(removeCompanion);
   // Orphan list-outside marks (host already clean) — clear without a full restore.
-  document.querySelectorAll<HTMLElement>(`[${LIST_OUTSIDE}]`).forEach((el) => {
+  root.querySelectorAll<HTMLElement>(`[${LIST_OUTSIDE}]`).forEach((el) => {
     if (!el.hasAttribute(DONE)) el.removeAttribute(LIST_OUTSIDE);
   });
 }
-

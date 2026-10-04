@@ -33,23 +33,26 @@ const SAFE_GLOBAL_ATTRS = new Set(['lang', 'dir', 'title']);
 /**
  * Build a disconnected element whose children mirror `source`'s structure
  * with only safe tags/attributes. Slot text order matches the source.
+ * Replace mode optionally records copy → original pairs to preserve page edits.
  */
-export function buildSafeRichSkeleton(source: HTMLElement): HTMLElement {
+export function buildSafeRichSkeleton(source: HTMLElement, originals?: Map<Node, Node>): HTMLElement {
   const wrap = document.createElement('div');
   wrap.setAttribute('data-dual-read-rich-skel', 'true');
-  appendSafeChildren(source, wrap);
+  appendSafeChildren(source, wrap, originals);
   return wrap;
 }
 
-function appendSafeChildren(source: ParentNode, target: ParentNode): void {
+function appendSafeChildren(source: ParentNode, target: ParentNode, originals?: Map<Node, Node>): void {
   for (const child of Array.from(source.childNodes)) {
-    appendSafeNode(child, target);
+    appendSafeNode(child, target, originals);
   }
 }
 
-function appendSafeNode(node: Node, target: ParentNode): void {
+function appendSafeNode(node: Node, target: ParentNode, originals?: Map<Node, Node>): void {
   if (node.nodeType === Node.TEXT_NODE) {
-    target.appendChild(document.createTextNode(node.nodeValue ?? ''));
+    const copy = document.createTextNode(node.nodeValue ?? '');
+    originals?.set(copy, node);
+    target.appendChild(copy);
     return;
   }
   if (node.nodeType !== Node.ELEMENT_NODE) return;
@@ -67,13 +70,15 @@ function appendSafeNode(node: Node, target: ParentNode): void {
 
   const tag = el.tagName;
   if (UNWRAP_TAGS.has(tag)) {
-    appendSafeChildren(el, target);
+    appendSafeChildren(el, target, originals);
     return;
   }
   if (FORBIDDEN_TAGS.has(tag)) return;
 
   if (VOID_TAGS.has(tag)) {
-    target.appendChild(document.createElement(tag.toLowerCase()));
+    const copy = document.createElement(tag.toLowerCase());
+    originals?.set(copy, node);
+    target.appendChild(copy);
     return;
   }
 
@@ -83,12 +88,13 @@ function appendSafeNode(node: Node, target: ParentNode): void {
     neu = document.createElement(tag.includes('-') ? tag.toLowerCase() : tag.toLowerCase());
   } catch {
     // Unknown / invalid tag — unwrap children to keep text.
-    appendSafeChildren(el, target);
+    appendSafeChildren(el, target, originals);
     return;
   }
 
   copySafeAttributes(el, neu);
-  appendSafeChildren(el, neu);
+  originals?.set(neu, node);
+  appendSafeChildren(el, neu, originals);
   target.appendChild(neu);
 }
 

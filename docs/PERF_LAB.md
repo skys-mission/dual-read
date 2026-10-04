@@ -11,7 +11,19 @@ Chromium E2E + unit gates for Dual Read’s page-impact budgets.
 | CLS (article + dense) | `PerformanceObserver` `layout-shift` | ≤0.35 | ≤0.20 |
 | Mock first visible paint | translate start → first `.dual-read-target` | ≤900ms | ≤500ms |
 | 20k long task | `longtask` entries (`PERF_FULL`, page parse excluded) | ≤200ms | ≤100ms |
-| 30× SPA heap | `performance.memory` (`PERF_FULL`) | ≤25% growth | ≤15% |
+| 30× SPA heap | CDP heap usage after explicit GC (`PERF_FULL`) | ≤25% growth | ≤15% |
+| 30× rich replace SPA heap | Normalize/split + slot edits + transfers + attribute changes + navigation, after explicit GC (`PERF_FULL`) | ≤25% growth | ≤15% |
+
+The heap probe warms mutation/request/cache paths with five navigations before
+its baseline, then measures thirty additional navigations. Both samples use
+explicit GC and precise CDP heap usage so first-use compilation and transient
+allocations are not reported as retained DOM growth. Budgets remain unchanged.
+The rich replace probe also exercises shared document mutation history,
+edits after normalization, splitting at a retained slot boundary, and transfers
+normalized into untranslated containers across discarded replacement trees.
+It also changes a visible link's href before automatic reconciliation and checks
+the latest href and complete retained source after the final restoration. Shared
+history uses weak host/root references and disconnects when its owners are gone.
 
 STRICT ceilings are calibrated for the shared ubuntu-latest runners that
 nightly.yml uses (measured floor + headroom), not for dev machines: the 5k

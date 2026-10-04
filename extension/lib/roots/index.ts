@@ -7,6 +7,8 @@
  * - Cross-origin / opaque frames are reported honestly as unsupported barriers.
  */
 
+import { ensureTranslationStyles } from '../renderer/styles';
+
 export type WatchRoot = Document | ShadowRoot | Element;
 
 export interface FrameBarrier {
@@ -137,6 +139,7 @@ export class RootRegistry {
   /** Watch a root if not already watched. Returns true when newly added. */
   watch(root: WatchRoot): boolean {
     if (this.disposed || this.watchers.has(root)) return false;
+    ensureTranslationStyles(root);
     const mo = new MutationObserver((mutations) => {
       if (this.disposed) return;
       const newly = this.discoverFromMutations(mutations);

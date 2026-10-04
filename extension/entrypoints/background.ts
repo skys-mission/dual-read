@@ -2,7 +2,7 @@ import {
   getSettings, saveSettings, effectiveForHost, hostOf, upsertSiteRule,
 } from '../lib/settings/storage';
 import { createDefaultSettings } from '../lib/settings/schema';
-import { buildPublicSessionConfig } from '../lib/settings/session-config';
+import { buildPublicSessionConfig, settingsForBatch } from '../lib/settings/session-config';
 import {
   clearPendingSiteAuto, readPendingSiteAutos,
 } from '../lib/settings/pending-site-auto';
@@ -188,7 +188,7 @@ export default defineBackground(() => {
         controllers.set(raw.requestId, ac);
         trackBatchStart();
         try {
-          const settings = await getSettings();
+          const settings = await settingsForBatch(await getSettings(), raw);
           const translations = await translateGate.run(
             () => translateTexts(raw.texts, settings, ac.signal),
             ac.signal,
