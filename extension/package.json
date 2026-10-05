@@ -35,7 +35,7 @@
     "jsdom": "^25.0.1",
     "playwright-webextext": "^0.0.5",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.70.1",
+    "typescript-eslint": "^8.71.0",
     "vitest": "^2.1.5",
     "wxt": "^0.19.13"
   },
