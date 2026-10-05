@@ -208,6 +208,17 @@ p + .dual-read-target {
   margin-bottom: 0.2em;
 }
 
+/* Structured table cells give each language its own line. Constrain only our
+   companion; preserve the page's source truncation and column sizing. */
+td > .dual-read-target:not(.dual-read-target--inline):not(.dual-read-target--inner):not(.dual-read-nav-sub):not(.dual-read-target--compact),
+th > .dual-read-target:not(.dual-read-target--inline):not(.dual-read-target--inner):not(.dual-read-nav-sub):not(.dual-read-target--compact) {
+  min-width: 0;
+  margin: 0.3em 0 0.25em;
+  line-height: 1.45;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+}
+
 /* Block-layout card/title links: companion nests inside the <a> and must open
    a new line under the original (not a mid-line suffix). */
 a > .dual-read-target:not(.dual-read-target--inline):not(.dual-read-target--inner):not(.dual-read-nav-sub):not(.dual-read-target--compact) {

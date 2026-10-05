@@ -24,6 +24,9 @@ export function hasControlSemantics(el: Element): boolean {
  * than prose cards; ordinary display:flex/grid links still need semantic proof.
  */
 export function isCompactControlHost(el: Element): boolean {
+  // Labels nested inside a semantic control share its size and hit target.
+  // Their own display:block does not turn them into a prose block.
+  if (el.closest(CONTROL_ROLE)) return true;
   if (hasControlSemantics(el)) return true;
   if (!el.matches('a[href]')) return false;
   try {

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Generic page layout fixture</title>
+  <style>
+    body { font: 16px/1.5 system-ui; max-width: 760px; margin: 24px auto; padding: 0 16px; }
+    .tools { display: flex; gap: 12px; align-items: center; }
+    button { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; }
+    .label { display: block; }
+    .custom-assistive { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+    table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 24px 0; }
+    td { border: 1px solid #aaa; padding: 8px; }
+    tr { height: 36px; }
+    .source-clipping-box { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 20px; }
+    #media img { width: 80px; height: 40px; }
+  </style>
+</head>
+<body>
+  <div id="icon-tools" class="tools">
+    <a href="/issues" aria-label="Issues"><svg aria-hidden="true" width="16" height="16"><circle cx="8" cy="8" r="6"></circle></svg></a>
+    <span aria-hidden="true" popover>Private tooltip helper</span>
+    <a href="/reviews" aria-label="Reviews"><svg aria-hidden="true" width="16" height="16"><circle cx="8" cy="8" r="6"></circle></svg></a>
+    <span class="custom-assistive">Clipped helper label</span>
+  </div>
+  <div id="controls" class="tools">
+    <button id="save" type="button"><span aria-hidden="true">+</span><span class="label">Save changes</span></button>
+    <button id="close" type="button"><span class="label">Close panel</span></button>
+    <div id="custom-control" role="button" tabindex="0"><span class="label">Open panel</span></div>
+  </div>
+  <p id="ordinary">Read <a href="/guide">the guide</a><span style="display:none">Hidden prose helper</span> before proceeding.</p>
+  <table><tbody><tr id="change-row">
+    <td id="change-cell"><div class="source-clipping-box"><a href="/change">A readable change description with useful details</a></div></td>
+    <td id="status-cell">Ready</td>
+  </tr></tbody></table>
+  <p id="media"><img alt="Artwork" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='40'%3E%3Crect width='80' height='40' fill='%23aaf'/%3E%3C/svg%3E"><br><em id="caption">Image by <a href="/author">Original Author</a>, licensed under <a href="/license">Open License</a>.</em></p>
+  <div id="time-widget">Fallback calendar date</div>
+  <div id="slotted-widget"><span id="slotted-label">Visible assigned label</span></div>
+  <div id="hidden-widget" aria-hidden="true"></div>
+  <script>
+    document.getElementById('time-widget').attachShadow({ mode: 'open' }).innerHTML = '<span>Visible relative time</span>';
+    document.getElementById('slotted-widget').attachShadow({ mode: 'open' }).innerHTML = '<slot><span>Hidden slot fallback</span></slot>';
+    document.getElementById('hidden-widget').attachShadow({ mode: 'open' }).innerHTML = '<p>Hidden shadow prose</p>';
+  </script>
+</body>
+</html>

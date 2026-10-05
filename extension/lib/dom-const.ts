@@ -50,7 +50,7 @@ export const BLOCKS =
 export const INLINE_HOST =
   'p, h1, h2, h3, h4, h5, h6, li, blockquote, td, th, dd, dt, figcaption, caption, label, button, article, [role="heading"], [role="article"], [role="listitem"]';
 export const INTERACTIVE =
-  'a[href], button, label, summary, input:not([type="hidden"]), select, textarea, img, video, audio, iframe';
+  'a[href], button, label, summary, input:not([type="hidden"]), select, textarea, img, video, audio, iframe, [role="button"], [role="menuitem"], [role="tab"], [role="switch"], [role="option"]';
 
 // Elements whose text is never natural language / must not be touched.
 // v1.1: added KBD/VAR/SAMP/TIME so shortcut keys and machine tokens survive.

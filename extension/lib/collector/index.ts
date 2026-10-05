@@ -309,7 +309,9 @@ function isA11y(el: Element): boolean {
 
 /** Source-side slot pruning shared with the rich skeleton builder (renderer/rich). */
 export function isA11yHidden(el: Element): boolean {
-  return isA11y(el);
+  // Disconnected skeletons no longer carry the page's classes/styles. Evaluate
+  // CSS on connected source nodes, before the safe builder strips those attrs.
+  return isA11y(el) || (el.isConnected && !isVisible(el));
 }
 
 /** True when this element alone would hide itself (ancestors not considered). */
@@ -325,8 +327,8 @@ function isSelfStyleHidden(el: Element): boolean {
     const width = parseFloat(s.width);
     const height = parseFloat(s.height);
     const clippedAssistiveText =
-      s.position === 'absolute'
-      && s.overflow === 'hidden'
+      (s.position === 'absolute' || s.position === 'fixed')
+      && (s.overflow === 'hidden' || s.overflow === 'clip')
       && width <= 2
       && height <= 2
       && (
@@ -349,12 +351,25 @@ function isVisible(el: Element | null): boolean {
   const cached = collectCache?.visible.get(el);
   if (cached !== undefined) return cached;
 
-  for (let n: Element | null = el; n && n !== document.documentElement; n = n.parentElement) {
+  for (let n: Element | null = el; n && n !== document.documentElement;) {
     if (n.nodeType !== 1) break;
     if (isSelfStyleHidden(n)) {
       collectCache?.visible.set(el, false);
       return false;
     }
+    const parent: Element | null = n.parentElement;
+    // Light DOM without a matching slot is fallback data, not rendered text.
+    // Walk the composed ancestry so hidden hosts/slots also hide shadow prose.
+    if (parent?.shadowRoot && !(n as HTMLElement).assignedSlot) {
+      collectCache?.visible.set(el, false);
+      return false;
+    }
+    if (parent instanceof HTMLSlotElement && parent.assignedNodes().length) {
+      collectCache?.visible.set(el, false);
+      return false;
+    }
+    const root = n.getRootNode();
+    n = (n as HTMLElement).assignedSlot || parent || (root instanceof ShadowRoot ? root.host : null);
   }
   const d = el.closest('details') as HTMLDetailsElement | null;
   if (d && !d.open && !el.closest('summary')) {
@@ -363,6 +378,14 @@ function isVisible(el: Element | null): boolean {
   }
   collectCache?.visible.set(el, true);
   return true;
+}
+
+/** A shadow host's unassigned direct text is not part of its rendered tree. */
+export function isRenderedTextNode(node: Text): boolean {
+  if (!node.isConnected) return true;
+  const parent = node.parentElement;
+  if (parent instanceof HTMLSlotElement && parent.assignedNodes().length) return false;
+  return !parent?.shadowRoot || node.assignedSlot !== null;
 }
 
 function inViewport(el: Element | null): boolean {
@@ -394,7 +417,7 @@ function underDone(el: Element | null): boolean {
 function leafTextContent(el: Element): string {
   let raw = '';
   for (let n = el.firstChild; n; n = n.nextSibling) {
-    if (n.nodeType === 3) raw += (n as Text).nodeValue ?? '';
+    if (n.nodeType === 3 && isRenderedTextNode(n as Text)) raw += (n as Text).nodeValue ?? '';
   }
   return raw.replace(/\s+/g, ' ').trim();
 }
@@ -413,6 +436,7 @@ function extractText(el: Element, nav = false): string {
     acceptNode(n) {
       const p = (n as Text).parentElement;
       if (!p || !el.contains(p) || NO_TEXT.has(p.tagName)) return NodeFilter.FILTER_REJECT;
+      if (!isRenderedTextNode(n as Text)) return NodeFilter.FILTER_REJECT;
       // DONE hosts keep their original text nodes; rejecting them stops a parent
       // (e.g. <li>) from being re-collected after a child <a> was translated.
       if (underDone(p) || p.closest(OURS_SEL) || p.closest(EDITABLE)) return NodeFilter.FILTER_REJECT;
@@ -517,7 +541,11 @@ function hasInteractiveDescendant(el: Element, nav = false): boolean {
     // A DONE interactive still owns its text — treat it as covering the host so
     // parents are not re-collected after the child was translated.
     if (c.hasAttribute(DONE) || underDone(c)) return true;
-    if (skip(c, nav) || c.closest(OURS_SEL)) continue;
+    if (c.closest(OURS_SEL)) continue;
+    // Buttons/inputs are excluded as translation hosts, but still own their
+    // nested labels. A parent must not combine several controls into one unit.
+    if (NO_TEXT.has(c.tagName)) return true;
+    if (skip(c, nav)) continue;
     return true;
   }
   return false;
@@ -537,7 +565,7 @@ export function collectVisibleTextNodes(root: Element, nav = false): Text[] {
     if (!vis(root)) return [];
     const nodes: Text[] = [];
     for (let n = root.firstChild; n; n = n.nextSibling) {
-      if (n.nodeType === 3 && (n as Text).nodeValue?.trim()) nodes.push(n as Text);
+      if (n.nodeType === 3 && isRenderedTextNode(n as Text) && (n as Text).nodeValue?.trim()) nodes.push(n as Text);
     }
     return nodes;
   }
@@ -546,6 +574,7 @@ export function collectVisibleTextNodes(root: Element, nav = false): Text[] {
     acceptNode(n) {
       const p = (n as Text).parentElement;
       if (!p || !root.contains(p) || NO_TEXT.has(p.tagName)) return NodeFilter.FILTER_REJECT;
+      if (!isRenderedTextNode(n as Text)) return NodeFilter.FILTER_REJECT;
       if (underDone(p) || p.closest(OURS_SEL) || p.closest(EDITABLE)) return NodeFilter.FILTER_REJECT;
       if (!vis(p) || !(n as Text).nodeValue?.trim()) return NodeFilter.FILTER_REJECT;
       return NodeFilter.FILTER_ACCEPT;
@@ -566,8 +595,9 @@ export function collectSlotTextNodes(root: Element): Text[] {
     acceptNode(n) {
       const p = (n as Text).parentElement;
       if (!p || !root.contains(p) || NO_TEXT.has(p.tagName)) return NodeFilter.FILTER_REJECT;
+      if (!isRenderedTextNode(n as Text)) return NodeFilter.FILTER_REJECT;
       if (p.closest(OURS_SEL) || p.closest(EDITABLE)) return NodeFilter.FILTER_REJECT;
-      if (isA11y(p)) return NodeFilter.FILTER_REJECT;
+      if (isA11yHidden(p)) return NodeFilter.FILTER_REJECT;
       if (!(n as Text).nodeValue?.trim()) return NodeFilter.FILTER_REJECT;
       return NodeFilter.FILTER_ACCEPT;
     },
@@ -605,6 +635,7 @@ function collectTextSegments(root: Element, nav = false): Segment[] {
     acceptNode(n) {
       const p = (n as Text).parentElement;
       if (!p || !root.contains(p) || NO_TEXT.has(p.tagName)) return NodeFilter.FILTER_REJECT;
+      if (!isRenderedTextNode(n as Text)) return NodeFilter.FILTER_REJECT;
       if (p.closest(INTERACTIVE)) return NodeFilter.FILTER_REJECT;
       if (underDone(p) || p.closest(OURS_SEL) || p.closest(EDITABLE)) return NodeFilter.FILTER_REJECT;
       if (!vis(p) || !(n as Text).nodeValue?.trim()) return NodeFilter.FILTER_REJECT;
@@ -651,7 +682,7 @@ function collectTextSegments(root: Element, nav = false): Segment[] {
 const RICH_MARKUP =
   'a[href], code, kbd, var, samp, strong, b, em, i, mark, sup, sub, abbr, cite, q';
 const RICH_BLOCKING =
-  'button, label, summary, input, select, textarea, img, video, audio, iframe';
+  'button, label, summary, input, select, textarea, img, video, audio, iframe, [role="button"], [role="menuitem"], [role="tab"], [role="switch"], [role="option"]';
 
 function hasRichMarkup(el: Element): boolean {
   return !!el.querySelector(RICH_MARKUP);
@@ -671,6 +702,7 @@ function tryCollectRichUnit(
   seen: Set<Node>,
   units: TranslationUnit[],
   nav = false,
+  kindOverride?: UnitKind,
 ): boolean {
   if (nav || inNav(host)) return false;
   if (hasRichBlocking(host) || !hasRichMarkup(host)) return false;
@@ -692,7 +724,7 @@ function tryCollectRichUnit(
   units.push({
     el: host as HTMLElement,
     text,
-    kind: classifyKind(host, text),
+    kind: kindOverride ?? classifyKind(host, text),
     rich: { slots },
   });
   return true;
@@ -706,6 +738,10 @@ function collectMixedContentUnits(
 ): void {
   for (const seg of collectTextSegments(host, nav)) {
     if (seen.has(seg.key)) continue;
+    // A media/control sibling can disqualify the outer block while a nested
+    // caption remains ordinary rich prose. Keep that caption and its links
+    // together rather than merging only its non-link text runs.
+    if (seg.anchor !== host && tryCollectRichUnit(seg.anchor, seen, units, nav, 'block')) continue;
     for (const n of seg.nodes) seen.add(n);
     // Immersive-style: mount as an inline suffix inside the text host.
     // `segment` still steers replace-mode to stashAndReplaceText; bilingual
@@ -763,9 +799,16 @@ function classifyKind(el: Element, text: string): UnitKind {
   // returned 'nav' above.
   if (el.matches('li, [role="listitem"]')) return 'block';
 
-  // Definition descriptions are prose; short terms/cells/captions stay compact.
+  // Descriptions and captions are prose; short terms/data cells stay compact.
   if (el.matches('dd')) return 'block';
-  if (el.matches('dt, th, td, figcaption, caption') && len <= INLINE_MAX) return 'inline';
+  if (el.matches('figcaption, caption')) return 'block';
+  // Structured cells already put their source in a block (often clipped or
+  // ellipsized). Give the companion its own row inside the cell, outside that
+  // source-only clipping box. Plain short data/header cells stay inline.
+  if (el.matches('td, th') && Array.from(el.children).some(child => isBlockLikeLayout(child))) {
+    return 'block';
+  }
+  if (el.matches('dt, th, td') && len <= INLINE_MAX) return 'inline';
 
   // Block-layout hosts (including short card titles) prefer an aligned newline.
   if (isBlockLikeLayout(el) && !el.matches('dt, th, td, figcaption, caption')) {

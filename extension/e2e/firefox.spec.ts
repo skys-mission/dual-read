@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { startMockServer } from './helpers/mock-server';
+import { pageLayoutCases, setupPageLayoutRegression, verifyPageLayoutRegression } from './helpers/page-layout-regressions';
 import { startRealProxy } from './helpers/real-proxy';
 import { sourceRegressions, setupSourceRegression, verifySourceRegression } from './helpers/source-regressions';
 import { normalizeRegressions, setupNormalizeRegression, verifyNormalizeRegression } from './helpers/normalize-regressions';
@@ -23,6 +24,26 @@ import {
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIREFOX_EXT = path.resolve(dirname, '../output/firefox-mv3');
+
+for (const scenario of pageLayoutCases) {
+  test(scenario.name, async () => {
+    const mock = await startMockServer();
+    const fx = await launchFirefoxGeckoContext();
+    try {
+      const page = await fx.context.newPage();
+      await page.goto(mock.fixtureUrl('lab-page-layout.html'));
+      await setupPageLayoutRegression(page);
+      await installFirefoxDualRead(page);
+      await page.evaluate(() => {
+        document.addEventListener('page-layout-test:restore', () => globalThis.__DUAL_READ__?.restore());
+      });
+      await verifyPageLayoutRegression(page, scenario, {
+        translate: mode => firefoxTranslatePage(page, mode),
+        restore: () => firefoxRestore(page), pause: () => firefoxStopWatch(page),
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
 
 /**
  * Firefox E2E:

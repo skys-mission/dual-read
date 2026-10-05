@@ -1,9 +1,11 @@
 import { extTest as test, expectExt as expect } from './helpers/ext-fixture';
 import { startMockServer } from './helpers/mock-server';
+import { pageLayoutCases, setupPageLayoutRegression, verifyPageLayoutRegression } from './helpers/page-layout-regressions';
 import {
   seedSettings,
   getTabId,
   translateTab,
+  restoreTab,
   stopWatchTab,
   getTabStatus,
   inspectTranslation,
@@ -11,6 +13,29 @@ import {
 
 // Lab matrix: open Shadow DOM, same/cross-origin frames, SPA mutation,
 // and XSS-safe text rendering — all on loopback fixtures (no live sites).
+
+for (const scenario of pageLayoutCases) {
+  test(scenario.name, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer();
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage();
+      await page.goto(mock.fixtureUrl('lab-page-layout.html'));
+      await setupPageLayoutRegression(page);
+      const tabId = await getTabId(page, sw);
+      await translateTab(sw, tabId, scenario.mode);
+      await sw.evaluate(async id => {
+        await chrome.scripting.executeScript({ target: { tabId: id }, func: () => {
+          document.addEventListener('page-layout-test:restore', () => globalThis.__DUAL_READ__?.restore());
+        } });
+      }, tabId);
+      await verifyPageLayoutRegression(page, scenario, {
+        translate: mode => translateTab(sw, tabId, mode),
+        restore: () => restoreTab(sw, tabId), pause: () => stopWatchTab(sw, tabId),
+      });
+    } finally { await mock.close(); }
+  });
+}
 
 test.describe('DOM lab fixtures', () => {
   test('open shadow root content is translated', async ({ extContext, extensionId, sw }) => {

@@ -7,7 +7,7 @@
  * `extractRichSlots` / `fillTextSlots`.
  */
 
-import { isA11yHidden, isOursElement } from '../collector';
+import { isA11yHidden, isOursElement, isRenderedTextNode } from '../collector';
 import { EDITABLE, OURS_SEL } from '../dom-const';
 
 /** Tags that may appear in a rich companion (plus structural wrappers). */
@@ -50,6 +50,7 @@ function appendSafeChildren(source: ParentNode, target: ParentNode, originals?: 
 
 function appendSafeNode(node: Node, target: ParentNode, originals?: Map<Node, Node>): void {
   if (node.nodeType === Node.TEXT_NODE) {
+    if (!isRenderedTextNode(node as Text)) return;
     const copy = document.createTextNode(node.nodeValue ?? '');
     originals?.set(copy, node);
     target.appendChild(copy);
