@@ -1,6 +1,7 @@
 import { extTest as test, expectExt as expect } from './helpers/ext-fixture';
 import { startMockServer } from './helpers/mock-server';
 import { pageLayoutCases, setupPageLayoutRegression, verifyPageLayoutRegression } from './helpers/page-layout-regressions';
+import { feedLayoutCases, setupFeedLayoutRegression, translateFeedText, verifyFeedLayoutRegression } from './helpers/feed-layout-regressions';
 import {
   seedSettings,
   getTabId,
@@ -30,6 +31,30 @@ for (const scenario of pageLayoutCases) {
         } });
       }, tabId);
       await verifyPageLayoutRegression(page, scenario, {
+        translate: mode => translateTab(sw, tabId, mode),
+        restore: () => restoreTab(sw, tabId), pause: () => stopWatchTab(sw, tabId),
+      });
+    } finally { await mock.close(); }
+  });
+}
+
+for (const scenario of feedLayoutCases) {
+  test(scenario.name, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer();
+    mock.setTranslator(translateFeedText);
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage();
+      await page.goto(mock.fixtureUrl('lab-feed-layout.html'));
+      await setupFeedLayoutRegression(page);
+      const tabId = await getTabId(page, sw);
+      await translateTab(sw, tabId, scenario.mode);
+      await sw.evaluate(async id => {
+        await chrome.scripting.executeScript({ target: { tabId: id }, func: () => {
+          document.addEventListener('feed-layout-test:restore', () => globalThis.__DUAL_READ__?.restore());
+        } });
+      }, tabId);
+      await verifyFeedLayoutRegression(page, scenario, {
         translate: mode => translateTab(sw, tabId, mode),
         restore: () => restoreTab(sw, tabId), pause: () => stopWatchTab(sw, tabId),
       });

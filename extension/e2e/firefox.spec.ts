@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { startMockServer } from './helpers/mock-server';
 import { pageLayoutCases, setupPageLayoutRegression, verifyPageLayoutRegression } from './helpers/page-layout-regressions';
+import { feedLayoutCases, setupFeedLayoutRegression, translateFeedText, verifyFeedLayoutRegression } from './helpers/feed-layout-regressions';
 import { startRealProxy } from './helpers/real-proxy';
 import { sourceRegressions, setupSourceRegression, verifySourceRegression } from './helpers/source-regressions';
 import { normalizeRegressions, setupNormalizeRegression, verifyNormalizeRegression } from './helpers/normalize-regressions';
@@ -38,6 +39,26 @@ for (const scenario of pageLayoutCases) {
         document.addEventListener('page-layout-test:restore', () => globalThis.__DUAL_READ__?.restore());
       });
       await verifyPageLayoutRegression(page, scenario, {
+        translate: mode => firefoxTranslatePage(page, mode),
+        restore: () => firefoxRestore(page), pause: () => firefoxStopWatch(page),
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
+
+for (const scenario of feedLayoutCases) {
+  test(scenario.name, async () => {
+    const mock = await startMockServer();
+    const fx = await launchFirefoxGeckoContext();
+    try {
+      const page = await fx.context.newPage();
+      await page.goto(mock.fixtureUrl('lab-feed-layout.html'));
+      await setupFeedLayoutRegression(page);
+      await installFirefoxDualRead(page, { translate: async texts => texts.map(translateFeedText) });
+      await page.evaluate(() => {
+        document.addEventListener('feed-layout-test:restore', () => globalThis.__DUAL_READ__?.restore());
+      });
+      await verifyFeedLayoutRegression(page, scenario, {
         translate: mode => firefoxTranslatePage(page, mode),
         restore: () => firefoxRestore(page), pause: () => firefoxStopWatch(page),
       });

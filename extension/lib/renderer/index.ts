@@ -4,7 +4,7 @@ import {
   FLOW, HIDE, LIST_OUTSIDE, MODE, NOWRAP, OURS_SEL, OUTSIDE, P, SHELL, STASH_ALL,
   STASH_LANGUAGE_ATTRS, STASH_TEXT,
 } from '../dom-const';
-import { isCompactControlHost } from '../dom-role';
+import { shouldKeepControlOnOneLine } from '../dom-role';
 import { collectSlotTextNodes, collectVisibleTextNodes } from '../collector';
 import { buildSafeRichSkeleton } from './rich';
 import { captureRichReplacement, forgetRichReplacement, restoreMovedRichNodes, restoreRichReplacement, type RichReplacementNode } from './rich-replace';
@@ -296,7 +296,9 @@ function ownsCompanion(host: Element, node: Element): boolean {
 
 function findNode(el: Element): Element | null {
   const owned = companions.get(el);
-  if (owned?.parentNode && (el.contains(owned) || el.nextElementSibling === owned)) return owned;
+  // A clipped source's companion may live after an ancestor clipping box.
+  // Keep its explicit owner even when the page moves/removes that source.
+  if (owned?.parentNode && companionHosts.get(owned) === el) return owned;
   // Prefer a companion nested inside the host (current Immersive-aligned mount).
   const nested = Array.from(el.querySelectorAll(
     `:scope > .${CLS_BLOCK}, :scope > .${CLS_ERR}, :scope .${P_NAV_SUB}, :scope .${P_INLINE}, :scope .${P_COMPACT}, :scope .${P_INNER}`,
@@ -366,7 +368,7 @@ function placeInlineCompanion(el: HTMLElement, node: HTMLElement): void {
  * Nesting (not afterend) is required for prose layout safety: an afterend node
  * becomes an extra flex/grid item and collapses into a vertical strip of glyphs.
  */
-function mount(el: HTMLElement, kind: UnitKind): HTMLElement {
+function mount(el: HTMLElement, kind: UnitKind, avoidClipping = false): HTMLElement {
   if (kind === 'nav' || kind === 'inline') return mountInlineTranslation(el, kind);
 
   const cls = kind === 'inner' ? CLS_INNER : CLS_BLOCK;
@@ -381,9 +383,7 @@ function mount(el: HTMLElement, kind: UnitKind): HTMLElement {
     if (kind === 'inner') {
       placeInlineCompanion(el, node);
     } else if (kind === 'block') {
-      nestCompanionInHost(el, node);
-      markListContentBox(el);
-      markFlexBreak(el, node);
+      placeBlockCompanion(el, node, avoidClipping);
     }
     return node;
   }
@@ -404,11 +404,54 @@ function mount(el: HTMLElement, kind: UnitKind): HTMLElement {
     el.insertAdjacentElement('afterend', node);
   }
   if (kind === 'block') {
-    nestCompanionInHost(el, node);
-    markListContentBox(el);
-    markFlexBreak(el, node);
+    placeBlockCompanion(el, node, avoidClipping);
   }
   return node;
+}
+
+/** Leave source line clamps intact while giving bilingual prose a visible row. */
+function placeBlockCompanion(host: HTMLElement, node: HTMLElement, avoidClipping: boolean): void {
+  if (avoidClipping) {
+    let clippingBox: HTMLElement | null = null;
+    for (let box: HTMLElement | null = host; box?.parentElement; box = box.parentElement) {
+      // Keep translated text inside the source's original interactive hit area.
+      if (box.matches('a[href], button, [role="button"], [role="tab"], body')) break;
+      const style = getComputedStyle(box);
+      const clamp = parseInt(style.getPropertyValue('line-clamp'), 10)
+        || parseInt(style.getPropertyValue('-webkit-line-clamp'), 10);
+      if (clamp > 0) clippingBox = box;
+    }
+    // Nested excerpt clamps can otherwise hide a companion moved out of only
+    // the innermost box. Stay inside the original card/link ownership boundary.
+    const box = clippingBox;
+    if (box?.parentElement) {
+      const parentStyle = getComputedStyle(box.parentElement);
+      // A new sibling must have a block row, rather than a squeezed flex/grid
+      // track beside the source. Ordinary blocks and column flex cards allow it.
+      if (!parentStyle.display.includes('grid')
+        && (!parentStyle.display.includes('flex') || parentStyle.flexDirection.startsWith('column'))) {
+        let after: Element = box;
+        for (let next = after.nextElementSibling; next && next !== node; next = after.nextElementSibling) {
+          const owner = companionHosts.get(next);
+          if (!owner || !box.contains(owner)
+            || !(owner.compareDocumentPosition(host) & Node.DOCUMENT_POSITION_FOLLOWING)) break;
+          after = next;
+        }
+        if (after.nextElementSibling !== node) after.insertAdjacentElement('afterend', node);
+        // Relocated companions still share the source's text metrics, even when
+        // the card shell has a different font or whitespace policy.
+        const sourceStyle = getComputedStyle(host);
+        for (const property of ['font-family', 'font-size', 'font-weight', 'font-style', 'line-height', 'letter-spacing', 'text-align', 'white-space', 'text-wrap', 'word-break', 'overflow-wrap']) {
+          const value = sourceStyle.getPropertyValue(property);
+          if (value) node.style.setProperty(property, value);
+        }
+        return;
+      }
+    }
+  }
+  nestCompanionInHost(host, node);
+  markListContentBox(host);
+  markFlexBreak(host, node);
 }
 
 /**
@@ -546,7 +589,7 @@ function renderRich(
     return true;
   }
 
-  const node = mount(el, kind);
+  const node = mount(el, kind, true);
   node.replaceChildren();
 
   // Prefer moving children into the companion so block mounts stay a single
@@ -627,7 +670,7 @@ function unwrapInlineFlows(host: HTMLElement): void {
 function markNowrapHost(el: HTMLElement, kind: UnitKind): void {
   if (
     (kind === 'nav' || kind === 'inline' || kind === 'inner')
-    && isCompactControlHost(el)
+    && shouldKeepControlOnOneLine(el)
   ) {
     el.setAttribute(NOWRAP, 'true');
   } else {
@@ -750,7 +793,7 @@ function renderCore(
     return;
   }
 
-  const node = mount(el, kind);
+  const node = mount(el, kind, true);
   applyTranslationLang(node, opts);
   node.textContent = kind === 'nav' || kind === 'inline' || kind === 'inner' ? `\u200b\u00a0${text}` : text;
   finalizeInlineCompanion(el, node, kind);
@@ -963,8 +1006,9 @@ function restoreRoot(root: ParentNode): void {
   root.querySelectorAll<HTMLElement>(`.${CLS_REPLACE}`).forEach((el) => {
     restoreUnit(el);
   });
-  // Error badges carry no DONE marker on their host — sweep them directly.
-  root.querySelectorAll(`.${CLS_ERR}`).forEach(removeCompanion);
+  // Detached sources can leave an outside-clamp companion in the live card.
+  // Error badges also carry no DONE marker on their host.
+  root.querySelectorAll(`.${CLS_BLOCK}, .${CLS_ERR}`).forEach(removeCompanion);
   // Orphan list-outside marks (host already clean) — clear without a full restore.
   root.querySelectorAll<HTMLElement>(`[${LIST_OUTSIDE}]`).forEach((el) => {
     if (!el.hasAttribute(DONE)) el.removeAttribute(LIST_OUTSIDE);

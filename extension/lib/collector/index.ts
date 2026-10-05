@@ -419,6 +419,17 @@ function leafTextContent(el: Element): string {
   for (let n = el.firstChild; n; n = n.nextSibling) {
     if (n.nodeType === 3 && isRenderedTextNode(n as Text)) raw += (n as Text).nodeValue ?? '';
   }
+  return normalizeRenderedText(el, raw);
+}
+
+/** Keep paragraph breaks when CSS makes source newlines visible. */
+function normalizeRenderedText(el: Element, raw: string): string {
+  if (/[\r\n]/.test(raw)) {
+    const whiteSpace = getComputedStyle(el).whiteSpace;
+    if (/^(pre|pre-wrap|pre-line|break-spaces)$/.test(whiteSpace)) {
+      return raw.replace(/\r\n?/g, '\n').replace(/[^\S\n]+/g, ' ').trim();
+    }
+  }
   return raw.replace(/\s+/g, ' ').trim();
 }
 
@@ -445,7 +456,7 @@ function extractText(el: Element, nav = false): string {
     },
   });
   for (let n = w.nextNode(); n; n = w.nextNode()) out.push((n as Text).nodeValue ?? '');
-  return out.join('').replace(/\s+/g, ' ').trim();
+  return normalizeRenderedText(el, out.join(''));
 }
 
 function skip(el: Element | null, nav = false): boolean {
@@ -608,7 +619,7 @@ export function collectSlotTextNodes(root: Element): Text[] {
 
 /** Text-node slots under a host, in document order (NO_TEXT parents skipped). */
 export function extractRichSlots(el: Element): string[] {
-  return collectSlotTextNodes(el).map((n) => (n.nodeValue ?? '').replace(/\s+/g, ' ').trim()).filter(Boolean);
+  return collectSlotTextNodes(el).map(n => normalizeRenderedText(n.parentElement || el, n.nodeValue ?? '')).filter(Boolean);
 }
 
 // Text-node level dedup: an element overlaps an existing unit when ANY of the
@@ -671,7 +682,7 @@ function collectTextSegments(root: Element, nav = false): Segment[] {
   }
 
   return Array.from(byAnchor.values())
-    .map((s) => ({ anchor: s.anchor, nodes: s.nodes, text: s.text.replace(/\s+/g, ' ').trim(), key: s.nodes[0] as Text }))
+    .map((s) => ({ anchor: s.anchor, nodes: s.nodes, text: normalizeRenderedText(s.anchor, s.text), key: s.nodes[0] as Text }))
     .filter((s) => okText(s.text));
 }
 
