@@ -1,0 +1,3315 @@
+{
+  "date": "2026-10-06",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "beforeBuildHash": "489fa39d3625e9d5cf35f13dd403c20b13af16a673cc52388ce9226994e15ddb",
+  "afterBuildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+  "afterStyleHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+  "pages": 10,
+  "sites": 9,
+  "restorationPasses": 20,
+  "codeBlocks": 136,
+  "retainedCodeNodes": 4182,
+  "checks": {
+    "compile": true,
+    "lint": true,
+    "unitTests": 1241,
+    "targetedBrowserTests": 4,
+    "browserFunctional": 208,
+    "performance": 5,
+    "performanceSkipped": 3
+  },
+  "scope": "10 selected public pages, original/bilingual first viewport, PageDown, replace first viewport, open Shadow DOM and restoration in both modes. This is a follow-up sample, separate from the preceding 70-page audit.",
+  "pagesDetail": [
+    {
+      "id": "popular-2-2",
+      "category": "popular",
+      "site": "GitHub",
+      "page": 2,
+      "url": "https://github.com/golang/go",
+      "assessment": "普通仓库正文、提交说明和 README 图文仍按原有通用布局呈现。",
+      "before": {
+        "buildHash": "489fa39d3625e9d5cf35f13dd403c20b13af16a673cc52388ce9226994e15ddb",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "statusTop": {
+          "translating": false,
+          "count": 111,
+          "failed": 0,
+          "total": 113,
+          "watching": true,
+          "sessionId": "iab-eae3467f-fe75-4182-93eb-b05f07f8f629",
+          "revision": 1,
+          "shadowRoots": 21,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 83.69999992847443,
+            "lastMutationIndexMs": 0.19999998807907104
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 113,
+          "failed": 0,
+          "total": 113,
+          "watching": true,
+          "sessionId": "iab-eae3467f-fe75-4182-93eb-b05f07f8f629",
+          "revision": 1,
+          "shadowRoots": 21,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 83.69999992847443,
+            "lastMutationIndexMs": 0.19999998807907104
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 115,
+          "failed": 0,
+          "total": 115,
+          "watching": true,
+          "sessionId": "iab-eae3467f-fe75-4182-93eb-b05f07f8f629",
+          "revision": 1,
+          "shadowRoots": 21,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 73.59999996423721,
+            "lastMutationIndexMs": 26.600000023841858
+          }
+        },
+        "restore": {
+          "originalNodes": 764,
+          "retainedNodes": 764,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 764,
+          "retainedNodes": 764,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 78
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 80
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 46
+          }
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actualUrl": "https://github.com/golang/go",
+        "top": {
+          "documentOverflow": 0,
+          "clips": []
+        },
+        "scroll": {
+          "documentOverflow": 0,
+          "clips": []
+        }
+      },
+      "after": {
+        "buildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "statusTop": {
+          "translating": false,
+          "count": 111,
+          "failed": 0,
+          "total": 113,
+          "watching": true,
+          "sessionId": "iab-2258bacb-04af-4609-acb3-6906fa725b47",
+          "revision": 1,
+          "shadowRoots": 21,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 79.19999980926514,
+            "lastMutationIndexMs": 0.6000000238418579
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 113,
+          "failed": 0,
+          "total": 113,
+          "watching": true,
+          "sessionId": "iab-2258bacb-04af-4609-acb3-6906fa725b47",
+          "revision": 1,
+          "shadowRoots": 21,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 79.19999980926514,
+            "lastMutationIndexMs": 0.6000000238418579
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 114,
+          "failed": 0,
+          "total": 115,
+          "watching": true,
+          "sessionId": "iab-2258bacb-04af-4609-acb3-6906fa725b47",
+          "revision": 1,
+          "shadowRoots": 21,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 67.09999996423721,
+            "lastMutationIndexMs": 42.30000001192093
+          }
+        },
+        "restore": {
+          "originalNodes": 764,
+          "retainedNodes": 764,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 764,
+          "retainedNodes": 764,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 78
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 80
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 45
+          }
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actualUrl": "https://github.com/golang/go",
+        "top": {
+          "documentOverflow": 0,
+          "clips": []
+        },
+        "scroll": {
+          "documentOverflow": 0,
+          "clips": []
+        }
+      }
+    },
+    {
+      "id": "popular-7-2",
+      "category": "popular",
+      "site": "Apple",
+      "page": 2,
+      "url": "https://www.apple.com/mac/",
+      "assessment": "产品卡片标题、说明、价格和按钮保留上一轮的布局修复，未新增重叠。",
+      "before": {
+        "buildHash": "489fa39d3625e9d5cf35f13dd403c20b13af16a673cc52388ce9226994e15ddb",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "statusTop": {
+          "translating": false,
+          "count": 54,
+          "failed": 0,
+          "total": 162,
+          "watching": true,
+          "sessionId": "iab-afa91bd8-4f50-4b2a-9b10-aff5ff4a3e70",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 112.30000013113022,
+            "lastMutationIndexMs": 0.19999998807907104
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 69,
+          "failed": 0,
+          "total": 168,
+          "watching": true,
+          "sessionId": "iab-afa91bd8-4f50-4b2a-9b10-aff5ff4a3e70",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 112.30000013113022,
+            "lastMutationIndexMs": 0.20000004768371582
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 70,
+          "failed": 0,
+          "total": 168,
+          "watching": true,
+          "sessionId": "iab-afa91bd8-4f50-4b2a-9b10-aff5ff4a3e70",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 114.30000007152557,
+            "lastMutationIndexMs": 0.09999996423721313
+          }
+        },
+        "restore": {
+          "originalNodes": 1202,
+          "retainedNodes": 1201,
+          "removedByPage": 1,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 1202,
+          "retainedNodes": 1201,
+          "removedByPage": 1,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 45
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 59
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 44
+          }
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actualUrl": "https://www.apple.com/mac/",
+        "top": {
+          "documentOverflow": 0,
+          "clips": [
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ 配件",
+              "visible": 0,
+              "box": {
+                "x": 1608,
+                "y": 433,
+                "w": 32,
+                "h": 17
+              },
+              "ancestor": "ul.ChapterNav_chapternav-items__G0AR3.ChapterNav_chapternav-clip-right__TDI7L",
+              "ancestorBox": {
+                "x": 326,
+                "y": 355,
+                "w": 1268,
+                "h": 116
+              },
+              "overflow": "auto hidden",
+              "clamp": "none"
+            }
+          ]
+        },
+        "scroll": {
+          "documentOverflow": 0,
+          "clips": []
+        }
+      },
+      "after": {
+        "buildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "statusTop": {
+          "translating": false,
+          "count": 54,
+          "failed": 0,
+          "total": 162,
+          "watching": true,
+          "sessionId": "iab-0153239b-babb-490e-9394-3f2b13ac0279",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 107.99999994039536,
+            "lastMutationIndexMs": 0.2999999523162842
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 69,
+          "failed": 0,
+          "total": 168,
+          "watching": true,
+          "sessionId": "iab-0153239b-babb-490e-9394-3f2b13ac0279",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 107.99999994039536,
+            "lastMutationIndexMs": 18.899999976158142
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 70,
+          "failed": 0,
+          "total": 168,
+          "watching": true,
+          "sessionId": "iab-0153239b-babb-490e-9394-3f2b13ac0279",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 99.5,
+            "lastMutationIndexMs": 19.19999998807907
+          }
+        },
+        "restore": {
+          "originalNodes": 1202,
+          "retainedNodes": 1201,
+          "removedByPage": 1,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 1202,
+          "retainedNodes": 1201,
+          "removedByPage": 1,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 45
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 59
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 44
+          }
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actualUrl": "https://www.apple.com/mac/",
+        "top": {
+          "documentOverflow": 0,
+          "clips": [
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ 配件",
+              "visible": 0,
+              "box": {
+                "x": 1608,
+                "y": 433,
+                "w": 32,
+                "h": 17
+              },
+              "ancestor": "ul.ChapterNav_chapternav-items__G0AR3.ChapterNav_chapternav-clip-right__TDI7L",
+              "ancestorBox": {
+                "x": 326,
+                "y": 355,
+                "w": 1268,
+                "h": 116
+              },
+              "overflow": "auto hidden",
+              "clamp": "none"
+            }
+          ]
+        },
+        "scroll": {
+          "documentOverflow": 0,
+          "clips": []
+        }
+      }
+    },
+    {
+      "id": "commercial-6-2",
+      "category": "commercial",
+      "site": "Slack Developer",
+      "page": 2,
+      "url": "https://docs.slack.dev/quickstart/",
+      "assessment": "CLI 命令及其嵌套高亮节点保持原样，步骤说明继续翻译；网页本身隐藏的示例保留原可见性。",
+      "before": {
+        "buildHash": "489fa39d3625e9d5cf35f13dd403c20b13af16a673cc52388ce9226994e15ddb",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "statusTop": {
+          "translating": false,
+          "count": 66,
+          "failed": 0,
+          "total": 83,
+          "watching": true,
+          "sessionId": "iab-820eb7df-3cce-45f3-a5c9-3ffbeb987798",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 36.400000154972076,
+            "lastMutationIndexMs": 1
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 66,
+          "failed": 0,
+          "total": 83,
+          "watching": true,
+          "sessionId": "iab-820eb7df-3cce-45f3-a5c9-3ffbeb987798",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 36.400000154972076,
+            "lastMutationIndexMs": 0.30000001192092896
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 77,
+          "failed": 0,
+          "total": 83,
+          "watching": true,
+          "sessionId": "iab-820eb7df-3cce-45f3-a5c9-3ffbeb987798",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 35.70000010728836,
+            "lastMutationIndexMs": 11.299999952316284
+          }
+        },
+        "restore": {
+          "originalNodes": 439,
+          "retainedNodes": 439,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 439,
+          "retainedNodes": 439,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 121,
+            "retainedCodeNodes": 121,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 121,
+            "retainedCodeNodes": 121,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 57
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 121,
+            "retainedCodeNodes": 121,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 57
+          },
+          "replace-top": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 4,
+            "originalCodeNodes": 121,
+            "retainedCodeNodes": 121,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 49
+          }
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actualUrl": "https://docs.slack.dev/quickstart/",
+        "top": {
+          "documentOverflow": 0,
+          "clips": []
+        },
+        "scroll": {
+          "documentOverflow": 0,
+          "clips": []
+        }
+      },
+      "after": {
+        "buildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "statusTop": {
+          "translating": false,
+          "count": 63,
+          "failed": 0,
+          "total": 79,
+          "watching": true,
+          "sessionId": "iab-c3ff0f36-8000-4da2-8938-61dc079fdc4e",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 21.500000059604645,
+            "lastMutationIndexMs": 1.100000023841858
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 63,
+          "failed": 0,
+          "total": 79,
+          "watching": true,
+          "sessionId": "iab-c3ff0f36-8000-4da2-8938-61dc079fdc4e",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 21.500000059604645,
+            "lastMutationIndexMs": 0.5
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 73,
+          "failed": 0,
+          "total": 79,
+          "watching": true,
+          "sessionId": "iab-c3ff0f36-8000-4da2-8938-61dc079fdc4e",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 20.799999952316284,
+            "lastMutationIndexMs": 12.800000011920929
+          }
+        },
+        "restore": {
+          "originalNodes": 439,
+          "retainedNodes": 439,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 439,
+          "retainedNodes": 439,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 121,
+            "retainedCodeNodes": 121,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 121,
+            "retainedCodeNodes": 121,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 56
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 121,
+            "retainedCodeNodes": 121,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 56
+          },
+          "replace-top": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 121,
+            "retainedCodeNodes": 121,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 48
+          }
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actualUrl": "https://docs.slack.dev/quickstart/",
+        "top": {
+          "documentOverflow": 0,
+          "clips": []
+        },
+        "scroll": {
+          "documentOverflow": 0,
+          "clips": []
+        }
+      }
+    },
+    {
+      "id": "commercial-9-2",
+      "category": "commercial",
+      "site": "Cloudflare Docs",
+      "page": 2,
+      "url": "https://developers.cloudflare.com/workers/get-started/guide/",
+      "assessment": "Workers CLI 示例与机器命令保留，步骤、提示和段落继续翻译。",
+      "before": {
+        "buildHash": "489fa39d3625e9d5cf35f13dd403c20b13af16a673cc52388ce9226994e15ddb",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "statusTop": {
+          "translating": false,
+          "count": 91,
+          "failed": 0,
+          "total": 119,
+          "watching": true,
+          "sessionId": "iab-df9d7527-965f-4969-8e6b-355498ead2e5",
+          "revision": 1,
+          "shadowRoots": 1,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 136.90000009536743,
+            "lastMutationIndexMs": 2.300000011920929
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 96,
+          "failed": 0,
+          "total": 119,
+          "watching": true,
+          "sessionId": "iab-df9d7527-965f-4969-8e6b-355498ead2e5",
+          "revision": 1,
+          "shadowRoots": 1,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 136.90000009536743,
+            "lastMutationIndexMs": 2.300000011920929
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 93,
+          "failed": 0,
+          "total": 119,
+          "watching": true,
+          "sessionId": "iab-df9d7527-965f-4969-8e6b-355498ead2e5",
+          "revision": 1,
+          "shadowRoots": 1,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 130.69999986886978,
+            "lastMutationIndexMs": 19.399999976158142
+          }
+        },
+        "restore": {
+          "originalNodes": 1136,
+          "retainedNodes": 1136,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 1136,
+          "retainedNodes": 1136,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 12,
+            "liveCodeBlocks": 12,
+            "originalCodeNodes": 143,
+            "retainedCodeNodes": 143,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 12,
+            "liveCodeBlocks": 12,
+            "originalCodeNodes": 143,
+            "retainedCodeNodes": 143,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 76
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 12,
+            "liveCodeBlocks": 12,
+            "originalCodeNodes": 143,
+            "retainedCodeNodes": 143,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 78
+          },
+          "replace-top": {
+            "codeBlocks": 12,
+            "liveCodeBlocks": 12,
+            "originalCodeNodes": 143,
+            "retainedCodeNodes": 143,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 65
+          }
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actualUrl": "https://developers.cloudflare.com/workers/get-started/guide/",
+        "top": {
+          "documentOverflow": 0,
+          "clips": []
+        },
+        "scroll": {
+          "documentOverflow": 0,
+          "clips": []
+        }
+      },
+      "after": {
+        "buildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "statusTop": {
+          "translating": false,
+          "count": 84,
+          "failed": 0,
+          "total": 108,
+          "watching": true,
+          "sessionId": "iab-2470351d-2774-4894-bd56-12c6d7fdd3f9",
+          "revision": 1,
+          "shadowRoots": 1,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 113.29999995231628,
+            "lastMutationIndexMs": 2.300000011920929
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 87,
+          "failed": 0,
+          "total": 108,
+          "watching": true,
+          "sessionId": "iab-2470351d-2774-4894-bd56-12c6d7fdd3f9",
+          "revision": 1,
+          "shadowRoots": 1,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 113.29999995231628,
+            "lastMutationIndexMs": 2.300000011920929
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 93,
+          "failed": 0,
+          "total": 108,
+          "watching": true,
+          "sessionId": "iab-2470351d-2774-4894-bd56-12c6d7fdd3f9",
+          "revision": 1,
+          "shadowRoots": 1,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 112.59999996423721,
+            "lastMutationIndexMs": 46.60000002384186
+          }
+        },
+        "restore": {
+          "originalNodes": 1136,
+          "retainedNodes": 1136,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 1136,
+          "retainedNodes": 1136,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 12,
+            "liveCodeBlocks": 12,
+            "originalCodeNodes": 143,
+            "retainedCodeNodes": 143,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 12,
+            "liveCodeBlocks": 12,
+            "originalCodeNodes": 143,
+            "retainedCodeNodes": 143,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 76
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 12,
+            "liveCodeBlocks": 12,
+            "originalCodeNodes": 143,
+            "retainedCodeNodes": 143,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 78
+          },
+          "replace-top": {
+            "codeBlocks": 12,
+            "liveCodeBlocks": 12,
+            "originalCodeNodes": 143,
+            "retainedCodeNodes": 143,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 69
+          }
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actualUrl": "https://developers.cloudflare.com/workers/get-started/guide/",
+        "top": {
+          "documentOverflow": 0,
+          "clips": []
+        },
+        "scroll": {
+          "documentOverflow": 0,
+          "clips": []
+        }
+      }
+    },
+    {
+      "id": "open_source-1-1",
+      "category": "open_source",
+      "site": "React",
+      "page": 1,
+      "url": "https://react.dev/",
+      "assessment": "4 个整段代码容器退出翻译采集；示例恢复为单份代码，右侧演示及说明继续翻译。替换模式不再隐藏两个代码块。",
+      "before": {
+        "buildHash": "489fa39d3625e9d5cf35f13dd403c20b13af16a673cc52388ce9226994e15ddb",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "statusTop": {
+          "translating": false,
+          "count": 18,
+          "failed": 0,
+          "total": 124,
+          "watching": true,
+          "sessionId": "iab-e59a4909-7a75-413b-afe3-a56485a0964a",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 164.69999998807907,
+            "lastMutationIndexMs": 50.60000002384186
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 20,
+          "failed": 0,
+          "total": 124,
+          "watching": true,
+          "sessionId": "iab-e59a4909-7a75-413b-afe3-a56485a0964a",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 164.69999998807907,
+            "lastMutationIndexMs": 1.100000023841858
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 20,
+          "failed": 0,
+          "total": 124,
+          "watching": true,
+          "sessionId": "iab-e59a4909-7a75-413b-afe3-a56485a0964a",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 181.19999998807907,
+            "lastMutationIndexMs": 38.10000002384186
+          }
+        },
+        "restore": {
+          "originalNodes": 710,
+          "retainedNodes": 710,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 710,
+          "retainedNodes": 710,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 14
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 16
+          },
+          "replace-top": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 6,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 12
+          }
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actualUrl": "https://react.dev/",
+        "top": {
+          "documentOverflow": 0,
+          "clips": []
+        },
+        "scroll": {
+          "documentOverflow": 0,
+          "clips": []
+        }
+      },
+      "after": {
+        "buildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "statusTop": {
+          "translating": false,
+          "count": 16,
+          "failed": 0,
+          "total": 120,
+          "watching": true,
+          "sessionId": "iab-4db784aa-dfff-499c-b735-dadba0bfcdac",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 47.1000000834465,
+            "lastMutationIndexMs": 0.9000000357627869
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 19,
+          "failed": 0,
+          "total": 120,
+          "watching": true,
+          "sessionId": "iab-4db784aa-dfff-499c-b735-dadba0bfcdac",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 47.1000000834465,
+            "lastMutationIndexMs": 1.199999988079071
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 21,
+          "failed": 0,
+          "total": 120,
+          "watching": true,
+          "sessionId": "iab-4db784aa-dfff-499c-b735-dadba0bfcdac",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 40.30000001192093,
+            "lastMutationIndexMs": 6
+          }
+        },
+        "restore": {
+          "originalNodes": 710,
+          "retainedNodes": 710,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 710,
+          "retainedNodes": 710,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 12
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 15
+          },
+          "replace-top": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 15
+          }
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actualUrl": "https://react.dev/",
+        "top": {
+          "documentOverflow": 0,
+          "clips": []
+        },
+        "scroll": {
+          "documentOverflow": 0,
+          "clips": []
+        }
+      }
+    },
+    {
+      "id": "open_source-1-2",
+      "category": "open_source",
+      "site": "React",
+      "page": 2,
+      "url": "https://react.dev/learn",
+      "assessment": "嵌套代码、内联标识符与示例代码保留，章节正文和操作说明继续翻译。",
+      "before": {
+        "buildHash": "489fa39d3625e9d5cf35f13dd403c20b13af16a673cc52388ce9226994e15ddb",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "statusTop": {
+          "translating": false,
+          "count": 57,
+          "failed": 0,
+          "total": 314,
+          "watching": true,
+          "sessionId": "iab-1252b0bf-378b-49ec-ada4-a2cc0bbb007a",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 4,
+            "crossOrigin": 1,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 213.19999992847443,
+            "lastMutationIndexMs": 12.5
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 57,
+          "failed": 0,
+          "total": 314,
+          "watching": true,
+          "sessionId": "iab-1252b0bf-378b-49ec-ada4-a2cc0bbb007a",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 4,
+            "crossOrigin": 1,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 213.19999992847443,
+            "lastMutationIndexMs": 1.0999999642372131
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 58,
+          "failed": 0,
+          "total": 314,
+          "watching": true,
+          "sessionId": "iab-1252b0bf-378b-49ec-ada4-a2cc0bbb007a",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 4,
+            "crossOrigin": 1,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 220.20000004768372,
+            "lastMutationIndexMs": 15
+          }
+        },
+        "restore": {
+          "originalNodes": 1976,
+          "retainedNodes": 1976,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 1976,
+          "retainedNodes": 1976,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 24,
+            "liveCodeBlocks": 49,
+            "originalCodeNodes": 1393,
+            "retainedCodeNodes": 1393,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 24,
+            "liveCodeBlocks": 49,
+            "originalCodeNodes": 1393,
+            "retainedCodeNodes": 1393,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 54
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 24,
+            "liveCodeBlocks": 49,
+            "originalCodeNodes": 1393,
+            "retainedCodeNodes": 1393,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 54
+          },
+          "replace-top": {
+            "codeBlocks": 24,
+            "liveCodeBlocks": 47,
+            "originalCodeNodes": 1393,
+            "retainedCodeNodes": 1393,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 44
+          }
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actualUrl": "https://react.dev/learn",
+        "top": {
+          "documentOverflow": 0,
+          "clips": []
+        },
+        "scroll": {
+          "documentOverflow": 0,
+          "clips": []
+        }
+      },
+      "after": {
+        "buildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "statusTop": {
+          "translating": false,
+          "count": 55,
+          "failed": 0,
+          "total": 131,
+          "watching": true,
+          "sessionId": "iab-473c9df9-caa4-4066-9555-1589812bce98",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 4,
+            "crossOrigin": 1,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 44.699999928474426,
+            "lastMutationIndexMs": 0.9000000357627869
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 56,
+          "failed": 0,
+          "total": 131,
+          "watching": true,
+          "sessionId": "iab-473c9df9-caa4-4066-9555-1589812bce98",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 4,
+            "crossOrigin": 1,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 44.699999928474426,
+            "lastMutationIndexMs": 1.300000011920929
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 61,
+          "failed": 0,
+          "total": 131,
+          "watching": true,
+          "sessionId": "iab-473c9df9-caa4-4066-9555-1589812bce98",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 4,
+            "crossOrigin": 1,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 39.8999999165535,
+            "lastMutationIndexMs": 0.699999988079071
+          }
+        },
+        "restore": {
+          "originalNodes": 1976,
+          "retainedNodes": 1976,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 1976,
+          "retainedNodes": 1976,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 24,
+            "liveCodeBlocks": 49,
+            "originalCodeNodes": 1393,
+            "retainedCodeNodes": 1393,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 24,
+            "liveCodeBlocks": 49,
+            "originalCodeNodes": 1393,
+            "retainedCodeNodes": 1393,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 52
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 24,
+            "liveCodeBlocks": 49,
+            "originalCodeNodes": 1393,
+            "retainedCodeNodes": 1393,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 53
+          },
+          "replace-top": {
+            "codeBlocks": 24,
+            "liveCodeBlocks": 49,
+            "originalCodeNodes": 1393,
+            "retainedCodeNodes": 1393,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 45
+          }
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actualUrl": "https://react.dev/learn",
+        "top": {
+          "documentOverflow": 0,
+          "clips": []
+        },
+        "scroll": {
+          "documentOverflow": 0,
+          "clips": []
+        }
+      }
+    },
+    {
+      "id": "open_source-4-2",
+      "category": "open_source",
+      "site": "Svelte",
+      "page": 2,
+      "url": "https://svelte.dev/docs/svelte/overview",
+      "assessment": "基准在代码内插入的 5 个译文节点归零，代码字符串、注释与语法标记保留原样。",
+      "before": {
+        "buildHash": "489fa39d3625e9d5cf35f13dd403c20b13af16a673cc52388ce9226994e15ddb",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "statusTop": {
+          "translating": false,
+          "count": 76,
+          "failed": 0,
+          "total": 137,
+          "watching": true,
+          "sessionId": "iab-1dcac4ed-053c-4b0c-a570-07f9b08b79cc",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 18.900000035762787,
+            "lastMutationIndexMs": 1.5999999642372131
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 76,
+          "failed": 0,
+          "total": 137,
+          "watching": true,
+          "sessionId": "iab-1dcac4ed-053c-4b0c-a570-07f9b08b79cc",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 18.900000035762787,
+            "lastMutationIndexMs": 1
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 76,
+          "failed": 0,
+          "total": 137,
+          "watching": true,
+          "sessionId": "iab-1dcac4ed-053c-4b0c-a570-07f9b08b79cc",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 24.09999990463257,
+            "lastMutationIndexMs": 4.399999976158142
+          }
+        },
+        "restore": {
+          "originalNodes": 319,
+          "retainedNodes": 319,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 319,
+          "retainedNodes": 319,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 2,
+            "liveCodeBlocks": 2,
+            "originalCodeNodes": 120,
+            "retainedCodeNodes": 120,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 2,
+            "liveCodeBlocks": 2,
+            "originalCodeNodes": 120,
+            "retainedCodeNodes": 120,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 5,
+            "codeTranslationSamples": [
+              "​ '欢迎使用 Svelte！'",
+              "​ 按钮",
+              "​ 按钮",
+              "​ 点击我",
+              "​ 按钮"
+            ],
+            "proseTranslationTargets": 27
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 2,
+            "liveCodeBlocks": 2,
+            "originalCodeNodes": 120,
+            "retainedCodeNodes": 120,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 5,
+            "codeTranslationSamples": [
+              "​ '欢迎使用 Svelte！'",
+              "​ 按钮",
+              "​ 按钮",
+              "​ 点击我",
+              "​ 按钮"
+            ],
+            "proseTranslationTargets": 27
+          },
+          "replace-top": {
+            "codeBlocks": 2,
+            "liveCodeBlocks": 2,
+            "originalCodeNodes": 120,
+            "retainedCodeNodes": 120,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 5,
+            "codeTranslationSamples": [
+              "'欢迎使用 Svelte！'",
+              "按钮",
+              "点击我",
+              "按钮",
+              "按钮"
+            ],
+            "proseTranslationTargets": 23
+          }
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actualUrl": "https://svelte.dev/docs/svelte/overview",
+        "top": {
+          "documentOverflow": 0,
+          "clips": [
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ in: 和 out:",
+              "visible": 55,
+              "box": {
+                "x": 366,
+                "y": 1028,
+                "w": 76,
+                "h": 18
+              },
+              "ancestor": "div.toc-container.svelte-13r3uwa",
+              "ancestorBox": {
+                "x": 0,
+                "y": 60,
+                "w": 532,
+                "h": 978
+              },
+              "overflow": "hidden",
+              "clamp": "none"
+            },
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ 样式：",
+              "visible": 0,
+              "box": {
+                "x": 322,
+                "y": 1077,
+                "w": 53,
+                "h": 18
+              },
+              "ancestor": "div.toc-container.svelte-13r3uwa",
+              "ancestorBox": {
+                "x": 0,
+                "y": 60,
+                "w": 532,
+                "h": 978
+              },
+              "overflow": "hidden",
+              "clamp": "none"
+            }
+          ]
+        },
+        "scroll": {
+          "documentOverflow": 0,
+          "clips": [
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ in: 和 out:",
+              "visible": 55,
+              "box": {
+                "x": 366,
+                "y": 1028,
+                "w": 76,
+                "h": 18
+              },
+              "ancestor": "div.toc-container.svelte-13r3uwa",
+              "ancestorBox": {
+                "x": 0,
+                "y": 60,
+                "w": 532,
+                "h": 978
+              },
+              "overflow": "hidden",
+              "clamp": "none"
+            },
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ 样式：",
+              "visible": 0,
+              "box": {
+                "x": 322,
+                "y": 1077,
+                "w": 53,
+                "h": 18
+              },
+              "ancestor": "div.toc-container.svelte-13r3uwa",
+              "ancestorBox": {
+                "x": 0,
+                "y": 60,
+                "w": 532,
+                "h": 978
+              },
+              "overflow": "hidden",
+              "clamp": "none"
+            }
+          ]
+        }
+      },
+      "after": {
+        "buildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "statusTop": {
+          "translating": false,
+          "count": 55,
+          "failed": 0,
+          "total": 116,
+          "watching": true,
+          "sessionId": "iab-89a3a837-108a-46f8-b397-a026a1658168",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 12.900000035762787,
+            "lastMutationIndexMs": 1.800000011920929
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 55,
+          "failed": 0,
+          "total": 116,
+          "watching": true,
+          "sessionId": "iab-89a3a837-108a-46f8-b397-a026a1658168",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 12.900000035762787,
+            "lastMutationIndexMs": 1.2999999523162842
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 55,
+          "failed": 0,
+          "total": 116,
+          "watching": true,
+          "sessionId": "iab-89a3a837-108a-46f8-b397-a026a1658168",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 10.799999952316284,
+            "lastMutationIndexMs": 4.399999976158142
+          }
+        },
+        "restore": {
+          "originalNodes": 319,
+          "retainedNodes": 319,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 319,
+          "retainedNodes": 319,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 2,
+            "liveCodeBlocks": 2,
+            "originalCodeNodes": 120,
+            "retainedCodeNodes": 120,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 2,
+            "liveCodeBlocks": 2,
+            "originalCodeNodes": 120,
+            "retainedCodeNodes": 120,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 27
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 2,
+            "liveCodeBlocks": 2,
+            "originalCodeNodes": 120,
+            "retainedCodeNodes": 120,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 27
+          },
+          "replace-top": {
+            "codeBlocks": 2,
+            "liveCodeBlocks": 2,
+            "originalCodeNodes": 120,
+            "retainedCodeNodes": 120,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 23
+          }
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actualUrl": "https://svelte.dev/docs/svelte/overview",
+        "top": {
+          "documentOverflow": 0,
+          "clips": [
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ in: 和 out:",
+              "visible": 55,
+              "box": {
+                "x": 366,
+                "y": 1028,
+                "w": 76,
+                "h": 18
+              },
+              "ancestor": "div.toc-container.svelte-13r3uwa",
+              "ancestorBox": {
+                "x": 0,
+                "y": 60,
+                "w": 532,
+                "h": 978
+              },
+              "overflow": "hidden",
+              "clamp": "none"
+            },
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ 样式：",
+              "visible": 0,
+              "box": {
+                "x": 322,
+                "y": 1077,
+                "w": 53,
+                "h": 18
+              },
+              "ancestor": "div.toc-container.svelte-13r3uwa",
+              "ancestorBox": {
+                "x": 0,
+                "y": 60,
+                "w": 532,
+                "h": 978
+              },
+              "overflow": "hidden",
+              "clamp": "none"
+            }
+          ]
+        },
+        "scroll": {
+          "documentOverflow": 0,
+          "clips": [
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ in: 和 out:",
+              "visible": 55,
+              "box": {
+                "x": 366,
+                "y": 1028,
+                "w": 76,
+                "h": 18
+              },
+              "ancestor": "div.toc-container.svelte-13r3uwa",
+              "ancestorBox": {
+                "x": 0,
+                "y": 60,
+                "w": 532,
+                "h": 978
+              },
+              "overflow": "hidden",
+              "clamp": "none"
+            },
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ 样式：",
+              "visible": 0,
+              "box": {
+                "x": 322,
+                "y": 1077,
+                "w": 53,
+                "h": 18
+              },
+              "ancestor": "div.toc-container.svelte-13r3uwa",
+              "ancestorBox": {
+                "x": 0,
+                "y": 60,
+                "w": 532,
+                "h": 978
+              },
+              "overflow": "hidden",
+              "clamp": "none"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "open_source-5-2",
+      "category": "open_source",
+      "site": "Next.js",
+      "page": 2,
+      "url": "https://nextjs.org/docs/app/getting-started/installation",
+      "assessment": "滚动视图中代码内的 16 个译文节点归零，安装命令及标识符保留，步骤说明继续翻译。",
+      "before": {
+        "buildHash": "489fa39d3625e9d5cf35f13dd403c20b13af16a673cc52388ce9226994e15ddb",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "statusTop": {
+          "translating": false,
+          "count": 95,
+          "failed": 0,
+          "total": 312,
+          "watching": true,
+          "sessionId": "iab-ed33fbb9-3ec4-45cb-9a44-fae8b14ab5c0",
+          "revision": 1,
+          "shadowRoots": 1,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 88.79999989271164,
+            "lastMutationIndexMs": 0
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 106,
+          "failed": 0,
+          "total": 312,
+          "watching": true,
+          "sessionId": "iab-ed33fbb9-3ec4-45cb-9a44-fae8b14ab5c0",
+          "revision": 1,
+          "shadowRoots": 1,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 88.79999989271164,
+            "lastMutationIndexMs": 1.399999976158142
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 117,
+          "failed": 0,
+          "total": 312,
+          "watching": true,
+          "sessionId": "iab-ed33fbb9-3ec4-45cb-9a44-fae8b14ab5c0",
+          "revision": 1,
+          "shadowRoots": 1,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 88.60000020265579,
+            "lastMutationIndexMs": 12.100000023841858
+          }
+        },
+        "restore": {
+          "originalNodes": 1526,
+          "retainedNodes": 1526,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 1526,
+          "retainedNodes": 1526,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 19,
+            "liveCodeBlocks": 19,
+            "originalCodeNodes": 324,
+            "retainedCodeNodes": 324,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 19,
+            "liveCodeBlocks": 19,
+            "originalCodeNodes": 324,
+            "retainedCodeNodes": 324,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 7,
+            "codeTranslationSamples": [
+              "​ 创建",
+              "​ 创建",
+              "​ 你的项目叫什么名字？ my-app",
+              "​ 是否要使用推荐的 Next.js 默认设置？",
+              "​ 是，使用推荐的默认设置 - TypeScript、ESLint、Tailwind CSS、App Router、AGENTS.md"
+            ],
+            "proseTranslationTargets": 72
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 19,
+            "liveCodeBlocks": 19,
+            "originalCodeNodes": 324,
+            "retainedCodeNodes": 324,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 16,
+            "codeTranslationSamples": [
+              "​ 创建",
+              "​ 创建",
+              "​ 你的项目叫什么名字？ my-app",
+              "​ 是否要使用推荐的 Next.js 默认设置？",
+              "​ 是，使用推荐的默认设置 - TypeScript、ESLint、Tailwind CSS、App Router、AGENTS.md"
+            ],
+            "proseTranslationTargets": 74
+          },
+          "replace-top": {
+            "codeBlocks": 19,
+            "liveCodeBlocks": 19,
+            "originalCodeNodes": 324,
+            "retainedCodeNodes": 324,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 16,
+            "codeTranslationSamples": [
+              "创建",
+              "创建",
+              "你的项目叫什么名字？ my-app",
+              "是否要使用推荐的 Next.js 默认设置？",
+              "是，使用推荐的默认设置 - TypeScript、ESLint、Tailwind CSS、App Router、AGENTS.md"
+            ],
+            "proseTranslationTargets": 64
+          }
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actualUrl": "https://nextjs.org/docs/app/getting-started/installation",
+        "top": {
+          "documentOverflow": 0,
+          "clips": []
+        },
+        "scroll": {
+          "documentOverflow": 0,
+          "clips": []
+        }
+      },
+      "after": {
+        "buildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "statusTop": {
+          "translating": false,
+          "count": 78,
+          "failed": 0,
+          "total": 184,
+          "watching": true,
+          "sessionId": "iab-f5718dff-e0a7-4051-b76a-1254befdc39b",
+          "revision": 1,
+          "shadowRoots": 1,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 58.69999998807907,
+            "lastMutationIndexMs": 0
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 80,
+          "failed": 0,
+          "total": 184,
+          "watching": true,
+          "sessionId": "iab-f5718dff-e0a7-4051-b76a-1254befdc39b",
+          "revision": 1,
+          "shadowRoots": 1,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 58.69999998807907,
+            "lastMutationIndexMs": 1.100000023841858
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 88,
+          "failed": 0,
+          "total": 184,
+          "watching": true,
+          "sessionId": "iab-f5718dff-e0a7-4051-b76a-1254befdc39b",
+          "revision": 1,
+          "shadowRoots": 1,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 64.40000009536743,
+            "lastMutationIndexMs": 13.899999976158142
+          }
+        },
+        "restore": {
+          "originalNodes": 1526,
+          "retainedNodes": 1526,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 1526,
+          "retainedNodes": 1526,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 19,
+            "liveCodeBlocks": 19,
+            "originalCodeNodes": 324,
+            "retainedCodeNodes": 324,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 19,
+            "liveCodeBlocks": 19,
+            "originalCodeNodes": 324,
+            "retainedCodeNodes": 324,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 72
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 19,
+            "liveCodeBlocks": 19,
+            "originalCodeNodes": 324,
+            "retainedCodeNodes": 324,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 74
+          },
+          "replace-top": {
+            "codeBlocks": 19,
+            "liveCodeBlocks": 19,
+            "originalCodeNodes": 324,
+            "retainedCodeNodes": 324,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 64
+          }
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actualUrl": "https://nextjs.org/docs/app/getting-started/installation",
+        "top": {
+          "documentOverflow": 0,
+          "clips": []
+        },
+        "scroll": {
+          "documentOverflow": 0,
+          "clips": []
+        }
+      }
+    },
+    {
+      "id": "open_source-7-2",
+      "category": "open_source",
+      "site": "Vite",
+      "page": 2,
+      "url": "https://vite.dev/guide/",
+      "assessment": "命令与高亮代码保留；非激活语言标签中的代码仍按网页本身隐藏，普通说明段落正常翻译。",
+      "before": {
+        "buildHash": "489fa39d3625e9d5cf35f13dd403c20b13af16a673cc52388ce9226994e15ddb",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "statusTop": {
+          "translating": false,
+          "count": 86,
+          "failed": 0,
+          "total": 150,
+          "watching": true,
+          "sessionId": "iab-5d1f6646-546f-4b53-a794-69ab671c91a0",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 72.1000000834465,
+            "lastMutationIndexMs": 1
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 89,
+          "failed": 0,
+          "total": 150,
+          "watching": true,
+          "sessionId": "iab-5d1f6646-546f-4b53-a794-69ab671c91a0",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 72.1000000834465,
+            "lastMutationIndexMs": 0.3999999761581421
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 96,
+          "failed": 0,
+          "total": 150,
+          "watching": true,
+          "sessionId": "iab-5d1f6646-546f-4b53-a794-69ab671c91a0",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 51.60000002384186,
+            "lastMutationIndexMs": 32.30000001192093
+          }
+        },
+        "restore": {
+          "originalNodes": 611,
+          "retainedNodes": 611,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 611,
+          "retainedNodes": 611,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 28,
+            "liveCodeBlocks": 28,
+            "originalCodeNodes": 187,
+            "retainedCodeNodes": 187,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 19,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 28,
+            "liveCodeBlocks": 28,
+            "originalCodeNodes": 187,
+            "retainedCodeNodes": 187,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 19,
+            "codeTranslationTargets": 1,
+            "codeTranslationSamples": [
+              "​ 创建"
+            ],
+            "proseTranslationTargets": 58
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 28,
+            "liveCodeBlocks": 28,
+            "originalCodeNodes": 187,
+            "retainedCodeNodes": 187,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 19,
+            "codeTranslationTargets": 1,
+            "codeTranslationSamples": [
+              "​ 创建"
+            ],
+            "proseTranslationTargets": 61
+          },
+          "replace-top": {
+            "codeBlocks": 28,
+            "liveCodeBlocks": 28,
+            "originalCodeNodes": 187,
+            "retainedCodeNodes": 187,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 19,
+            "codeTranslationTargets": 1,
+            "codeTranslationSamples": [
+              "创建"
+            ],
+            "proseTranslationTargets": 48
+          }
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actualUrl": "https://vite.dev/guide/",
+        "top": {
+          "documentOverflow": 0,
+          "clips": []
+        },
+        "scroll": {
+          "documentOverflow": 0,
+          "clips": []
+        }
+      },
+      "after": {
+        "buildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "statusTop": {
+          "translating": false,
+          "count": 83,
+          "failed": 0,
+          "total": 128,
+          "watching": true,
+          "sessionId": "iab-53606095-047b-42ec-b687-d42f9193f0a8",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 54.40000009536743,
+            "lastMutationIndexMs": 1
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 86,
+          "failed": 0,
+          "total": 128,
+          "watching": true,
+          "sessionId": "iab-53606095-047b-42ec-b687-d42f9193f0a8",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 54.40000009536743,
+            "lastMutationIndexMs": 0.3999999761581421
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 93,
+          "failed": 0,
+          "total": 128,
+          "watching": true,
+          "sessionId": "iab-53606095-047b-42ec-b687-d42f9193f0a8",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 44,
+            "lastMutationIndexMs": 43.90000003576279
+          }
+        },
+        "restore": {
+          "originalNodes": 611,
+          "retainedNodes": 611,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 611,
+          "retainedNodes": 611,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 28,
+            "liveCodeBlocks": 28,
+            "originalCodeNodes": 187,
+            "retainedCodeNodes": 187,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 19,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 28,
+            "liveCodeBlocks": 28,
+            "originalCodeNodes": 187,
+            "retainedCodeNodes": 187,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 19,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 58
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 28,
+            "liveCodeBlocks": 28,
+            "originalCodeNodes": 187,
+            "retainedCodeNodes": 187,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 19,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 61
+          },
+          "replace-top": {
+            "codeBlocks": 28,
+            "liveCodeBlocks": 28,
+            "originalCodeNodes": 187,
+            "retainedCodeNodes": 187,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 19,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 48
+          }
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actualUrl": "https://vite.dev/guide/",
+        "top": {
+          "documentOverflow": 0,
+          "clips": []
+        },
+        "scroll": {
+          "documentOverflow": 0,
+          "clips": []
+        }
+      }
+    },
+    {
+      "id": "open_source-9-2",
+      "category": "open_source",
+      "site": "Python",
+      "page": 2,
+      "url": "https://docs.python.org/3/tutorial/introduction.html",
+      "assessment": "交互式代码、输出、字符串和嵌套高亮节点保留，教程正文与编号保持正常。",
+      "before": {
+        "buildHash": "489fa39d3625e9d5cf35f13dd403c20b13af16a673cc52388ce9226994e15ddb",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "statusTop": {
+          "translating": false,
+          "count": 47,
+          "failed": 0,
+          "total": 151,
+          "watching": true,
+          "sessionId": "iab-2b44e98f-f8c0-4186-92ec-732d0c7412f5",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 114.70000010728836,
+            "lastMutationIndexMs": 0
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 49,
+          "failed": 0,
+          "total": 151,
+          "watching": true,
+          "sessionId": "iab-2b44e98f-f8c0-4186-92ec-732d0c7412f5",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 114.70000010728836,
+            "lastMutationIndexMs": 0
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 56,
+          "failed": 0,
+          "total": 151,
+          "watching": true,
+          "sessionId": "iab-2b44e98f-f8c0-4186-92ec-732d0c7412f5",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 96.8999999165535,
+            "lastMutationIndexMs": 62.90000003576279
+          }
+        },
+        "restore": {
+          "originalNodes": 2364,
+          "retainedNodes": 2364,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 2364,
+          "retainedNodes": 2364,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 42,
+            "liveCodeBlocks": 42,
+            "originalCodeNodes": 1394,
+            "retainedCodeNodes": 1394,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 42,
+            "liveCodeBlocks": 42,
+            "originalCodeNodes": 1394,
+            "retainedCodeNodes": 1394,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 41
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 42,
+            "liveCodeBlocks": 42,
+            "originalCodeNodes": 1394,
+            "retainedCodeNodes": 1394,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 43
+          },
+          "replace-top": {
+            "codeBlocks": 42,
+            "liveCodeBlocks": 34,
+            "originalCodeNodes": 1394,
+            "retainedCodeNodes": 1394,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 8,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 33
+          }
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actualUrl": "https://docs.python.org/3/tutorial/introduction.html",
+        "top": {
+          "documentOverflow": 0,
+          "clips": []
+        },
+        "scroll": {
+          "documentOverflow": 0,
+          "clips": []
+        }
+      },
+      "after": {
+        "buildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "statusTop": {
+          "translating": false,
+          "count": 39,
+          "failed": 0,
+          "total": 109,
+          "watching": true,
+          "sessionId": "iab-fe1a0615-7c12-4d50-a7e5-18dd739e1147",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 27.19999998807907,
+            "lastMutationIndexMs": 0
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 43,
+          "failed": 0,
+          "total": 109,
+          "watching": true,
+          "sessionId": "iab-fe1a0615-7c12-4d50-a7e5-18dd739e1147",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 27.19999998807907,
+            "lastMutationIndexMs": 0
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 44,
+          "failed": 0,
+          "total": 109,
+          "watching": true,
+          "sessionId": "iab-fe1a0615-7c12-4d50-a7e5-18dd739e1147",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 29.59999990463257,
+            "lastMutationIndexMs": 48.5
+          }
+        },
+        "restore": {
+          "originalNodes": 2364,
+          "retainedNodes": 2364,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 2364,
+          "retainedNodes": 2364,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 42,
+            "liveCodeBlocks": 42,
+            "originalCodeNodes": 1394,
+            "retainedCodeNodes": 1394,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 42,
+            "liveCodeBlocks": 42,
+            "originalCodeNodes": 1394,
+            "retainedCodeNodes": 1394,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 36
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 42,
+            "liveCodeBlocks": 42,
+            "originalCodeNodes": 1394,
+            "retainedCodeNodes": 1394,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 40
+          },
+          "replace-top": {
+            "codeBlocks": 42,
+            "liveCodeBlocks": 42,
+            "originalCodeNodes": 1394,
+            "retainedCodeNodes": 1394,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 25
+          }
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actualUrl": "https://docs.python.org/3/tutorial/introduction.html",
+        "top": {
+          "documentOverflow": 0,
+          "clips": []
+        },
+        "scroll": {
+          "documentOverflow": 0,
+          "clips": []
+        }
+      }
+    }
+  ]
+}

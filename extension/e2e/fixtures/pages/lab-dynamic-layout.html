@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dynamic layout restoration regression</title>
+  <style>
+    body { margin:20px; font:16px/20px sans-serif; }
+    main { width:1100px; }
+    #action { display:inline-flex; align-items:center; gap:8px; }
+    #action > svg { width:16px; height:16px; flex-shrink:0; }
+    #frame { position:relative; width:300px; padding-bottom:40px; overflow:hidden; }
+    #frame p { margin:0; font:16px/20px sans-serif; }
+    #footer { position:absolute; left:0; right:0; top:40px; height:calc(100% - 40px); }
+    .spin-a { transform:rotate(0deg); }
+    .spin-b { transform:rotate(30deg); }
+    #spinner { width:16px; height:16px; }
+    code-widget, read-widget { display:block; }
+  </style>
+</head>
+<body>
+  <main id="main">
+    <aside><a id="action" href="/sign-in">Continue<svg id="middle-icon" viewBox="0 0 16 16"><path d="M2 8h12m-4-4 4 4-4 4" fill="none" stroke="black"></path></svg> with your account</a></aside>
+    <section id="frame"><div><p id="first">First long footer paragraph.</p><p id="second">Second short footer paragraph.</p></div><div id="footer" style="top:40px;height:calc(100% - 40px)"><button id="next">Next</button></div></section>
+    <code-widget id="shadow-editor"></code-widget>
+    <read-widget id="slot-widget"><p id="slot-code" slot="code">function SlottedReviewExample() {}</p><p id="slot-prose" slot="prose">Independent slotted documentation.</p></read-widget>
+    <div id="adjacent">Read the existing editor documentation.<div class="cm-editor"><span id="existing-code">function ExistingReviewExample() {}</span></div></div>
+    <svg id="spinner" class="spin-a" aria-hidden="true"></svg>
+    <section id="receiver"></section>
+  </main>
+  <script>
+    const codeRoot = document.getElementById('shadow-editor').attachShadow({mode:'open'});
+    codeRoot.innerHTML = '<nested-code></nested-code>';
+    codeRoot.querySelector('nested-code').attachShadow({mode:'open'}).innerHTML = '<p id="shadow-code">function ShadowReviewExample() { return null; }</p>';
+    document.getElementById('slot-widget').attachShadow({mode:'open'}).innerHTML = '<div id="slot-editor"><slot name="code"></slot></div><slot name="prose"></slot>';
+  </script>
+</body>
+</html>

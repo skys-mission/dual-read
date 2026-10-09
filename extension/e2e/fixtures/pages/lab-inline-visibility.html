@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Inline clipping visibility regression</title>
+  <style>
+    body{font:20px/30px sans-serif;margin:24px;max-width:900px}
+    .inline{display:inline}.contents{display:contents}
+    .zero-height{height:0;width:300px;overflow:hidden}
+    .zero-width{width:0;height:40px;overflow:clip}
+    .indent{overflow-x:hidden;text-indent:-9999px}
+    .closed{height:0;width:300px;overflow:hidden}
+    .narrow{display:inline-block;width:0;height:40px;overflow:hidden}
+  </style>
+</head>
+<body><main id="source">
+  <p id="inline-height"><span class="inline zero-height">Visible inline height documentation.</span></p>
+  <p id="inline-width"><span class="inline zero-width">Visible inline width documentation.</span></p>
+  <p id="inline-indent"><span class="inline indent">Visible inline indent documentation.</span></p>
+  <p id="contents-height"><span class="contents zero-height"><span>Visible contents height documentation.</span></span></p>
+  <p id="contents-width"><span class="contents zero-width"><span>Visible contents width documentation.</span></span></p>
+  <p id="contents-indent"><span class="contents indent"><span>Visible contents indent documentation.</span></span></p>
+  <p id="rich">Visible rich <span class="inline zero-height">installation documentation</span> with <a id="guide" href="/guide">a guide</a> and <code>createRoot(container)</code>.</p>
+  <section class="closed"><p>Hidden collapsed documentation.</p></section>
+  <p><span class="narrow">Hidden narrow documentation.</span></p>
+  <section style="width:300px;overflow-x:hidden;text-indent:-9999px"><p>Hidden indented documentation.</p></section>
+  <pre><code id="protected">const protectedSnippet = 'Do not translate code';</code></pre>
+</main><section id="receiver"></section></body>
+</html>

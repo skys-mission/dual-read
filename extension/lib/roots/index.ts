@@ -8,6 +8,7 @@
  */
 
 import { ensureTranslationStyles } from '../renderer/styles';
+import { composedContains } from '../dom-tree';
 
 export type WatchRoot = Document | ShadowRoot | Element;
 
@@ -146,7 +147,18 @@ export class RootRegistry {
       if (newly.length) this.onRootsChanged?.(newly);
       this.onMutations(mutations, root);
     });
-    mo.observe(root, { childList: true, subtree: true, characterData: true });
+    const attributes: MutationObserverInit = {
+      attributes: true, attributeOldValue: true,
+      attributeFilter: ['hidden', 'aria-hidden', 'open', 'class', 'style'],
+    };
+    mo.observe(root, {
+      childList: true, subtree: true, characterData: true, ...attributes,
+    });
+    // Inherited visibility variables/themes often live on <html>. Observe
+    // only its own attributes, retaining body as the indexed content scope.
+    if (root instanceof Element && root === root.ownerDocument.body && root.ownerDocument.documentElement) {
+      mo.observe(root.ownerDocument.documentElement, attributes);
+    }
     this.watchers.set(root, mo);
     return true;
   }
@@ -176,6 +188,26 @@ export class RootRegistry {
       if (this.watch(sr)) added.push(sr);
     }
     return added;
+  }
+
+  /** Visibility attributes outside a shadow tree do not mutate that tree.
+   * Revisit only affected existing roots and slot assignments, including nested
+   * shadows and assigned light DOM that ordinary subtree collection cannot see. */
+  affectedComposedScopes(mutations: MutationRecord[]): WatchRoot[] {
+    const boxes = mutations.flatMap(mutation => mutation.type === 'attributes' && mutation.target instanceof Element ? [mutation.target] : []);
+    const scopes = new Set<WatchRoot>();
+    for (const root of this.watchers.keys()) {
+      if (!(root instanceof ShadowRoot) || !root.host.isConnected) continue;
+      if (boxes.some(box => composedContains(box, root.host))) scopes.add(root);
+      for (const slot of root.querySelectorAll('slot')) {
+        if (!boxes.some(box => composedContains(box, slot))) continue;
+        for (const node of slot.assignedNodes({ flatten: true })) {
+          const scope = node instanceof Element ? node : node.parentElement;
+          if (scope?.isConnected) scopes.add(scope);
+        }
+      }
+    }
+    return [...scopes];
   }
 
   /** Drop watchers whose root left the document. */

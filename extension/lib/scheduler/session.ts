@@ -1,5 +1,6 @@
 import type { PublicSessionConfig, TranslateStatus, TranslationPayload, TranslationUnit } from '../types';
-import { collectSlotTextNodes, collectUnits, collectUnitsAsync, mutationHasNewContent, mutationIndexDelta } from '../collector';
+import { collectSlotTextNodes, collectUnits, collectUnitsAsync, isVisibilityMutation, mutationHasNewContent, mutationIndexDelta } from '../collector';
+import { composedContains } from '../dom-tree';
 import { yieldToMain } from '../runtime/yield';
 import {
   renderBatch,
@@ -10,6 +11,17 @@ import {
   restoreMovedRichNodes,
   readShellDecisions,
   applyShellDecisions,
+  readBoundedLayouts,
+  applyBoundedLayouts,
+  readCompactLayouts,
+  applyCompactLayouts,
+  applyMediaLayouts,
+  captureMediaLayouts,
+  readMediaLayouts,
+  readSourceTypography,
+  applyAnchoredLayouts,
+  captureAnchoredLayouts,
+  readAnchoredLayouts,
   type ShellReservation,
 } from '../renderer';
 import { lookup, store } from '../cache';
@@ -68,6 +80,8 @@ interface Entry {
   retryTimer: ReturnType<typeof setTimeout> | null;
   /** Current source/rendered text nodes, excluding extension chrome. No layout reads. */
   source: { node: Text; ancestors: Element[]; value: string }[];
+  /** Originals remain owned while rich/plain replacement paints different nodes. */
+  originalSource: Text[];
 }
 
 interface SlotJob {
@@ -320,6 +334,7 @@ export class ContentSession {
     this.renderTimer = null;
     this.renderBuf = [];
     this.pendingShells = [];
+    this.pendingLayouts = [];
     this.disconnectPorts();
     this.io?.disconnect();
     this.registry?.dispose();
@@ -386,6 +401,7 @@ export class ContentSession {
    * flush frame (read pass runs while layout is still clean → no forced layout).
    */
   private pendingShells: ShellReservation[] = [];
+  private pendingLayouts: HTMLElement[] = [];
 
   private flushRenders(): void {
     // Frame-start order matters — every layout read happens before the frame's
@@ -396,6 +412,11 @@ export class ContentSession {
     const settling = this.pendingShells;
     this.pendingShells = [];
     const decisions = settling.length ? readShellDecisions(settling) : [];
+    const layouts = readBoundedLayouts(this.pendingLayouts);
+    const compact = readCompactLayouts(this.pendingLayouts);
+    const media = readMediaLayouts(this.pendingLayouts);
+    const anchors = readAnchoredLayouts(this.pendingLayouts);
+    this.pendingLayouts = [...settling.map(({ node }) => node), ...compact, ...layouts.map(({ owner }) => owner)];
 
     const items = this.renderBuf.filter(({ entry }) => this.isLiveEntry(entry) && !this.sourceChanged(entry));
     this.renderBuf = [];
@@ -405,6 +426,11 @@ export class ContentSession {
     }
 
     const measured = new Map<HTMLElement, number>();
+    const typography = readSourceTypography(items.map(({ entry }) => entry.unit));
+    captureMediaLayouts(items.map(({ entry }) => entry.unit.el));
+    if (this.config.mode !== 'replace') {
+      captureAnchoredLayouts(items.map(({ entry }) => entry.unit.el));
+    }
     for (const { entry: { unit } } of items) {
       if (unit.kind !== 'block' || measured.has(unit.el)) continue;
       try {
@@ -415,8 +441,15 @@ export class ContentSession {
     }
 
     if (decisions.length) applyShellDecisions(decisions);
+    applyBoundedLayouts(layouts);
+    applyCompactLayouts(compact);
+    applyMediaLayouts(media);
+    applyAnchoredLayouts(anchors);
 
-    if (!items.length) return;
+    if (!items.length) {
+      if (this.pendingLayouts.length) requestAnimationFrame(() => this.flushRenders());
+      return;
+    }
     const mode = this.config.mode ?? 'bilingual';
     const opts = this.renderOpts();
     // Time-slice oversized flushes across frames: render in fixed small chunks
@@ -429,7 +462,7 @@ export class ContentSession {
     while (done < items.length) {
       const chunk = items.slice(done, done + RENDER_CHUNK_SIZE);
       done += chunk.length;
-      this.pendingShells.push(...renderBatch(chunk.map(({ entry, payload }) => ({ unit: entry.unit, payload })), mode, opts, measured));
+      this.pendingShells.push(...renderBatch(chunk.map(({ entry, payload }) => ({ unit: entry.unit, payload })), mode, opts, measured, typography));
       // Rich replace and inline flows intentionally move/change source nodes.
       // Capture the resulting tree before observer callbacks see our writes.
       for (const { entry } of chunk) entry.source = this.captureSource(entry.unit);
@@ -442,7 +475,7 @@ export class ContentSession {
       return;
     }
     // Settle this frame's shells at the next frame start (clean-layout reads).
-    if (this.pendingShells.length) {
+    if (this.pendingShells.length || this.pendingLayouts.length) {
       requestAnimationFrame(() => this.flushRenders());
     }
   }
@@ -773,7 +806,8 @@ export class ContentSession {
 
   private ensureEntry(unit: TranslationUnit): Entry | null {
     if (this.entries.has(unit.el)) return null;
-    const entry: Entry = { unit, attempts: 0, status: 'idle', retryTimer: null, source: this.captureSource(unit) };
+    const source = this.captureSource(unit);
+    const entry: Entry = { unit, attempts: 0, status: 'idle', retryTimer: null, source, originalSource: source.map(({ node }) => node) };
     this.entries.set(unit.el, entry);
     return entry;
   }
@@ -890,6 +924,10 @@ export class ContentSession {
     const delta = mutationIndexDelta(mutations, this.entries.keys(), (host) => {
       const entry = this.entries.get(host);
       return Boolean(entry && this.sourceChanged(entry));
+    }, (host, box) => {
+      const entry = this.entries.get(host);
+      return Boolean(entry && [...entry.originalSource, ...entry.source.map(({ node }) => node)]
+        .some(node => node.isConnected && host.contains(node) && composedContains(box, node) && this.ownsSource(entry, node.parentElement)));
     });
 
     for (const host of delta.removed) {
@@ -911,7 +949,14 @@ export class ContentSession {
       if (!host.isConnected) this.dropEntry(host);
     }
 
-    const toAdd = [...delta.added];
+    const composedScopes = this.registry?.affectedComposedScopes(mutations.filter(isVisibilityMutation)) ?? [];
+    // Restoration can enqueue an original span beside the reveal attribute.
+    // The affected composed scope already collects its paragraph consistently;
+    // do not register that span and the paragraph as overlapping source owners.
+    const toAdd = delta.added.filter(unit => !composedScopes.some(scope => scope.contains(unit.el)));
+    for (const scope of composedScopes) {
+      for (const unit of collectUnits(scope)) toAdd.push(unit);
+    }
     for (const host of delta.invalidated) {
       if (!host.isConnected) continue;
       for (const unit of collectUnits(host)) toAdd.push(unit);
@@ -938,8 +983,12 @@ export class ContentSession {
     this.registry = new RootRegistry(
       (mutations) => {
         if (!this.alive) return;
-        this.pendingMutations.push(...mutations);
-        if (this.moTimer) clearTimeout(this.moTimer);
+        const relevant = mutations.filter(mutation => mutation.type !== 'attributes' || isVisibilityMutation(mutation));
+        if (!relevant.length) return;
+        this.pendingMutations.push(...relevant);
+        // Bound latency from the first record: unrelated attribute animations
+        // must not keep postponing appended or edited source indefinitely.
+        if (this.moTimer) return;
         this.moTimer = setTimeout(() => {
           this.moTimer = null;
           const batch = this.pendingMutations;

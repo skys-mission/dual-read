@@ -20,6 +20,26 @@ export function hasControlSemantics(el: Element): boolean {
     .some((token) => CONTROL_CLASS_SEGMENT.test(token));
 }
 
+/** Single-line ellipsized prose needs a wrapping translation below the source. */
+export function isEllipsizedTextHost(el: Element): boolean {
+  if (el.closest(CONTROL_ROLE)) return false;
+  const anchor = el.closest('a[href]');
+  if (anchor && hasControlSemantics(anchor)) return false;
+  try {
+    for (let box: Element | null = el; box && box !== document.body; box = box.parentElement) {
+      const style = getComputedStyle(box);
+      if (style.whiteSpace === 'nowrap' && style.textOverflow === 'ellipsis'
+        && /^(hidden|clip)$/.test(style.overflowX || style.overflow)) return true;
+      // Inspect the local text box only; a distant cropped card or carousel
+      // does not make an otherwise ordinary inline label ellipsized prose.
+      if (box !== el && style.display !== 'inline' && style.display !== 'contents') break;
+    }
+  } catch {
+    /* detached or incomplete style implementation */
+  }
+  return false;
+}
+
 /**
  * Presentation fallback for accessible-but-unlabelled link controls. Inline
  * flex/grid and nowrap anchors overwhelmingly represent compact actions rather

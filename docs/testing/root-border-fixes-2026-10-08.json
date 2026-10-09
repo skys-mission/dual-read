@@ -1,0 +1,423 @@
+{
+  "date": "2026-10-08",
+  "timezone": "Asia/Shanghai",
+  "task": "Stylesheet root scope, border sizing and shared layout policy contract",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "scope": {
+    "changedProductionFiles": [
+      "extension/lib/renderer/selector-specificity.ts",
+      "extension/lib/renderer/source-layout-policy.ts",
+      "extension/package.json",
+      "extension/lib/renderer/layout-properties.ts"
+    ],
+    "productionInputsChecked": 72,
+    "dependencyVersionsChanged": false,
+    "packageScriptsAdded": [
+      "test:layout-policy",
+      "e2e:layout-policy"
+    ],
+    "packagedCssChanged": false,
+    "domainRulesAdded": false
+  },
+  "fixes": [
+    {
+      "id": "stylesheet-root-scope",
+      "behavior": "Resolve document stylesheet top-level nesting through a zero-specificity root selector; context-sensitive Shadow DOM and scope selectors remain incomplete and use the existing computed fallback."
+    },
+    {
+      "id": "logical-border-sizing",
+      "behavior": "Share physical/logical equivalence and CSSOM shorthand expansion across selected dimensions, padding, border, margin and inset. Include border style as a width dependency and inherit it in the fallback pseudo probe; exclude unrequested edges and border color."
+    }
+  ],
+  "baseline": {
+    "sourceSessions": 48,
+    "beforeFailures": 16,
+    "beforeControlCorrect": 8,
+    "afterCorrect": 24,
+    "packagedBeforeSessions": 24,
+    "reviewComparison": "HEAD preserved authored sizing; the previous uncommitted build and the reviewed build both exhibited the issues."
+  },
+  "validation": {
+    "unit": {
+      "files": 44,
+      "tests": 1739,
+      "added": 176
+    },
+    "compile": true,
+    "lint": true,
+    "diffCheck": true,
+    "freshBuilds": [
+      "Chrome MV3",
+      "Firefox MV3"
+    ],
+    "native": {
+      "cases": 200,
+      "newGroupedTests": 16,
+      "newBehaviorCombinations": 96,
+      "existingTests": 184,
+      "chromium": 100,
+      "firefox": 100,
+      "failures": 0,
+      "retries": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "workers": 2
+    },
+    "policyMatrix": {
+      "cases": 1294,
+      "engines": 2,
+      "writingModes": [
+        "horizontal-tb",
+        "vertical-rl",
+        "vertical-lr",
+        "sideways-rl",
+        "sideways-lr"
+      ],
+      "directions": [
+        "ltr",
+        "rtl"
+      ],
+      "families": [
+        "padding",
+        "margin",
+        "inset",
+        "border"
+      ],
+      "operations": [
+        "specificity",
+        "declaration-order",
+        "shorthand",
+        "variable"
+      ],
+      "selectorContexts": [
+        "document root",
+        "scope rule",
+        "shadow host",
+        "document scope"
+      ]
+    },
+    "performance": {
+      "cases": 8,
+      "full": 1,
+      "strict": 0,
+      "defaultBudgets": true,
+      "ranAfterOtherAutomatedBrowserJobs": true
+    },
+    "restoration": "Fresh packaged sessions cover deferred/delivered mutation records, watching/paused, text and code edits, added elements, source transfer, removal, href changes, repeated restoration and opposite translation mode."
+  },
+  "sampling": {
+    "method": "Freshly live-loaded public page snapshots replayed at original URLs with site scripts disabled; paired inputs verified by HTML hash.",
+    "sites": [
+      {
+        "id": "popular-1-2",
+        "site": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Internet",
+        "snapshotHash": "2705d0ca809d0752812b7c57f323b713c9fd33e7be94c167d33f96cf199a8695",
+        "sourceUnits": 681,
+        "processed": 145,
+        "codeNodes": 0,
+        "views": [
+          {
+            "view": "source-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-scroll",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "replace-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          }
+        ]
+      },
+      {
+        "id": "popular-2-2",
+        "site": "GitHub",
+        "url": "https://github.com/golang/go",
+        "snapshotHash": "f8b751530a72027a35123634e895ace50a7edee31f9a288ac3c485831c827b60",
+        "sourceUnits": 120,
+        "processed": 120,
+        "codeNodes": 0,
+        "views": [
+          {
+            "view": "source-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-top",
+            "overflow": 0,
+            "clips": 2,
+            "squeezed": 1
+          },
+          {
+            "view": "bilingual-scroll",
+            "overflow": 0,
+            "clips": 2,
+            "squeezed": 0
+          },
+          {
+            "view": "replace-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          }
+        ]
+      },
+      {
+        "id": "commercial-1-2",
+        "site": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/azure/architecture/",
+        "snapshotHash": "e6d44e67d5d212585c03c917d097cf2fab97411cb46edccc367743bb15e11368",
+        "sourceUnits": 65,
+        "processed": 65,
+        "codeNodes": 0,
+        "views": [
+          {
+            "view": "source-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-scroll",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "replace-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          }
+        ]
+      },
+      {
+        "id": "commercial-7-2",
+        "site": "Shopify Developer",
+        "url": "https://shopify.dev/docs/apps/build",
+        "snapshotHash": "86b34e697786a989b59dc7028c04b85bab52685e26c445c680792baea251339c",
+        "sourceUnits": 102,
+        "processed": 47,
+        "codeNodes": 0,
+        "views": [
+          {
+            "view": "source-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-top",
+            "overflow": 0,
+            "clips": 1,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-scroll",
+            "overflow": 0,
+            "clips": 1,
+            "squeezed": 0
+          },
+          {
+            "view": "replace-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          }
+        ]
+      },
+      {
+        "id": "open_source-1-1",
+        "site": "React",
+        "url": "https://react.dev/",
+        "snapshotHash": "41e0d2a45f86d6dcf4d7b468e661140f08b159d01f8148304482f46db406c9e7",
+        "sourceUnits": 120,
+        "processed": 19,
+        "codeNodes": 500,
+        "views": [
+          {
+            "view": "source-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-scroll",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "replace-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          }
+        ]
+      },
+      {
+        "id": "open_source-2-2",
+        "site": "Vue",
+        "url": "https://vuejs.org/guide/introduction.html",
+        "snapshotHash": "960566fddc87f374d8f41b26d7829e8741b0390c7a87c2fe4c4ae1e174babcc4",
+        "sourceUnits": 149,
+        "processed": 80,
+        "codeNodes": 369,
+        "views": [
+          {
+            "view": "source-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-scroll",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "replace-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          }
+        ]
+      },
+      {
+        "id": "commercial-8-2",
+        "site": "Stripe Docs",
+        "url": "https://docs.stripe.com/payments/accept-a-payment",
+        "snapshotHash": "e4eb5d27a43ca10fd4e197a9aa60c82cf008d5db1a589e3dc88953afc7b9d558",
+        "sourceUnits": 174,
+        "processed": 74,
+        "codeNodes": 257,
+        "views": [
+          {
+            "view": "source-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-scroll",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "replace-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          }
+        ]
+      }
+    ],
+    "primaryScreenshots": 56,
+    "translatedPairsVisuallyInspected": 21,
+    "stripeWheel": {
+      "delta": 900,
+      "codeNodes": 257,
+      "sourceUnits": 174,
+      "processed": 81
+    },
+    "iab": {
+      "url": "https://react.dev/",
+      "method": "Temporary injection of fresh production content script through isolated developer world; no installed extension.",
+      "originalTextNodes": 710,
+      "codeTextNodes": 500,
+      "failed": 0,
+      "watching": false,
+      "screenshot": ".codex/root-border-fixes-2026-10-08/iab-after/react-delivery.jpg"
+    }
+  },
+  "engineering": {
+    "nativeDurationMs": 427230.11600000004,
+    "previousFullNativeDurationMs": 1065501.833,
+    "nativeTimeReduction": 0.5990338986117916,
+    "workflow": [
+      "Full unit suite and fast real-browser policy matrix",
+      "Fresh builds and grouped new cases plus selected neighboring restoration cases",
+      "Paired public page sample",
+      "Independent performance suite"
+    ],
+    "fullSuiteRerunTriggers": [
+      "Collector/renderer/restoration ownership changes",
+      "Shared observer lifecycle changes",
+      "Failures or material risks uncovered by targeted gates"
+    ]
+  },
+  "assets": {
+    "before": {
+      "jsBytes": 266153,
+      "jsGzipBytes": 73481,
+      "jsSha256": "bda8a34c5926148cb440f1ab69974c2cf1be8fb760706bec3e96fdcd72f6a2ea",
+      "cssSha256": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d"
+    },
+    "after": {
+      "jsBytes": 268301,
+      "jsGzipBytes": 74083,
+      "jsSha256": "1075f1cfeeb591f1ad6d07d051d0a126361d593abf67c4de0cf1f1b23495c13d",
+      "cssSha256": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d"
+    }
+  },
+  "limits": [
+    "Website comparison uses fresh live-loaded snapshots replayed at their original URLs with site scripts disabled to keep paired input identical; dynamic mutation behavior is covered by native fixtures and the actual in-app browser.",
+    "Sampling covers seven public pages; the earlier full 70-page audit was not rerun. The browser pass is a targeted 200-test gate, not a rerun of the previous complete 752-test matrix.",
+    "Firefox tests use the repository Gecko runtime shim with freshly built packaged content."
+  ],
+  "security": {
+    "knownCredentialMatchesInGitVisibleFiles": 0,
+    "privateConfigMode": "0600"
+  },
+  "git": {
+    "staged": false,
+    "committed": false,
+    "head": "995498672da7fdbddf4e00f21224ba6cfabf0163"
+  },
+  "evidenceDirectory": ".codex/root-border-fixes-2026-10-08"
+}

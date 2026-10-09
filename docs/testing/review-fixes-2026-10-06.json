@@ -1,0 +1,3477 @@
+{
+  "date": "2026-10-06",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "beforeBuildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+  "afterBuildHash": "88fa0d2406d8184e77a88ad6c6ffa4bb034854b88caf58be4309e8aa53e8bca9",
+  "afterStyleHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+  "scope": "Four review findings fixed with generic collector/renderer/session rules; 10 public pages sampled in original, bilingual top, PageDown and replace views; Chrome native extension and Firefox fresh Gecko content harness regressions.",
+  "fixes": [
+    "Independent flex text items remain in their original columns; single existing labels are reused without moving source elements.",
+    "Later translations register as owners of active height/media rules even when the rule already prevents overflow.",
+    "Owned flow wrappers are unwrapped at their current page location, including wrapping, transfer and removed original hosts.",
+    "Code-boundary attribute changes invalidate the actual source owner, including original nodes in replace-mode stashes; existing editor animation does not invalidate adjacent prose."
+  ],
+  "checks": {
+    "unitTests": 1256,
+    "preFixFailures": 13,
+    "newUnitCases": 15,
+    "newBrowserCases": 16,
+    "focusedBrowserCases": 4,
+    "functionalBrowserCases": 392,
+    "performanceCases": 5,
+    "optionalPerformanceSkipped": 3
+  },
+  "verifiedFixes": {
+    "originalColumnParentsAndColor": true,
+    "sharedHeightRetained": true,
+    "sharedMediaRetained": true,
+    "noFlowResidual": true,
+    "codeAncestorInvalidated": true
+  },
+  "inAppReact": {
+    "bilingual": {
+      "codeBlocks": 4,
+      "codeTranslationSamples": [],
+      "codeTranslationTargets": 0,
+      "hiddenCodeBlocks": 0,
+      "liveCodeBlocks": 8,
+      "originalCodeNodes": 500,
+      "overwrittenCodeValues": 0,
+      "proseTranslationTargets": 15,
+      "retainedCodeNodes": 500
+    },
+    "restoreBilingual": {
+      "changedLinks": 0,
+      "changedValues": 1,
+      "orderDifferences": [],
+      "originalNodes": 710,
+      "overwrittenCurrentLinks": 0,
+      "overwrittenCurrentValues": 0,
+      "remainingTargets": 0,
+      "removedByPage": 0,
+      "removedSinceRestoreSnapshot": [],
+      "retainedCurrentOrder": true,
+      "retainedNodes": 710,
+      "sourceOrder": true
+    },
+    "replace": {
+      "codeBlocks": 4,
+      "codeTranslationSamples": [],
+      "codeTranslationTargets": 0,
+      "hiddenCodeBlocks": 0,
+      "liveCodeBlocks": 8,
+      "originalCodeNodes": 500,
+      "overwrittenCodeValues": 0,
+      "proseTranslationTargets": 12,
+      "retainedCodeNodes": 500
+    },
+    "restoreReplace": {
+      "changedLinks": 0,
+      "changedValues": 1,
+      "orderDifferences": [],
+      "originalNodes": 710,
+      "overwrittenCurrentLinks": 0,
+      "overwrittenCurrentValues": 0,
+      "remainingTargets": 0,
+      "removedByPage": 0,
+      "removedSinceRestoreSnapshot": [],
+      "retainedCurrentOrder": true,
+      "retainedNodes": 710,
+      "sourceOrder": true
+    },
+    "viewport": {
+      "height": 1080,
+      "width": 1920
+    }
+  },
+  "pages": 10,
+  "sites": 10,
+  "restorationPasses": 20,
+  "codeContainers": 76,
+  "codeTextNodes": 2201,
+  "pagesDetail": [
+    {
+      "id": "popular-2-2",
+      "category": "popular",
+      "site": "GitHub",
+      "page": 2,
+      "url": "https://github.com/golang/go",
+      "note": "仓库列表、README 图文、图注和侧栏保持原有排版。",
+      "before": {
+        "buildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 111,
+          "failed": 0,
+          "total": 113,
+          "watching": true,
+          "sessionId": "iab-a76752d9-6496-43ae-a72b-5a445797c2ac",
+          "revision": 1,
+          "shadowRoots": 21,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 95.5,
+            "lastMutationIndexMs": 0.19999998807907104
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 113,
+          "failed": 0,
+          "total": 113,
+          "watching": true,
+          "sessionId": "iab-a76752d9-6496-43ae-a72b-5a445797c2ac",
+          "revision": 1,
+          "shadowRoots": 21,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 95.5,
+            "lastMutationIndexMs": 0.19999998807907104
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 115,
+          "failed": 0,
+          "total": 115,
+          "watching": true,
+          "sessionId": "iab-a76752d9-6496-43ae-a72b-5a445797c2ac",
+          "revision": 1,
+          "shadowRoots": 21,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 81.60000020265579,
+            "lastMutationIndexMs": 30.69999998807907
+          }
+        },
+        "restore": {
+          "originalNodes": 764,
+          "retainedNodes": 764,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 764,
+          "retainedNodes": 764,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 78
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 80
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 46
+          }
+        },
+        "views": {
+          "source-top": {
+            "units": 115,
+            "targets": 0,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-top": {
+            "units": 115,
+            "targets": 78,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-scroll": {
+            "units": 115,
+            "targets": 80,
+            "overflow": 0,
+            "clips": 0
+          },
+          "replace-top": {
+            "units": 115,
+            "targets": 130,
+            "overflow": 0,
+            "clips": 0
+          }
+        }
+      },
+      "after": {
+        "buildHash": "88fa0d2406d8184e77a88ad6c6ffa4bb034854b88caf58be4309e8aa53e8bca9",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 111,
+          "failed": 0,
+          "total": 113,
+          "watching": true,
+          "sessionId": "iab-1b32a626-e4f9-42db-871c-48cad9bd7837",
+          "revision": 1,
+          "shadowRoots": 21,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 88,
+            "lastMutationIndexMs": 0.6000000238418579
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 113,
+          "failed": 0,
+          "total": 113,
+          "watching": true,
+          "sessionId": "iab-1b32a626-e4f9-42db-871c-48cad9bd7837",
+          "revision": 1,
+          "shadowRoots": 21,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 88,
+            "lastMutationIndexMs": 0.6000000238418579
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 114,
+          "failed": 0,
+          "total": 115,
+          "watching": true,
+          "sessionId": "iab-1b32a626-e4f9-42db-871c-48cad9bd7837",
+          "revision": 1,
+          "shadowRoots": 21,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 69.09999990463257,
+            "lastMutationIndexMs": 47.39999997615814
+          }
+        },
+        "restore": {
+          "originalNodes": 764,
+          "retainedNodes": 764,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 764,
+          "retainedNodes": 764,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 78
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 80
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 45
+          }
+        },
+        "views": {
+          "source-top": {
+            "units": 115,
+            "targets": 0,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-top": {
+            "units": 115,
+            "targets": 78,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-scroll": {
+            "units": 115,
+            "targets": 80,
+            "overflow": 0,
+            "clips": 0
+          },
+          "replace-top": {
+            "units": 115,
+            "targets": 128,
+            "overflow": 0,
+            "clips": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "popular-7-2",
+      "category": "popular",
+      "site": "Apple",
+      "page": 2,
+      "url": "https://www.apple.com/mac/",
+      "note": "产品栏、价格、按钮及轮播页脚保持正常；屏外轮播项目保留。",
+      "before": {
+        "buildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 54,
+          "failed": 0,
+          "total": 162,
+          "watching": true,
+          "sessionId": "iab-9228d525-7caa-45df-b198-1195c13ed71a",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 124.6000000834465,
+            "lastMutationIndexMs": 0.30000001192092896
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 69,
+          "failed": 0,
+          "total": 168,
+          "watching": true,
+          "sessionId": "iab-9228d525-7caa-45df-b198-1195c13ed71a",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 124.6000000834465,
+            "lastMutationIndexMs": 0.30000001192092896
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 61,
+          "failed": 0,
+          "total": 168,
+          "watching": true,
+          "sessionId": "iab-9228d525-7caa-45df-b198-1195c13ed71a",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 133.80000013113022,
+            "lastMutationIndexMs": 0.19999998807907104
+          }
+        },
+        "restore": {
+          "originalNodes": 1202,
+          "retainedNodes": 1201,
+          "removedByPage": 1,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 1202,
+          "retainedNodes": 1201,
+          "removedByPage": 1,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 45
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 59
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 36
+          }
+        },
+        "views": {
+          "source-top": {
+            "units": 162,
+            "targets": 0,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-top": {
+            "units": 162,
+            "targets": 45,
+            "overflow": 0,
+            "clips": 1
+          },
+          "bilingual-scroll": {
+            "units": 162,
+            "targets": 59,
+            "overflow": 0,
+            "clips": 0
+          },
+          "replace-top": {
+            "units": 162,
+            "targets": 82,
+            "overflow": 0,
+            "clips": 1
+          }
+        }
+      },
+      "after": {
+        "buildHash": "88fa0d2406d8184e77a88ad6c6ffa4bb034854b88caf58be4309e8aa53e8bca9",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 54,
+          "failed": 0,
+          "total": 162,
+          "watching": true,
+          "sessionId": "iab-a30f394b-11d9-47f1-9de6-ed19c493b690",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 125.80000013113022,
+            "lastMutationIndexMs": 0.19999998807907104
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 69,
+          "failed": 0,
+          "total": 168,
+          "watching": true,
+          "sessionId": "iab-a30f394b-11d9-47f1-9de6-ed19c493b690",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 125.80000013113022,
+            "lastMutationIndexMs": 19.19999998807907
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 70,
+          "failed": 0,
+          "total": 168,
+          "watching": true,
+          "sessionId": "iab-a30f394b-11d9-47f1-9de6-ed19c493b690",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 106.20000004768372,
+            "lastMutationIndexMs": 17.299999952316284
+          }
+        },
+        "restore": {
+          "originalNodes": 1202,
+          "retainedNodes": 1201,
+          "removedByPage": 1,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 1202,
+          "retainedNodes": 1201,
+          "removedByPage": 1,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 45
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 59
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 44
+          }
+        },
+        "views": {
+          "source-top": {
+            "units": 162,
+            "targets": 0,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-top": {
+            "units": 162,
+            "targets": 45,
+            "overflow": 0,
+            "clips": 1
+          },
+          "bilingual-scroll": {
+            "units": 162,
+            "targets": 59,
+            "overflow": 0,
+            "clips": 0
+          },
+          "replace-top": {
+            "units": 162,
+            "targets": 98,
+            "overflow": 0,
+            "clips": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "commercial-2-1",
+      "category": "commercial",
+      "site": "Adobe Developer",
+      "page": 1,
+      "url": "https://developer.adobe.com/developer-console/docs/guides/",
+      "note": "两列文档说明、固定横幅和侧栏按钮保留已有布局修正。",
+      "before": {
+        "buildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 34,
+          "failed": 0,
+          "total": 34,
+          "watching": true,
+          "sessionId": "iab-5865128c-a579-47a9-88d3-0407d37a519c",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 14.599999845027924,
+            "lastMutationIndexMs": 4.300000011920929
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 34,
+          "failed": 0,
+          "total": 34,
+          "watching": true,
+          "sessionId": "iab-5865128c-a579-47a9-88d3-0407d37a519c",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 14.599999845027924,
+            "lastMutationIndexMs": 4.300000011920929
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 34,
+          "failed": 0,
+          "total": 34,
+          "watching": true,
+          "sessionId": "iab-5865128c-a579-47a9-88d3-0407d37a519c",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 12.5,
+            "lastMutationIndexMs": 16.69999998807907
+          }
+        },
+        "restore": {
+          "originalNodes": 473,
+          "retainedNodes": 473,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 473,
+          "retainedNodes": 473,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 33
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 33
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 19
+          }
+        },
+        "views": {
+          "source-top": {
+            "units": 34,
+            "targets": 0,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-top": {
+            "units": 34,
+            "targets": 33,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-scroll": {
+            "units": 34,
+            "targets": 33,
+            "overflow": 0,
+            "clips": 0
+          },
+          "replace-top": {
+            "units": 34,
+            "targets": 52,
+            "overflow": 0,
+            "clips": 0
+          }
+        }
+      },
+      "after": {
+        "buildHash": "88fa0d2406d8184e77a88ad6c6ffa4bb034854b88caf58be4309e8aa53e8bca9",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 34,
+          "failed": 0,
+          "total": 34,
+          "watching": true,
+          "sessionId": "iab-8d1d168c-8997-42fb-a254-3196cf4392e0",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 18.100000023841858,
+            "lastMutationIndexMs": 8.099999964237213
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 34,
+          "failed": 0,
+          "total": 34,
+          "watching": true,
+          "sessionId": "iab-8d1d168c-8997-42fb-a254-3196cf4392e0",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 18.100000023841858,
+            "lastMutationIndexMs": 8.099999964237213
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 34,
+          "failed": 0,
+          "total": 34,
+          "watching": true,
+          "sessionId": "iab-8d1d168c-8997-42fb-a254-3196cf4392e0",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 12.699999988079071,
+            "lastMutationIndexMs": 6.700000047683716
+          }
+        },
+        "restore": {
+          "originalNodes": 465,
+          "retainedNodes": 465,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 465,
+          "retainedNodes": 465,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 33
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 33
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 19
+          }
+        },
+        "views": {
+          "source-top": {
+            "units": 34,
+            "targets": 0,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-top": {
+            "units": 34,
+            "targets": 33,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-scroll": {
+            "units": 34,
+            "targets": 33,
+            "overflow": 0,
+            "clips": 0
+          },
+          "replace-top": {
+            "units": 34,
+            "targets": 51,
+            "overflow": 0,
+            "clips": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "commercial-3-1",
+      "category": "commercial",
+      "site": "Salesforce Developers",
+      "page": 1,
+      "url": "https://developer.salesforce.com/docs",
+      "note": "开放 Shadow DOM 文档、卡片列和导航在两种模式中保持可见。",
+      "before": {
+        "buildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 45,
+          "failed": 0,
+          "total": 119,
+          "watching": true,
+          "sessionId": "iab-69c651e2-a866-452e-a333-eca4c4cb0809",
+          "revision": 1,
+          "shadowRoots": 428,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 41.700000047683716,
+            "lastMutationIndexMs": 2.300000011920929
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 54,
+          "failed": 0,
+          "total": 119,
+          "watching": true,
+          "sessionId": "iab-69c651e2-a866-452e-a333-eca4c4cb0809",
+          "revision": 1,
+          "shadowRoots": 428,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 41.700000047683716,
+            "lastMutationIndexMs": 6.300000011920929
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 66,
+          "failed": 0,
+          "total": 119,
+          "watching": true,
+          "sessionId": "iab-69c651e2-a866-452e-a333-eca4c4cb0809",
+          "revision": 1,
+          "shadowRoots": 428,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 38.39999997615814,
+            "lastMutationIndexMs": 9.5
+          }
+        },
+        "restore": {
+          "originalNodes": 1180,
+          "retainedNodes": 1180,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 1180,
+          "retainedNodes": 1180,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 42
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 51
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 60
+          }
+        },
+        "views": {
+          "source-top": {
+            "units": 119,
+            "targets": 0,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-top": {
+            "units": 119,
+            "targets": 42,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-scroll": {
+            "units": 119,
+            "targets": 51,
+            "overflow": 0,
+            "clips": 0
+          },
+          "replace-top": {
+            "units": 119,
+            "targets": 121,
+            "overflow": 0,
+            "clips": 0
+          }
+        }
+      },
+      "after": {
+        "buildHash": "88fa0d2406d8184e77a88ad6c6ffa4bb034854b88caf58be4309e8aa53e8bca9",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 45,
+          "failed": 0,
+          "total": 119,
+          "watching": true,
+          "sessionId": "iab-0a49b9d0-f172-413b-a56e-83ba6d19bcb0",
+          "revision": 1,
+          "shadowRoots": 428,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 43.10000014305115,
+            "lastMutationIndexMs": 2.5
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 54,
+          "failed": 0,
+          "total": 119,
+          "watching": true,
+          "sessionId": "iab-0a49b9d0-f172-413b-a56e-83ba6d19bcb0",
+          "revision": 1,
+          "shadowRoots": 428,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 43.10000014305115,
+            "lastMutationIndexMs": 5.299999952316284
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 66,
+          "failed": 0,
+          "total": 119,
+          "watching": true,
+          "sessionId": "iab-0a49b9d0-f172-413b-a56e-83ba6d19bcb0",
+          "revision": 1,
+          "shadowRoots": 428,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 44.80000001192093,
+            "lastMutationIndexMs": 7.700000047683716
+          }
+        },
+        "restore": {
+          "originalNodes": 1180,
+          "retainedNodes": 1180,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 1180,
+          "retainedNodes": 1180,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 42
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 51
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 60
+          }
+        },
+        "views": {
+          "source-top": {
+            "units": 119,
+            "targets": 0,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-top": {
+            "units": 119,
+            "targets": 42,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-scroll": {
+            "units": 119,
+            "targets": 51,
+            "overflow": 0,
+            "clips": 0
+          },
+          "replace-top": {
+            "units": 119,
+            "targets": 121,
+            "overflow": 0,
+            "clips": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "commercial-4-1",
+      "category": "commercial",
+      "site": "Atlassian Developer",
+      "page": 1,
+      "url": "https://developer.atlassian.com/",
+      "note": "图文共享行、深色正文和按钮正常；轮播、淡入动画会导致不同访问间的画面差异。",
+      "before": {
+        "buildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 30,
+          "failed": 0,
+          "total": 32,
+          "watching": true,
+          "sessionId": "iab-d9b105d0-1b54-4123-88a2-21abcbfc3297",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 12.100000083446503,
+            "lastMutationIndexMs": 0.19999998807907104
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 32,
+          "failed": 0,
+          "total": 32,
+          "watching": true,
+          "sessionId": "iab-d9b105d0-1b54-4123-88a2-21abcbfc3297",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 12.100000083446503,
+            "lastMutationIndexMs": 0.20000004768371582
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 32,
+          "failed": 0,
+          "total": 32,
+          "watching": true,
+          "sessionId": "iab-d9b105d0-1b54-4123-88a2-21abcbfc3297",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 9.099999964237213,
+            "lastMutationIndexMs": 4.099999964237213
+          }
+        },
+        "restore": {
+          "originalNodes": 160,
+          "retainedNodes": 157,
+          "removedByPage": 3,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 160,
+          "retainedNodes": 157,
+          "removedByPage": 3,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 27
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 27
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 25
+          }
+        },
+        "views": {
+          "source-top": {
+            "units": 32,
+            "targets": 0,
+            "overflow": 37,
+            "clips": 0
+          },
+          "bilingual-top": {
+            "units": 32,
+            "targets": 27,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-scroll": {
+            "units": 32,
+            "targets": 27,
+            "overflow": 0,
+            "clips": 0
+          },
+          "replace-top": {
+            "units": 32,
+            "targets": 54,
+            "overflow": 0,
+            "clips": 0
+          }
+        }
+      },
+      "after": {
+        "buildHash": "88fa0d2406d8184e77a88ad6c6ffa4bb034854b88caf58be4309e8aa53e8bca9",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 31,
+          "failed": 0,
+          "total": 33,
+          "watching": true,
+          "sessionId": "iab-101870be-2540-4407-97c0-91b6289f7e4b",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 11.899999976158142,
+            "lastMutationIndexMs": 0.699999988079071
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 32,
+          "failed": 0,
+          "total": 32,
+          "watching": true,
+          "sessionId": "iab-101870be-2540-4407-97c0-91b6289f7e4b",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 11.899999976158142,
+            "lastMutationIndexMs": 0.09999996423721313
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 32,
+          "failed": 0,
+          "total": 32,
+          "watching": true,
+          "sessionId": "iab-101870be-2540-4407-97c0-91b6289f7e4b",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 10.49999988079071,
+            "lastMutationIndexMs": 2.200000047683716
+          }
+        },
+        "restore": {
+          "originalNodes": 160,
+          "retainedNodes": 157,
+          "removedByPage": 3,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 160,
+          "retainedNodes": 157,
+          "removedByPage": 3,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 1,
+          "changedLinks": 1,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 27
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 29
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 25
+          }
+        },
+        "views": {
+          "source-top": {
+            "units": 32,
+            "targets": 0,
+            "overflow": 37,
+            "clips": 0
+          },
+          "bilingual-top": {
+            "units": 32,
+            "targets": 27,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-scroll": {
+            "units": 32,
+            "targets": 29,
+            "overflow": 0,
+            "clips": 0
+          },
+          "replace-top": {
+            "units": 32,
+            "targets": 50,
+            "overflow": 0,
+            "clips": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "commercial-10-2",
+      "category": "commercial",
+      "site": "Auth0 Docs",
+      "page": 2,
+      "url": "https://auth0.com/docs/get-started",
+      "note": "正文、侧目录、卡片和提示区保持布局；原文参考保留网页本身的显示范围。",
+      "before": {
+        "buildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 59,
+          "failed": 0,
+          "total": 75,
+          "watching": true,
+          "sessionId": "iab-21c1ebc4-19aa-4818-a440-dd76a73a32bb",
+          "revision": 1,
+          "shadowRoots": 1,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 4,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 22.00000011920929,
+            "lastMutationIndexMs": 6.400000035762787
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 60,
+          "failed": 0,
+          "total": 74,
+          "watching": true,
+          "sessionId": "iab-21c1ebc4-19aa-4818-a440-dd76a73a32bb",
+          "revision": 1,
+          "shadowRoots": 1,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 4,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 22.00000011920929,
+            "lastMutationIndexMs": 0.20000004768371582
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 60,
+          "failed": 0,
+          "total": 74,
+          "watching": true,
+          "sessionId": "iab-21c1ebc4-19aa-4818-a440-dd76a73a32bb",
+          "revision": 1,
+          "shadowRoots": 1,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 4,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 20.899999856948853,
+            "lastMutationIndexMs": 5
+          }
+        },
+        "restore": {
+          "originalNodes": 243,
+          "retainedNodes": 243,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 243,
+          "retainedNodes": 243,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 57
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 58
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 54
+          }
+        },
+        "views": {
+          "source-top": {
+            "units": 75,
+            "targets": 0,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-top": {
+            "units": 75,
+            "targets": 57,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-scroll": {
+            "units": 75,
+            "targets": 58,
+            "overflow": 0,
+            "clips": 0
+          },
+          "replace-top": {
+            "units": 75,
+            "targets": 112,
+            "overflow": 0,
+            "clips": 0
+          }
+        }
+      },
+      "after": {
+        "buildHash": "88fa0d2406d8184e77a88ad6c6ffa4bb034854b88caf58be4309e8aa53e8bca9",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 59,
+          "failed": 0,
+          "total": 75,
+          "watching": true,
+          "sessionId": "iab-e54ddb34-9ee4-4f6c-807f-572696fdf783",
+          "revision": 1,
+          "shadowRoots": 1,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 4,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 24.900000035762787,
+            "lastMutationIndexMs": 3.099999964237213
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 60,
+          "failed": 0,
+          "total": 74,
+          "watching": true,
+          "sessionId": "iab-e54ddb34-9ee4-4f6c-807f-572696fdf783",
+          "revision": 1,
+          "shadowRoots": 1,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 4,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 24.900000035762787,
+            "lastMutationIndexMs": 0.30000001192092896
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 60,
+          "failed": 0,
+          "total": 74,
+          "watching": true,
+          "sessionId": "iab-e54ddb34-9ee4-4f6c-807f-572696fdf783",
+          "revision": 1,
+          "shadowRoots": 1,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 4,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 21.300000071525574,
+            "lastMutationIndexMs": 1.5
+          }
+        },
+        "restore": {
+          "originalNodes": 243,
+          "retainedNodes": 243,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 243,
+          "retainedNodes": 243,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 57
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 58
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 58
+          }
+        },
+        "views": {
+          "source-top": {
+            "units": 75,
+            "targets": 0,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-top": {
+            "units": 75,
+            "targets": 57,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-scroll": {
+            "units": 75,
+            "targets": 58,
+            "overflow": 0,
+            "clips": 0
+          },
+          "replace-top": {
+            "units": 75,
+            "targets": 109,
+            "overflow": 0,
+            "clips": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "open_source-1-1",
+      "category": "open_source",
+      "site": "React",
+      "page": 1,
+      "url": "https://react.dev/",
+      "note": "示例代码保持单份，说明文字和右侧交互演示继续翻译。",
+      "before": {
+        "buildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 16,
+          "failed": 0,
+          "total": 120,
+          "watching": true,
+          "sessionId": "iab-05e65d5f-6ac3-4aa4-9d93-f9affec6111b",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 41.79999989271164,
+            "lastMutationIndexMs": 1.399999976158142
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 19,
+          "failed": 0,
+          "total": 120,
+          "watching": true,
+          "sessionId": "iab-05e65d5f-6ac3-4aa4-9d93-f9affec6111b",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 41.79999989271164,
+            "lastMutationIndexMs": 1.199999988079071
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 21,
+          "failed": 0,
+          "total": 120,
+          "watching": true,
+          "sessionId": "iab-05e65d5f-6ac3-4aa4-9d93-f9affec6111b",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 43.299999952316284,
+            "lastMutationIndexMs": 8.599999964237213
+          }
+        },
+        "restore": {
+          "originalNodes": 710,
+          "retainedNodes": 710,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 710,
+          "retainedNodes": 710,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 12
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 15
+          },
+          "replace-top": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 15
+          }
+        },
+        "views": {
+          "source-top": {
+            "units": 120,
+            "targets": 0,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-top": {
+            "units": 120,
+            "targets": 12,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-scroll": {
+            "units": 120,
+            "targets": 15,
+            "overflow": 0,
+            "clips": 0
+          },
+          "replace-top": {
+            "units": 120,
+            "targets": 32,
+            "overflow": 0,
+            "clips": 0
+          }
+        }
+      },
+      "after": {
+        "buildHash": "88fa0d2406d8184e77a88ad6c6ffa4bb034854b88caf58be4309e8aa53e8bca9",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 16,
+          "failed": 0,
+          "total": 120,
+          "watching": true,
+          "sessionId": "iab-83a000c7-56a3-42d9-b8c4-7535ff7147d6",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 44.00000011920929,
+            "lastMutationIndexMs": 1.800000011920929
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 19,
+          "failed": 0,
+          "total": 120,
+          "watching": true,
+          "sessionId": "iab-83a000c7-56a3-42d9-b8c4-7535ff7147d6",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 44.00000011920929,
+            "lastMutationIndexMs": 1.4000000357627869
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 21,
+          "failed": 0,
+          "total": 120,
+          "watching": true,
+          "sessionId": "iab-83a000c7-56a3-42d9-b8c4-7535ff7147d6",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 45.6000000834465,
+            "lastMutationIndexMs": 5
+          }
+        },
+        "restore": {
+          "originalNodes": 710,
+          "retainedNodes": 710,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 710,
+          "retainedNodes": 710,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 12
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 15
+          },
+          "replace-top": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 15
+          }
+        },
+        "views": {
+          "source-top": {
+            "units": 120,
+            "targets": 0,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-top": {
+            "units": 120,
+            "targets": 12,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-scroll": {
+            "units": 120,
+            "targets": 15,
+            "overflow": 0,
+            "clips": 0
+          },
+          "replace-top": {
+            "units": 120,
+            "targets": 32,
+            "overflow": 0,
+            "clips": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "open_source-4-2",
+      "category": "open_source",
+      "site": "Svelte",
+      "page": 2,
+      "url": "https://svelte.dev/docs/svelte/overview",
+      "note": "示例代码与侧目录保留，正文翻译正常；原生代码/目录裁切保留。",
+      "before": {
+        "buildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 55,
+          "failed": 0,
+          "total": 116,
+          "watching": true,
+          "sessionId": "iab-ad35885d-fe4a-4683-89db-a6d2b1b06c4d",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 14.300000011920929,
+            "lastMutationIndexMs": 2.599999964237213
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 55,
+          "failed": 0,
+          "total": 116,
+          "watching": true,
+          "sessionId": "iab-ad35885d-fe4a-4683-89db-a6d2b1b06c4d",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 14.300000011920929,
+            "lastMutationIndexMs": 1.4000000357627869
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 55,
+          "failed": 0,
+          "total": 116,
+          "watching": true,
+          "sessionId": "iab-ad35885d-fe4a-4683-89db-a6d2b1b06c4d",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 11.800000011920929,
+            "lastMutationIndexMs": 13.5
+          }
+        },
+        "restore": {
+          "originalNodes": 319,
+          "retainedNodes": 319,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 319,
+          "retainedNodes": 319,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 2,
+            "liveCodeBlocks": 2,
+            "originalCodeNodes": 120,
+            "retainedCodeNodes": 120,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 2,
+            "liveCodeBlocks": 2,
+            "originalCodeNodes": 120,
+            "retainedCodeNodes": 120,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 27
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 2,
+            "liveCodeBlocks": 2,
+            "originalCodeNodes": 120,
+            "retainedCodeNodes": 120,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 27
+          },
+          "replace-top": {
+            "codeBlocks": 2,
+            "liveCodeBlocks": 2,
+            "originalCodeNodes": 120,
+            "retainedCodeNodes": 120,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 23
+          }
+        },
+        "views": {
+          "source-top": {
+            "units": 116,
+            "targets": 0,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-top": {
+            "units": 116,
+            "targets": 27,
+            "overflow": 0,
+            "clips": 2
+          },
+          "bilingual-scroll": {
+            "units": 116,
+            "targets": 27,
+            "overflow": 0,
+            "clips": 2
+          },
+          "replace-top": {
+            "units": 116,
+            "targets": 50,
+            "overflow": 0,
+            "clips": 1
+          }
+        }
+      },
+      "after": {
+        "buildHash": "88fa0d2406d8184e77a88ad6c6ffa4bb034854b88caf58be4309e8aa53e8bca9",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 56,
+          "failed": 0,
+          "total": 117,
+          "watching": true,
+          "sessionId": "iab-5e52149f-ce40-46d0-8f83-4669ec83c086",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 14.500000059604645,
+            "lastMutationIndexMs": 1
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 56,
+          "failed": 0,
+          "total": 117,
+          "watching": true,
+          "sessionId": "iab-5e52149f-ce40-46d0-8f83-4669ec83c086",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 14.500000059604645,
+            "lastMutationIndexMs": 1.100000023841858
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 56,
+          "failed": 0,
+          "total": 117,
+          "watching": true,
+          "sessionId": "iab-5e52149f-ce40-46d0-8f83-4669ec83c086",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 12.000000059604645,
+            "lastMutationIndexMs": 0.19999998807907104
+          }
+        },
+        "restore": {
+          "originalNodes": 319,
+          "retainedNodes": 319,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 319,
+          "retainedNodes": 319,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 2,
+            "liveCodeBlocks": 2,
+            "originalCodeNodes": 120,
+            "retainedCodeNodes": 120,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 2,
+            "liveCodeBlocks": 2,
+            "originalCodeNodes": 120,
+            "retainedCodeNodes": 120,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 27
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 2,
+            "liveCodeBlocks": 2,
+            "originalCodeNodes": 120,
+            "retainedCodeNodes": 120,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 27
+          },
+          "replace-top": {
+            "codeBlocks": 2,
+            "liveCodeBlocks": 2,
+            "originalCodeNodes": 120,
+            "retainedCodeNodes": 120,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 1,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 24
+          }
+        },
+        "views": {
+          "source-top": {
+            "units": 117,
+            "targets": 0,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-top": {
+            "units": 117,
+            "targets": 27,
+            "overflow": 0,
+            "clips": 2
+          },
+          "bilingual-scroll": {
+            "units": 117,
+            "targets": 27,
+            "overflow": 0,
+            "clips": 2
+          },
+          "replace-top": {
+            "units": 117,
+            "targets": 50,
+            "overflow": 0,
+            "clips": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "open_source-7-2",
+      "category": "open_source",
+      "site": "Vite",
+      "page": 2,
+      "url": "https://vite.dev/guide/",
+      "note": "命令、内联标识符和代码标签页保留，说明及目录排版正常。",
+      "before": {
+        "buildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 83,
+          "failed": 0,
+          "total": 128,
+          "watching": true,
+          "sessionId": "iab-50b83dfc-1969-4a33-8233-6375772bc27a",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 46.500000059604645,
+            "lastMutationIndexMs": 2.300000011920929
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 86,
+          "failed": 0,
+          "total": 128,
+          "watching": true,
+          "sessionId": "iab-50b83dfc-1969-4a33-8233-6375772bc27a",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 46.500000059604645,
+            "lastMutationIndexMs": 1.199999988079071
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 93,
+          "failed": 0,
+          "total": 128,
+          "watching": true,
+          "sessionId": "iab-50b83dfc-1969-4a33-8233-6375772bc27a",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 40.90000003576279,
+            "lastMutationIndexMs": 45.89999997615814
+          }
+        },
+        "restore": {
+          "originalNodes": 611,
+          "retainedNodes": 611,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 611,
+          "retainedNodes": 611,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 28,
+            "liveCodeBlocks": 28,
+            "originalCodeNodes": 187,
+            "retainedCodeNodes": 187,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 19,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 28,
+            "liveCodeBlocks": 28,
+            "originalCodeNodes": 187,
+            "retainedCodeNodes": 187,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 19,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 58
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 28,
+            "liveCodeBlocks": 28,
+            "originalCodeNodes": 187,
+            "retainedCodeNodes": 187,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 19,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 61
+          },
+          "replace-top": {
+            "codeBlocks": 28,
+            "liveCodeBlocks": 28,
+            "originalCodeNodes": 187,
+            "retainedCodeNodes": 187,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 19,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 48
+          }
+        },
+        "views": {
+          "source-top": {
+            "units": 128,
+            "targets": 0,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-top": {
+            "units": 128,
+            "targets": 58,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-scroll": {
+            "units": 128,
+            "targets": 61,
+            "overflow": 0,
+            "clips": 0
+          },
+          "replace-top": {
+            "units": 128,
+            "targets": 116,
+            "overflow": 0,
+            "clips": 0
+          }
+        }
+      },
+      "after": {
+        "buildHash": "88fa0d2406d8184e77a88ad6c6ffa4bb034854b88caf58be4309e8aa53e8bca9",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 83,
+          "failed": 0,
+          "total": 128,
+          "watching": true,
+          "sessionId": "iab-85249ead-7af1-4c4d-baa1-3a8dee5df26b",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 47.40000003576279,
+            "lastMutationIndexMs": 1.699999988079071
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 86,
+          "failed": 0,
+          "total": 128,
+          "watching": true,
+          "sessionId": "iab-85249ead-7af1-4c4d-baa1-3a8dee5df26b",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 47.40000003576279,
+            "lastMutationIndexMs": 0.5
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 92,
+          "failed": 0,
+          "total": 128,
+          "watching": true,
+          "sessionId": "iab-85249ead-7af1-4c4d-baa1-3a8dee5df26b",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 40.80000001192093,
+            "lastMutationIndexMs": 35.5
+          }
+        },
+        "restore": {
+          "originalNodes": 611,
+          "retainedNodes": 611,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 611,
+          "retainedNodes": 611,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 28,
+            "liveCodeBlocks": 28,
+            "originalCodeNodes": 187,
+            "retainedCodeNodes": 187,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 19,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 28,
+            "liveCodeBlocks": 28,
+            "originalCodeNodes": 187,
+            "retainedCodeNodes": 187,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 19,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 58
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 28,
+            "liveCodeBlocks": 28,
+            "originalCodeNodes": 187,
+            "retainedCodeNodes": 187,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 19,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 61
+          },
+          "replace-top": {
+            "codeBlocks": 28,
+            "liveCodeBlocks": 28,
+            "originalCodeNodes": 187,
+            "retainedCodeNodes": 187,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 19,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 48
+          }
+        },
+        "views": {
+          "source-top": {
+            "units": 128,
+            "targets": 0,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-top": {
+            "units": 128,
+            "targets": 58,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-scroll": {
+            "units": 128,
+            "targets": 61,
+            "overflow": 0,
+            "clips": 0
+          },
+          "replace-top": {
+            "units": 128,
+            "targets": 115,
+            "overflow": 0,
+            "clips": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "open_source-9-2",
+      "category": "open_source",
+      "site": "Python",
+      "page": 2,
+      "url": "https://docs.python.org/3/tutorial/introduction.html",
+      "note": "交互式代码与输出保留，教程标题、正文和侧栏保持正常。",
+      "before": {
+        "buildHash": "2d8af572d4578940fe95e1dce43df4425f516473d2b6ba31d65f7d7b8110e330",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 39,
+          "failed": 0,
+          "total": 109,
+          "watching": true,
+          "sessionId": "iab-2ec90448-d1ca-4900-97fb-5ae7cf1141ee",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 26.700000047683716,
+            "lastMutationIndexMs": 0
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 43,
+          "failed": 0,
+          "total": 109,
+          "watching": true,
+          "sessionId": "iab-2ec90448-d1ca-4900-97fb-5ae7cf1141ee",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 26.700000047683716,
+            "lastMutationIndexMs": 0
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 44,
+          "failed": 0,
+          "total": 109,
+          "watching": true,
+          "sessionId": "iab-2ec90448-d1ca-4900-97fb-5ae7cf1141ee",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 24.30000013113022,
+            "lastMutationIndexMs": 59.799999952316284
+          }
+        },
+        "restore": {
+          "originalNodes": 2364,
+          "retainedNodes": 2364,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 2364,
+          "retainedNodes": 2364,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 42,
+            "liveCodeBlocks": 42,
+            "originalCodeNodes": 1394,
+            "retainedCodeNodes": 1394,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 42,
+            "liveCodeBlocks": 42,
+            "originalCodeNodes": 1394,
+            "retainedCodeNodes": 1394,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 36
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 42,
+            "liveCodeBlocks": 42,
+            "originalCodeNodes": 1394,
+            "retainedCodeNodes": 1394,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 40
+          },
+          "replace-top": {
+            "codeBlocks": 42,
+            "liveCodeBlocks": 42,
+            "originalCodeNodes": 1394,
+            "retainedCodeNodes": 1394,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 25
+          }
+        },
+        "views": {
+          "source-top": {
+            "units": 109,
+            "targets": 0,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-top": {
+            "units": 109,
+            "targets": 36,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-scroll": {
+            "units": 109,
+            "targets": 40,
+            "overflow": 0,
+            "clips": 0
+          },
+          "replace-top": {
+            "units": 109,
+            "targets": 66,
+            "overflow": 0,
+            "clips": 0
+          }
+        }
+      },
+      "after": {
+        "buildHash": "88fa0d2406d8184e77a88ad6c6ffa4bb034854b88caf58be4309e8aa53e8bca9",
+        "buildCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 39,
+          "failed": 0,
+          "total": 109,
+          "watching": true,
+          "sessionId": "iab-1b679d88-f766-48c9-bbc4-bc303d21b49f",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 26.800000071525574,
+            "lastMutationIndexMs": 0
+          }
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 43,
+          "failed": 0,
+          "total": 109,
+          "watching": true,
+          "sessionId": "iab-1b679d88-f766-48c9-bbc4-bc303d21b49f",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 26.800000071525574,
+            "lastMutationIndexMs": 0
+          }
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 44,
+          "failed": 0,
+          "total": 109,
+          "watching": true,
+          "sessionId": "iab-1b679d88-f766-48c9-bbc4-bc303d21b49f",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 23,
+            "lastMutationIndexMs": 44.80000001192093
+          }
+        },
+        "restore": {
+          "originalNodes": 2364,
+          "retainedNodes": 2364,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "restoreReplace": {
+          "originalNodes": 2364,
+          "retainedNodes": 2364,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 42,
+            "liveCodeBlocks": 42,
+            "originalCodeNodes": 1394,
+            "retainedCodeNodes": 1394,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 42,
+            "liveCodeBlocks": 42,
+            "originalCodeNodes": 1394,
+            "retainedCodeNodes": 1394,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 36
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 42,
+            "liveCodeBlocks": 42,
+            "originalCodeNodes": 1394,
+            "retainedCodeNodes": 1394,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 40
+          },
+          "replace-top": {
+            "codeBlocks": 42,
+            "liveCodeBlocks": 42,
+            "originalCodeNodes": 1394,
+            "retainedCodeNodes": 1394,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 25
+          }
+        },
+        "views": {
+          "source-top": {
+            "units": 109,
+            "targets": 0,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-top": {
+            "units": 109,
+            "targets": 36,
+            "overflow": 0,
+            "clips": 0
+          },
+          "bilingual-scroll": {
+            "units": 109,
+            "targets": 40,
+            "overflow": 0,
+            "clips": 0
+          },
+          "replace-top": {
+            "units": 109,
+            "targets": 66,
+            "overflow": 0,
+            "clips": 0
+          }
+        }
+      }
+    }
+  ]
+}

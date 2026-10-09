@@ -23,6 +23,8 @@ export const CLS_ERR = `${P}-error`;
 /** Inline flow wrapper: keeps original text + companion as one flex item. */
 export const CLS_FLOW = `${P}-flow`;
 export const FLOW = `data-${P}-flow`;
+/** Let structured prose rows open a translation row without reparenting source elements. */
+export const WRAP_TEXT = `data-${P}-wrap-text`;
 export const HIDE = `${P}-original-hidden`;
 export const CLS_REPLACE = `${P}-replace-text`;
 export const STASH_ALL = `data-${P}-stash-all`;

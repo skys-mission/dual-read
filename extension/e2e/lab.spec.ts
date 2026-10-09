@@ -2,6 +2,24 @@ import { extTest as test, expectExt as expect } from './helpers/ext-fixture';
 import { startMockServer } from './helpers/mock-server';
 import { pageLayoutCases, setupPageLayoutRegression, verifyPageLayoutRegression } from './helpers/page-layout-regressions';
 import { feedLayoutCases, setupFeedLayoutRegression, translateFeedText, verifyFeedLayoutRegression } from './helpers/feed-layout-regressions';
+import { codeContentCases, verifyCodeContentRegression } from './helpers/code-content-regressions';
+import { reviewLayoutCases, translateReviewLayoutText, verifyReviewLayoutRegression } from './helpers/review-layout-regressions';
+import { dynamicLayoutCases, translateDynamicLayoutText, verifyDynamicLayoutRegression } from './helpers/dynamic-layout-regressions';
+import { presentationLayoutCases, translatePresentationText, verifyPresentationLayoutRegression } from './helpers/presentation-layout-regressions';
+import { layoutLifecycleCases, translateLayoutLifecycleText, verifyLayoutLifecycleRegression } from './helpers/layout-lifecycle-regressions';
+import { layoutPolicyCases, translateLayoutPolicyText, verifyLayoutPolicyRegression, verifyResumedFooter } from './helpers/layout-policy-regressions';
+import {flowStyleCases, translateFlowStyleText, verifyFlowStyleRegression} from './helpers/flow-style-regressions';
+import {stylesheetLayoutCases, translateStylesheetText, verifyStylesheetLayoutRegression} from './helpers/stylesheet-layout-regressions';
+import {mediaPolicyCases, translateMediaPolicyText, verifyMediaPolicyRegression} from './helpers/media-policy-regressions';
+import {inlineVisibilityCases, verifyInlineVisibilityRegression} from './helpers/inline-visibility-regressions';
+import {layoutNeighborCases, translateNeighborText, verifyLayoutNeighborRegression} from './helpers/layout-neighbor-regressions';
+import {cascadeLayoutCases, translateCascadeText, verifyCascadeLayoutRegression} from './helpers/cascade-layout-regressions';
+import {positionedLayoutCases, translatePositionedText, verifyPositionedLayoutRegression} from './helpers/positioned-layout-regressions';
+import {specificityVisibilityCases, translateSpecificityText, verifySpecificityVisibilityRegression} from './helpers/specificity-visibility-regressions';
+import {motionPolicyGroups, translateMotionPolicyText, verifyMotionPolicyRegression} from './helpers/motion-policy-regressions';
+import {sharedPolicyGroups, translateSharedPolicyText, verifySharedPolicyRegression} from './helpers/shared-policy-regressions';
+import {nestingPaddingCases, translateNestingPaddingText, verifyNestingPaddingRegression} from './helpers/nesting-padding-regressions';
+import {logicalNestingCases, translateLogicalText, verifyLogicalNestingRegression} from './helpers/logical-nesting-regressions';
 import {
   seedSettings,
   getTabId,
@@ -14,6 +32,329 @@ import {
 
 // Lab matrix: open Shadow DOM, same/cross-origin frames, SPA mutation,
 // and XSS-safe text rendering — all on loopback fixtures (no live sites).
+
+for (const scenario of motionPolicyGroups) {
+  test(scenario.name, async ({extContext, extensionId, sw}) => {
+    const mock = await startMockServer(), requests: string[] = [];
+    mock.setTranslator(text => {requests.push(text);return translateMotionPolicyText(text);});
+    try {
+      await seedSettings(extContext,extensionId,{apiBase:mock.apiBase});
+      const page = await extContext.newPage();await page.goto(mock.fixtureUrl('lab-motion-policy.html'));
+      const tabId = await getTabId(page,sw);
+      await sw.evaluate(async id => {await chrome.scripting.executeScript({target:{tabId:id},func:() => {
+        document.addEventListener('motion-policy-test:restore',() => globalThis.__DUAL_READ__?.restore());
+      }});},tabId);
+      await verifyMotionPolicyRegression(page,scenario,{translate:mode => translateTab(sw,tabId,mode),restore:() => restoreTab(sw,tabId),pause:() => stopWatchTab(sw,tabId)},requests);
+    } finally {await mock.close();}
+  });
+}
+
+for (const scenario of sharedPolicyGroups) {
+  test(scenario.name, async ({extContext, extensionId, sw}) => {
+    const mock = await startMockServer(), requests: string[] = [];
+    mock.setTranslator(text => {requests.push(text);return translateSharedPolicyText(text);});
+    try {
+      await seedSettings(extContext,extensionId,{apiBase:mock.apiBase});
+      const page = await extContext.newPage();await page.goto(mock.fixtureUrl('lab-shared-policy.html'));
+      const tabId = await getTabId(page,sw);
+      await sw.evaluate(async id => {await chrome.scripting.executeScript({target:{tabId:id},func:() => {
+        document.addEventListener('shared-policy-test:restore',() => globalThis.__DUAL_READ__?.restore());
+      }});},tabId);
+      await verifySharedPolicyRegression(page,scenario,{translate:mode => translateTab(sw,tabId,mode),restore:() => restoreTab(sw,tabId),pause:() => stopWatchTab(sw,tabId)},requests);
+    } finally {await mock.close();}
+  });
+}
+
+for (const scenario of nestingPaddingCases) {
+  test(scenario.name, async ({extContext, extensionId, sw}) => {
+    const mock = await startMockServer(), requests: string[] = [];
+    mock.setTranslator(text => {requests.push(text);return translateNestingPaddingText(text);});
+    try {
+      await seedSettings(extContext,extensionId,{apiBase:mock.apiBase});
+      const page = await extContext.newPage();await page.goto(mock.fixtureUrl('lab-nesting-padding.html'));
+      const tabId = await getTabId(page,sw);
+      await sw.evaluate(async id => {await chrome.scripting.executeScript({target:{tabId:id},func:() => {
+        document.addEventListener('nesting-padding-test:restore',() => globalThis.__DUAL_READ__?.restore());
+      }});},tabId);
+      await verifyNestingPaddingRegression(page,scenario,{translate:mode => translateTab(sw,tabId,mode),restore:() => restoreTab(sw,tabId),pause:() => stopWatchTab(sw,tabId)},requests);
+    } finally {await mock.close();}
+  });
+}
+
+for (const scenario of logicalNestingCases) {
+  test(scenario.name, async ({extContext, extensionId, sw}) => {
+    const mock = await startMockServer(), requests: string[] = [];
+    mock.setTranslator(text => {requests.push(text);return translateLogicalText(text);});
+    try {
+      await seedSettings(extContext,extensionId,{apiBase:mock.apiBase});
+      const page = await extContext.newPage();await page.goto(mock.fixtureUrl('lab-logical-nesting.html'));
+      const tabId = await getTabId(page,sw);
+      await sw.evaluate(async id => {await chrome.scripting.executeScript({target:{tabId:id},func:() => {
+        document.addEventListener('logical-test:restore',() => globalThis.__DUAL_READ__?.restore());
+      }});},tabId);
+      await verifyLogicalNestingRegression(page,scenario,{translate:mode => translateTab(sw,tabId,mode),restore:() => restoreTab(sw,tabId),pause:() => stopWatchTab(sw,tabId)},requests);
+    } finally {await mock.close();}
+  });
+}
+
+for (const scenario of specificityVisibilityCases) {
+  test(scenario.name, async ({extContext, extensionId, sw}) => {
+    const mock = await startMockServer(), requests: string[] = [];
+    mock.setTranslator(text => {requests.push(text);return translateSpecificityText(text);});
+    try {
+      await seedSettings(extContext,extensionId,{apiBase:mock.apiBase});
+      const page = await extContext.newPage();await page.goto(mock.fixtureUrl('lab-specificity-visibility.html'));
+      const tabId = await getTabId(page,sw);
+      await sw.evaluate(async id => {await chrome.scripting.executeScript({target:{tabId:id},func:() => {
+        document.addEventListener('specificity-test:restore',() => globalThis.__DUAL_READ__?.restore());
+      }});},tabId);
+      await verifySpecificityVisibilityRegression(page,scenario,{translate:mode => translateTab(sw,tabId,mode),restore:() => restoreTab(sw,tabId),pause:() => stopWatchTab(sw,tabId)},requests);
+    } finally {await mock.close();}
+  });
+}
+
+for (const scenario of positionedLayoutCases) {
+  test(scenario.name, async ({extContext, extensionId, sw}) => {
+    const mock = await startMockServer(), requests: string[] = [];
+    mock.setTranslator(text => {requests.push(text);return translatePositionedText(text);});
+    try {
+      await seedSettings(extContext,extensionId,{apiBase:mock.apiBase});
+      const page = await extContext.newPage();await page.goto(mock.fixtureUrl('lab-positioned-layout.html'));
+      const tabId = await getTabId(page,sw);
+      await sw.evaluate(async id => {await chrome.scripting.executeScript({target:{tabId:id},func:() => {
+        document.addEventListener('positioned-test:restore',() => globalThis.__DUAL_READ__?.restore());
+      }});},tabId);
+      await verifyPositionedLayoutRegression(page,scenario,{translate:mode => translateTab(sw,tabId,mode),restore:() => restoreTab(sw,tabId),pause:() => stopWatchTab(sw,tabId)},requests);
+    } finally {await mock.close();}
+  });
+}
+
+for (const scenario of cascadeLayoutCases) {
+  test(scenario.name, async ({extContext, extensionId, sw}) => {
+    const mock = await startMockServer(), requests: string[] = [];
+    mock.setTranslator(text => {requests.push(text);return translateCascadeText(text);});
+    try {
+      await seedSettings(extContext,extensionId,{apiBase:mock.apiBase});
+      const page = await extContext.newPage();await page.goto(mock.fixtureUrl('lab-cascade-layout.html'));
+      const tabId = await getTabId(page,sw);
+      await sw.evaluate(async id => {await chrome.scripting.executeScript({target:{tabId:id},func:() => {
+        document.addEventListener('cascade-test:restore',() => globalThis.__DUAL_READ__?.restore());
+      }});},tabId);
+      await verifyCascadeLayoutRegression(page,scenario,{translate:mode => translateTab(sw,tabId,mode),restore:() => restoreTab(sw,tabId),pause:() => stopWatchTab(sw,tabId)},requests);
+    } finally {await mock.close();}
+  });
+}
+
+for (const scenario of layoutNeighborCases) {
+  test(scenario.name, async ({extContext, extensionId, sw}) => {
+    const mock = await startMockServer(), requests: string[] = [];
+    mock.setTranslator(text => {requests.push(text); return translateNeighborText(text);});
+    try {
+      await seedSettings(extContext, extensionId, {apiBase:mock.apiBase});
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('lab-layout-neighbors.html'));
+      const tabId = await getTabId(page,sw);
+      await sw.evaluate(async id => {await chrome.scripting.executeScript({target:{tabId:id},func:() => {
+        document.addEventListener('layout-neighbor-test:restore',() => globalThis.__DUAL_READ__?.restore());
+      }});}, tabId);
+      await verifyLayoutNeighborRegression(page,scenario,{translate:mode => translateTab(sw,tabId,mode),restore:() => restoreTab(sw,tabId),pause:() => stopWatchTab(sw,tabId)},requests);
+    } finally {await mock.close();}
+  });
+}
+
+for (const scenario of inlineVisibilityCases) {
+  test(scenario.name, async ({extContext, extensionId, sw}) => {
+    const mock = await startMockServer(), requests: string[] = [];
+    mock.setTranslator(text => {requests.push(text); return `译:${text}`;});
+    try {
+      await seedSettings(extContext, extensionId, {apiBase: mock.apiBase});
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('lab-inline-visibility.html'));
+      const tabId = await getTabId(page, sw);
+      await sw.evaluate(async id => {await chrome.scripting.executeScript({target: {tabId: id}, func: () => {
+        document.addEventListener('inline-visibility-test:restore', () => globalThis.__DUAL_READ__?.restore());
+      }});}, tabId);
+      await verifyInlineVisibilityRegression(page, scenario, {translate: mode => translateTab(sw, tabId, mode), restore: () => restoreTab(sw, tabId), pause: () => stopWatchTab(sw, tabId)}, requests);
+    } finally {await mock.close();}
+  });
+}
+
+for (const scenario of mediaPolicyCases) {
+  test(scenario.name, async ({extContext, extensionId, sw}) => {
+    const mock = await startMockServer(); const requests: string[] = [];
+    mock.setTranslator(text => {requests.push(text); return translateMediaPolicyText(text);});
+    try {
+      await seedSettings(extContext, extensionId, {apiBase: mock.apiBase});
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('lab-media-policy.html'));
+      const tabId = await getTabId(page, sw);
+      await sw.evaluate(async id => {await chrome.scripting.executeScript({target: {tabId: id}, func: () => {
+        document.addEventListener('media-policy-test:restore', () => globalThis.__DUAL_READ__?.restore());
+      }});}, tabId);
+      await verifyMediaPolicyRegression(page, scenario, {translate: mode => translateTab(sw, tabId, mode), restore: () => restoreTab(sw, tabId), pause: () => stopWatchTab(sw, tabId)}, requests);
+    } finally {await mock.close();}
+  });
+}
+
+for (const scenario of stylesheetLayoutCases) {
+  test(scenario.name, async ({extContext, extensionId, sw}) => {
+    const mock=await startMockServer(); const requests:string[]=[];
+    mock.setTranslator(text=>{requests.push(text);return translateStylesheetText(text);});
+    try {
+      await seedSettings(extContext,extensionId,{apiBase:mock.apiBase});
+      const page=await extContext.newPage();await page.goto(mock.fixtureUrl('lab-stylesheet-layout.html'));
+      const tabId=await getTabId(page,sw);
+      await sw.evaluate(async id=>{await chrome.scripting.executeScript({target:{tabId:id},func:()=>{
+        document.addEventListener('stylesheet-layout-test:restore',()=>globalThis.__DUAL_READ__?.restore());
+      }});},tabId);
+      await verifyStylesheetLayoutRegression(page,scenario,{translate:mode=>translateTab(sw,tabId,mode),restore:()=>restoreTab(sw,tabId),pause:()=>stopWatchTab(sw,tabId)},requests);
+    } finally {await mock.close();}
+  });
+}
+
+for (const scenario of flowStyleCases) {
+  test(scenario.name, async ({extContext, extensionId, sw}) => {
+    const mock=await startMockServer(); const requests:string[]=[];
+    mock.setTranslator(text=>{requests.push(text); return translateFlowStyleText(text);});
+    try {
+      await seedSettings(extContext, extensionId, {apiBase:mock.apiBase});
+      const page=await extContext.newPage(); await page.goto(mock.fixtureUrl('lab-flow-style.html'));
+      const tabId=await getTabId(page,sw);
+      await sw.evaluate(async id=>{await chrome.scripting.executeScript({target:{tabId:id},func:()=>{
+        document.addEventListener('flow-style-test:restore',()=>globalThis.__DUAL_READ__?.restore());
+      }});},tabId);
+      await verifyFlowStyleRegression(page,scenario,{translate:mode=>translateTab(sw,tabId,mode),restore:()=>restoreTab(sw,tabId),pause:()=>stopWatchTab(sw,tabId)},requests);
+    } finally {await mock.close();}
+  });
+}
+
+for (const delivered of [false, true]) {
+  test(`layout policy resumed footer: delivered=${delivered}`, async ({extContext, extensionId, sw}) => {
+    const mock = await startMockServer(); const requests: string[] = [];
+    mock.setTranslator(text => {requests.push(text); return translateLayoutPolicyText(text);});
+    try {
+      await seedSettings(extContext, extensionId, {apiBase: mock.apiBase});
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('lab-layout-policy.html'));
+      const tabId = await getTabId(page, sw);
+      await sw.evaluate(async id => {await chrome.scripting.executeScript({target: {tabId: id}, func: () => {
+        document.addEventListener('layout-policy-test:restore', () => globalThis.__DUAL_READ__?.restore());
+      }});}, tabId);
+      await verifyResumedFooter(page, delivered, {
+        translate: mode => translateTab(sw, tabId, mode), restore: () => restoreTab(sw, tabId), pause: () => stopWatchTab(sw, tabId),
+      }, requests);
+    } finally {await mock.close();}
+  });
+}
+
+for (const scenario of layoutPolicyCases) {
+  test(scenario.name, async ({extContext, extensionId, sw}) => {
+    const mock = await startMockServer(); const requests: string[] = [];
+    mock.setTranslator(text => {requests.push(text); return translateLayoutPolicyText(text);});
+    try {
+      await seedSettings(extContext, extensionId, {apiBase: mock.apiBase});
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('lab-layout-policy.html'));
+      const tabId = await getTabId(page, sw);
+      await sw.evaluate(async id => {await chrome.scripting.executeScript({target: {tabId: id}, func: () => {
+        document.addEventListener('layout-policy-test:restore', () => globalThis.__DUAL_READ__?.restore());
+      }});}, tabId);
+      await verifyLayoutPolicyRegression(page, scenario, {
+        translate: mode => translateTab(sw, tabId, mode), restore: () => restoreTab(sw, tabId), pause: () => stopWatchTab(sw, tabId),
+      }, requests);
+    } finally {await mock.close();}
+  });
+}
+
+for (const scenario of layoutLifecycleCases) {
+  test(scenario.name, async ({extContext,extensionId,sw}) => {
+    const mock=await startMockServer();const requests:string[]=[];
+    mock.setTranslator(text=>{requests.push(text);return translateLayoutLifecycleText(text);});
+    try {
+      await seedSettings(extContext,extensionId,{apiBase:mock.apiBase});
+      const page=await extContext.newPage();await page.goto(mock.fixtureUrl('lab-layout-lifecycle.html'));
+      const tabId=await getTabId(page,sw);
+      await sw.evaluate(async id=>{await chrome.scripting.executeScript({target:{tabId:id},func:()=> {
+        document.addEventListener('layout-lifecycle-test:restore',()=>globalThis.__DUAL_READ__?.restore());
+      }});},tabId);
+      await verifyLayoutLifecycleRegression(page,scenario,{translate:mode=>translateTab(sw,tabId,mode),restore:()=>restoreTab(sw,tabId),pause:()=>stopWatchTab(sw,tabId)},requests);
+    } finally {await mock.close();}
+  });
+}
+
+for (const scenario of presentationLayoutCases) {
+  test(scenario.name, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer(); const sources: string[] = [];
+    mock.setTranslator(text => {sources.push(text);return translatePresentationText(text);});
+    try {
+      await seedSettings(extContext,extensionId,{apiBase:mock.apiBase});
+      const page=await extContext.newPage(); await page.goto(mock.fixtureUrl('lab-presentation-layout.html'));
+      const tabId=await getTabId(page,sw);
+      await sw.evaluate(async id => {await chrome.scripting.executeScript({target:{tabId:id},func:() => {
+        document.addEventListener('presentation-layout-test:restore',() => globalThis.__DUAL_READ__?.restore());
+      }});},tabId);
+      await verifyPresentationLayoutRegression(page,scenario,{
+        translate:mode => translateTab(sw,tabId,mode),restore:() => restoreTab(sw,tabId),pause:() => stopWatchTab(sw,tabId),
+      },sources);
+    } finally {await mock.close();}
+  });
+}
+
+for (const scenario of dynamicLayoutCases) {
+  test(scenario.name, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer();
+    const sources: string[] = [];
+    mock.setTranslator(text => { sources.push(text); return translateDynamicLayoutText(text); });
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage();
+      await page.goto(mock.fixtureUrl('lab-dynamic-layout.html'));
+      const tabId = await getTabId(page, sw);
+      await sw.evaluate(async id => {
+        await chrome.scripting.executeScript({ target: { tabId: id }, func: () => {
+          document.addEventListener('dynamic-layout-test:restore', () => globalThis.__DUAL_READ__?.restore());
+        } });
+      }, tabId);
+      await verifyDynamicLayoutRegression(page, scenario, {
+        translate: mode => translateTab(sw, tabId, mode), restore: () => restoreTab(sw, tabId), pause: () => stopWatchTab(sw, tabId),
+      }, sources);
+    } finally { await mock.close(); }
+  });
+}
+
+for (const scenario of reviewLayoutCases) {
+  test(scenario.name, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer();
+    const sources: string[] = [];
+    mock.setTranslator(text => { sources.push(text); return translateReviewLayoutText(text); });
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage();
+      await page.goto(mock.fixtureUrl('lab-review-layout.html'));
+      const tabId = await getTabId(page, sw);
+      await sw.evaluate(async id => {
+        await chrome.scripting.executeScript({ target: { tabId: id }, func: () => {
+          document.addEventListener('review-layout-test:restore', () => globalThis.__DUAL_READ__?.restore());
+        } });
+      }, tabId);
+      await verifyReviewLayoutRegression(page, scenario, {
+        translate: mode => translateTab(sw, tabId, mode), restore: () => restoreTab(sw, tabId), pause: () => stopWatchTab(sw, tabId),
+      }, sources);
+    } finally { await mock.close(); }
+  });
+}
+
+for (const scenario of codeContentCases) {
+  test(scenario.name, async ({extContext, extensionId, sw}) => {
+    const mock = await startMockServer();
+    const sources: string[] = [];
+    mock.setTranslator(text => { sources.push(text); return `译:${text}`; });
+    try {
+      await seedSettings(extContext, extensionId, {apiBase:mock.apiBase});
+      const page = await extContext.newPage();
+      await page.goto(mock.fixtureUrl('lab-code-content.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyCodeContentRegression(page, scenario.mode, {
+        translate: mode => translateTab(sw, tabId, mode), restore: () => restoreTab(sw, tabId),
+      }, sources);
+    } finally { await mock.close(); }
+  });
+}
 
 for (const scenario of pageLayoutCases) {
   test(scenario.name, async ({ extContext, extensionId, sw }) => {

@@ -3,16 +3,28 @@ import {
   CLS_BLOCK, CLS_ERR, CLS_FLOW, CLS_INLINE, CLS_INNER, CLS_NAV, CLS_REPLACE, DONE,
   FLOW, HIDE, LIST_OUTSIDE, MODE, NOWRAP, OURS_SEL, OUTSIDE, P, SHELL, STASH_ALL,
   STASH_LANGUAGE_ATTRS, STASH_TEXT,
+  WRAP_TEXT,
 } from '../dom-const';
-import { shouldKeepControlOnOneLine } from '../dom-role';
-import { collectSlotTextNodes, collectVisibleTextNodes } from '../collector';
+import { isCompactControlHost, shouldKeepControlOnOneLine } from '../dom-role';
+import { collectSlotTextNodes, collectVisibleTextNodes, hasComposedBoundary } from '../collector';
+import { hasCodeBlock } from '../collector/code-content';
 import { buildSafeRichSkeleton } from './rich';
 import { captureRichReplacement, forgetRichReplacement, restoreMovedRichNodes, restoreRichReplacement, type RichReplacementNode } from './rich-replace';
 import { walkOpenShadowRoots } from '../roots';
 import { ensureTranslationStyles, removeTranslationStyles } from './styles';
+import { applyBoundedLayouts, readBoundedLayouts, releaseBoundedLayout, restoreBoundedLayouts } from './bounded-layout';
+import { applyCompactLayouts, readCompactLayouts } from './compact-layout';
+import { applyMediaLayouts, attachMediaLayouts, captureMediaLayouts, readMediaLayouts, releaseMediaLayout, restoreMediaLayouts } from './media-layout';
+import { applySourceTypography, readSourceTypography, releaseSourceTypography, restoreSourceTypography, type SourceTypography } from './source-typography';
+import { applyAnchoredLayouts, attachAnchoredLayouts, captureAnchoredLayouts, readAnchoredLayouts, releaseAnchoredLayout, restoreAnchoredLayouts } from './anchored-layout';
 
 export { buildSafeRichSkeleton, sanitizeHref, isForbiddenAttr } from './rich';
 export { restoreMovedRichNodes } from './rich-replace';
+export { applyBoundedLayouts, readBoundedLayouts } from './bounded-layout';
+export { applyCompactLayouts, readCompactLayouts } from './compact-layout';
+export { applyMediaLayouts, captureMediaLayouts, readMediaLayouts } from './media-layout';
+export { readSourceTypography } from './source-typography';
+export { applyAnchoredLayouts, captureAnchoredLayouts, readAnchoredLayouts } from './anchored-layout';
 
 const P_NAV_SUB = `${P}-nav-sub`;
 const P_INLINE = `${P}-target--inline`;
@@ -22,6 +34,8 @@ const LIST_HOST = 'li, [role="listitem"]';
 const richReplacementNodes = new WeakMap<HTMLElement, RichReplacementNode[]>();
 const companions = new WeakMap<Element, Element>();
 const companionHosts = new WeakMap<Element, Element>();
+const flows = new WeakMap<HTMLElement, Set<HTMLElement>>();
+const flowHosts = new WeakMap<Element, HTMLElement>();
 interface TextReplacement {
   host: HTMLElement;
   visible: HTMLElement;
@@ -122,14 +136,19 @@ function restoreLanguageAttrs(el: HTMLElement): void {
   }
 }
 
+/** Move current source children back in place, preserving identities and edits. */
+function unwrapTextStash(stash: Element): void {
+  const parent = stash.parentNode;
+  if (!parent) return;
+  while (stash.firstChild) parent.insertBefore(stash.firstChild, stash);
+  stash.remove();
+}
+
 function restoreTextReplace(visible: Element): void {
   const replacement = textReplacementNodes.get(visible);
   if (replacement) {
     for (const stash of replacement.stashes) {
-      const parent = stash.parentNode;
-      if (!parent) continue; // The page replaced this source subtree entirely.
-      while (stash.firstChild) parent.insertBefore(stash.firstChild, stash);
-      stash.remove();
+      unwrapTextStash(stash);
     }
     visible.remove();
     textReplacements.delete(replacement.host);
@@ -140,9 +159,7 @@ function restoreTextReplace(visible: Element): void {
   const parent = visible.parentElement;
   if (!parent) return;
   for (const stash of Array.from(parent.querySelectorAll(`:scope .${HIDE}[${STASH_TEXT}]`))) {
-    const replacement = document.createTextNode(stash.textContent ?? '');
-    stash.parentElement?.insertBefore(replacement, stash);
-    stash.remove();
+    unwrapTextStash(stash);
   }
   visible.remove();
 }
@@ -177,9 +194,7 @@ function restoreReplaceOn(el: HTMLElement): void {
   el.querySelectorAll(`:scope .${HIDE}[${STASH_TEXT}]`).forEach((stash) => {
     const visible = stash.nextElementSibling;
     if (visible?.classList?.contains(CLS_REPLACE)) visible.remove();
-    const replacement = document.createTextNode(stash.textContent ?? '');
-    stash.parentElement?.insertBefore(replacement, stash);
-    stash.remove();
+    unwrapTextStash(stash);
   });
 }
 
@@ -279,6 +294,10 @@ function rememberCompanion(host: Element, node: Element): Element {
 }
 
 function removeCompanion(node: Element): void {
+  releaseSourceTypography(node);
+  releaseBoundedLayout(node);
+  releaseMediaLayout(node);
+  releaseAnchoredLayout(node);
   const host = companionHosts.get(node);
   if (host && companions.get(host) === node) companions.delete(host);
   companionHosts.delete(node);
@@ -411,6 +430,13 @@ function mount(el: HTMLElement, kind: UnitKind, avoidClipping = false): HTMLElem
 
 /** Leave source line clamps intact while giving bilingual prose a visible row. */
 function placeBlockCompanion(host: HTMLElement, node: HTMLElement, avoidClipping: boolean): void {
+  // Source-only nowrap truncation must not turn a prose translation into one
+  // unbreakable line. Preserve actual source paragraph breaks under `pre`.
+  const sourceWhiteSpace = getComputedStyle(host).whiteSpace;
+  if (sourceWhiteSpace === 'nowrap' || sourceWhiteSpace === 'pre') {
+    node.style.whiteSpace = sourceWhiteSpace === 'pre' ? 'pre-wrap' : 'normal';
+    node.style.overflowWrap = 'anywhere';
+  }
   if (avoidClipping) {
     let clippingBox: HTMLElement | null = null;
     for (let box: HTMLElement | null = host; box?.parentElement; box = box.parentElement) {
@@ -442,6 +468,8 @@ function placeBlockCompanion(host: HTMLElement, node: HTMLElement, avoidClipping
         // the card shell has a different font or whitespace policy.
         const sourceStyle = getComputedStyle(host);
         for (const property of ['font-family', 'font-size', 'font-weight', 'font-style', 'line-height', 'letter-spacing', 'text-align', 'white-space', 'text-wrap', 'word-break', 'overflow-wrap']) {
+          if ((sourceWhiteSpace === 'nowrap' || sourceWhiteSpace === 'pre')
+            && (property === 'white-space' || property === 'overflow-wrap')) continue;
           const value = sourceStyle.getPropertyValue(property);
           if (value) node.style.setProperty(property, value);
         }
@@ -522,12 +550,94 @@ function clearBlockShell(node: Element): void {
 /** When host is flex/grid, force the companion onto its own row/track. */
 function markFlexBreak(host: HTMLElement, node: HTMLElement): void {
   try {
-    const d = getComputedStyle(host).display;
+    const style = getComputedStyle(host);
+    const d = style.display;
+    if (d === 'flex' || d === 'inline-flex') {
+      if (style.flexDirection.startsWith('column')) return;
+      if (style.flexWrap !== 'wrap' && style.flexWrap !== 'wrap-reverse') {
+        ensureBlockFlow(host, node);
+        return;
+      }
+    }
     if (d === 'flex' || d === 'inline-flex' || d === 'grid' || d === 'inline-grid') {
       node.classList.add(`${P}-target--break`);
     }
   } catch {
     /* jsdom / detached */
+  }
+}
+
+/** A nowrap icon row gives prose and its translation one shrinking flex item. */
+function ensureBlockFlow(host: HTMLElement, companion: HTMLElement): void {
+  if (companion.parentElement !== host) return;
+  const directText = Array.from(host.childNodes).some(node => node.nodeType === Node.TEXT_NODE && !!node.nodeValue?.trim());
+  const labels = Array.from(host.children).filter(child => child !== companion
+    && !isFlexLeadMedia(child) && !!child.textContent?.trim());
+  if (!directText) {
+    // Reuse the page's label rather than moving it out of its flex slot.
+    if (labels.length === 1 && labels[0] instanceof HTMLElement
+      && !labels[0].matches('a[href], button, label, summary')) labels[0].appendChild(companion);
+    return;
+  }
+  if (labels.some(label => !isTextFlowBoundary(label))) {
+    // Original prose markup can depend on direct-child selectors. Keep every
+    // page element in place and give the companion a complete wrapping row.
+    host.setAttribute(WRAP_TEXT, 'true');
+    companion.classList.add(`${P}-target--break`);
+    return;
+  }
+  wrapTextFlow(host, companion, true);
+}
+
+/** Independent flex slots split source runs; their page selectors stay intact. */
+function isTextFlowBoundary(node: Node): boolean {
+  return isFlexLeadMedia(node) || node instanceof Element && (
+    node.matches('button, label, summary, input, select, textarea, iframe, audio, [role="button"], [role="tab"], [role="menuitem"], [role="switch"], [role="option"]')
+    || node.matches('a[href]') && (isCompactControlHost(node)
+      || /^(inline-)?(flex|grid)$/.test(getComputedStyle(node).display))
+    || hasCodeBlock(node)
+  );
+}
+
+/** Keep each contiguous source run at its current position around independent
+ * media/control/code slots, with the companion in the final text run. */
+function wrapTextFlow(host: HTMLElement, companion: HTMLElement, block: boolean): void {
+  const existing = Array.from(host.querySelectorAll<HTMLElement>(`:scope > .${CLS_FLOW}`))
+    .filter(flow => !flowHosts.has(flow) || flowHosts.get(flow) === host).at(-1);
+  if (existing) {
+    rememberFlow(host, existing);
+    existing.appendChild(companion);
+    return;
+  }
+  const children = Array.from(host.childNodes).filter(child => child !== companion);
+  // Read source roles before wrapping changes direct-child selectors/layout.
+  const boundaries = new Map<Node, boolean>(children.map(child => [child, isTextFlowBoundary(child)]));
+  const isContent = (child: Node): boolean => child.nodeType === Node.TEXT_NODE
+    ? !!child.nodeValue?.trim()
+    : !boundaries.get(child) && !!child.textContent?.trim();
+  const first = children.findIndex(isContent);
+  let last = children.length - 1;
+  while (last >= first && !isContent(children[last])) last--;
+  if (first < 0) return;
+
+  const runs: Node[][] = [];
+  let run: Node[] = [];
+  for (const child of children.slice(first, last + 1)) {
+    if (boundaries.get(child)) {
+      if (run.some(isContent)) runs.push(run);
+      run = [];
+    } else run.push(child);
+  }
+  if (run.some(isContent)) runs.push(run);
+  for (let index = 0; index < runs.length; index++) {
+    const nodes = runs[index];
+    const flow = document.createElement('span');
+    flow.className = block ? `${CLS_FLOW} ${CLS_FLOW}--block` : CLS_FLOW;
+    flow.setAttribute(FLOW, 'true');
+    rememberFlow(host, flow);
+    host.insertBefore(flow, nodes[0]);
+    for (const child of nodes) flow.appendChild(child);
+    if (index === runs.length - 1) flow.appendChild(companion);
   }
 }
 
@@ -628,7 +738,7 @@ function isFlexLeadMedia(node: Node): boolean {
  * Chinese sitting beside a stacked "Get" / "Involved" instead of wrapping as
  * "Get" / "Involved 参与".
  *
- * Flat hosts wrap direct non-media children + companion into one inline flow.
+ * Flat hosts wrap a contiguous source run + companion into one inline flow.
  * Structured controls already mount inside their nested label; preserving that
  * subtree keeps page selectors such as `button > content > label` intact.
  */
@@ -643,27 +753,37 @@ function ensureInlineFlow(host: HTMLElement, companion: HTMLElement): void {
   }
   if (display !== 'flex' && display !== 'inline-flex') return;
 
-  const flow = document.createElement('span');
-  flow.className = CLS_FLOW;
-  flow.setAttribute(FLOW, 'true');
+  wrapTextFlow(host, companion, false);
+}
 
-  const move: Node[] = [];
-  for (const child of Array.from(host.childNodes)) {
-    if (child === companion) continue;
-    if (isFlexLeadMedia(child)) continue;
-    if (child.nodeType === 1 && (child as Element).getAttribute(FLOW) === 'true') continue;
-    move.push(child);
-  }
-  for (const n of move) flow.appendChild(n);
-  flow.appendChild(companion);
-  host.appendChild(flow);
+function rememberFlow(host: HTMLElement, flow: HTMLElement): void {
+  const owned = flows.get(host) ?? new Set<HTMLElement>();
+  owned.add(flow);
+  flows.set(host, owned);
+  flowHosts.set(flow, host);
+}
+
+/** Unwrap at the page's current position; never move transferred sources back. */
+function unwrapFlow(flow: Element): void {
+  const parent = flow.parentNode;
+  if (!parent) return;
+  while (flow.firstChild) parent.insertBefore(flow.firstChild, flow);
+  flow.remove();
+  const host = flowHosts.get(flow);
+  if (host) flows.get(host)?.delete(flow as HTMLElement);
+  flowHosts.delete(flow);
 }
 
 function unwrapInlineFlows(host: HTMLElement): void {
-  for (const flow of Array.from(host.querySelectorAll(`:scope > .${CLS_FLOW}`))) {
-    while (flow.firstChild) host.insertBefore(flow.firstChild, flow);
-    flow.remove();
+  const owned = new Set<Element>(flows.get(host));
+  // Legacy/reinjected flows lack an identity map. A different translated host
+  // remains an ownership boundary during single-unit restoration.
+  for (const flow of host.querySelectorAll(`.${CLS_FLOW}[${FLOW}="true"]`)) {
+    const owner = flowHosts.get(flow) ?? flow.parentElement?.closest(`[${DONE}], [${MODE}]`);
+    if (!owner || owner === host) owned.add(flow);
   }
+  for (const flow of owned) unwrapFlow(flow);
+  flows.delete(host);
 }
 
 /** Mark compact control hosts so original+translation stay on one horizontal line. */
@@ -756,7 +876,7 @@ function renderCore(
     return;
   }
 
-  if (unit.rich?.slots?.length) {
+  if (unit.rich?.slots?.length && !hasComposedBoundary(el)) {
     const slots = Array.isArray(payload)
       ? payload
       : unit.rich.slots.length === 1
@@ -774,6 +894,11 @@ function renderCore(
   if (mode === 'replace') {
     if (unit.segment && unit.nodes?.length) {
       stashAndReplaceText(el, unit.nodes, text, opts);
+      return;
+    }
+    if (hasComposedBoundary(el)) {
+      const nodes = collectVisibleTextNodes(el);
+      if (nodes.length) stashAndReplaceText(el, nodes, text, opts);
       return;
     }
     if (kind === 'inner') {
@@ -809,13 +934,32 @@ export function render(
   mode: TranslationMode,
   opts?: RenderOpts,
 ): void {
+  const typography = readSourceTypography([unit]);
+  captureMediaLayouts([unit.el]);
+  if (mode === 'bilingual') {
+    captureAnchoredLayouts([unit.el]);
+  }
   renderCore(unit, payload, mode, opts, (host, node) => {
+    applySourceTypography(node, typography.get(unit.el));
     reserveBlockShell(host, node);
     stabilizeBlockShell(node);
+    attachMediaLayouts(unit.el, node);
+    attachAnchoredLayouts(unit.el, node);
+    applyBoundedLayouts(readBoundedLayouts([node]));
+    applyMediaLayouts(readMediaLayouts([node]));
+    applyAnchoredLayouts(readAnchoredLayouts([node]));
   });
+  const node = findNode(unit.el);
+  if (mode === 'replace') {
+    if (node instanceof HTMLElement) applySourceTypography(node, typography.get(unit.el));
+    const owner = node instanceof HTMLElement ? node : textReplacements.get(unit.el)?.visible ?? unit.el;
+    attachMediaLayouts(unit.el, owner);
+    applyMediaLayouts(readMediaLayouts([owner]));
+  }
+  if (mode === 'bilingual' && node instanceof HTMLElement) applyCompactLayouts(readCompactLayouts([node]));
 }
 
-/** A block companion whose reserved floor was applied but not yet settled. */
+/** A companion awaiting layout checks; value zero denotes an inline label. */
 export interface ShellReservation {
   node: HTMLElement;
   value: number;
@@ -838,6 +982,7 @@ export function readShellDecisions(
 ): ShellDecision[] {
   const decisions: ShellDecision[] = [];
   for (const { node, value } of reserved) {
+    if (!value) continue;
     let h = 0;
     try {
       h = node.getBoundingClientRect().height || node.scrollHeight;
@@ -877,13 +1022,30 @@ export function renderBatch(
   mode: TranslationMode,
   opts?: RenderOpts,
   preMeasuredHostHeights?: ReadonlyMap<HTMLElement, number>,
+  preMeasuredTypography?: ReadonlyMap<HTMLElement, SourceTypography>,
 ): ShellReservation[] {
+  const typography = preMeasuredTypography ?? readSourceTypography(items.map(({ unit }) => unit));
+  if (!preMeasuredHostHeights) {
+    captureMediaLayouts(items.map(({ unit }) => unit.el));
+    if (mode === 'bilingual') captureAnchoredLayouts(items.map(({ unit }) => unit.el));
+  }
   const pending: Array<{ host: HTMLElement; node: HTMLElement }> = [];
+  const replacements: HTMLElement[] = [];
   for (const { unit, payload } of items) {
     try {
       renderCore(unit, payload, mode, opts, (host, node) => {
+        applySourceTypography(node, typography.get(unit.el));
+        attachMediaLayouts(unit.el, node);
+        attachAnchoredLayouts(unit.el, node);
         pending.push({ host, node });
       });
+      const node = mode === 'replace' ? findNode(unit.el) : null;
+      if (node instanceof HTMLElement) applySourceTypography(node, typography.get(unit.el));
+      if (mode === 'replace') {
+        const owner = node instanceof HTMLElement ? node : textReplacements.get(unit.el)?.visible ?? unit.el;
+        attachMediaLayouts(unit.el, owner);
+        replacements.push(owner);
+      }
     } catch (err) {
       console.error('[Dual Read] render:', err);
     }
@@ -891,6 +1053,7 @@ export function renderBatch(
   // Apply every reserved floor in one write pass (no reads between writes).
   // Inline companions (inner/nav/compact/err) are skipped, matching reserveBlockShell.
   const reserved: ShellReservation[] = [];
+  for (const node of replacements) reserved.push({ node, value: 0 });
   for (const { host, node } of pending) {
     if (
       node.classList.contains(P_INNER)
@@ -915,6 +1078,14 @@ export function renderBatch(
     node.style.minHeight = `${value}px`;
     node.setAttribute(SHELL, String(value));
     reserved.push({ node, value });
+  }
+  if (mode === 'bilingual') {
+    for (const { unit } of items) {
+      const node = findNode(unit.el);
+      if (node instanceof HTMLElement && node.matches(`.${P_INNER}, .${P_INLINE}, .${P_NAV_SUB}, .${P_COMPACT}`)) {
+        reserved.push({ node, value: 0 });
+      }
+    }
   }
   return reserved;
 }
@@ -946,6 +1117,7 @@ export function clearNode(el: HTMLElement): void {
     removeCompanion(n);
   }
   unwrapInlineFlows(el);
+  el.removeAttribute(WRAP_TEXT);
 }
 
 /**
@@ -953,6 +1125,15 @@ export function clearNode(el: HTMLElement): void {
  * Idempotent: a second call is a no-op once markers and chrome are gone.
  */
 export function restoreUnit(el: HTMLElement): void {
+  releaseSourceTypography(el);
+  releaseBoundedLayout(el);
+  releaseMediaLayout(el);
+  const replacedText = textReplacements.get(el)?.visible;
+  if (replacedText) {
+    releaseSourceTypography(replacedText);
+    releaseBoundedLayout(replacedText);
+    releaseMediaLayout(replacedText);
+  }
   if (el.classList.contains(CLS_REPLACE)) {
     restoreTextReplace(el);
     el.removeAttribute(DONE);
@@ -980,6 +1161,7 @@ export function restoreUnit(el: HTMLElement): void {
   el.removeAttribute(NOWRAP);
   el.removeAttribute(OUTSIDE);
   el.removeAttribute(LIST_OUTSIDE);
+  el.removeAttribute(WRAP_TEXT);
 }
 
 /** Full-page restore. Safe to call repeatedly. */
@@ -990,6 +1172,7 @@ export function restoreDom(): void {
     restoreRoot(root);
     removeTranslationStyles(root);
   }
+  restoreSourceTypography();
 }
 
 /** Includes translated Web Components, which document selectors cannot reach. */
@@ -1009,8 +1192,15 @@ function restoreRoot(root: ParentNode): void {
   // Detached sources can leave an outside-clamp companion in the live card.
   // Error badges also carry no DONE marker on their host.
   root.querySelectorAll(`.${CLS_BLOCK}, .${CLS_ERR}`).forEach(removeCompanion);
+  // Page wrappers, transfers and deleted owners can leave a flow outside the
+  // original host. Full restore removes that chrome at its current location.
+  root.querySelectorAll(`.${CLS_FLOW}[${FLOW}="true"]`).forEach(unwrapFlow);
   // Orphan list-outside marks (host already clean) — clear without a full restore.
   root.querySelectorAll<HTMLElement>(`[${LIST_OUTSIDE}]`).forEach((el) => {
     if (!el.hasAttribute(DONE)) el.removeAttribute(LIST_OUTSIDE);
   });
+  root.querySelectorAll(`[${WRAP_TEXT}]`).forEach(el => el.removeAttribute(WRAP_TEXT));
+  restoreBoundedLayouts(root);
+  restoreMediaLayouts(root);
+  restoreAnchoredLayouts(root);
 }

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Review layout regression</title>
+  <style>
+    body { margin: 20px; font: 16px/20px sans-serif; }
+    main { width: 1100px; }
+    #columns { display: flex; gap: 24px; width: 520px; margin: 0; padding: 0; }
+    #date { flex: 0 0 140px; }
+    #copy { flex: 1; }
+    #columns > #copy { color: rgb(200, 0, 0); }
+    .owners { display: grid; grid-template-columns: 340px 280px; gap: 40px; margin-top: 20px; }
+    #bounded { width: 320px; height: 70px; overflow: hidden; }
+    #bounded p { margin: 0; }
+    #media { display: grid; grid-template-columns: 140px 120px; gap: 12px; }
+    #image-column { display: flex; }
+    #image { height: 100%; width: auto; max-width: none; }
+    .flow-row { display: flex; gap: 8px; width: 420px; }
+    .flow-row svg { flex-shrink: 0; }
+    .code-row { width: 520px; }
+  </style>
+</head>
+<body>
+  <main>
+    <ul><li id="columns"><span id="date">Monday, October 6</span><span id="copy">Read <strong>the documentation</strong> for detailed platform instructions.</span></li></ul>
+    <div class="owners">
+      <section id="bounded"><p id="bounded-first">Shared bounded first paragraph.</p><p id="bounded-second" hidden>Shared bounded second paragraph.</p></section>
+      <section id="media"><div><p id="media-first">Shared media first paragraph.</p><p id="media-second" hidden>Shared media second paragraph.</p></div><div id="image-column"><img id="image" alt="Diagram" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='100'%3E%3Crect width='1000' height='100' fill='%23b6d9ff'/%3E%3C/svg%3E"></div></section>
+    </div>
+    <p class="code-row" id="code-plain">An example follows: <span id="editor-plain">function PlainExample() { return null; }</span> Continue with the documentation.</p>
+    <p class="code-row" id="code-rich">Another example follows: <strong id="editor-rich">function RichExample() { return null; }</strong> Continue reading the guide.</p>
+    <div class="code-row" id="existing">Read the existing editor documentation.<div class="cm-editor"><span id="existing-code">function ExistingExample() {}</span></div></div>
+    <ul>
+      <li id="flow-one" class="flow-row"><svg id="lead-one" width="12" height="12"></svg>Read first <a id="link-one" href="/first">the guide</a><svg id="tail-one" width="12" height="12"></svg></li>
+      <li id="flow-two" class="flow-row"><svg width="12" height="12"></svg>Read second <a id="link-two" href="/second">the guide</a><svg width="12" height="12"></svg></li>
+    </ul>
+    <section id="receiver"></section>
+  </main>
+</body>
+</html>

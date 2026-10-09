@@ -492,6 +492,80 @@ describe('ContentSession scheduling state machine', () => {
     } finally { session.dispose(); }
   });
 
+  it.each(['bilingual', 'replace'] as const)('translates new prose during continuous unrelated class animation in %s', async mode => {
+    vi.useFakeTimers();
+    document.body.innerHTML = '<main><svg id="spinner" class="first" aria-hidden="true"></svg></main>';
+    vi.mocked(translateBatchViaPort).mockImplementation(async texts => texts.map(text => `译:${text}`));
+    const session = new ContentSession(config({ mode, batchSize: 1 }));
+    await session.start();
+    const late = document.createElement('p'); late.textContent = 'Newly appended document paragraph.';
+    const original = late.firstChild;
+    document.querySelector('main')!.appendChild(late);
+    const animation = setInterval(() => {
+      const spinner = document.getElementById('spinner')!;
+      spinner.setAttribute('class', spinner.getAttribute('class') === 'first' ? 'second' : 'first');
+    }, 100);
+    try {
+      await vi.advanceTimersByTimeAsync(1600);
+      expect(late.textContent).toContain('译:Newly appended document paragraph.');
+      expect(translateBatchViaPort).toHaveBeenCalledTimes(1);
+      expect(session.status()).toMatchObject({ count: 1, total: 1, watching: true });
+      session.restore();
+      await vi.advanceTimersByTimeAsync(800);
+      expect(late.firstChild).toBe(original);
+      expect(late.textContent).toBe('Newly appended document paragraph.');
+      expect(document.querySelector('.dual-read-target,.dual-read-original-hidden')).toBeNull();
+    } finally { clearInterval(animation); session.dispose(); }
+  });
+
+  it.each(['bilingual', 'replace'] as const)('reindexes nested shadow and slotted prose after ancestor reveals in %s', async mode => {
+    vi.useFakeTimers();
+    document.body.innerHTML = '<main><read-widget id="widget"><p id="slotted" slot="copy">Assigned slot documentation.</p></read-widget><other-widget></other-widget></main>';
+    const widget = document.getElementById('widget')!;
+    const root = widget.attachShadow({mode:'open'});
+    root.innerHTML = '<div id="inner"><slot name="copy"></slot><nested-widget></nested-widget></div>';
+    const inner = root.querySelector<HTMLElement>('#inner')!;
+    // jsdom caches a shadow element's UA [hidden] display after its removal.
+    // Native Chromium/Firefox fixtures also exercise the actual CSS behavior.
+    const computedStyle = window.getComputedStyle.bind(window);
+    vi.spyOn(window, 'getComputedStyle').mockImplementation(element => {
+      const style = computedStyle(element);
+      if (element === inner) style.display = inner.hidden ? 'none' : 'block';
+      return style;
+    });
+    const nested = root.querySelector('nested-widget')!.attachShadow({mode:'open'});
+    nested.innerHTML = '<p style="color:black;background:black"><span style="color:white">Nested component documentation.</span></p>';
+    const other = document.querySelector('other-widget')!.attachShadow({mode:'open'});
+    other.innerHTML = '<p>Unrelated component documentation.</p>';
+    const original = nested.querySelector('p')!.firstChild;
+    const slotted = document.getElementById('slotted')!; const slotOriginal = slotted.firstChild;
+    vi.mocked(translateBatchViaPort).mockImplementation(async texts => texts.map(text => `译:${text}`));
+    const session = new ContentSession(config({mode}));
+    const start = session.start();
+    try {
+      await vi.advanceTimersByTimeAsync(1600); await start;
+      expect(nested.textContent).toContain('译:Nested component documentation.');
+      const unrelated = other.querySelector('.dual-read-target');
+      // Reveal while source moves emitted by restoration still await their
+      // own mutation batch. The narrower span must not become a second unit.
+      widget.setAttribute('style','opacity:0'); await vi.advanceTimersByTimeAsync(400);
+      widget.setAttribute('style','opacity:1'); await vi.advanceTimersByTimeAsync(1600);
+      expect(nested.textContent).toContain('译:Nested component documentation.');
+      expect(nested.querySelectorAll('.dual-read-target,.dual-read-replace-text')).toHaveLength(1);
+      expect(slotted.textContent).toContain('译:Assigned slot documentation.');
+      root.querySelector<HTMLElement>('#inner')!.hidden = true; await vi.advanceTimersByTimeAsync(800);
+      root.querySelector<HTMLElement>('#inner')!.hidden = false; await vi.advanceTimersByTimeAsync(1600);
+      expect(slotted.textContent).toContain('译:Assigned slot documentation.');
+      expect(nested.textContent).toContain('译:Nested component documentation.');
+      expect(nested.querySelectorAll('.dual-read-target,.dual-read-replace-text')).toHaveLength(1);
+      expect(other.querySelector('.dual-read-target')).toBe(unrelated);
+      session.restore(); session.restore();
+      expect(nested.querySelector('p')!.firstChild).toBe(original); expect(slotted.firstChild).toBe(slotOriginal);
+      expect(slotted.textContent).toBe('Assigned slot documentation.');
+      expect(root.querySelector<HTMLSlotElement>('slot')!.assignedElements()).toEqual([slotted]);
+    } finally {session.restore();}
+  });
+
   it('pause does not dispatch the queued remainder of a full pipeline', async () => {
     vi.useFakeTimers();
     paragraphs(9); // batchSize 4 × concurrency 2 → 8 in flight, 1 queued

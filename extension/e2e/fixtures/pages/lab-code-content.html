@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Code content boundaries</title>
+  <style>
+    body { max-width: 1000px; margin: 24px auto; font: 16px/24px system-ui; }
+    .demo { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .code-panel { padding: 16px; border: 1px solid #bbb; background: #f6f8fa; }
+    pre, code, .hljs, .prism-code, .shiki, .cm-content, .CodeMirror, .monaco-editor, .ace_editor, .sp-code-editor { font-family: monospace; }
+    #ordinary { font-family: monospace; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Learn from an interactive example</h1>
+    <div class="demo">
+      <div class="code-panel" id="semantic-panel"><pre data-code-test><code><div class="cm-line"><span class="sp-syntax-keyword">function</span> <span>Video</span>({ video }) {<br></div><div class="cm-line">  <span>return</span> &lt;Video title="CODE_STRING_SENTINEL" /&gt;;</div><div><span>// CODE_COMMENT_SENTINEL remains original.</span></div><div>}</div></code></pre></div>
+      <div id="preview"><h2>A rendered video preview</h2><p>Preview descriptions remain readable.</p></div>
+    </div>
+    <p id="inline-copy">Call <code data-code-test><span>createRoot</span>(<var>container</var>)</code> to render the example.</p>
+    <div id="mixed">Read the example before continuing.<div class="hljs" data-code-test><div><span>const</span> result = "CODE_HIGHLIGHT_SENTINEL";</div></div><em>Then open <a href="/guide">the documentation guide</a>.</em></div>
+    <div class="cm-editor"><div class="cm-content" data-code-test><div class="cm-line"><span>// CODE_EDITOR_SENTINEL</span></div><div class="cm-line">function Search() { return null; }</div></div></div>
+    <div class="prism-code" data-code-test><span>const</span> <span>code = "CODE_PRISM_SENTINEL";</span></div>
+    <div class="shiki" data-code-test><span>print("CODE_SHIKI_SENTINEL")</span></div>
+    <div class="CodeMirror" data-code-test><div><span>CODE_MIRROR_SENTINEL</span></div></div>
+    <div class="monaco-editor" data-code-test><div class="view-lines"><span>CODE_MONACO_SENTINEL</span></div></div>
+    <div class="ace_editor" data-code-test><div class="ace_text-layer"><span>CODE_ACE_SENTINEL</span></div></div>
+    <div class="sp-code-editor" data-code-test><div><span>CODE_SANDPACK_SENTINEL</span></div></div>
+    <samp data-code-test><span>CODE_OUTPUT_SENTINEL: Build completed successfully.</span></samp>
+    <p id="ordinary">This function is explained in ordinary monospace documentation.
+The paragraph is still natural language.</p>
+    <p id="highlight-copy"><span class="highlight">An important explanation</span> appears outside the code.</p>
+    <section id="late"></section>
+  </main>
+</body>
+</html>

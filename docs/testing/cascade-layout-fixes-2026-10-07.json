@@ -1,0 +1,4095 @@
+{
+  "date": "2026-10-07",
+  "purpose": "Repair CSS cascade layer order tracking, logical media size contracts, and visible text under negative-indent ancestors.",
+  "gitHead": "995498672da7fdbddf4e00f21224ba6cfabf0163",
+  "gitCommitCreated": false,
+  "productionScope": {
+    "changed": [
+      "extension/lib/collector/index.ts",
+      "extension/lib/renderer/media-layout.ts",
+      "extension/lib/renderer/source-layout-policy.ts"
+    ],
+    "fingerprintedFiles": 68,
+    "priorWorkPreserved": true,
+    "newDomainRules": false,
+    "cssChanged": false
+  },
+  "builds": {
+    "beforeJs": "d4f228a1e1aa0b9383ff7f74c46836ab6cb51021c0c4cc93ac6d985a11195ae1",
+    "afterJs": "3a878778be0ba0217945932f6e5535532df559871e697710077b1a1de0176cef",
+    "css": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d",
+    "freshChromiumAndFirefox": true,
+    "engines": {
+      "chromium": "153.0.8010.12",
+      "firefox": "155.0"
+    }
+  },
+  "approach": [
+    "Record each matching sizing declaration in its named/nested/anonymous/imported layer context, plus relative layer order. Filter paint-only layers from the order signature, and continue omitting owned sheets.",
+    "Add all four min/max logical dimensions to the image contract, so author changes invalidate an installed physical sizing correction.",
+    "Move negative-indent pruning from entire element ancestry to actual text lines. Use Range geometry only when a boxed negative-indent ancestor and horizontal clip coexist; preserve reset children and partly visible multi-line source units. Reuse per-collection styles and clipping ancestry."
+  ],
+  "restorationContract": [
+    "No source text, node identity, class, inline style, link or page ordering is changed by these production edits. Existing correction ownership/release mechanisms remain in use.",
+    "Native tests derive source values, identities, direct-child order, additions, removals, code/link edits and transfer destinations from explicit page operations.",
+    "Cross bilingual/replace, watching/paused, immediate/delivered records, repeat restoration, opposite mode and 1920x1080/1600x900 views.",
+    "For a partly visible multi-line paragraph, retain its whole semantic source text; wholly clipped runs remain excluded. If a DOM implementation has no line geometry, preserve text conservatively."
+  ],
+  "validation": {
+    "units": {
+      "passed": 1428,
+      "files": 42,
+      "newCases": 15
+    },
+    "typecheck": true,
+    "lint": true,
+    "diffCheck": true,
+    "sourceComparisons": {
+      "sessions": 64,
+      "beforeFailures": 32,
+      "afterCorrect": 32,
+      "evidence": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/comparison-results.json"
+    },
+    "beforeNative": {
+      "sessions": 32,
+      "reproduced": true,
+      "testedJs": "d4f228a1e1aa0b9383ff7f74c46836ab6cb51021c0c4cc93ac6d985a11195ae1",
+      "evidence": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/native-before-results.json"
+    },
+    "native": {
+      "passed": 400,
+      "newCases": 64,
+      "neighboringCases": 336,
+      "projects": {
+        "chromium-ext": 200,
+        "firefox-ext": 200
+      },
+      "groups": {
+        "cascade layout regression": 64,
+        "layout neighbor regression": 64,
+        "inline visibility regression": 16,
+        "media policy regression": 24,
+        "stylesheet layout regression": 16,
+        "flow style regression": 32,
+        "layout policy resumed footer": 4,
+        "layout policy regression": 32,
+        "layout lifecycle regression": 32,
+        "presentation layout regression": 32,
+        "dynamic layout regression": 32,
+        "review layout regression": 16,
+        "code content boundaries": 4,
+        "generic page layout": 16,
+        "generic feed layout": 16
+      },
+      "noRetries": true,
+      "evidence": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/native-regression.json"
+    },
+    "performance": {
+      "passed": 8,
+      "PERF_FULL": true,
+      "defaultBudgets": true,
+      "strictMode": false,
+      "ranAfterOtherBrowserJobs": true,
+      "evidence": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/native-perf.json"
+    },
+    "websites": {
+      "sampled": 7,
+      "primaryScreenshots": 56,
+      "translatedPairsVisuallyInspected": 21,
+      "earlier70PageAuditRerun": false
+    }
+  },
+  "websites": [
+    {
+      "id": "popular-1-2",
+      "site": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Internet",
+      "sourceUnits": 681,
+      "processed": 147,
+      "codeNodes": 0,
+      "views": [
+        {
+          "view": "source-top",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        },
+        {
+          "view": "bilingual-top",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        },
+        {
+          "view": "bilingual-scroll",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        },
+        {
+          "view": "replace-top",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        }
+      ],
+      "before": {
+        "id": "popular-1-2",
+        "category": "popular",
+        "site": "Wikipedia",
+        "page": 2,
+        "url": "https://en.wikipedia.org/wiki/Internet",
+        "phase": "live-before",
+        "engine": "Chromium production content + isolated bridge",
+        "buildHash": "d4f228a1e1aa0b9383ff7f74c46836ab6cb51021c0c4cc93ac6d985a11195ae1",
+        "buildCssHash": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d",
+        "started": "2026-10-07T07:12:49.809Z",
+        "httpStatus": 200,
+        "meta": {
+          "url": "https://en.wikipedia.org/wiki/Internet",
+          "title": "Internet - Wikipedia",
+          "text": "Jump to content\nMain menu\nSearch\nDonate\nCreate account\nLog in\nContents hide\n(Top)\nTerminology\nHistory\nToggle History subsection\nSocial impact\nToggle Social impact subsection\nApplications and services\nToggle Applications and services subsection\nGovernance\nToggle Governance subsection\nInfrastructure\nToggle Infrastructure subsection\nInternet Protocol Suite\nToggle Internet Protocol Suite subsection\nSecurity\nToggle Security subsection\nPerformance\nToggle Performance subsection\nSee also\nNotes\nReferences\nSources\nFurther reading\nExternal links\nInternet\n229 languages\nArticle\nTalk\nRead\nView source\nView history\nTools\nAppearance hide\nText\nSmall\nStandard\nLarge\nWidth\nStandard\nWide\nColor\nAutomatic\nLight\nDark\nFrom Wikipedia, the free encyclopedia\nFor other uses, see Internet (disambiguation).\nThis article is about the worldwide computer network. For the global system of pages accessed through URLs via the Internet, see World Wide Web. \"Interweb\" redirects here. For the song, see Interweb (song).\n\t\nhide\nThis article has multiple issues. Please help improve it or discuss these issues on the talk page. (Learn how and when to remove these messages)\nThis article needs more citations. (October 2025)\nThis",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          }
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 138
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 140
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 127
+          }
+        },
+        "source-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/popular-1-2-source-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 681,
+          "targetCount": 0,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 145,
+          "failed": 0,
+          "total": 681,
+          "watching": true,
+          "sessionId": "iab-c026b3ff-f493-4be5-942b-917f8bf49b9e",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 653.6000004410744,
+            "lastMutationIndexMs": 0
+          }
+        },
+        "bilingual-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/popular-1-2-bilingual-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 681,
+          "targetCount": 138,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 147,
+          "failed": 0,
+          "total": 683,
+          "watching": true,
+          "sessionId": "iab-c026b3ff-f493-4be5-942b-917f8bf49b9e",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 653.6000004410744,
+            "lastMutationIndexMs": 425.80000001192093
+          }
+        },
+        "bilingual-scroll": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/popular-1-2-bilingual-scroll.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 681,
+          "targetCount": 140,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restore": {
+          "originalNodes": 8618,
+          "retainedNodes": 8618,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 150,
+          "failed": 0,
+          "total": 683,
+          "watching": true,
+          "sessionId": "iab-c026b3ff-f493-4be5-942b-917f8bf49b9e",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 661.2000000476837,
+            "lastMutationIndexMs": 1431
+          }
+        },
+        "replace-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/popular-1-2-replace-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 681,
+          "targetCount": 274,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restoreReplace": {
+          "originalNodes": 8618,
+          "retainedNodes": 8618,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "finished": "2026-10-07T07:13:19.337Z"
+      },
+      "after": {
+        "id": "popular-1-2",
+        "category": "popular",
+        "site": "Wikipedia",
+        "page": 2,
+        "url": "https://en.wikipedia.org/wiki/Internet",
+        "phase": "live-after",
+        "engine": "Chromium production content + isolated bridge",
+        "buildHash": "3a878778be0ba0217945932f6e5535532df559871e697710077b1a1de0176cef",
+        "buildCssHash": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d",
+        "started": "2026-10-07T07:16:07.413Z",
+        "httpStatus": 200,
+        "meta": {
+          "url": "https://en.wikipedia.org/wiki/Internet",
+          "title": "Internet - Wikipedia",
+          "text": "Jump to content\nMain menu\nSearch\nDonate\nCreate account\nLog in\nContents hide\n(Top)\nTerminology\nHistory\nToggle History subsection\nSocial impact\nToggle Social impact subsection\nApplications and services\nToggle Applications and services subsection\nGovernance\nToggle Governance subsection\nInfrastructure\nToggle Infrastructure subsection\nInternet Protocol Suite\nToggle Internet Protocol Suite subsection\nSecurity\nToggle Security subsection\nPerformance\nToggle Performance subsection\nSee also\nNotes\nReferences\nSources\nFurther reading\nExternal links\nInternet\n229 languages\nArticle\nTalk\nRead\nView source\nView history\nTools\nAppearance hide\nText\nSmall\nStandard\nLarge\nWidth\nStandard\nWide\nColor\nAutomatic\nLight\nDark\nFrom Wikipedia, the free encyclopedia\nFor other uses, see Internet (disambiguation).\nThis article is about the worldwide computer network. For the global system of pages accessed through URLs via the Internet, see World Wide Web. \"Interweb\" redirects here. For the song, see Interweb (song).\n\t\nhide\nThis article has multiple issues. Please help improve it or discuss these issues on the talk page. (Learn how and when to remove these messages)\nThis article needs more citations. (October 2025)\nThis",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          }
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 138
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 140
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 127
+          }
+        },
+        "source-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/popular-1-2-source-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 681,
+          "targetCount": 0,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 145,
+          "failed": 0,
+          "total": 681,
+          "watching": true,
+          "sessionId": "iab-9203b9b8-272e-4886-9421-9a15d4d38ae5",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 747.9999998211861,
+            "lastMutationIndexMs": 0
+          }
+        },
+        "bilingual-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/popular-1-2-bilingual-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 681,
+          "targetCount": 138,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 147,
+          "failed": 0,
+          "total": 683,
+          "watching": true,
+          "sessionId": "iab-9203b9b8-272e-4886-9421-9a15d4d38ae5",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 747.9999998211861,
+            "lastMutationIndexMs": 400.5
+          }
+        },
+        "bilingual-scroll": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/popular-1-2-bilingual-scroll.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 681,
+          "targetCount": 140,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restore": {
+          "originalNodes": 8618,
+          "retainedNodes": 8618,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 150,
+          "failed": 0,
+          "total": 683,
+          "watching": true,
+          "sessionId": "iab-9203b9b8-272e-4886-9421-9a15d4d38ae5",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 695.3999999165535,
+            "lastMutationIndexMs": 1831.8999999761581
+          }
+        },
+        "replace-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/popular-1-2-replace-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 681,
+          "targetCount": 274,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restoreReplace": {
+          "originalNodes": 8618,
+          "retainedNodes": 8618,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "finished": "2026-10-07T07:16:37.225Z"
+      }
+    },
+    {
+      "id": "popular-2-2",
+      "site": "GitHub",
+      "url": "https://github.com/golang/go",
+      "sourceUnits": 120,
+      "processed": 118,
+      "codeNodes": 0,
+      "views": [
+        {
+          "view": "source-top",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        },
+        {
+          "view": "bilingual-top",
+          "overflow": 0,
+          "clipCandidates": 2,
+          "squeezeCandidates": 1
+        },
+        {
+          "view": "bilingual-scroll",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        },
+        {
+          "view": "replace-top",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        }
+      ],
+      "before": {
+        "id": "popular-2-2",
+        "category": "popular",
+        "site": "GitHub",
+        "page": 2,
+        "url": "https://github.com/golang/go",
+        "phase": "live-before",
+        "engine": "Chromium production content + isolated bridge",
+        "buildHash": "d4f228a1e1aa0b9383ff7f74c46836ab6cb51021c0c4cc93ac6d985a11195ae1",
+        "buildCssHash": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d",
+        "started": "2026-10-07T07:12:49.810Z",
+        "httpStatus": 200,
+        "meta": {
+          "url": "https://github.com/golang/go",
+          "title": "GitHub - golang/go: The Go programming language · GitHub",
+          "text": "Skip to content\nNavigation Menu\nPlatform\nSolutions\nResources\nOpen Source\nEnterprise\nPricing\nSearch\n/\nSign in\nSign up\ngolang\ngo\nRepository navigation\nCode\nIssues\n5k+\n (5k+)\nPull requests\n591\n (591)\nDiscussions\nActions\nProjects\nWiki\nSecurity and quality\nInsights\ngo\nPublic\nNotifications\nFork21.5k\n (21.5k)\nStar139k\n (139k)\nmaster\n65 Branches\n496 Tags\nCode\nLatest commit\nsophie-zhao\nand\nabner-chenc\ncrypto/internal/fips140/aes: avoid stack round-trip when building cou…\nb756cce\n · \nHistory\n67,956 Commits\nFolders and files\nName\tLast commit message\tLast commit date\n\n.github\n\t\n.github: update PULL_REQUEST_TEMPLATE to match the latest instruction\n\t\n\n\napi\n\t\nregexp: add SplitSeq\n\t\n\n\ndoc\n\t\nspec: add missing appendix section on 1.26 language changes\n\t\n\n\nlib\n\t\ncmd/go: bundle go.sum h1 hashes for golang.org/fips140\n\t\n\n\nmisc\n\t\nall: replace strings.Split with strings.SplitSeq\n\t\n\n\nsrc\n\t\ncrypto/internal/fips140/aes: avoid stack round-trip when building cou…\n\t\n\n\ntest\n\t\ncmd/compile: forward the whole of a copy's loads through a Move\n\t\n\n\n.gitattributes\n\t\nall: treat all files as binary, but check in .bat with CRLF\n\t\n\n\n.gitignore\n\t\n.gitignore: ignore go test artifacts\n\t\n\n\nCONTRIBUTING.md\n\t\ndoc: normalize pro",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          }
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 80
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 83
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 48
+          }
+        },
+        "source-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/popular-2-2-source-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 120,
+          "targetCount": 0,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 115,
+          "failed": 0,
+          "total": 118,
+          "watching": true,
+          "sessionId": "iab-6b110226-c40a-4fef-bd0d-626c55311b28",
+          "revision": 1,
+          "shadowRoots": 19,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 87.8999999165535,
+            "lastMutationIndexMs": 0.6000000238418579
+          }
+        },
+        "bilingual-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/popular-2-2-bilingual-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 120,
+          "targetCount": 80,
+          "documentOverflow": 0,
+          "clips": [
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ 议题",
+              "visible": 0,
+              "box": {
+                "x": 215,
+                "y": 169,
+                "w": 1,
+                "h": 84
+              },
+              "ancestor": "span.prc-VisuallyHidden-VisuallyHidden-Q0qSB",
+              "ancestorBox": {
+                "x": 215,
+                "y": 148,
+                "w": 1,
+                "h": 1
+              },
+              "overflow": "hidden",
+              "clamp": "none"
+            },
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ 拉取请求",
+              "visible": 0,
+              "box": {
+                "x": 395,
+                "y": 169,
+                "w": 1,
+                "h": 126
+              },
+              "ancestor": "span.prc-VisuallyHidden-VisuallyHidden-Q0qSB",
+              "ancestorBox": {
+                "x": 395,
+                "y": 148,
+                "w": 1,
+                "h": 1
+              },
+              "overflow": "hidden",
+              "clamp": "none"
+            }
+          ],
+          "squeezed": [
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ 拉取请求",
+              "box": {
+                "x": 395,
+                "y": 169,
+                "w": 1,
+                "h": 126
+              },
+              "parent": "span.prc-VisuallyHidden-VisuallyHidden-Q0qSB"
+            }
+          ],
+          "overflow": [
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ 议题",
+              "amount": 13,
+              "parent": "span.prc-VisuallyHidden-VisuallyHidden-Q0qSB"
+            },
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ 拉取请求",
+              "amount": 13,
+              "parent": "span.prc-VisuallyHidden-VisuallyHidden-Q0qSB"
+            }
+          ]
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 118,
+          "failed": 0,
+          "total": 118,
+          "watching": true,
+          "sessionId": "iab-6b110226-c40a-4fef-bd0d-626c55311b28",
+          "revision": 1,
+          "shadowRoots": 19,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 87.8999999165535,
+            "lastMutationIndexMs": 0.6000000238418579
+          }
+        },
+        "bilingual-scroll": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/popular-2-2-bilingual-scroll.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 120,
+          "targetCount": 83,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restore": {
+          "originalNodes": 589,
+          "retainedNodes": 589,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 119,
+          "failed": 0,
+          "total": 120,
+          "watching": true,
+          "sessionId": "iab-6b110226-c40a-4fef-bd0d-626c55311b28",
+          "revision": 1,
+          "shadowRoots": 19,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 73.90000009536743,
+            "lastMutationIndexMs": 48.200000047683716
+          }
+        },
+        "replace-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/popular-2-2-replace-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 120,
+          "targetCount": 134,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restoreReplace": {
+          "originalNodes": 589,
+          "retainedNodes": 589,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "finished": "2026-10-07T07:13:29.136Z"
+      },
+      "after": {
+        "id": "popular-2-2",
+        "category": "popular",
+        "site": "GitHub",
+        "page": 2,
+        "url": "https://github.com/golang/go",
+        "phase": "live-after",
+        "engine": "Chromium production content + isolated bridge",
+        "buildHash": "3a878778be0ba0217945932f6e5535532df559871e697710077b1a1de0176cef",
+        "buildCssHash": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d",
+        "started": "2026-10-07T07:16:07.414Z",
+        "httpStatus": 200,
+        "meta": {
+          "url": "https://github.com/golang/go",
+          "title": "GitHub - golang/go: The Go programming language · GitHub",
+          "text": "Skip to content\nNavigation Menu\nPlatform\nSolutions\nResources\nOpen Source\nEnterprise\nPricing\nSearch\n/\nSign in\nSign up\ngolang\ngo\nRepository navigation\nCode\nIssues\n5k+\n (5k+)\nPull requests\n591\n (591)\nDiscussions\nActions\nProjects\nWiki\nSecurity and quality\nInsights\ngo\nPublic\nNotifications\nFork21.5k\n (21.5k)\nStar139k\n (139k)\nmaster\n65 Branches\n496 Tags\nCode\nLatest commit\nsophie-zhao\nand\nabner-chenc\ncrypto/internal/fips140/aes: avoid stack round-trip when building cou…\nb756cce\n · \nHistory\n67,956 Commits\nFolders and files\nName\tLast commit message\tLast commit date\n\n.github\n\t\n.github: update PULL_REQUEST_TEMPLATE to match the latest instruction\n\t\n\n\napi\n\t\nregexp: add SplitSeq\n\t\n\n\ndoc\n\t\nspec: add missing appendix section on 1.26 language changes\n\t\n\n\nlib\n\t\ncmd/go: bundle go.sum h1 hashes for golang.org/fips140\n\t\n\n\nmisc\n\t\nall: replace strings.Split with strings.SplitSeq\n\t\n\n\nsrc\n\t\ncrypto/internal/fips140/aes: avoid stack round-trip when building cou…\n\t\n\n\ntest\n\t\ncmd/compile: forward the whole of a copy's loads through a Move\n\t\n\n\n.gitattributes\n\t\nall: treat all files as binary, but check in .bat with CRLF\n\t\n\n\n.gitignore\n\t\n.gitignore: ignore go test artifacts\n\t\n\n\nCONTRIBUTING.md\n\t\ndoc: normalize pro",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          }
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 80
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 83
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 49
+          }
+        },
+        "source-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/popular-2-2-source-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 120,
+          "targetCount": 0,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 115,
+          "failed": 0,
+          "total": 118,
+          "watching": true,
+          "sessionId": "iab-ff3959b9-9d7f-4b2a-a3fa-b30c9d9e7fcd",
+          "revision": 1,
+          "shadowRoots": 19,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 97.1000000834465,
+            "lastMutationIndexMs": 0.5
+          }
+        },
+        "bilingual-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/popular-2-2-bilingual-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 120,
+          "targetCount": 80,
+          "documentOverflow": 0,
+          "clips": [
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ 议题",
+              "visible": 0,
+              "box": {
+                "x": 215,
+                "y": 169,
+                "w": 1,
+                "h": 84
+              },
+              "ancestor": "span.prc-VisuallyHidden-VisuallyHidden-Q0qSB",
+              "ancestorBox": {
+                "x": 215,
+                "y": 148,
+                "w": 1,
+                "h": 1
+              },
+              "overflow": "hidden",
+              "clamp": "none"
+            },
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ 拉取请求",
+              "visible": 0,
+              "box": {
+                "x": 395,
+                "y": 169,
+                "w": 1,
+                "h": 126
+              },
+              "ancestor": "span.prc-VisuallyHidden-VisuallyHidden-Q0qSB",
+              "ancestorBox": {
+                "x": 395,
+                "y": 148,
+                "w": 1,
+                "h": 1
+              },
+              "overflow": "hidden",
+              "clamp": "none"
+            }
+          ],
+          "squeezed": [
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ 拉取请求",
+              "box": {
+                "x": 395,
+                "y": 169,
+                "w": 1,
+                "h": 126
+              },
+              "parent": "span.prc-VisuallyHidden-VisuallyHidden-Q0qSB"
+            }
+          ],
+          "overflow": [
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ 议题",
+              "amount": 13,
+              "parent": "span.prc-VisuallyHidden-VisuallyHidden-Q0qSB"
+            },
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ 拉取请求",
+              "amount": 13,
+              "parent": "span.prc-VisuallyHidden-VisuallyHidden-Q0qSB"
+            }
+          ]
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 118,
+          "failed": 0,
+          "total": 118,
+          "watching": true,
+          "sessionId": "iab-ff3959b9-9d7f-4b2a-a3fa-b30c9d9e7fcd",
+          "revision": 1,
+          "shadowRoots": 19,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 97.1000000834465,
+            "lastMutationIndexMs": 0.5
+          }
+        },
+        "bilingual-scroll": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/popular-2-2-bilingual-scroll.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 120,
+          "targetCount": 83,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restore": {
+          "originalNodes": 589,
+          "retainedNodes": 589,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 120,
+          "failed": 0,
+          "total": 120,
+          "watching": true,
+          "sessionId": "iab-ff3959b9-9d7f-4b2a-a3fa-b30c9d9e7fcd",
+          "revision": 1,
+          "shadowRoots": 19,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 87.19999998807907,
+            "lastMutationIndexMs": 49.59999996423721
+          }
+        },
+        "replace-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/popular-2-2-replace-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 120,
+          "targetCount": 136,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restoreReplace": {
+          "originalNodes": 589,
+          "retainedNodes": 589,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "finished": "2026-10-07T07:16:46.471Z"
+      }
+    },
+    {
+      "id": "commercial-1-2",
+      "site": "Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/",
+      "sourceUnits": 65,
+      "processed": 65,
+      "codeNodes": 0,
+      "views": [
+        {
+          "view": "source-top",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        },
+        {
+          "view": "bilingual-top",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        },
+        {
+          "view": "bilingual-scroll",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        },
+        {
+          "view": "replace-top",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        }
+      ],
+      "before": {
+        "id": "commercial-1-2",
+        "category": "commercial",
+        "site": "Microsoft Learn",
+        "page": 2,
+        "url": "https://learn.microsoft.com/en-us/azure/architecture/",
+        "phase": "live-before",
+        "engine": "Chromium production content + isolated bridge",
+        "buildHash": "d4f228a1e1aa0b9383ff7f74c46836ab6cb51021c0c4cc93ac6d985a11195ae1",
+        "buildCssHash": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d",
+        "started": "2026-10-07T07:13:19.390Z",
+        "httpStatus": 200,
+        "cookieChoice": "Reject",
+        "meta": {
+          "url": "https://learn.microsoft.com/en-us/azure/architecture/",
+          "title": "Azure Architecture Center",
+          "text": "Skip to main content\nLearn\nDocumentation\nTraining & Labs\nQ&A\nTopics\nSign in\nAzure\nProducts\nArchitecture\nMigration\nDevelop\nLearn Azure\nTroubleshooting\nResources\nPortal\nGet started with Azure\nSearch\nAzure Architecture Center\nBrowse all Architectures\nArchitecture icons\nWhat's new\nApplication architecture fundamentals\nAzure landing zone\nAzure categories\nAzure for AWS professionals\nAzure for Google Cloud professionals\nMicrosoft Azure Well-Architected Framework\nCloud Adoption Framework for Azure\nLearnAzureArchitecture Center\nAzure Architecture Center\n\nDesign solutions on Azure by using established patterns and practices. The Azure Architecture Center is a catalog of solution ideas, example workloads, reference architectures, technology decision guides, and architecture guides that help cloud architects and engineers build workloads aligned with the Azure Well-Architected Framework and the Cloud Adoption Framework for Azure.\n\nGet started\n\nChoose a starting point based on what you need to do.\n\nBrowse architectures\n\nExplore reference architectures, example workloads, and solution ideas.\n\nLearn the fundamentals\n\nUnderstand architecture styles, design principles, and best practices.\n\nMake tec",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          }
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 62
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 62
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 44
+          }
+        },
+        "source-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/commercial-1-2-source-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 65,
+          "targetCount": 0,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 65,
+          "failed": 0,
+          "total": 65,
+          "watching": true,
+          "sessionId": "iab-d6520e2e-ae67-4fd6-b0fd-f6b25ad9eb33",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 23.100000083446503,
+            "lastMutationIndexMs": 2
+          }
+        },
+        "bilingual-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/commercial-1-2-bilingual-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 65,
+          "targetCount": 62,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 65,
+          "failed": 0,
+          "total": 65,
+          "watching": true,
+          "sessionId": "iab-d6520e2e-ae67-4fd6-b0fd-f6b25ad9eb33",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 23.100000083446503,
+            "lastMutationIndexMs": 48.59999996423721
+          }
+        },
+        "bilingual-scroll": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/commercial-1-2-bilingual-scroll.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 65,
+          "targetCount": 62,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restore": {
+          "originalNodes": 852,
+          "retainedNodes": 852,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 65,
+          "failed": 0,
+          "total": 65,
+          "watching": true,
+          "sessionId": "iab-d6520e2e-ae67-4fd6-b0fd-f6b25ad9eb33",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 18.300000071525574,
+            "lastMutationIndexMs": 81.59999996423721
+          }
+        },
+        "replace-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/commercial-1-2-replace-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 65,
+          "targetCount": 106,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restoreReplace": {
+          "originalNodes": 852,
+          "retainedNodes": 852,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "finished": "2026-10-07T07:13:48.584Z"
+      },
+      "after": {
+        "id": "commercial-1-2",
+        "category": "commercial",
+        "site": "Microsoft Learn",
+        "page": 2,
+        "url": "https://learn.microsoft.com/en-us/azure/architecture/",
+        "phase": "live-after",
+        "engine": "Chromium production content + isolated bridge",
+        "buildHash": "3a878778be0ba0217945932f6e5535532df559871e697710077b1a1de0176cef",
+        "buildCssHash": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d",
+        "started": "2026-10-07T07:16:37.260Z",
+        "httpStatus": 200,
+        "cookieChoice": "Reject",
+        "meta": {
+          "url": "https://learn.microsoft.com/en-us/azure/architecture/",
+          "title": "Azure Architecture Center",
+          "text": "Skip to main content\nLearn\nDocumentation\nTraining & Labs\nQ&A\nTopics\nSign in\nAzure\nProducts\nArchitecture\nMigration\nDevelop\nLearn Azure\nTroubleshooting\nResources\nPortal\nGet started with Azure\nSearch\nAzure Architecture Center\nBrowse all Architectures\nArchitecture icons\nWhat's new\nApplication architecture fundamentals\nAzure landing zone\nAzure categories\nAzure for AWS professionals\nAzure for Google Cloud professionals\nMicrosoft Azure Well-Architected Framework\nCloud Adoption Framework for Azure\nLearnAzureArchitecture Center\nAzure Architecture Center\n\nDesign solutions on Azure by using established patterns and practices. The Azure Architecture Center is a catalog of solution ideas, example workloads, reference architectures, technology decision guides, and architecture guides that help cloud architects and engineers build workloads aligned with the Azure Well-Architected Framework and the Cloud Adoption Framework for Azure.\n\nGet started\n\nChoose a starting point based on what you need to do.\n\nBrowse architectures\n\nExplore reference architectures, example workloads, and solution ideas.\n\nLearn the fundamentals\n\nUnderstand architecture styles, design principles, and best practices.\n\nMake tec",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          }
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 62
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 62
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 44
+          }
+        },
+        "source-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/commercial-1-2-source-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 65,
+          "targetCount": 0,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 65,
+          "failed": 0,
+          "total": 65,
+          "watching": true,
+          "sessionId": "iab-20fb588c-fe0b-405f-abc4-928b44d7f10c",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 24.499999940395355,
+            "lastMutationIndexMs": 1.5999999642372131
+          }
+        },
+        "bilingual-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/commercial-1-2-bilingual-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 65,
+          "targetCount": 62,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 65,
+          "failed": 0,
+          "total": 65,
+          "watching": true,
+          "sessionId": "iab-20fb588c-fe0b-405f-abc4-928b44d7f10c",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 24.499999940395355,
+            "lastMutationIndexMs": 58
+          }
+        },
+        "bilingual-scroll": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/commercial-1-2-bilingual-scroll.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 65,
+          "targetCount": 62,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restore": {
+          "originalNodes": 852,
+          "retainedNodes": 852,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 65,
+          "failed": 0,
+          "total": 65,
+          "watching": true,
+          "sessionId": "iab-20fb588c-fe0b-405f-abc4-928b44d7f10c",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 19.400000035762787,
+            "lastMutationIndexMs": 114.19999998807907
+          }
+        },
+        "replace-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/commercial-1-2-replace-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 65,
+          "targetCount": 106,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restoreReplace": {
+          "originalNodes": 852,
+          "retainedNodes": 852,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "finished": "2026-10-07T07:17:02.901Z"
+      }
+    },
+    {
+      "id": "commercial-7-2",
+      "site": "Shopify Developer",
+      "url": "https://shopify.dev/docs/apps/build",
+      "sourceUnits": 102,
+      "processed": 47,
+      "codeNodes": 0,
+      "views": [
+        {
+          "view": "source-top",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        },
+        {
+          "view": "bilingual-top",
+          "overflow": 0,
+          "clipCandidates": 1,
+          "squeezeCandidates": 0
+        },
+        {
+          "view": "bilingual-scroll",
+          "overflow": 0,
+          "clipCandidates": 1,
+          "squeezeCandidates": 0
+        },
+        {
+          "view": "replace-top",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        }
+      ],
+      "before": {
+        "id": "commercial-7-2",
+        "category": "commercial",
+        "site": "Shopify Developer",
+        "page": 2,
+        "url": "https://shopify.dev/docs/apps/build",
+        "phase": "live-before",
+        "engine": "Chromium production content + isolated bridge",
+        "buildHash": "d4f228a1e1aa0b9383ff7f74c46836ab6cb51021c0c4cc93ac6d985a11195ae1",
+        "buildCssHash": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d",
+        "started": "2026-10-07T07:13:29.171Z",
+        "httpStatus": 200,
+        "meta": {
+          "url": "https://shopify.dev/docs/apps/build",
+          "title": "Build",
+          "text": "Skip to main content\nApps\nStorefronts\nAgents\nReferences\nChangelog\nAsk assistant\n/\nHelp\n•\nLog in\nCollapse sidebar\nApps\nOverview\nBUILDING AND DEPLOYING APPS\nScaffold an app\nBuild an app\nDeployment\nDistribution\nDEV TOOLS\nShopify AI Toolkit\nShopify CLI\nDev Dashboard\nBUILDING BLOCKS\nAPIs\nAuthentication\nCustom data\nEvents and webhooks\nExtensions\nFunctions\nDESIGN AND QUALITY\nDesign guidelines\nSecurity\nApp performance\nBuilt for Shopify\nAPP SURFACES\nAdmin\nApp Home\nCheckout\nCustomer accounts\nOnline store\nPoint of Sale\nUSE CASES\nAI and agents\nAnalytics\nB2B\nFlow\nGlobal markets\nMarketing and web pixels\nOrders and fulfillment\nPayments\nProducts and pricing\nSales channels\nSELLING AND GROWING YOUR APP\nShopify App Store\nBilling\nMarketing and growth\nBuild apps for Shopify\n\nMerchants run their whole business on Shopify, and they turn to apps for the features they need next. Your app runs inside Shopify's own surfaces, works with Shopify's APIs and store data, and can reach millions of merchants through the Shopify App Store.\n\nScaffold an app\n\nUse Shopify CLI to generate a new app project with everything you need.\n\nBuild an app\n\nAfter scaffolding, build a QR code app with the Admin API, web components,",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          }
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 41
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 45
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 32
+          }
+        },
+        "source-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/commercial-7-2-source-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 102,
+          "targetCount": 0,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 43,
+          "failed": 0,
+          "total": 102,
+          "watching": true,
+          "sessionId": "iab-ffb44028-2447-4b66-a89e-576b70704591",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 30.800000071525574,
+            "lastMutationIndexMs": 0
+          }
+        },
+        "bilingual-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/commercial-7-2-bilingual-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 102,
+          "targetCount": 41,
+          "documentOverflow": 0,
+          "clips": [
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ 事件和 Webhook",
+              "visible": 78,
+              "box": {
+                "x": 197,
+                "y": 782,
+                "w": 112,
+                "h": 17
+              },
+              "ancestor": "nav._Nav_1gye5_5",
+              "ancestorBox": {
+                "x": 8,
+                "y": 168,
+                "w": 276,
+                "h": 904
+              },
+              "overflow": "hidden auto",
+              "clamp": "none"
+            }
+          ],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 47,
+          "failed": 0,
+          "total": 102,
+          "watching": true,
+          "sessionId": "iab-ffb44028-2447-4b66-a89e-576b70704591",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 30.800000071525574,
+            "lastMutationIndexMs": 0
+          }
+        },
+        "bilingual-scroll": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/commercial-7-2-bilingual-scroll.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 102,
+          "targetCount": 45,
+          "documentOverflow": 0,
+          "clips": [
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ 事件和 Webhook",
+              "visible": 78,
+              "box": {
+                "x": 197,
+                "y": 782,
+                "w": 112,
+                "h": 17
+              },
+              "ancestor": "nav._Nav_1gye5_5",
+              "ancestorBox": {
+                "x": 8,
+                "y": 168,
+                "w": 276,
+                "h": 904
+              },
+              "overflow": "hidden auto",
+              "clamp": "none"
+            }
+          ],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restore": {
+          "originalNodes": 291,
+          "retainedNodes": 291,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 47,
+          "failed": 0,
+          "total": 102,
+          "watching": true,
+          "sessionId": "iab-ffb44028-2447-4b66-a89e-576b70704591",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 26.899999976158142,
+            "lastMutationIndexMs": 16.299999952316284
+          }
+        },
+        "replace-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/commercial-7-2-replace-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 102,
+          "targetCount": 77,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restoreReplace": {
+          "originalNodes": 291,
+          "retainedNodes": 291,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "finished": "2026-10-07T07:13:53.904Z"
+      },
+      "after": {
+        "id": "commercial-7-2",
+        "category": "commercial",
+        "site": "Shopify Developer",
+        "page": 2,
+        "url": "https://shopify.dev/docs/apps/build",
+        "phase": "live-after",
+        "engine": "Chromium production content + isolated bridge",
+        "buildHash": "3a878778be0ba0217945932f6e5535532df559871e697710077b1a1de0176cef",
+        "buildCssHash": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d",
+        "started": "2026-10-07T07:16:46.504Z",
+        "httpStatus": 200,
+        "meta": {
+          "url": "https://shopify.dev/docs/apps/build",
+          "title": "Build",
+          "text": "Skip to main content\nApps\nStorefronts\nAgents\nReferences\nChangelog\nAsk assistant\n/\nHelp\n•\nLog in\nCollapse sidebar\nApps\nOverview\nBUILDING AND DEPLOYING APPS\nScaffold an app\nBuild an app\nDeployment\nDistribution\nDEV TOOLS\nShopify AI Toolkit\nShopify CLI\nDev Dashboard\nBUILDING BLOCKS\nAPIs\nAuthentication\nCustom data\nEvents and webhooks\nExtensions\nFunctions\nDESIGN AND QUALITY\nDesign guidelines\nSecurity\nApp performance\nBuilt for Shopify\nAPP SURFACES\nAdmin\nApp Home\nCheckout\nCustomer accounts\nOnline store\nPoint of Sale\nUSE CASES\nAI and agents\nAnalytics\nB2B\nFlow\nGlobal markets\nMarketing and web pixels\nOrders and fulfillment\nPayments\nProducts and pricing\nSales channels\nSELLING AND GROWING YOUR APP\nShopify App Store\nBilling\nMarketing and growth\nBuild apps for Shopify\n\nMerchants run their whole business on Shopify, and they turn to apps for the features they need next. Your app runs inside Shopify's own surfaces, works with Shopify's APIs and store data, and can reach millions of merchants through the Shopify App Store.\n\nScaffold an app\n\nUse Shopify CLI to generate a new app project with everything you need.\n\nBuild an app\n\nAfter scaffolding, build a QR code app with the Admin API, web components,",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          }
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 41
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 45
+          },
+          "replace-top": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 32
+          }
+        },
+        "source-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/commercial-7-2-source-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 102,
+          "targetCount": 0,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 43,
+          "failed": 0,
+          "total": 102,
+          "watching": true,
+          "sessionId": "iab-aaf95500-e2b3-404b-ad8e-566e9ef0bea6",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 30.90000009536743,
+            "lastMutationIndexMs": 0
+          }
+        },
+        "bilingual-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/commercial-7-2-bilingual-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 102,
+          "targetCount": 41,
+          "documentOverflow": 0,
+          "clips": [
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ 事件和 Webhook",
+              "visible": 78,
+              "box": {
+                "x": 197,
+                "y": 782,
+                "w": 112,
+                "h": 17
+              },
+              "ancestor": "nav._Nav_1gye5_5",
+              "ancestorBox": {
+                "x": 8,
+                "y": 168,
+                "w": 276,
+                "h": 904
+              },
+              "overflow": "hidden auto",
+              "clamp": "none"
+            }
+          ],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 47,
+          "failed": 0,
+          "total": 102,
+          "watching": true,
+          "sessionId": "iab-aaf95500-e2b3-404b-ad8e-566e9ef0bea6",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 30.90000009536743,
+            "lastMutationIndexMs": 0
+          }
+        },
+        "bilingual-scroll": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/commercial-7-2-bilingual-scroll.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 102,
+          "targetCount": 45,
+          "documentOverflow": 0,
+          "clips": [
+            {
+              "selector": "span.dual-read-target.dual-read-target--compact.dual-read-nav-sub",
+              "text": "​ 事件和 Webhook",
+              "visible": 78,
+              "box": {
+                "x": 197,
+                "y": 782,
+                "w": 112,
+                "h": 17
+              },
+              "ancestor": "nav._Nav_1gye5_5",
+              "ancestorBox": {
+                "x": 8,
+                "y": 168,
+                "w": 276,
+                "h": 904
+              },
+              "overflow": "hidden auto",
+              "clamp": "none"
+            }
+          ],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restore": {
+          "originalNodes": 291,
+          "retainedNodes": 291,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 47,
+          "failed": 0,
+          "total": 102,
+          "watching": true,
+          "sessionId": "iab-aaf95500-e2b3-404b-ad8e-566e9ef0bea6",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 27.59999990463257,
+            "lastMutationIndexMs": 22
+          }
+        },
+        "replace-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/commercial-7-2-replace-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 102,
+          "targetCount": 77,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restoreReplace": {
+          "originalNodes": 291,
+          "retainedNodes": 291,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "finished": "2026-10-07T07:17:11.098Z"
+      }
+    },
+    {
+      "id": "open_source-1-1",
+      "site": "React",
+      "url": "https://react.dev/",
+      "sourceUnits": 120,
+      "processed": 19,
+      "codeNodes": 500,
+      "views": [
+        {
+          "view": "source-top",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        },
+        {
+          "view": "bilingual-top",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        },
+        {
+          "view": "bilingual-scroll",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        },
+        {
+          "view": "replace-top",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        }
+      ],
+      "before": {
+        "id": "open_source-1-1",
+        "category": "open_source",
+        "site": "React",
+        "page": 1,
+        "url": "https://react.dev/",
+        "phase": "live-before",
+        "engine": "Chromium production content + isolated bridge",
+        "buildHash": "d4f228a1e1aa0b9383ff7f74c46836ab6cb51021c0c4cc93ac6d985a11195ae1",
+        "buildCssHash": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d",
+        "started": "2026-10-07T07:13:53.939Z",
+        "httpStatus": 200,
+        "meta": {
+          "url": "https://react.dev/",
+          "title": "React",
+          "text": "React\nv19.3\nSearch\n⌘\nK\nLearn\nReference\nCommunity\nBlog\nReact\n\nThe library for web and native user interfaces\n\nLearn React\nAPI Reference\nCreate user interfaces from components\n\nReact lets you build user interfaces out of individual pieces called components. Create your own React components like Thumbnail, LikeButton, and Video. Then combine them into entire screens, pages, and apps.\n\nVideo.js\nfunction Video({ video }) {\n\n  return (\n\n    <div>\n\n      <Thumbnail video={video} />\n\n      <a href={video.url}>\n\n        <h3>{video.title}</h3>\n\n        <p>{video.description}</p>\n\n      </a>\n\n      <LikeButton video={video} />\n\n    </div>\n\n  );\n\n}\n\nWhether you work on your own or with thousands of other developers, using React feels the same. It is designed to let you seamlessly combine components written by independent people, teams, and organizations.\n\nWrite components with code and markup\n\nReact components are JavaScript functions. Want to show some content conditionally? Use an if statement. Displaying a list? Try array map(). Learning React is learning programming.\n\nVideoList.js\nfunction VideoList({ videos, emptyHeading }) {\n\n  const count = videos.length;\n\n  let heading = emptyHeading;\n",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          }
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 12
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 15
+          },
+          "replace-top": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 14
+          }
+        },
+        "source-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/open_source-1-1-source-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 120,
+          "targetCount": 0,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 16,
+          "failed": 0,
+          "total": 120,
+          "watching": true,
+          "sessionId": "iab-cfa0ce49-1c6d-4583-aee4-b45897b66cf9",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 47.6000000834465,
+            "lastMutationIndexMs": 1.0999999642372131
+          }
+        },
+        "bilingual-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/open_source-1-1-bilingual-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 120,
+          "targetCount": 12,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 19,
+          "failed": 0,
+          "total": 120,
+          "watching": true,
+          "sessionId": "iab-cfa0ce49-1c6d-4583-aee4-b45897b66cf9",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 47.6000000834465,
+            "lastMutationIndexMs": 1.5
+          }
+        },
+        "bilingual-scroll": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/open_source-1-1-bilingual-scroll.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 120,
+          "targetCount": 15,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restore": {
+          "originalNodes": 710,
+          "retainedNodes": 710,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 20,
+          "failed": 0,
+          "total": 120,
+          "watching": true,
+          "sessionId": "iab-cfa0ce49-1c6d-4583-aee4-b45897b66cf9",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 49.300000071525574,
+            "lastMutationIndexMs": 8
+          }
+        },
+        "replace-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/open_source-1-1-replace-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 120,
+          "targetCount": 30,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restoreReplace": {
+          "originalNodes": 710,
+          "retainedNodes": 710,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "finished": "2026-10-07T07:14:18.320Z"
+      },
+      "after": {
+        "id": "open_source-1-1",
+        "category": "open_source",
+        "site": "React",
+        "page": 1,
+        "url": "https://react.dev/",
+        "phase": "live-after",
+        "engine": "Chromium production content + isolated bridge",
+        "buildHash": "3a878778be0ba0217945932f6e5535532df559871e697710077b1a1de0176cef",
+        "buildCssHash": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d",
+        "started": "2026-10-07T07:17:11.145Z",
+        "httpStatus": 200,
+        "meta": {
+          "url": "https://react.dev/",
+          "title": "React",
+          "text": "React\nv19.3\nSearch\n⌘\nK\nLearn\nReference\nCommunity\nBlog\nReact\n\nThe library for web and native user interfaces\n\nLearn React\nAPI Reference\nCreate user interfaces from components\n\nReact lets you build user interfaces out of individual pieces called components. Create your own React components like Thumbnail, LikeButton, and Video. Then combine them into entire screens, pages, and apps.\n\nVideo.js\nfunction Video({ video }) {\n\n  return (\n\n    <div>\n\n      <Thumbnail video={video} />\n\n      <a href={video.url}>\n\n        <h3>{video.title}</h3>\n\n        <p>{video.description}</p>\n\n      </a>\n\n      <LikeButton video={video} />\n\n    </div>\n\n  );\n\n}\n\nWhether you work on your own or with thousands of other developers, using React feels the same. It is designed to let you seamlessly combine components written by independent people, teams, and organizations.\n\nWrite components with code and markup\n\nReact components are JavaScript functions. Want to show some content conditionally? Use an if statement. Displaying a list? Try array map(). Learning React is learning programming.\n\nVideoList.js\nfunction VideoList({ videos, emptyHeading }) {\n\n  const count = videos.length;\n\n  let heading = emptyHeading;\n",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          }
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 12
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 15
+          },
+          "replace-top": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 15
+          }
+        },
+        "source-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/open_source-1-1-source-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 120,
+          "targetCount": 0,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 16,
+          "failed": 0,
+          "total": 120,
+          "watching": true,
+          "sessionId": "iab-7c6c5802-5afe-494f-8ee9-480823e09a3a",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 56.699999928474426,
+            "lastMutationIndexMs": 1.0999999642372131
+          }
+        },
+        "bilingual-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/open_source-1-1-bilingual-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 120,
+          "targetCount": 12,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 19,
+          "failed": 0,
+          "total": 120,
+          "watching": true,
+          "sessionId": "iab-7c6c5802-5afe-494f-8ee9-480823e09a3a",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 56.699999928474426,
+            "lastMutationIndexMs": 1.5
+          }
+        },
+        "bilingual-scroll": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/open_source-1-1-bilingual-scroll.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 120,
+          "targetCount": 15,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restore": {
+          "originalNodes": 710,
+          "retainedNodes": 710,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 21,
+          "failed": 0,
+          "total": 120,
+          "watching": true,
+          "sessionId": "iab-7c6c5802-5afe-494f-8ee9-480823e09a3a",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 52.30000001192093,
+            "lastMutationIndexMs": 11.200000047683716
+          }
+        },
+        "replace-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/open_source-1-1-replace-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 120,
+          "targetCount": 32,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restoreReplace": {
+          "originalNodes": 710,
+          "retainedNodes": 710,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "finished": "2026-10-07T07:17:35.305Z"
+      }
+    },
+    {
+      "id": "commercial-8-2",
+      "site": "Stripe Docs",
+      "url": "https://docs.stripe.com/payments/accept-a-payment",
+      "sourceUnits": 173,
+      "processed": 73,
+      "codeNodes": 257,
+      "views": [
+        {
+          "view": "source-top",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        },
+        {
+          "view": "bilingual-top",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        },
+        {
+          "view": "bilingual-scroll",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        },
+        {
+          "view": "replace-top",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        }
+      ],
+      "before": {
+        "id": "commercial-8-2",
+        "category": "commercial",
+        "site": "Stripe Docs",
+        "page": 2,
+        "url": "https://docs.stripe.com/payments/accept-a-payment",
+        "phase": "live-before",
+        "engine": "Chromium production content + isolated bridge",
+        "buildHash": "d4f228a1e1aa0b9383ff7f74c46836ab6cb51021c0c4cc93ac6d985a11195ae1",
+        "buildCssHash": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d",
+        "started": "2026-10-07T07:13:48.617Z",
+        "httpStatus": 200,
+        "cookieChoice": "Reject all",
+        "meta": {
+          "url": "https://docs.stripe.com/payments/accept-a-payment",
+          "title": "Accept a payment | Stripe Documentation",
+          "text": "Skip to content\nSearch\n/\nAsk AI\nCreate account\nSign in\nGet started\nPayments\nRevenue\nRisk\nData\nMoney management\nStablecoins\nEmbedded finance\nDeveloper resources\nAPIs & SDKs\nHelp\nOverview\nAccept a payment\nONLINE PAYMENTS\nOverview\nFind your use case\nUse Payment Links\nBuild a payments page\nBuild a custom integration with Elements\nBuild an in-app integration\nUse Managed Payments\nRecurring payments\nMigrate legacy integrations\nIN-PERSON PAYMENTS\nOverview\nHow Terminal works\nAvailability\nReaders\nReady-made apps\nCustom integration\nPAYMENT METHODS\nAdd payment methods\nManage payment methods\nFaster checkout with Link\nPAYMENT OPERATIONS\nAnalytics\nBalances and settlement time\nCompliance and security\nCurrencies\nDeclines\nDisputes\nPayouts\nReceipts\nRefunds and cancellations\nADVANCED INTEGRATIONS\nCustom payment flows\nFlexible acquiring\nOff-Session Payments\nMultiprocessor orchestration\nBEYOND PAYMENTS\nIncorporate your company\nAgentic commerce\nFinancial Connections\nClimate\nUnited States\nEnglish (United States)\nHome\n/\nPayments\nAccept a payment\nSecurely accept payments online.\nAsk about this page\nCopy for LLM\nView as Markdown\nInstall tools\n\nBuild a payment form or use a prebuilt checkout page to start acc",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          }
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 257,
+            "retainedCodeNodes": 257,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 257,
+            "retainedCodeNodes": 257,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 73
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 257,
+            "retainedCodeNodes": 257,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 73
+          },
+          "replace-top": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 257,
+            "retainedCodeNodes": 257,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 67
+          }
+        },
+        "source-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/commercial-8-2-source-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 173,
+          "targetCount": 0,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 73,
+          "failed": 0,
+          "total": 173,
+          "watching": true,
+          "sessionId": "iab-850aaa3e-e420-40bf-85fe-d321a3c4bedc",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 4,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 80.79999995231628,
+            "lastMutationIndexMs": 5.299999952316284
+          }
+        },
+        "bilingual-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/commercial-8-2-bilingual-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 173,
+          "targetCount": 73,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 73,
+          "failed": 0,
+          "total": 173,
+          "watching": true,
+          "sessionId": "iab-850aaa3e-e420-40bf-85fe-d321a3c4bedc",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 4,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 80.79999995231628,
+            "lastMutationIndexMs": 4.299999952316284
+          }
+        },
+        "bilingual-scroll": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/commercial-8-2-bilingual-scroll.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 173,
+          "targetCount": 73,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restore": {
+          "originalNodes": 629,
+          "retainedNodes": 629,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 73,
+          "failed": 0,
+          "total": 173,
+          "watching": true,
+          "sessionId": "iab-850aaa3e-e420-40bf-85fe-d321a3c4bedc",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 4,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 80.39999997615814,
+            "lastMutationIndexMs": 0
+          }
+        },
+        "replace-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/commercial-8-2-replace-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 173,
+          "targetCount": 129,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restoreReplace": {
+          "originalNodes": 629,
+          "retainedNodes": 629,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "finished": "2026-10-07T07:14:37.284Z"
+      },
+      "after": {
+        "id": "commercial-8-2",
+        "category": "commercial",
+        "site": "Stripe Docs",
+        "page": 2,
+        "url": "https://docs.stripe.com/payments/accept-a-payment",
+        "phase": "live-after",
+        "engine": "Chromium production content + isolated bridge",
+        "buildHash": "3a878778be0ba0217945932f6e5535532df559871e697710077b1a1de0176cef",
+        "buildCssHash": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d",
+        "started": "2026-10-07T07:17:02.937Z",
+        "httpStatus": 200,
+        "cookieChoice": "Reject all",
+        "meta": {
+          "url": "https://docs.stripe.com/payments/accept-a-payment",
+          "title": "Accept a payment | Stripe Documentation",
+          "text": "Skip to content\nSearch\n/\nAsk AI\nCreate account\nSign in\nGet started\nPayments\nRevenue\nRisk\nData\nMoney management\nStablecoins\nEmbedded finance\nDeveloper resources\nAPIs & SDKs\nHelp\nOverview\nAccept a payment\nONLINE PAYMENTS\nOverview\nFind your use case\nUse Payment Links\nBuild a payments page\nBuild a custom integration with Elements\nBuild an in-app integration\nUse Managed Payments\nRecurring payments\nMigrate legacy integrations\nIN-PERSON PAYMENTS\nOverview\nHow Terminal works\nAvailability\nReaders\nReady-made apps\nCustom integration\nPAYMENT METHODS\nAdd payment methods\nManage payment methods\nFaster checkout with Link\nPAYMENT OPERATIONS\nAnalytics\nBalances and settlement time\nCompliance and security\nCurrencies\nDeclines\nDisputes\nPayouts\nReceipts\nRefunds and cancellations\nADVANCED INTEGRATIONS\nCustom payment flows\nFlexible acquiring\nOff-Session Payments\nMultiprocessor orchestration\nBEYOND PAYMENTS\nIncorporate your company\nAgentic commerce\nFinancial Connections\nClimate\nUnited States\nEnglish (United States)\nHome\n/\nPayments\nAccept a payment\nSecurely accept payments online.\nAsk about this page\nCopy for LLM\nView as Markdown\nInstall tools\n\nBuild a payment form or use a prebuilt checkout page to start acc",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          }
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 257,
+            "retainedCodeNodes": 257,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 257,
+            "retainedCodeNodes": 257,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 73
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 257,
+            "retainedCodeNodes": 257,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 73
+          },
+          "replace-top": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 257,
+            "retainedCodeNodes": 257,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 67
+          }
+        },
+        "source-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/commercial-8-2-source-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 173,
+          "targetCount": 0,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 73,
+          "failed": 0,
+          "total": 173,
+          "watching": true,
+          "sessionId": "iab-c50f9bff-6538-4bc9-9ad2-0382ca2e5848",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 4,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 92.69999986886978,
+            "lastMutationIndexMs": 6.599999964237213
+          }
+        },
+        "bilingual-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/commercial-8-2-bilingual-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 173,
+          "targetCount": 73,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 73,
+          "failed": 0,
+          "total": 173,
+          "watching": true,
+          "sessionId": "iab-c50f9bff-6538-4bc9-9ad2-0382ca2e5848",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 4,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 92.69999986886978,
+            "lastMutationIndexMs": 5.699999988079071
+          }
+        },
+        "bilingual-scroll": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/commercial-8-2-bilingual-scroll.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 173,
+          "targetCount": 73,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restore": {
+          "originalNodes": 629,
+          "retainedNodes": 629,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 73,
+          "failed": 0,
+          "total": 173,
+          "watching": true,
+          "sessionId": "iab-c50f9bff-6538-4bc9-9ad2-0382ca2e5848",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 4,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 91.20000004768372,
+            "lastMutationIndexMs": 0
+          }
+        },
+        "replace-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/commercial-8-2-replace-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 173,
+          "targetCount": 129,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restoreReplace": {
+          "originalNodes": 629,
+          "retainedNodes": 629,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "finished": "2026-10-07T07:17:53.088Z"
+      }
+    },
+    {
+      "id": "open_source-2-2",
+      "site": "Vue",
+      "url": "https://vuejs.org/guide/introduction.html",
+      "sourceUnits": 149,
+      "processed": 80,
+      "codeNodes": 369,
+      "views": [
+        {
+          "view": "source-top",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        },
+        {
+          "view": "bilingual-top",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        },
+        {
+          "view": "bilingual-scroll",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        },
+        {
+          "view": "replace-top",
+          "overflow": 0,
+          "clipCandidates": 0,
+          "squeezeCandidates": 0
+        }
+      ],
+      "before": {
+        "id": "open_source-2-2",
+        "category": "open_source",
+        "site": "Vue",
+        "page": 2,
+        "url": "https://vuejs.org/guide/introduction.html",
+        "phase": "live-before",
+        "engine": "Chromium production content + isolated bridge",
+        "buildHash": "d4f228a1e1aa0b9383ff7f74c46836ab6cb51021c0c4cc93ac6d985a11195ae1",
+        "buildCssHash": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d",
+        "started": "2026-10-07T07:14:18.358Z",
+        "httpStatus": 200,
+        "meta": {
+          "url": "https://vuejs.org/guide/introduction.html",
+          "title": "Introduction | Vue.js",
+          "text": "Skip to content\nVue.js\nSearch\n⌘\nK\nMain Navigation\nDocs\nPlayground\nEcosystem\nAbout\nSupport\ngithub\ntwitter\ndiscord\nAPI Preference\nOptions\nComposition\n?\n\nAPI style now defaults to Composition API.\n\nSome pages contain different content based on the API style chosen. Use this switch to toggle between APIs styles.\n\nLearn moreGot it\n\nSidebar Navigation\nGetting Started\n\nIntroduction\n\nQuick Start\n\nEssentials\n\nCreating an Application\n\nTemplate Syntax\n\nReactivity Fundamentals\n\nComputed Properties\n\nClass and Style Bindings\n\nConditional Rendering\n\nList Rendering\n\nEvent Handling\n\nForm Input Bindings\n\nWatchers\n\nTemplate Refs\n\nComponents Basics\n\nLifecycle Hooks\n\nComponents In-Depth\n\nRegistration\n\nProps\n\nEvents\n\nComponent v-model\n\nFallthrough Attributes\n\nSlots\n\nProvide / inject\n\nAsync Components\n\nReusability\n\nComposables\n\nCustom Directives\n\nPlugins\n\nBuilt-in Components\n\nTransition\n\nTransitionGroup\n\nKeepAlive\n\nTeleport\n\nSuspense\n\nScaling Up\n\nSingle-File Components\n\nTooling\n\nRouting\n\nState Management\n\nTesting\n\nServer-Side Rendering (SSR)\n\nBest Practices\n\nProduction Deployment\n\nPerformance\n\nAccessibility\n\nSecurity\n\nTypeScript\n\nOverview\n\nTS with Composition API\n\nTS with Options API\n\nExtra Topics\n\nWays ",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          }
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 7,
+            "liveCodeBlocks": 7,
+            "originalCodeNodes": 369,
+            "retainedCodeNodes": 369,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 7,
+            "liveCodeBlocks": 7,
+            "originalCodeNodes": 369,
+            "retainedCodeNodes": 369,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 70
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 7,
+            "liveCodeBlocks": 7,
+            "originalCodeNodes": 369,
+            "retainedCodeNodes": 369,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 76
+          },
+          "replace-top": {
+            "codeBlocks": 7,
+            "liveCodeBlocks": 7,
+            "originalCodeNodes": 369,
+            "retainedCodeNodes": 369,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 66
+          }
+        },
+        "source-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/open_source-2-2-source-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 149,
+          "targetCount": 0,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 74,
+          "failed": 0,
+          "total": 149,
+          "watching": true,
+          "sessionId": "iab-2f184d20-58e2-4afb-b4f5-455aa227ae6d",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 28.199999928474426,
+            "lastMutationIndexMs": 1.9000000357627869
+          }
+        },
+        "bilingual-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/open_source-2-2-bilingual-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 149,
+          "targetCount": 70,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 80,
+          "failed": 0,
+          "total": 149,
+          "watching": true,
+          "sessionId": "iab-2f184d20-58e2-4afb-b4f5-455aa227ae6d",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 28.199999928474426,
+            "lastMutationIndexMs": 2.100000023841858
+          }
+        },
+        "bilingual-scroll": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/open_source-2-2-bilingual-scroll.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 149,
+          "targetCount": 76,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restore": {
+          "originalNodes": 674,
+          "retainedNodes": 674,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 84,
+          "failed": 0,
+          "total": 149,
+          "watching": true,
+          "sessionId": "iab-2f184d20-58e2-4afb-b4f5-455aa227ae6d",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 28.899999976158142,
+            "lastMutationIndexMs": 20
+          }
+        },
+        "replace-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-before/open_source-2-2-replace-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 149,
+          "targetCount": 143,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restoreReplace": {
+          "originalNodes": 674,
+          "retainedNodes": 674,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "finished": "2026-10-07T07:14:43.993Z"
+      },
+      "after": {
+        "id": "open_source-2-2",
+        "category": "open_source",
+        "site": "Vue",
+        "page": 2,
+        "url": "https://vuejs.org/guide/introduction.html",
+        "phase": "live-after",
+        "engine": "Chromium production content + isolated bridge",
+        "buildHash": "3a878778be0ba0217945932f6e5535532df559871e697710077b1a1de0176cef",
+        "buildCssHash": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d",
+        "started": "2026-10-07T07:17:35.342Z",
+        "httpStatus": 200,
+        "meta": {
+          "url": "https://vuejs.org/guide/introduction.html",
+          "title": "Introduction | Vue.js",
+          "text": "Skip to content\nVue.js\nSearch\n⌘\nK\nMain Navigation\nDocs\nPlayground\nEcosystem\nAbout\nSupport\ngithub\ntwitter\ndiscord\nAPI Preference\nOptions\nComposition\n?\n\nAPI style now defaults to Composition API.\n\nSome pages contain different content based on the API style chosen. Use this switch to toggle between APIs styles.\n\nLearn moreGot it\n\nSidebar Navigation\nGetting Started\n\nIntroduction\n\nQuick Start\n\nEssentials\n\nCreating an Application\n\nTemplate Syntax\n\nReactivity Fundamentals\n\nComputed Properties\n\nClass and Style Bindings\n\nConditional Rendering\n\nList Rendering\n\nEvent Handling\n\nForm Input Bindings\n\nWatchers\n\nTemplate Refs\n\nComponents Basics\n\nLifecycle Hooks\n\nComponents In-Depth\n\nRegistration\n\nProps\n\nEvents\n\nComponent v-model\n\nFallthrough Attributes\n\nSlots\n\nProvide / inject\n\nAsync Components\n\nReusability\n\nComposables\n\nCustom Directives\n\nPlugins\n\nBuilt-in Components\n\nTransition\n\nTransitionGroup\n\nKeepAlive\n\nTeleport\n\nSuspense\n\nScaling Up\n\nSingle-File Components\n\nTooling\n\nRouting\n\nState Management\n\nTesting\n\nServer-Side Rendering (SSR)\n\nBest Practices\n\nProduction Deployment\n\nPerformance\n\nAccessibility\n\nSecurity\n\nTypeScript\n\nOverview\n\nTS with Composition API\n\nTS with Options API\n\nExtra Topics\n\nWays ",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          }
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 7,
+            "liveCodeBlocks": 7,
+            "originalCodeNodes": 369,
+            "retainedCodeNodes": 369,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 7,
+            "liveCodeBlocks": 7,
+            "originalCodeNodes": 369,
+            "retainedCodeNodes": 369,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 70
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 7,
+            "liveCodeBlocks": 7,
+            "originalCodeNodes": 369,
+            "retainedCodeNodes": 369,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 76
+          },
+          "replace-top": {
+            "codeBlocks": 7,
+            "liveCodeBlocks": 7,
+            "originalCodeNodes": 369,
+            "retainedCodeNodes": 369,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 66
+          }
+        },
+        "source-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/open_source-2-2-source-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 149,
+          "targetCount": 0,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 74,
+          "failed": 0,
+          "total": 149,
+          "watching": true,
+          "sessionId": "iab-02c7555d-4109-4fb4-8f8c-ad473d1ab0bd",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 31.700000047683716,
+            "lastMutationIndexMs": 2.199999988079071
+          }
+        },
+        "bilingual-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/open_source-2-2-bilingual-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 149,
+          "targetCount": 70,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusScroll": {
+          "translating": false,
+          "count": 80,
+          "failed": 0,
+          "total": 149,
+          "watching": true,
+          "sessionId": "iab-02c7555d-4109-4fb4-8f8c-ad473d1ab0bd",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 31.700000047683716,
+            "lastMutationIndexMs": 1.699999988079071
+          }
+        },
+        "bilingual-scroll": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/open_source-2-2-bilingual-scroll.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 149,
+          "targetCount": 76,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restore": {
+          "originalNodes": 674,
+          "retainedNodes": 674,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 84,
+          "failed": 0,
+          "total": 149,
+          "watching": true,
+          "sessionId": "iab-02c7555d-4109-4fb4-8f8c-ad473d1ab0bd",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 1,
+            "crossOrigin": 0,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 27.69999998807907,
+            "lastMutationIndexMs": 27.099999964237213
+          }
+        },
+        "replace-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/live-after/open_source-2-2-replace-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 149,
+          "targetCount": 143,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restoreReplace": {
+          "originalNodes": 674,
+          "retainedNodes": 674,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "finished": "2026-10-07T07:17:59.932Z"
+      }
+    }
+  ],
+  "stripeScroll": {
+    "nativeInnerWheelPixels": 900,
+    "before": [
+      {
+        "id": "commercial-8-2",
+        "category": "commercial",
+        "site": "Stripe Docs",
+        "page": 2,
+        "url": "https://docs.stripe.com/payments/accept-a-payment",
+        "phase": "wheel-before",
+        "engine": "Chromium production content + isolated bridge",
+        "buildHash": "d4f228a1e1aa0b9383ff7f74c46836ab6cb51021c0c4cc93ac6d985a11195ae1",
+        "buildCssHash": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d",
+        "started": "2026-10-07T07:18:40.062Z",
+        "httpStatus": 200,
+        "cookieChoice": "Reject all",
+        "meta": {
+          "url": "https://docs.stripe.com/payments/accept-a-payment",
+          "title": "Accept a payment | Stripe Documentation",
+          "text": "Skip to content\nSearch\n/\nAsk AI\nCreate account\nSign in\nGet started\nPayments\nRevenue\nRisk\nData\nMoney management\nStablecoins\nEmbedded finance\nDeveloper resources\nAPIs & SDKs\nHelp\nOverview\nAccept a payment\nONLINE PAYMENTS\nOverview\nFind your use case\nUse Payment Links\nBuild a payments page\nBuild a custom integration with Elements\nBuild an in-app integration\nUse Managed Payments\nRecurring payments\nMigrate legacy integrations\nIN-PERSON PAYMENTS\nOverview\nHow Terminal works\nAvailability\nReaders\nReady-made apps\nCustom integration\nPAYMENT METHODS\nAdd payment methods\nManage payment methods\nFaster checkout with Link\nPAYMENT OPERATIONS\nAnalytics\nBalances and settlement time\nCompliance and security\nCurrencies\nDeclines\nDisputes\nPayouts\nReceipts\nRefunds and cancellations\nADVANCED INTEGRATIONS\nCustom payment flows\nFlexible acquiring\nOff-Session Payments\nMultiprocessor orchestration\nBEYOND PAYMENTS\nIncorporate your company\nAgentic commerce\nFinancial Connections\nClimate\nUnited States\nEnglish (United States)\nHome\n/\nPayments\nAccept a payment\nSecurely accept payments online.\nAsk about this page\nCopy for LLM\nView as Markdown\nInstall tools\n\nBuild a payment form or use a prebuilt checkout page to start acc",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          }
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 257,
+            "retainedCodeNodes": 257,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 257,
+            "retainedCodeNodes": 257,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 73
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 257,
+            "retainedCodeNodes": 257,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 77
+          },
+          "replace-top": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 257,
+            "retainedCodeNodes": 257,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 61
+          }
+        },
+        "source-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/wheel-before/commercial-8-2-source-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 173,
+          "targetCount": 0,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 73,
+          "failed": 0,
+          "total": 173,
+          "watching": true,
+          "sessionId": "iab-d87bbf7d-57cf-42d7-a549-f21f7b32150a",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 4,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 90.69999992847443,
+            "lastMutationIndexMs": 5.199999988079071
+          }
+        },
+        "bilingual-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/wheel-before/commercial-8-2-bilingual-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 173,
+          "targetCount": 73,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "scrollBefore": {
+          "windowY": 0,
+          "containers": [
+            {
+              "tag": "DIV",
+              "id": "",
+              "cls": "⚙  as-3r as-5p as-3x as-10 as-5q as-5r as-5s as-0 ⚙1hps5wf",
+              "top": 0,
+              "height": 887,
+              "scrollHeight": 2020
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "cls": "Content Box-root",
+              "top": 0,
+              "height": 968,
+              "scrollHeight": 6820
+            }
+          ]
+        },
+        "scrollAfter": {
+          "windowY": 0,
+          "containers": [
+            {
+              "tag": "DIV",
+              "id": "",
+              "cls": "⚙  as-3r as-5p as-3x as-10 as-5q as-5r as-5s as-0 ⚙1hps5wf",
+              "top": 0,
+              "height": 887,
+              "scrollHeight": 2020
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "cls": "Content Box-root",
+              "top": 900,
+              "height": 968,
+              "scrollHeight": 6927
+            }
+          ]
+        },
+        "verifiedScroll": true,
+        "statusScroll": {
+          "translating": false,
+          "count": 80,
+          "failed": 0,
+          "total": 173,
+          "watching": true,
+          "sessionId": "iab-d87bbf7d-57cf-42d7-a549-f21f7b32150a",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 4,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 90.69999992847443,
+            "lastMutationIndexMs": 5.199999988079071
+          }
+        },
+        "bilingual-scroll": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/wheel-before/commercial-8-2-bilingual-scroll.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 173,
+          "targetCount": 77,
+          "documentOverflow": 0,
+          "clips": [
+            {
+              "selector": "span.dual-read-target",
+              "text": "或者，从 代码快速入门 开始构建或下载可运行的示例。",
+              "visible": 0,
+              "box": {
+                "x": 561,
+                "y": 28,
+                "w": 829,
+                "h": 26
+              },
+              "ancestor": "div.Content.Box-root",
+              "ancestorBox": {
+                "x": 280,
+                "y": 112,
+                "w": 1640,
+                "h": 968
+              },
+              "overflow": "hidden auto",
+              "clamp": "none"
+            }
+          ],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restore": {
+          "originalNodes": 629,
+          "retainedNodes": 629,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 73,
+          "failed": 0,
+          "total": 173,
+          "watching": true,
+          "sessionId": "iab-d87bbf7d-57cf-42d7-a549-f21f7b32150a",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 4,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 88.5,
+            "lastMutationIndexMs": 0.6000000238418579
+          }
+        },
+        "replace-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/wheel-before/commercial-8-2-replace-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 173,
+          "targetCount": 120,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restoreReplace": {
+          "originalNodes": 629,
+          "retainedNodes": 629,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "finished": "2026-10-07T07:19:31.033Z"
+      }
+    ],
+    "after": [
+      {
+        "id": "commercial-8-2",
+        "category": "commercial",
+        "site": "Stripe Docs",
+        "page": 2,
+        "url": "https://docs.stripe.com/payments/accept-a-payment",
+        "phase": "wheel-after",
+        "engine": "Chromium production content + isolated bridge",
+        "buildHash": "3a878778be0ba0217945932f6e5535532df559871e697710077b1a1de0176cef",
+        "buildCssHash": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d",
+        "started": "2026-10-07T07:19:31.466Z",
+        "httpStatus": 200,
+        "cookieChoice": "Reject all",
+        "meta": {
+          "url": "https://docs.stripe.com/payments/accept-a-payment",
+          "title": "Accept a payment | Stripe Documentation",
+          "text": "Skip to content\nSearch\n/\nAsk AI\nCreate account\nSign in\nGet started\nPayments\nRevenue\nRisk\nData\nMoney management\nStablecoins\nEmbedded finance\nDeveloper resources\nAPIs & SDKs\nHelp\nOverview\nAccept a payment\nONLINE PAYMENTS\nOverview\nFind your use case\nUse Payment Links\nBuild a payments page\nBuild a custom integration with Elements\nBuild an in-app integration\nUse Managed Payments\nRecurring payments\nMigrate legacy integrations\nIN-PERSON PAYMENTS\nOverview\nHow Terminal works\nAvailability\nReaders\nReady-made apps\nCustom integration\nPAYMENT METHODS\nAdd payment methods\nManage payment methods\nFaster checkout with Link\nPAYMENT OPERATIONS\nAnalytics\nBalances and settlement time\nCompliance and security\nCurrencies\nDeclines\nDisputes\nPayouts\nReceipts\nRefunds and cancellations\nADVANCED INTEGRATIONS\nCustom payment flows\nFlexible acquiring\nOff-Session Payments\nMultiprocessor orchestration\nBEYOND PAYMENTS\nIncorporate your company\nAgentic commerce\nFinancial Connections\nClimate\nUnited States\nEnglish (United States)\nHome\n/\nPayments\nAccept a payment\nSecurely accept payments online.\nAsk about this page\nCopy for LLM\nView as Markdown\nInstall tools\n\nBuild a payment form or use a prebuilt checkout page to start acc",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          }
+        },
+        "codeAudit": {
+          "source-top": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 257,
+            "retainedCodeNodes": 257,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          },
+          "bilingual-top": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 257,
+            "retainedCodeNodes": 257,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 73
+          },
+          "bilingual-scroll": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 257,
+            "retainedCodeNodes": 257,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 77
+          },
+          "replace-top": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 257,
+            "retainedCodeNodes": 257,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 61
+          }
+        },
+        "source-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/wheel-after/commercial-8-2-source-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 173,
+          "targetCount": 0,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "statusTop": {
+          "translating": false,
+          "count": 73,
+          "failed": 0,
+          "total": 173,
+          "watching": true,
+          "sessionId": "iab-32290377-9ad0-4404-b28b-4d3bfd215ae0",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 4,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 89.80000001192093,
+            "lastMutationIndexMs": 7
+          }
+        },
+        "bilingual-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/wheel-after/commercial-8-2-bilingual-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 173,
+          "targetCount": 73,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "scrollBefore": {
+          "windowY": 0,
+          "containers": [
+            {
+              "tag": "DIV",
+              "id": "",
+              "cls": "⚙  as-3r as-5p as-3x as-10 as-5q as-5r as-5s as-0 ⚙1hps5wf",
+              "top": 0,
+              "height": 887,
+              "scrollHeight": 2020
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "cls": "Content Box-root",
+              "top": 0,
+              "height": 968,
+              "scrollHeight": 6820
+            }
+          ]
+        },
+        "scrollAfter": {
+          "windowY": 0,
+          "containers": [
+            {
+              "tag": "DIV",
+              "id": "",
+              "cls": "⚙  as-3r as-5p as-3x as-10 as-5q as-5r as-5s as-0 ⚙1hps5wf",
+              "top": 0,
+              "height": 887,
+              "scrollHeight": 2020
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "cls": "Content Box-root",
+              "top": 900,
+              "height": 968,
+              "scrollHeight": 6927
+            }
+          ]
+        },
+        "verifiedScroll": true,
+        "statusScroll": {
+          "translating": false,
+          "count": 80,
+          "failed": 0,
+          "total": 173,
+          "watching": true,
+          "sessionId": "iab-32290377-9ad0-4404-b28b-4d3bfd215ae0",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 4,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 89.80000001192093,
+            "lastMutationIndexMs": 7
+          }
+        },
+        "bilingual-scroll": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/wheel-after/commercial-8-2-bilingual-scroll.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 173,
+          "targetCount": 77,
+          "documentOverflow": 0,
+          "clips": [
+            {
+              "selector": "span.dual-read-target",
+              "text": "或者，从 代码快速入门 开始构建或下载可运行的示例。",
+              "visible": 0,
+              "box": {
+                "x": 561,
+                "y": 28,
+                "w": 829,
+                "h": 26
+              },
+              "ancestor": "div.Content.Box-root",
+              "ancestorBox": {
+                "x": 280,
+                "y": 112,
+                "w": 1640,
+                "h": 968
+              },
+              "overflow": "hidden auto",
+              "clamp": "none"
+            }
+          ],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restore": {
+          "originalNodes": 629,
+          "retainedNodes": 629,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "statusReplace": {
+          "translating": false,
+          "count": 73,
+          "failed": 0,
+          "total": 173,
+          "watching": true,
+          "sessionId": "iab-32290377-9ad0-4404-b28b-4d3bfd215ae0",
+          "revision": 1,
+          "shadowRoots": 0,
+          "frames": {
+            "sameOrigin": 0,
+            "crossOrigin": 4,
+            "opaque": 0
+          },
+          "perf": {
+            "lastIndexMs": 94.19999986886978,
+            "lastMutationIndexMs": 0.19999998807907104
+          }
+        },
+        "replace-top": {
+          "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/wheel-after/commercial-8-2-replace-top.png",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "units": 173,
+          "targetCount": 120,
+          "documentOverflow": 0,
+          "clips": [],
+          "squeezed": [],
+          "overflow": []
+        },
+        "restoreReplace": {
+          "originalNodes": 629,
+          "retainedNodes": 629,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "finished": "2026-10-07T07:20:21.113Z"
+      }
+    ],
+    "codeNodes": 257
+  },
+  "iab": {
+    "status": {
+      "count": 19,
+      "failed": 0,
+      "frames": {
+        "crossOrigin": 0,
+        "opaque": 0,
+        "sameOrigin": 0
+      },
+      "perf": {
+        "lastIndexMs": 53.49999988079071,
+        "lastMutationIndexMs": 2.100000023841858
+      },
+      "revision": 1,
+      "sessionId": "iab-82cbf921-2cff-4f45-9760-1f1d7aaa8488",
+      "shadowRoots": 0,
+      "total": 119,
+      "translating": false,
+      "watching": false
+    },
+    "viewport": {
+      "height": 1080,
+      "scrollY": 900,
+      "width": 1920
+    },
+    "code": {
+      "codeBlocks": 4,
+      "codeTranslationSamples": [],
+      "codeTranslationTargets": 0,
+      "hiddenCodeBlocks": 0,
+      "liveCodeBlocks": 8,
+      "originalCodeNodes": 500,
+      "overwrittenCodeValues": 0,
+      "proseTranslationTargets": 15,
+      "retainedCodeNodes": 500
+    },
+    "restore": {
+      "changedLinks": 0,
+      "changedValues": 0,
+      "orderDifferences": [],
+      "originalNodes": 710,
+      "overwrittenCurrentLinks": 0,
+      "overwrittenCurrentValues": 0,
+      "remainingTargets": 0,
+      "removedByPage": 0,
+      "removedSinceRestoreSnapshot": [],
+      "retainedCurrentOrder": true,
+      "retainedNodes": 710,
+      "sourceOrder": true
+    },
+    "restoreReplace": {
+      "changedLinks": 0,
+      "changedValues": 0,
+      "orderDifferences": [],
+      "originalNodes": 710,
+      "overwrittenCurrentLinks": 0,
+      "overwrittenCurrentValues": 0,
+      "remainingTargets": 0,
+      "removedByPage": 0,
+      "removedSinceRestoreSnapshot": [],
+      "retainedCurrentOrder": true,
+      "retainedNodes": 710,
+      "sourceOrder": true
+    },
+    "temporaryContentInjection": true,
+    "installedExtension": false,
+    "pageReloaded": false,
+    "testedBuild": "3a878778be0ba0217945932f6e5535532df559871e697710077b1a1de0176cef",
+    "screenshot": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/iab-after/react-delivery.jpg"
+  },
+  "observations": [
+    "No increased measured clipping, squeeze or overflow candidates in the matched sampled views; existing GitHub chrome and Shopify sidebar candidates remain at baseline levels.",
+    "React500, Vue369 and Stripe257 source code nodes remain intact, with zero overwritten values and zero translated code targets.",
+    "The inner Stripe document is actually scrolled900px on both builds; code remains untranslated and restore preserves current content and ordering.",
+    "IAB React remains1920x1080 with watching paused; both modes restore all710 source nodes and current source values/order."
+  ],
+  "limitations": [
+    "The policy fingerprint is not a complete CSS cascade interpreter; existing unknown-scope/container/opaque-sheet fallbacks remain observational.",
+    "CSSOM-only changes without an observable update event retain the existing trigger limitation.",
+    "Raw text directly in display:contents retains the previous geometry eligibility boundary.",
+    "The earlier70-page audit and unrelated extension/server functional suites were not rerun; Firefox native tests use packaged content with the repository Gecko shim."
+  ],
+  "security": {
+    "knownCredentialMatches": 0,
+    "privateConfigMode600": true,
+    "gitStagingEmpty": true
+  },
+  "artifacts": {
+    "directory": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07",
+    "comparisons": [
+      "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/site-pair-1.jpg",
+      "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/site-pair-2.jpg",
+      "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/site-pair-3.jpg",
+      "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/site-pair-4.jpg",
+      "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/site-pair-5.jpg",
+      "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/site-pair-6.jpg",
+      "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/cascade-layout-fixes-2026-10-07/site-pair-7.jpg"
+    ]
+  }
+}

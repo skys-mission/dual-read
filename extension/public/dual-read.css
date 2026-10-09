@@ -116,6 +116,20 @@ button .dual-read-target--inner {
   white-space: inherit;
 }
 
+/* In a nowrap prose row, keep the icon in its original flex slot while both
+   languages share the available text column. Column flex and wrapping rows
+   already provide a natural row for the block companion. */
+.dual-read-flow--block {
+  display: block !important;
+  flex: 1 1 0;
+}
+
+/* Structured prose keeps its source elements and direct-child selectors.
+   Only the owned companion occupies the additional full-width flex row. */
+[data-dual-read-wrap-text="true"] {
+  flex-wrap: wrap !important;
+}
+
 a[data-dual-read-done] .dual-read-target--inner {
   text-align: inherit;
 }
@@ -267,7 +281,7 @@ li[data-dual-read-list-outside="true"],
   line-height: inherit;
   letter-spacing: inherit;
   color: inherit;
-  white-space: normal;
+  white-space: inherit;
 }
 
 .dual-read-error {

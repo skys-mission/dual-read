@@ -18,6 +18,29 @@
     .action svg { flex-shrink: 0; }
     .action-label { min-width: 0; text-align: center; }
     #ordinary-card { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; }
+    #photo { width: 150px; overflow: hidden; margin: 12px 0; }
+    #photo img { width: 150px; height: 40px; }
+    #plain-caption { display: block; }
+    #ellipsis-column { width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #icon-row { display: flex; flex-wrap: nowrap; align-items: baseline; gap: 8px; width: 220px; }
+    #icon-row svg { flex-shrink: 0; }
+    .concealed { opacity: 0; }
+    .bounded { height: 80px; width: 320px; overflow: hidden; border: 1px solid #aaa; }
+    .bounded p { margin: 8px; }
+    #bounded-hero > div { height: 100%; display: flex; flex-direction: column; justify-content: center; }
+    #bounded-carousel ul { display: flex; gap: 12px; padding: 0; margin: 0; list-style: none; }
+    #bounded-carousel li { flex: 0 0 180px; }
+    #link-column { width: 240px; }
+    #link-column a { white-space: nowrap; }
+    #media-row { display: grid; grid-template-columns: 140px 120px; gap: 12px; }
+    #media-column { display: flex; }
+    #media-column img { height: 100%; width: auto; max-width: none; }
+    #dark-panel { background: #000; padding: 12px; }
+    #styled-paragraph { color: #000; font-size: 14px; line-height: 21px; }
+    #measured-grid { display: grid; grid-template-rows: 36px 48px 40px; width: 240px; }
+    #measured-grid h3, #measured-grid p { margin: 0; }
+    #measured-frame { position: relative; width: 240px; padding-bottom: 40px; }
+    #measured-footer { position: absolute; left: 0; right: 0; }
   </style>
 </head>
 <body>
@@ -27,6 +50,11 @@
       <p id="multiline" style="white-space:pre-wrap">First visible paragraph.
 
 Second visible paragraph, with useful details.</p>
+      <section id="bounded-hero" class="bounded"><div><p id="bounded-prose">Explore the platform and discover all available services.</p></div></section>
+      <section id="media-row"><div><p id="media-prose">Explore the platform and discover all available services.</p></div><div id="media-column"><img id="row-image" alt="A diagram" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='100' viewBox='0 0 1000 100'%3E%3Crect width='1000' height='100' fill='%23b6d9ff'/%3E%3C/svg%3E"></div></section>
+      <div id="measured-frame"><section id="measured-grid"><div id="measured-title-box" style="height:36px"><h3 id="measured-title">A useful product</h3></div><div id="measured-copy-box" style="height:48px"><p id="measured-copy">Explore the platform and discover all available services.</p></div><a id="measured-action" href="/learn">Learn more</a></section><div id="measured-footer" style="top:124px;height:calc(100% - 124px)"><button aria-label="Next item">→</button></div></div>
+      <section id="bounded-carousel" class="bounded"><ul><li><p>Browse the first featured product in the collection.</p></li><li><p>Browse the second featured product in the collection.</p></li><li><p>Browse the third featured product in the collection.</p></li></ul></section>
+      <div id="link-column"><a id="column-label" class="button primary" href="/console">Accessing the developer console</a></div>
       <a href="/quote" class="card" id="plain-card">
         <div id="plain-boundary" class="clip" style="-webkit-line-clamp:5"><div id="plain-clip" class="clip"><span id="plain-source">A quoted paragraph with enough useful source text to span multiple lines in a constrained card. The page deliberately truncates the original while the bilingual translation needs a separate visible row.</span></div></div>
       </a>
@@ -35,12 +63,24 @@ Second visible paragraph, with useful details.</p>
       </div>
       <div class="card" id="removed-card"><p id="removed-source" class="clip">A separate quoted paragraph can be removed by a live page while its translated companion is visible outside the clipping box. Restoration must keep the removal.</p></div>
       <div class="card" id="receiver"></div>
+      <figure id="photo"><a id="photo-link" href="/photo"><img alt="Landscape"></a><div id="plain-caption">Photo of the mountain range</div></figure>
+      <div id="ellipsis-column"><a id="ellipsis" href="/change">A useful description of the latest change</a></div>
+      <ul><li id="icon-row"><svg id="row-icon" aria-hidden="true" width="12" height="12"></svg>Read <a id="row-reference" href="/guide">the guide</a><svg id="row-tail" aria-hidden="true" width="12" height="12"></svg></li></ul>
+      <section id="doc-receiver"></section>
     </article>
     <section id="sidebar">
       <h2>Continue reading</h2>
+      <aside><a id="flat-control" href="/console" style="display:inline-flex"><svg aria-hidden="true" width="12" height="12"></svg>Developer Console<svg aria-hidden="true" width="12" height="12"></svg></a></aside>
+      <p id="late-style" style="opacity:0">Late visible paragraph from a style change.</p>
+      <p id="late-class" class="concealed">Late visible paragraph from a class change.</p>
+      <p id="late-hidden" hidden>Late visible paragraph from a hidden attribute.</p>
+      <p id="late-aria" aria-hidden="true">Late visible paragraph from an accessibility state change.</p>
       <a id="phone" class="action" href="/phone"><span><svg aria-hidden="true" width="18" height="18"><circle cx="9" cy="9" r="6"></circle></svg><span class="action-label">Continue with phone</span></span></a>
       <a id="login" class="action" href="/login"><span><svg aria-hidden="true" width="18" height="18"><circle cx="9" cy="9" r="6"></circle></svg><span class="action-label">Log in with username or email</span></span></a>
       <a id="ordinary-card" href="/article">A useful article title</a>
+      <section id="dark-panel"><p id="styled-paragraph"><span id="source-style" style="color:white;font-size:20px;line-height:30px">Styled text on a dark surface inherits its actual typography from a nested span.</span></p></section>
+      <section id="composed-card"></section>
+      <section id="slot-card"></section>
     </section>
   </main>
 </body>

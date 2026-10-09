@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Media source policy regression</title></head>
+<body>
+  <main>
+    <section class="media-container case-a" id="container-a"><div class="media-row" id="row-a"><div><p id="copy-a">Expansion cropped media source documentation.</p></div><div><img id="photo-a" alt="Source diagram"></div></div></section>
+    <section class="media-container case-b" id="container-b"><div class="media-row" id="row-b"><div><p id="copy-b">Expansion height-only media source documentation.</p></div><div><img id="photo-b" alt="Source diagram"></div></div></section>
+    <section class="media-container case-control" id="container-control"><div class="media-row" id="row-control"><div id="control-copy"><p id="copy-control">Expansion stable media source documentation.</p></div><div><img id="photo-control" alt="Source diagram"></div></div></section>
+    <pre><code>function ProtectedMedia() { return 'Do not translate code'; }</code></pre>
+    <div id="receiver"></div>
+  </main>
+</body>
+</html>
