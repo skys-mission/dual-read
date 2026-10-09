@@ -1,5 +1,5 @@
 import type { PublicSessionConfig, TranslateStatus } from '../types';
-import { restoreDom } from '../renderer';
+import { hasTranslatedDom, restoreDom } from '../renderer';
 import { ContentSession, configChanged, type PageResult } from './session';
 
 export type { PageResult, DisposeReason } from './session';
@@ -83,7 +83,7 @@ export function restoreOriginal(): void {
 }
 
 export function isTranslated(): boolean {
-  return Boolean(document.querySelector('[data-dual-read-done]')) || Boolean(getActiveSession());
+  return Boolean(getActiveSession()) || hasTranslatedDom();
 }
 
 /**
@@ -127,7 +127,7 @@ export async function translatePage(config: PublicSessionConfig): Promise<PageRe
     }
   }
 
-  const hasExisting = Boolean(document.querySelector('[data-dual-read-done]'));
+  const hasExisting = hasTranslatedDom();
   const sameConfig = current && !configChanged(current.config, config);
 
   if (sameConfig && hasExisting) {

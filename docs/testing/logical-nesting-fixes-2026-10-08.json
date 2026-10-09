@@ -1,0 +1,385 @@
+{
+  "date": "2026-10-08",
+  "timezone": "Asia/Shanghai",
+  "task": "Logical/physical sizing cascade and native CSS nested declarations fixes",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "scope": {
+    "changedProductionFiles": [
+      "extension/lib/renderer/source-layout-policy.ts"
+    ],
+    "productionInputsChecked": 71,
+    "dependenciesChanged": false,
+    "packagedCssChanged": false,
+    "domainRulesAdded": false
+  },
+  "fixes": [
+    {
+      "id": "logical-physical-cascade",
+      "behavior": "Group logical and physical normal/min/max sizes by the current writing mode; retain relative specificity and authored order only among competing equally important declarations. Ignore unrelated paint/order and numeric specificity increases that preserve priority."
+    },
+    {
+      "id": "native-nested-declarations",
+      "behavior": "Read CSSNestedDeclarations through the parent style selector context with its matching-list specificity and original traversal order; honor media conditions and mark unknown raw declaration forms incomplete."
+    }
+  ],
+  "baseline": {
+    "sourceSessions": 64,
+    "beforeFailures": 32,
+    "afterCorrect": 32,
+    "packagedBeforeSessions": 32,
+    "reviewComparison": "HEAD preserved authored sizing; the previous uncommitted build and the reviewed build both exhibited the issues."
+  },
+  "validation": {
+    "unit": {
+      "files": 43,
+      "tests": 1505,
+      "added": 24
+    },
+    "compile": true,
+    "lint": true,
+    "diffCheck": true,
+    "freshBuilds": [
+      "Chrome MV3",
+      "Firefox MV3"
+    ],
+    "native": {
+      "cases": 656,
+      "newCases": 96,
+      "existingCases": 560,
+      "chromium": 328,
+      "firefox": 328,
+      "failures": 0,
+      "retries": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "workers": 2
+    },
+    "dimensionMatrix": {
+      "cases": 120,
+      "engines": 2,
+      "writingModes": [
+        "horizontal-tb",
+        "vertical-rl",
+        "vertical-lr",
+        "sideways-rl",
+        "sideways-lr"
+      ],
+      "operations": [
+        "specificity",
+        "declaration-order"
+      ],
+      "dimensions": [
+        "size",
+        "min-size",
+        "max-size"
+      ]
+    },
+    "performance": {
+      "cases": 8,
+      "full": 1,
+      "strict": 0,
+      "defaultBudgets": true,
+      "ranAfterOtherAutomatedBrowserJobs": true
+    },
+    "restoration": "Fresh packaged sessions cover deferred/delivered mutation records, watching/paused, text and code edits, added elements, source transfer, removal, href changes, repeated restoration and opposite translation mode."
+  },
+  "sampling": {
+    "method": "Freshly live-loaded public page snapshots replayed at original URLs with site scripts disabled; paired inputs verified by HTML hash.",
+    "sites": [
+      {
+        "id": "popular-1-2",
+        "site": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Internet",
+        "snapshotHash": "00abca8a4875622dd739db14d9ef0f7d8e082642d07638283a02bf47ef55ec2a",
+        "sourceUnits": 681,
+        "processed": 145,
+        "codeNodes": 0,
+        "views": [
+          {
+            "view": "source-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-scroll",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "replace-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          }
+        ]
+      },
+      {
+        "id": "popular-2-2",
+        "site": "GitHub",
+        "url": "https://github.com/golang/go",
+        "snapshotHash": "b77bf1919e87f32432ac0b441919d727e77a557c880658fc79aedca98e7f6efd",
+        "sourceUnits": 120,
+        "processed": 120,
+        "codeNodes": 0,
+        "views": [
+          {
+            "view": "source-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-top",
+            "overflow": 0,
+            "clips": 2,
+            "squeezed": 1
+          },
+          {
+            "view": "bilingual-scroll",
+            "overflow": 0,
+            "clips": 2,
+            "squeezed": 0
+          },
+          {
+            "view": "replace-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          }
+        ]
+      },
+      {
+        "id": "commercial-1-2",
+        "site": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/azure/architecture/",
+        "snapshotHash": "d3d4c337abec8784d4ae90cfe9302460d23f1a5b6344eca72c5ce62730acea02",
+        "sourceUnits": 65,
+        "processed": 65,
+        "codeNodes": 0,
+        "views": [
+          {
+            "view": "source-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-scroll",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "replace-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          }
+        ]
+      },
+      {
+        "id": "commercial-7-2",
+        "site": "Shopify Developer",
+        "url": "https://shopify.dev/docs/apps/build",
+        "snapshotHash": "35d79f45f9ce2169f970150bd4fff821570bd4f612afb4c91cb49d7831dfeeb3",
+        "sourceUnits": 102,
+        "processed": 47,
+        "codeNodes": 0,
+        "views": [
+          {
+            "view": "source-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-top",
+            "overflow": 0,
+            "clips": 1,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-scroll",
+            "overflow": 0,
+            "clips": 1,
+            "squeezed": 0
+          },
+          {
+            "view": "replace-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          }
+        ]
+      },
+      {
+        "id": "open_source-1-1",
+        "site": "React",
+        "url": "https://react.dev/",
+        "snapshotHash": "41e0d2a45f86d6dcf4d7b468e661140f08b159d01f8148304482f46db406c9e7",
+        "sourceUnits": 120,
+        "processed": 19,
+        "codeNodes": 500,
+        "views": [
+          {
+            "view": "source-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-scroll",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "replace-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          }
+        ]
+      },
+      {
+        "id": "open_source-2-2",
+        "site": "Vue",
+        "url": "https://vuejs.org/guide/introduction.html",
+        "snapshotHash": "960566fddc87f374d8f41b26d7829e8741b0390c7a87c2fe4c4ae1e174babcc4",
+        "sourceUnits": 149,
+        "processed": 80,
+        "codeNodes": 369,
+        "views": [
+          {
+            "view": "source-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-scroll",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "replace-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          }
+        ]
+      },
+      {
+        "id": "commercial-8-2",
+        "site": "Stripe Docs",
+        "url": "https://docs.stripe.com/payments/accept-a-payment",
+        "snapshotHash": "7749dc32dbe7b6bba5a1117791f30fb007cd0ed13df18a6a1059b45cdb167af6",
+        "sourceUnits": 174,
+        "processed": 74,
+        "codeNodes": 245,
+        "views": [
+          {
+            "view": "source-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-scroll",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "replace-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          }
+        ]
+      }
+    ],
+    "primaryScreenshots": 56,
+    "translatedPairsVisuallyInspected": 21,
+    "stripeWheel": {
+      "delta": 900,
+      "codeNodes": 245,
+      "sourceUnits": 174,
+      "processed": 81
+    },
+    "iab": {
+      "url": "https://react.dev/",
+      "method": "Temporary injection of fresh production content script through isolated developer world; no installed extension.",
+      "originalTextNodes": 710,
+      "codeTextNodes": 500,
+      "failed": 0,
+      "watching": false,
+      "screenshot": ".codex/logical-nesting-fixes-2026-10-08/iab-after/react-delivery.jpg"
+    }
+  },
+  "assets": {
+    "before": {
+      "jsBytes": 263668,
+      "jsGzipBytes": 72606,
+      "jsSha256": "1597f85bacddc07d31b19a4ea1f5c96cb0cef8515dc1602bc42f528ba0dd5116",
+      "cssSha256": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d"
+    },
+    "after": {
+      "jsBytes": 264475,
+      "jsGzipBytes": 72965,
+      "jsSha256": "efaae3fe080db0ecca1a17b2343e98b41c8e71cc33a18e9f8228a48b48b3c4e3",
+      "cssSha256": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d"
+    }
+  },
+  "limits": [
+    "Website comparison uses fresh live-loaded snapshots replayed at their original URLs with site scripts disabled to keep paired input identical; dynamic mutation behavior is covered by native fixtures and the actual in-app browser.",
+    "Sampling covers seven public pages; the earlier full 70-page audit was not rerun.",
+    "Firefox tests use the repository Gecko runtime shim with freshly built packaged content."
+  ],
+  "security": {
+    "knownCredentialMatchesInGitVisibleFiles": 0,
+    "privateConfigMode": "0600"
+  },
+  "git": {
+    "staged": false,
+    "committed": false,
+    "head": "995498672da7fdbddf4e00f21224ba6cfabf0163"
+  },
+  "evidenceDirectory": ".codex/logical-nesting-fixes-2026-10-08"
+}

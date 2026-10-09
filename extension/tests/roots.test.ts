@@ -10,6 +10,20 @@ import {
 import { collectUnits } from '../lib/collector';
 
 describe('shadow / frame root helpers', () => {
+  it('delivers document-element visibility inputs to the body watcher and disposes them', async () => {
+    const batches: MutationRecord[] = [];
+    const registry = new RootRegistry(records => batches.push(...records));
+    registry.bootstrap(document);
+    try {
+      document.documentElement.style.setProperty('--page-height', '100px');
+      await Promise.resolve();
+      expect(batches.some(record => record.target === document.documentElement && record.attributeName === 'style')).toBe(true);
+      registry.dispose(); batches.length = 0;
+      document.documentElement.style.setProperty('--page-height', '120px');
+      await Promise.resolve(); expect(batches).toEqual([]);
+    } finally {registry.dispose(); document.documentElement.style.removeProperty('--page-height');}
+  });
+
   const realRect = Element.prototype.getBoundingClientRect;
   beforeEach(() => {
     Element.prototype.getBoundingClientRect = function () {

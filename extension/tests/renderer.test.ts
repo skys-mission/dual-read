@@ -8,6 +8,25 @@ afterEach(() => {
   document.body.innerHTML = '';
 });
 
+describe('Shadow DOM restore', () => {
+  it.each(['bilingual', 'replace'] as const)('restores nested shadow roots in %s mode', (mode) => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const outer = host.attachShadow({ mode: 'open' });
+    const nested = document.createElement('div');
+    outer.appendChild(nested);
+    const inner = nested.attachShadow({ mode: 'open' });
+    inner.innerHTML = '<p lang="en">Hello shadow world.</p>';
+    const p = inner.querySelector('p')!;
+    render({ el: p, text: p.textContent!, kind: 'block' }, '影子译文', mode);
+    restoreDom();
+    expect(p.textContent).toBe('Hello shadow world.');
+    expect(inner.querySelector('[data-dual-read-done], .dual-read-target, .dual-read-original-hidden')).toBeNull();
+    restoreDom();
+    expect(p.getAttribute('lang')).toBe('en');
+  });
+});
+
 describe('fillTextSlots', () => {
   it('fills slots in document order and preserves code text', () => {
     document.body.innerHTML =
@@ -71,6 +90,396 @@ describe('buildSafeRichSkeleton', () => {
     expect(skel.textContent).toMatch(/Before/);
     expect(skel.textContent).toMatch(/after/);
     expect(skel.textContent).toMatch(/end/);
+  });
+});
+
+describe('replace restoration after page updates', () => {
+  function replaceRich(p: HTMLElement): void {
+    const slots = extractRichSlots(p);
+    render({ el: p, text: slots.join(' '), kind: 'block', rich: { slots } }, slots.map((text) => `译:${text}`), 'replace');
+  }
+
+  it('preserves newly appended plain content and its node identity', () => {
+    document.body.innerHTML = '<p>Original plain paragraph.</p>';
+    const p = document.querySelector('p')!;
+    render({ el: p, text: p.textContent!, kind: 'block' }, '译文', 'replace');
+    const added = document.createElement('em');
+    added.textContent = ' Additional source content.';
+    p.appendChild(added);
+    restoreDom();
+    expect(p.textContent).toBe('Original plain paragraph. Additional source content.');
+    expect(p.querySelector('em')).toBe(added);
+    restoreDom();
+    expect(p.textContent).toBe('Original plain paragraph. Additional source content.');
+  });
+
+  it.each(['characterData', 'textContent', 'empty'] as const)('keeps nested rich %s updates on the original elements', (change) => {
+    document.body.innerHTML = '<p lang="en">Read <strong id="title">the <em id="word">old title</em></strong> and <a href="/docs">documentation</a>.</p>';
+    const p = document.querySelector('p')!;
+    const title = p.querySelector('strong')!;
+    const word = title.querySelector('em')!;
+    const link = p.querySelector('a')!;
+    replaceRich(p);
+    const visible = p.querySelector(':scope > strong em')!;
+    const text = change === 'empty' ? '' : 'new title';
+    if (change === 'characterData') visible.firstChild!.nodeValue = text;
+    else visible.textContent = text;
+    restoreDom();
+    expect(p.textContent).toBe(`Read the ${text} and documentation.`);
+    expect(p.querySelector('strong')).toBe(title);
+    expect(p.querySelector('em')).toBe(word);
+    expect(p.querySelector('a')).toBe(link);
+    expect(p.getAttribute('lang')).toBe('en');
+    restoreDom();
+    expect(p.textContent).toBe(`Read the ${text} and documentation.`);
+  });
+
+  it('preserves rich additions in order and does not resurrect removed content', () => {
+    document.body.innerHTML = '<p><strong id="first">First title</strong> and <em id="second">second title</em>.</p>';
+    const p = document.querySelector('p')!;
+    const first = p.querySelector('strong')!;
+    replaceRich(p);
+    const visible = p.querySelector(':scope > strong')!;
+    const added = document.createElement('span');
+    added.textContent = ' added by the page';
+    visible.appendChild(added);
+    const middle = document.createTextNode('New middle content ');
+    p.insertBefore(middle, p.querySelector(':scope > em'));
+    p.querySelector(':scope > em')!.remove();
+    restoreDom();
+    expect(p.textContent).toBe('First title added by the page and New middle content .');
+    expect(p.querySelector('strong')).toBe(first);
+    expect(p.querySelector('span')).toBe(added);
+    expect(middle.parentNode).toBe(p);
+    expect(p.querySelector('em')).toBeNull();
+  });
+
+  it('preserves a page replacement of an entire rich child', () => {
+    document.body.innerHTML = '<p>Read <strong>the old title</strong> and <a href="/docs">documentation</a>.</p>';
+    const p = document.querySelector('p')!;
+    const link = p.querySelector('a')!;
+    replaceRich(p);
+    const newTitle = document.createElement('strong');
+    newTitle.textContent = 'the new title';
+    p.querySelector(':scope > strong')!.replaceWith(newTitle);
+    restoreDom();
+    expect(p.textContent).toBe('Read the new title and documentation.');
+    expect(p.querySelector('strong')).toBe(newTitle);
+    expect(p.querySelector('a')).toBe(link);
+  });
+
+  it('restores page-reordered rich children in their new order', () => {
+    document.body.innerHTML = '<p><strong>First title.</strong><em>Second title.</em></p>';
+    const p = document.querySelector('p')!;
+    const first = p.querySelector('strong')!;
+    const second = p.querySelector('em')!;
+    replaceRich(p);
+    p.querySelector(':scope > strong')!.before(p.querySelector(':scope > em')!);
+    restoreDom();
+    expect(p.textContent).toBe('Second title.First title.');
+    expect(p.firstChild).toBe(second);
+    expect(p.lastChild).toBe(first);
+  });
+
+  it('restores a rich descendant moved to the host with its original node and listener', () => {
+    document.body.innerHTML = '<p><strong>First <em>nested title</em></strong> tail text.</p>';
+    const p = document.querySelector('p')!;
+    const word = p.querySelector('em')!;
+    let clicks = 0;
+    word.addEventListener('click', () => { clicks++; });
+    replaceRich(p);
+    p.appendChild(p.querySelector(':scope > strong em')!);
+    restoreDom();
+    expect(p.textContent).toBe('First  tail text.nested title');
+    expect(p.querySelector(':scope > em')).toBe(word);
+    word.click();
+    expect(clicks).toBe(1);
+    restoreDom();
+    expect(p.textContent).toBe('First  tail text.nested title');
+  });
+
+  it('restores rich descendants moved between existing parents', () => {
+    document.body.innerHTML = '<p><strong>Left <em>nested title</em></strong><span>Right tail.</span></p>';
+    const p = document.querySelector('p')!;
+    const word = p.querySelector('em')!;
+    const right = p.querySelector('span')!;
+    replaceRich(p);
+    p.querySelector(':scope > span:not(.dual-read-original-hidden)')!.appendChild(p.querySelector(':scope > strong em')!);
+    restoreDom();
+    expect(p.textContent).toBe('Left Right tail.nested title');
+    expect(p.querySelector('span')).toBe(right);
+    expect(word.parentNode).toBe(right);
+  });
+
+  it('keeps a moved rich descendant when the page removes its old parent', () => {
+    document.body.innerHTML = '<p><strong>First <em>nested title</em></strong> tail text.</p>';
+    const p = document.querySelector('p')!;
+    const word = p.querySelector('em')!;
+    replaceRich(p);
+    const visible = p.querySelector(':scope > strong')!;
+    p.appendChild(visible.querySelector('em')!);
+    visible.remove();
+    restoreDom();
+    expect(p.textContent).toBe(' tail text.nested title');
+    expect(p.querySelector(':scope > em')).toBe(word);
+    expect(p.querySelector('strong')).toBeNull();
+  });
+
+  it('restores known rich nodes inside a page-added wrapper', () => {
+    document.body.innerHTML = '<p><strong>First <em>nested title</em></strong> tail text.</p>';
+    const p = document.querySelector('p')!;
+    const word = p.querySelector('em')!;
+    replaceRich(p);
+    const wrapper = document.createElement('span');
+    wrapper.append('Added ', p.querySelector(':scope > strong em')!, ' more.');
+    p.appendChild(wrapper);
+    restoreDom();
+    expect(p.textContent).toBe('First  tail text.Added nested title more.');
+    expect(p.lastChild).toBe(wrapper);
+    expect(wrapper.querySelector('em')).toBe(word);
+    expect(wrapper.querySelectorAll('em')).toHaveLength(1);
+  });
+
+  it('restores a rich ancestor moved under its former descendant', () => {
+    document.body.innerHTML = '<p><strong>First <em>nested title</em></strong> tail text.</p>';
+    const p = document.querySelector('p')!;
+    const first = p.querySelector('strong')!;
+    const word = p.querySelector('em')!;
+    replaceRich(p);
+    const visibleFirst = p.querySelector(':scope > strong')!;
+    const visibleWord = visibleFirst.querySelector('em')!;
+    p.appendChild(visibleWord);
+    visibleWord.appendChild(visibleFirst);
+    restoreDom();
+    expect(p.textContent).toBe(' tail text.nested titleFirst ');
+    expect(p.querySelector(':scope > em')).toBe(word);
+    expect(word.querySelector('strong')).toBe(first);
+  });
+
+  it.each(['source first', 'target first'] as const)('restores rich nodes moved between hosts: %s', (order) => {
+    document.body.innerHTML = '<p id="one">Read <strong>the original title</strong> for details.</p><p id="two">Another paragraph <em>with a note</em> here.</p>';
+    const one = document.querySelector<HTMLElement>('#one')!;
+    const two = document.querySelector<HTMLElement>('#two')!;
+    const title = one.querySelector('strong')!;
+    let clicks = 0;
+    title.addEventListener('click', () => { clicks++; });
+    replaceRich(one);
+    replaceRich(two);
+    two.appendChild(one.querySelector(':scope > strong')!);
+    const hosts = order === 'source first' ? [one, two] : [two, one];
+    hosts.forEach(restoreUnit);
+    expect(one.textContent).toBe('Read  for details.');
+    expect(two.textContent).toBe('Another paragraph with a note here.the original title');
+    expect(two.querySelector('strong')).toBe(title);
+    title.click();
+    expect(clicks).toBe(1);
+    restoreDom();
+    expect(two.querySelector('strong')).toBe(title);
+  });
+
+  it.each([false, true])('restores a moved rich child in a plain target, translated: %s', (translated) => {
+    document.body.innerHTML = '<p id="one">Read <strong>the original title</strong> for details.</p><p id="two">Another plain paragraph.</p>';
+    const one = document.querySelector<HTMLElement>('#one')!;
+    const two = document.querySelector<HTMLElement>('#two')!;
+    const title = one.querySelector('strong')!;
+    replaceRich(one);
+    if (translated) render({ el: two, kind: 'block', text: two.textContent! }, '译:Another plain paragraph.', 'replace');
+    two.appendChild(one.querySelector(':scope > strong')!);
+    restoreDom();
+    expect(one.textContent).toBe('Read  for details.');
+    expect(two.textContent).toBe('Another plain paragraph.the original title');
+    expect(two.querySelector('strong')).toBe(title);
+  });
+
+  it('recovers a moved rich child after its source host is removed', () => {
+    document.body.innerHTML = '<p id="one">Read <strong>the original title</strong> for details.</p><p id="two">Another paragraph.</p>';
+    const one = document.querySelector<HTMLElement>('#one')!;
+    const two = document.querySelector<HTMLElement>('#two')!;
+    const title = one.querySelector('strong')!;
+    replaceRich(one);
+    two.appendChild(one.querySelector(':scope > strong')!);
+    one.remove();
+    restoreDom();
+    expect(two.textContent).toBe('Another paragraph.the original title');
+    expect(two.querySelector('strong')).toBe(title);
+  });
+
+  it('restores rich nodes swapped between hosts and wrapped by the page', () => {
+    document.body.innerHTML = '<p id="one">Read <strong>the original title</strong> for details.</p><p id="two">Another paragraph <em>with a note</em> here.</p>';
+    const one = document.querySelector<HTMLElement>('#one')!;
+    const two = document.querySelector<HTMLElement>('#two')!;
+    const title = one.querySelector('strong')!;
+    const note = two.querySelector('em')!;
+    replaceRich(one);
+    replaceRich(two);
+    const wrapper = document.createElement('span');
+    wrapper.append('Added ', one.querySelector(':scope > strong')!);
+    one.appendChild(two.querySelector(':scope > em')!);
+    two.appendChild(wrapper);
+    restoreDom();
+    expect(one.textContent).toBe('Read  for details.with a note');
+    expect(two.textContent).toBe('Another paragraph  here.Added the original title');
+    expect(wrapper.querySelector('strong')).toBe(title);
+    expect(one.querySelector('em')).toBe(note);
+  });
+
+  it.each(['append', 'prepend', 'both'] as const)('merges %s edits into original rich text', (edit) => {
+    document.body.innerHTML = '<p>Read <strong>the original title</strong> for details.</p>';
+    const p = document.querySelector('p')!;
+    const original = p.querySelector('strong')!.firstChild!;
+    replaceRich(p);
+    const text = p.querySelector(':scope > strong')!.firstChild as Text;
+    if (edit !== 'append') text.insertData(0, 'New prefix ');
+    if (edit !== 'prepend') text.appendData(' with more source');
+    restoreDom();
+    const expected = `${edit !== 'append' ? 'New prefix ' : ''}the original title${edit !== 'prepend' ? ' with more source' : ''}`;
+    expect(p.textContent).toBe(`Read ${expected} for details.`);
+    expect(p.querySelector('strong')!.firstChild).toBe(original);
+  });
+
+  it('uses a complete text-node replacement as the new rich source', () => {
+    document.body.innerHTML = '<p>Read <strong>the original title</strong> for details.</p>';
+    const p = document.querySelector('p')!;
+    replaceRich(p);
+    p.querySelector(':scope > strong')!.firstChild!.nodeValue = 'A completely new title';
+    restoreDom();
+    expect(p.textContent).toBe('Read A completely new title for details.');
+  });
+
+  it.each([0, 1, 5, 20])('restores source Text identity after splitText(%s)', (offset) => {
+    document.body.innerHTML = '<p lang="en">Read <strong>The original title</strong> for details.</p>';
+    const p = document.querySelector('p')!;
+    const title = p.querySelector('strong')!;
+    const original = title.firstChild!;
+    replaceRich(p);
+    const copy = p.querySelector(':scope > strong')!;
+    const fragment = (copy.firstChild as Text).splitText(offset);
+    fragment.splitText(Math.floor(fragment.length / 2));
+    restoreDom();
+    expect(p.textContent).toBe('Read The original title for details.');
+    expect(p.querySelector('strong')).toBe(title);
+    expect(Array.from(title.childNodes).filter((node) => node.nodeValue)).toEqual([original]);
+    expect(title.firstChild).toBe(original);
+    expect(p.getAttribute('lang')).toBe('en');
+    restoreDom();
+    expect(title.firstChild).toBe(original);
+  });
+
+  it.each(['normalize', 'split and normalize', 'prepend and normalize', 'append and normalize'] as const)(
+    'restores adjacent source Text and comment identities after %s', (change) => {
+      document.body.innerHTML = '<p><strong>First source<!-- marker -->second source</strong> for details.</p>';
+      const p = document.querySelector('p')!;
+      const title = p.querySelector('strong')!;
+      const originals = Array.from(title.childNodes);
+      replaceRich(p);
+      const copy = p.querySelector(':scope > strong')!;
+      if (change === 'split and normalize') (copy.firstChild as Text).splitText(4);
+      if (change === 'prepend and normalize') copy.prepend(document.createTextNode('New prefix '));
+      if (change === 'append and normalize') copy.append(' with more source');
+      copy.normalize();
+      restoreDom();
+      const prefix = change === 'prepend and normalize' ? 'New prefix ' : '';
+      const suffix = change === 'append and normalize' ? ' with more source' : '';
+      expect(title.textContent).toBe(`${prefix}First sourcesecond source${suffix}`);
+      expect(originals.every((node) => node.parentNode === title)).toBe(true);
+      expect(originals[0].nodeValue).toBe('First source');
+      expect(originals[2].nodeValue).toBe(`second source${suffix}`);
+      expect(title.childNodes[change === 'prepend and normalize' ? 1 : 0]).toBe(originals[0]);
+    },
+  );
+
+  it('keeps page-owned prefix/suffix Text identities around a split translation', () => {
+    document.body.innerHTML = '<p><strong>The original title</strong> for details.</p>';
+    const p = document.querySelector('p')!;
+    const original = p.querySelector('strong')!.firstChild!;
+    replaceRich(p);
+    const copy = p.querySelector(':scope > strong')!;
+    const prefix = document.createTextNode('New prefix ');
+    const suffix = document.createTextNode(' with more source');
+    (copy.firstChild as Text).splitText(5);
+    copy.prepend(prefix);
+    copy.append(suffix);
+    restoreDom();
+    expect(p.querySelector('strong')!.textContent).toBe('New prefix The original title with more source');
+    expect(Array.from(p.querySelector('strong')!.childNodes)).toEqual([prefix, original, suffix]);
+  });
+
+  it('keeps prefix/suffix edits made on a Text before splitting it', () => {
+    document.body.innerHTML = '<p><strong>The original title</strong> for details.</p>';
+    const p = document.querySelector('p')!;
+    const original = p.querySelector('strong')!.firstChild!;
+    replaceRich(p);
+    const copy = p.querySelector(':scope > strong')!;
+    const text = copy.firstChild as Text;
+    text.insertData(0, 'New prefix ');
+    text.appendData(' with more source');
+    text.splitText(16);
+    restoreDom();
+    expect(copy.isConnected).toBe(false);
+    expect(p.querySelector('strong')!.textContent).toBe('New prefix The original title with more source');
+    expect(p.querySelector('strong')!.firstChild).toBe(original);
+  });
+
+  it('does not resurrect a removed adjacent slot or reclaim a transferred Text', () => {
+    document.body.innerHTML = '<p id="one"><strong>First source<!-- marker -->second source</strong> for details.</p><p id="two">Another paragraph.</p>';
+    const p = document.querySelector<HTMLElement>('#one')!;
+    const two = document.querySelector<HTMLElement>('#two')!;
+    const second = p.querySelector('strong')!.lastChild!;
+    replaceRich(p);
+    const copy = p.querySelector(':scope > strong')!;
+    two.appendChild(copy.lastChild!);
+    copy.normalize();
+    restoreDom();
+    expect(p.textContent).toBe('First source for details.');
+    expect(two.textContent).toBe('Another paragraph.second source');
+    expect(second.parentNode).toBe(two);
+  });
+
+  it.each(['remove', 'replace'] as const)('preserves actual %s of adjacent translated slots', (change) => {
+    document.body.innerHTML = '<p><strong>First source<!-- marker -->second source</strong> for details.</p>';
+    const p = document.querySelector('p')!;
+    replaceRich(p);
+    const copy = p.querySelector(':scope > strong')!;
+    if (change === 'remove') copy.lastChild!.remove();
+    else copy.textContent = 'An entirely new title';
+    copy.normalize();
+    restoreDom();
+    expect(p.textContent).toBe(`${change === 'remove' ? 'First source' : 'An entirely new title'} for details.`);
+  });
+
+  it.each(['split', 'normalize'] as const)('restores the host\'s direct Text/comment children after %s', (change) => {
+    document.body.innerHTML = '<p>First source<!-- marker -->second source<strong>Title</strong> for details.</p>';
+    const p = document.querySelector('p')!;
+    const originals = Array.from(p.childNodes);
+    replaceRich(p);
+    const visible = Array.from(p.childNodes).find((node) => node instanceof Text) as Text;
+    if (change === 'split') visible.splitText(5);
+    else p.normalize();
+    restoreDom();
+    expect(p.textContent).toBe('First sourcesecond sourceTitle for details.');
+    expect(Array.from(p.childNodes)).toEqual(originals);
+  });
+
+  it.each(['local wrapper', 'another host'] as const)('restores a split Text transferred into %s', (destination) => {
+    document.body.innerHTML = '<p id="one">Read <strong>The original title</strong> for details.</p><p id="two">Another paragraph.</p>';
+    const one = document.querySelector<HTMLElement>('#one')!;
+    const two = document.querySelector<HTMLElement>('#two')!;
+    const title = one.querySelector('strong')!;
+    const originalText = title.firstChild!;
+    replaceRich(one);
+    const copy = one.querySelector(':scope > strong')!;
+    (copy.firstChild as Text).splitText(5);
+    const wrapper = document.createElement('span');
+    wrapper.append(...Array.from(copy.childNodes));
+    (destination === 'local wrapper' ? one : two).appendChild(wrapper);
+    restoreDom();
+    expect(wrapper.textContent).toBe('The original title');
+    expect(wrapper.firstChild).toBe(originalText);
+    expect(wrapper.childNodes).toHaveLength(1);
+    expect(one.querySelector('strong')).toBe(title);
+    expect(title.childNodes).toHaveLength(0);
+    expect(one.textContent).toBe(`Read  for details.${destination === 'local wrapper' ? 'The original title' : ''}`);
+    expect(two.textContent).toBe(`Another paragraph.${destination === 'another host' ? 'The original title' : ''}`);
   });
 });
 

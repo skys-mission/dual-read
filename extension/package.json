@@ -1,6 +1,6 @@
 {
   "name": "dual-read-extension",
-  "description": "Dual Read — bilingual/replacement page translation via any OpenAI-compatible API.",
+  "description": "Dual Read \u2014 bilingual/replacement page translation via any OpenAI-compatible API.",
   "private": true,
   "version": "0.1.1",
   "type": "module",
@@ -24,7 +24,9 @@
     "probe": "node tools/collector-probe/run.mjs",
     "probe:live": "node tools/live-translate-probe/run.mjs",
     "probe:live:chrome": "node tools/live-translate-probe/run.mjs --browser=chrome",
-    "probe:live:firefox": "node tools/live-translate-probe/run.mjs --browser=firefox"
+    "probe:live:firefox": "node tools/live-translate-probe/run.mjs --browser=firefox",
+    "test:layout-policy": "node tools/layout-policy-probe/run.mjs",
+    "e2e:layout-policy": "node tools/layout-policy-probe/regression.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
@@ -40,6 +42,8 @@
     "wxt": "^0.19.13"
   },
   "dependencies": {
+    "@csstools/selector-specificity": "6.0.1",
+    "postcss-selector-parser": "7.1.6",
     "zod": "^3.23.8"
   }
 }

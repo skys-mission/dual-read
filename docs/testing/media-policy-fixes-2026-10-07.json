@@ -1,0 +1,2136 @@
+{
+  "date": "2026-10-07",
+  "purpose": "Repair media source policy invalidation for container queries and opaque cross-origin stylesheets.",
+  "gitHead": "995498672da7fdbddf4e00f21224ba6cfabf0163",
+  "gitCommitCreated": false,
+  "viewport": {
+    "affectedCases": {
+      "width": 1920,
+      "height": 1080
+    },
+    "responsiveControl": {
+      "width": 1600,
+      "height": 900
+    },
+    "liveSites": {
+      "width": 1920,
+      "height": 1080
+    },
+    "iab": {
+      "height": 1080,
+      "width": 1920
+    }
+  },
+  "productionScope": {
+    "changed": [
+      "extension/lib/renderer/media-layout.ts",
+      "extension/lib/renderer/source-layout-policy.ts"
+    ],
+    "frozenFiles": 57,
+    "finalFiles": 57,
+    "unchangedEntrypointsConfigServer": true,
+    "newDomainRules": false
+  },
+  "builds": {
+    "beforeJavaScript": "a361a92204f34444de3e08cfcc67b054aba9f20772334f700ed4c1612668aff2",
+    "afterJavaScript": "1c73d64e7cf4c825a6a0f22af0e0b3d03969a09bcc4a61038a907ce0858bb680",
+    "css": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d",
+    "freshChromiumAndFirefox": true
+  },
+  "approach": [
+    "Expose a separate completeness flag; matching declarations in container/scope conditions and opaque sheets cannot alone prove an unchanged author policy. Preserve the existing signature-only API for other layout consumers.",
+    "For incomplete media policy, read the browser cascade with the owned media rule omitted synchronously, restoring CSSOM declarations in finally. Compare source crop, content aspect ratio and unbounded height relationship, allowing normal translation growth and viewport reflow.",
+    "Use containing content width and the image CSS sizing box for percentage constraints; verify border and padding on both image and column."
+  ],
+  "restorationContract": [
+    "No authored source nodes, attributes, styles or text are overwritten by media probes.",
+    "Only the owned CSSOM media rule is omitted synchronously during measurement, without yielding or DOM mutation records; all declarations are restored on exceptions.",
+    "Page edits and source transfers survive immediate restoration, repeated restoration and a switch between bilingual and replace modes."
+  ],
+  "validation": {
+    "unit": {
+      "files": 42,
+      "passed": 1393,
+      "log": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/unit-full.log"
+    },
+    "typecheck": true,
+    "lint": true,
+    "preFixNative": {
+      "failed": 4,
+      "reason": "Owned media rule remained after author state changed.",
+      "log": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/native-before.log"
+    },
+    "sourceComparison": {
+      "sessions": 16,
+      "beforeFailures": 8,
+      "afterCorrect": 8,
+      "engines": [
+        "Chromium",
+        "Firefox"
+      ],
+      "states": [
+        "watching",
+        "paused"
+      ],
+      "evidence": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/comparison-results.json"
+    },
+    "native": {
+      "passed": 212,
+      "chromium": 106,
+      "firefox": 106,
+      "groups": {
+        "media policy regression": 16,
+        "stylesheet layout regression": 16,
+        "flow style regression": 32,
+        "layout policy resumed footer": 4,
+        "layout policy regression": 32,
+        "layout lifecycle regression": 32,
+        "presentation layout regression": 32,
+        "dynamic layout regression": 32,
+        "review layout regression": 16
+      },
+      "newMediaCases": 16,
+      "neighboringCases": 196,
+      "log": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/native-regression.log",
+      "boxedCases": {
+        "passed": 16,
+        "log": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/native-boxed.log"
+      }
+    },
+    "performance": {
+      "passed": 8,
+      "PERF_FULL": true,
+      "STRICT_PERF": false,
+      "defaultBudgets": true,
+      "ranAfterOtherBrowserJobs": true,
+      "log": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/native-perf.log"
+    },
+    "intermediateAssertions": "An initial targeted run used exact 100px CSS serialization; native layout can return subpixel values such as99.9844px. The height assertion now checks the retained source height within0.1px. Final16-case boxed and212-case related runs are green.",
+    "webSamples": {
+      "sites": 8,
+      "primaryScreenshots": 64,
+      "translatedVisualPairs": 24,
+      "allVisualPairsInspected": true,
+      "earlier70PageAuditRerun": false
+    }
+  },
+  "stripeInnerScroll": [
+    {
+      "phase": "stripe-before-wheel",
+      "buildHash": "a361a92204f34444de3e08cfcc67b054aba9f20772334f700ed4c1612668aff2",
+      "movedContainers": [
+        {
+          "tag": "DIV",
+          "id": "",
+          "cls": "Content Box-root",
+          "top": 900,
+          "height": 968,
+          "scrollHeight": 6927,
+          "delta": 900
+        }
+      ],
+      "code": {
+        "codeBlocks": 5,
+        "liveCodeBlocks": 5,
+        "originalCodeNodes": 257,
+        "retainedCodeNodes": 257,
+        "overwrittenCodeValues": 0,
+        "hiddenCodeBlocks": 0,
+        "codeTranslationTargets": 0,
+        "codeTranslationSamples": [],
+        "proseTranslationTargets": 77
+      },
+      "restore": {
+        "originalNodes": 629,
+        "retainedNodes": 629,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 629,
+        "retainedNodes": 629,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "clips": [
+        {
+          "selector": "span.dual-read-target",
+          "text": "或者，从 代码快速入门 开始构建或下载可运行的示例。",
+          "visible": 0,
+          "box": {
+            "x": 561,
+            "y": 28,
+            "w": 829,
+            "h": 26
+          },
+          "ancestor": "div.Content.Box-root",
+          "ancestorBox": {
+            "x": 280,
+            "y": 112,
+            "w": 1640,
+            "h": 968
+          },
+          "overflow": "hidden auto",
+          "clamp": "none"
+        }
+      ],
+      "screenshot": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/stripe-before-wheel/commercial-8-2-bilingual-scroll.png"
+    },
+    {
+      "phase": "stripe-after-wheel",
+      "buildHash": "1c73d64e7cf4c825a6a0f22af0e0b3d03969a09bcc4a61038a907ce0858bb680",
+      "movedContainers": [
+        {
+          "tag": "DIV",
+          "id": "",
+          "cls": "Content Box-root",
+          "top": 900,
+          "height": 968,
+          "scrollHeight": 6927,
+          "delta": 900
+        }
+      ],
+      "code": {
+        "codeBlocks": 5,
+        "liveCodeBlocks": 5,
+        "originalCodeNodes": 257,
+        "retainedCodeNodes": 257,
+        "overwrittenCodeValues": 0,
+        "hiddenCodeBlocks": 0,
+        "codeTranslationTargets": 0,
+        "codeTranslationSamples": [],
+        "proseTranslationTargets": 77
+      },
+      "restore": {
+        "originalNodes": 629,
+        "retainedNodes": 629,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 629,
+        "retainedNodes": 629,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "clips": [
+        {
+          "selector": "span.dual-read-target",
+          "text": "或者，从 代码快速入门 开始构建或下载可运行的示例。",
+          "visible": 0,
+          "box": {
+            "x": 561,
+            "y": 28,
+            "w": 829,
+            "h": 26
+          },
+          "ancestor": "div.Content.Box-root",
+          "ancestorBox": {
+            "x": 280,
+            "y": 112,
+            "w": 1640,
+            "h": 968
+          },
+          "overflow": "hidden auto",
+          "clamp": "none"
+        }
+      ],
+      "screenshot": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/stripe-after-wheel/commercial-8-2-bilingual-scroll.png"
+    }
+  ],
+  "cases": [
+    {
+      "engine": "chromium",
+      "version": "before",
+      "scenario": "container-media",
+      "paused": false,
+      "translated": {
+        "width": 400,
+        "height": 100,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "changed": {
+        "width": 260,
+        "height": 65,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "restored": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 0,
+        "sourceIdentity": true
+      }
+    },
+    {
+      "engine": "chromium",
+      "version": "before",
+      "scenario": "container-media",
+      "paused": true,
+      "translated": {
+        "width": 400,
+        "height": 100,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "changed": {
+        "width": 260,
+        "height": 65,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "restored": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 0,
+        "sourceIdentity": true
+      }
+    },
+    {
+      "engine": "chromium",
+      "version": "before",
+      "scenario": "opaque-media",
+      "paused": false,
+      "translated": {
+        "width": 400,
+        "height": 100,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "changed": {
+        "width": 260,
+        "height": 65,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "restored": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 0,
+        "sourceIdentity": true
+      }
+    },
+    {
+      "engine": "chromium",
+      "version": "before",
+      "scenario": "opaque-media",
+      "paused": true,
+      "translated": {
+        "width": 400,
+        "height": 100,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "changed": {
+        "width": 260,
+        "height": 65,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "restored": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 0,
+        "sourceIdentity": true
+      }
+    },
+    {
+      "engine": "chromium",
+      "version": "current",
+      "scenario": "container-media",
+      "paused": false,
+      "translated": {
+        "width": 400,
+        "height": 100,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "changed": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "restored": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 0,
+        "sourceIdentity": true
+      }
+    },
+    {
+      "engine": "chromium",
+      "version": "current",
+      "scenario": "container-media",
+      "paused": true,
+      "translated": {
+        "width": 400,
+        "height": 100,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "changed": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "restored": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 0,
+        "sourceIdentity": true
+      }
+    },
+    {
+      "engine": "chromium",
+      "version": "current",
+      "scenario": "opaque-media",
+      "paused": false,
+      "translated": {
+        "width": 400,
+        "height": 100,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "changed": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "restored": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 0,
+        "sourceIdentity": true
+      }
+    },
+    {
+      "engine": "chromium",
+      "version": "current",
+      "scenario": "opaque-media",
+      "paused": true,
+      "translated": {
+        "width": 400,
+        "height": 100,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "changed": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "restored": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 0,
+        "sourceIdentity": true
+      }
+    },
+    {
+      "engine": "firefox",
+      "version": "before",
+      "scenario": "container-media",
+      "paused": false,
+      "translated": {
+        "width": 400,
+        "height": 100,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "changed": {
+        "width": 260,
+        "height": 65,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "restored": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 0,
+        "sourceIdentity": true
+      }
+    },
+    {
+      "engine": "firefox",
+      "version": "before",
+      "scenario": "container-media",
+      "paused": true,
+      "translated": {
+        "width": 400,
+        "height": 100,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "changed": {
+        "width": 260,
+        "height": 65,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "restored": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 0,
+        "sourceIdentity": true
+      }
+    },
+    {
+      "engine": "firefox",
+      "version": "before",
+      "scenario": "opaque-media",
+      "paused": false,
+      "translated": {
+        "width": 400,
+        "height": 100,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "changed": {
+        "width": 260,
+        "height": 65,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "restored": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 0,
+        "sourceIdentity": true
+      }
+    },
+    {
+      "engine": "firefox",
+      "version": "before",
+      "scenario": "opaque-media",
+      "paused": true,
+      "translated": {
+        "width": 400,
+        "height": 100,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "changed": {
+        "width": 260,
+        "height": 65,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "restored": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 0,
+        "sourceIdentity": true
+      }
+    },
+    {
+      "engine": "firefox",
+      "version": "current",
+      "scenario": "container-media",
+      "paused": false,
+      "translated": {
+        "width": 400,
+        "height": 100,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "changed": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "restored": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 0,
+        "sourceIdentity": true
+      }
+    },
+    {
+      "engine": "firefox",
+      "version": "current",
+      "scenario": "container-media",
+      "paused": true,
+      "translated": {
+        "width": 400,
+        "height": 100,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "changed": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "restored": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": false,
+        "imagePolicy": "[[[[\"width\",\"auto\",\"\"],[\"height\",\"100%\",\"\"]],[[\"width\",\"260px\",\"\"],[\"height\",\"220px\",\"\"],[\"object-fit\",\"cover\",\"\"]]],[]]",
+        "rowPolicy": "[[[[\"grid-template-columns\",\"260px 260px\",\"\"]]],[]]",
+        "targets": 0,
+        "sourceIdentity": true
+      }
+    },
+    {
+      "engine": "firefox",
+      "version": "current",
+      "scenario": "opaque-media",
+      "paused": false,
+      "translated": {
+        "width": 400,
+        "height": 100,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "changed": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "restored": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 0,
+        "sourceIdentity": true
+      }
+    },
+    {
+      "engine": "firefox",
+      "version": "current",
+      "scenario": "opaque-media",
+      "paused": true,
+      "translated": {
+        "width": 400,
+        "height": 100,
+        "objectFit": "contain",
+        "rule": true,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "changed": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 1,
+        "sourceIdentity": true
+      },
+      "restored": {
+        "width": 260,
+        "height": 220,
+        "objectFit": "cover",
+        "rule": false,
+        "opaque": true,
+        "imagePolicy": "[[],[]]",
+        "rowPolicy": "[[],[]]",
+        "targets": 0,
+        "sourceIdentity": true
+      }
+    }
+  ],
+  "websites": [
+    {
+      "id": "popular-1-2",
+      "site": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Internet",
+      "sourceUnits": 681,
+      "translatedCount": 147,
+      "measurements": {
+        "source-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before/popular-1-2-source-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/popular-1-2-source-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          }
+        },
+        "bilingual-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before/popular-1-2-bilingual-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/popular-1-2-bilingual-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 138
+          }
+        },
+        "bilingual-scroll": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before/popular-1-2-bilingual-scroll.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/popular-1-2-bilingual-scroll.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 140
+          }
+        },
+        "replace-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before/popular-1-2-replace-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/popular-1-2-replace-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 127
+          }
+        }
+      },
+      "restore": {
+        "originalNodes": 8618,
+        "retainedNodes": 8618,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 8618,
+        "retainedNodes": 8618,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "comparisonImage": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/site-pair-1.jpg"
+    },
+    {
+      "id": "popular-2-2",
+      "site": "GitHub",
+      "url": "https://github.com/golang/go",
+      "sourceUnits": 120,
+      "translatedCount": 118,
+      "measurements": {
+        "source-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before-github-stable/popular-2-2-source-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/popular-2-2-source-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          }
+        },
+        "bilingual-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before-github-stable/popular-2-2-bilingual-top.png",
+            "overflow": 0,
+            "clips": 2,
+            "squeezed": 1
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/popular-2-2-bilingual-top.png",
+            "overflow": 0,
+            "clips": 2,
+            "squeezed": 1
+          },
+          "code": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 80
+          }
+        },
+        "bilingual-scroll": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before-github-stable/popular-2-2-bilingual-scroll.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/popular-2-2-bilingual-scroll.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 83
+          }
+        },
+        "replace-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before-github-stable/popular-2-2-replace-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/popular-2-2-replace-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 48
+          }
+        }
+      },
+      "restore": {
+        "originalNodes": 589,
+        "retainedNodes": 589,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 589,
+        "retainedNodes": 589,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "comparisonImage": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/site-pair-2.jpg"
+    },
+    {
+      "id": "commercial-1-2",
+      "site": "Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/",
+      "sourceUnits": 65,
+      "translatedCount": 65,
+      "measurements": {
+        "source-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before/commercial-1-2-source-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/commercial-1-2-source-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          }
+        },
+        "bilingual-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before/commercial-1-2-bilingual-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/commercial-1-2-bilingual-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 62
+          }
+        },
+        "bilingual-scroll": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before/commercial-1-2-bilingual-scroll.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/commercial-1-2-bilingual-scroll.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 62
+          }
+        },
+        "replace-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before/commercial-1-2-replace-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/commercial-1-2-replace-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 44
+          }
+        }
+      },
+      "restore": {
+        "originalNodes": 852,
+        "retainedNodes": 852,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 852,
+        "retainedNodes": 852,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "comparisonImage": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/site-pair-3.jpg"
+    },
+    {
+      "id": "popular-7-2",
+      "site": "Apple",
+      "url": "https://www.apple.com/mac/",
+      "sourceUnits": 162,
+      "translatedCount": 63,
+      "measurements": {
+        "source-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before/popular-7-2-source-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/popular-7-2-source-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          }
+        },
+        "bilingual-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before/popular-7-2-bilingual-top.png",
+            "overflow": 0,
+            "clips": 1,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/popular-7-2-bilingual-top.png",
+            "overflow": 0,
+            "clips": 1,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 45
+          }
+        },
+        "bilingual-scroll": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before/popular-7-2-bilingual-scroll.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/popular-7-2-bilingual-scroll.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 53
+          }
+        },
+        "replace-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before/popular-7-2-replace-top.png",
+            "overflow": 0,
+            "clips": 1,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/popular-7-2-replace-top.png",
+            "overflow": 0,
+            "clips": 1,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 44
+          }
+        }
+      },
+      "restore": {
+        "originalNodes": 1202,
+        "retainedNodes": 1201,
+        "removedByPage": 1,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 1202,
+        "retainedNodes": 1201,
+        "removedByPage": 1,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "comparisonImage": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/site-pair-4.jpg"
+    },
+    {
+      "id": "commercial-7-2",
+      "site": "Shopify Developer",
+      "url": "https://shopify.dev/docs/apps/build",
+      "sourceUnits": 102,
+      "translatedCount": 47,
+      "measurements": {
+        "source-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before/commercial-7-2-source-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/commercial-7-2-source-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          }
+        },
+        "bilingual-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before/commercial-7-2-bilingual-top.png",
+            "overflow": 0,
+            "clips": 1,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/commercial-7-2-bilingual-top.png",
+            "overflow": 0,
+            "clips": 1,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 41
+          }
+        },
+        "bilingual-scroll": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before/commercial-7-2-bilingual-scroll.png",
+            "overflow": 0,
+            "clips": 1,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/commercial-7-2-bilingual-scroll.png",
+            "overflow": 0,
+            "clips": 1,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 45
+          }
+        },
+        "replace-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before/commercial-7-2-replace-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/commercial-7-2-replace-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 0,
+            "liveCodeBlocks": 0,
+            "originalCodeNodes": 0,
+            "retainedCodeNodes": 0,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 32
+          }
+        }
+      },
+      "restore": {
+        "originalNodes": 291,
+        "retainedNodes": 291,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 291,
+        "retainedNodes": 291,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "comparisonImage": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/site-pair-5.jpg"
+    },
+    {
+      "id": "commercial-8-2",
+      "site": "Stripe Docs",
+      "url": "https://docs.stripe.com/payments/accept-a-payment",
+      "sourceUnits": 173,
+      "translatedCount": 73,
+      "measurements": {
+        "source-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before-confirm/commercial-8-2-source-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/commercial-8-2-source-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 257,
+            "retainedCodeNodes": 257,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          }
+        },
+        "bilingual-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before-confirm/commercial-8-2-bilingual-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/commercial-8-2-bilingual-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 257,
+            "retainedCodeNodes": 257,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 73
+          }
+        },
+        "bilingual-scroll": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before-confirm/commercial-8-2-bilingual-scroll.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/commercial-8-2-bilingual-scroll.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 257,
+            "retainedCodeNodes": 257,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 73
+          }
+        },
+        "replace-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before-confirm/commercial-8-2-replace-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/commercial-8-2-replace-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 5,
+            "liveCodeBlocks": 5,
+            "originalCodeNodes": 257,
+            "retainedCodeNodes": 257,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 67
+          }
+        }
+      },
+      "restore": {
+        "originalNodes": 629,
+        "retainedNodes": 629,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 629,
+        "retainedNodes": 629,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "comparisonImage": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/site-pair-6.jpg"
+    },
+    {
+      "id": "open_source-1-1",
+      "site": "React",
+      "url": "https://react.dev/",
+      "sourceUnits": 120,
+      "translatedCount": 19,
+      "measurements": {
+        "source-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before-confirm/open_source-1-1-source-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/open_source-1-1-source-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          }
+        },
+        "bilingual-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before-confirm/open_source-1-1-bilingual-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/open_source-1-1-bilingual-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 12
+          }
+        },
+        "bilingual-scroll": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before-confirm/open_source-1-1-bilingual-scroll.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/open_source-1-1-bilingual-scroll.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 15
+          }
+        },
+        "replace-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before-confirm/open_source-1-1-replace-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/open_source-1-1-replace-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 4,
+            "liveCodeBlocks": 8,
+            "originalCodeNodes": 500,
+            "retainedCodeNodes": 500,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 0,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 15
+          }
+        }
+      },
+      "restore": {
+        "originalNodes": 710,
+        "retainedNodes": 710,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 1,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 710,
+        "retainedNodes": 710,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 1,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "comparisonImage": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/site-pair-7.jpg"
+    },
+    {
+      "id": "open_source-2-2",
+      "site": "Vue",
+      "url": "https://vuejs.org/guide/introduction.html",
+      "sourceUnits": 149,
+      "translatedCount": 80,
+      "measurements": {
+        "source-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before/open_source-2-2-source-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/open_source-2-2-source-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 7,
+            "liveCodeBlocks": 7,
+            "originalCodeNodes": 369,
+            "retainedCodeNodes": 369,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 0
+          }
+        },
+        "bilingual-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before/open_source-2-2-bilingual-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/open_source-2-2-bilingual-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 7,
+            "liveCodeBlocks": 7,
+            "originalCodeNodes": 369,
+            "retainedCodeNodes": 369,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 70
+          }
+        },
+        "bilingual-scroll": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before/open_source-2-2-bilingual-scroll.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/open_source-2-2-bilingual-scroll.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 7,
+            "liveCodeBlocks": 7,
+            "originalCodeNodes": 369,
+            "retainedCodeNodes": 369,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 76
+          }
+        },
+        "replace-top": {
+          "before": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-before/open_source-2-2-replace-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "after": {
+            "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/live-after/open_source-2-2-replace-top.png",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          "code": {
+            "codeBlocks": 7,
+            "liveCodeBlocks": 7,
+            "originalCodeNodes": 369,
+            "retainedCodeNodes": 369,
+            "overwrittenCodeValues": 0,
+            "hiddenCodeBlocks": 2,
+            "codeTranslationTargets": 0,
+            "codeTranslationSamples": [],
+            "proseTranslationTargets": 66
+          }
+        }
+      },
+      "restore": {
+        "originalNodes": 674,
+        "retainedNodes": 674,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 674,
+        "retainedNodes": 674,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "comparisonImage": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/site-pair-8.jpg"
+    }
+  ],
+  "iab": {
+    "url": "https://react.dev/",
+    "injectedFreshProductionContent": true,
+    "installedBrowserExtension": false,
+    "checks": {
+      "id": "open_source-1-1",
+      "status": {
+        "count": 16,
+        "failed": 0,
+        "frames": {
+          "crossOrigin": 0,
+          "opaque": 0,
+          "sameOrigin": 0
+        },
+        "perf": {
+          "lastIndexMs": 167.50000005960464,
+          "lastMutationIndexMs": 2.699999988079071
+        },
+        "revision": 1,
+        "sessionId": "iab-6dc1ebf0-8b62-4c1f-afb0-dc73405e6678",
+        "shadowRoots": 0,
+        "total": 119,
+        "translating": false,
+        "watching": true
+      },
+      "top": {
+        "file": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/iab-after/open_source-1-1-bilingual-top.jpg",
+        "viewport": {
+          "height": 1080,
+          "width": 1920
+        },
+        "units": 120,
+        "targetCount": 12,
+        "documentOverflow": 0,
+        "clips": [],
+        "squeezed": [],
+        "overflow": []
+      },
+      "restore": {
+        "changedLinks": 0,
+        "changedValues": 1,
+        "orderDifferences": [],
+        "originalNodes": 710,
+        "overwrittenCurrentLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "remainingTargets": 0,
+        "removedByPage": 0,
+        "removedSinceRestoreSnapshot": [],
+        "retainedCurrentOrder": true,
+        "retainedNodes": 710,
+        "sourceOrder": true
+      },
+      "restoreReplace": {
+        "changedLinks": 0,
+        "changedValues": 1,
+        "orderDifferences": [],
+        "originalNodes": 710,
+        "overwrittenCurrentLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "remainingTargets": 0,
+        "removedByPage": 0,
+        "removedSinceRestoreSnapshot": [],
+        "retainedCurrentOrder": true,
+        "retainedNodes": 710,
+        "sourceOrder": true
+      }
+    },
+    "code": {
+      "codeBlocks": 4,
+      "codeTranslationSamples": [],
+      "codeTranslationTargets": 0,
+      "hiddenCodeBlocks": 0,
+      "liveCodeBlocks": 8,
+      "originalCodeNodes": 500,
+      "overwrittenCodeValues": 0,
+      "proseTranslationTargets": 15,
+      "retainedCodeNodes": 500
+    },
+    "status": {
+      "count": 19,
+      "failed": 0,
+      "frames": {
+        "crossOrigin": 0,
+        "opaque": 0,
+        "sameOrigin": 0
+      },
+      "perf": {
+        "lastIndexMs": 132.69999986886978,
+        "lastMutationIndexMs": 8.099999964237213
+      },
+      "revision": 1,
+      "sessionId": "iab-167d992a-b5a1-45a1-8ea6-3f5dd330655a",
+      "shadowRoots": 0,
+      "total": 119,
+      "translating": false,
+      "watching": false
+    },
+    "viewport": {
+      "height": 1080,
+      "width": 1920
+    },
+    "screenshot": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/iab-after/react-delivery.jpg",
+    "screenshotSize": {
+      "width": 1920,
+      "height": 1080
+    },
+    "note": "The actual IAB viewport and screenshot are1920×1080."
+  },
+  "observations": [
+    "GitHub source commit cells hydrated after initial captures. The selected baseline waits for at least8 visible populated commit cells, yielding120 source units and118 translations on both builds.",
+    "Stripe initial baseline captured157 source units before all source content settled. A fresh confirmation matches173 source units and73 translations on both builds.",
+    "React source demo clock advanced during translation: changedValues relative to the initial snapshot may be1; overwrittenCurrentValues is0, and current source node identity/order are preserved.",
+    "Existing clipping/squeeze candidates in GitHub chrome, Apple and Shopify remain at baseline values; no new ones were measured in the selected views.",
+    "React500, Vue369 and Stripe257 original code text nodes remain untouched; Vue retains two source-hidden code blocks for its selected API-style tab.",
+    "Stripe internal content moved900px with native wheel input on both builds; all257 code nodes and both mode restores passed. One fully offscreen clipping candidate above its content viewport is the same on both builds."
+  ],
+  "limitations": [
+    "Eight live pages and212 related native cases were rerun. The earlier70-page audit and unrelated functional suites were not rerun.",
+    "The fallback validates observed media paint and shape; it is not a full CSS condition/cascade interpreter. Bounded min/max heights do not establish a proportional height relationship. CSSOM-only edits without observable events remain outside the update-trigger contract.",
+    "Chromium native regressions load the installed extension; Firefox uses native Gecko with fresh packaged content and the repository browser shim.",
+    "Performance checks use the default repository budgets rather than strict mode."
+  ],
+  "security": {
+    "scannedPublicFiles": 302,
+    "knownCredentialMatches": 0,
+    "privateConfigsMode600": true
+  },
+  "artifacts": {
+    "bugComparison": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07/fix-comparison.jpg",
+    "directory": "/Users/skysmission/WorkSpace/github/skys-mission/dual-read/.codex/media-policy-fixes-2026-10-07"
+  }
+}

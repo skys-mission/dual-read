@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Translation sizing and CSS motion regression</title>
+  <style>
+    body {margin:8px;font:16px/20px sans-serif}
+    .bounded p {margin:0;font:16px/20px sans-serif}
+    #theme {color:black;background:black;padding:12px}
+    #theme p {font:20px/30px sans-serif;margin:0}
+    #theme-source {color:white;transition:color 400ms linear}
+    #theme.light {background:white}
+    #theme.light #theme-source {color:black}
+    motion-state {display:block}
+    #reveal p {margin:0}
+  </style>
+</head>
+<body>
+  <main>
+    <section id="theme"><p><span id="theme-source">Documentation with a smooth color theme transition.</span></p></section>
+    <motion-state id="motion-widget"></motion-state>
+    <section id="responsive" class="bounded" style="height:80px;width:260px;overflow:hidden"><p id="responsive-copy">Expansion responsive documentation.</p></section>
+    <section id="policy" class="bounded" style="height:80px;width:260px;overflow:hidden"><p>Expansion collapsible documentation.</p></section>
+    <section id="scroll" class="bounded" style="height:80px;width:260px;overflow:hidden"><p>Expansion scroll viewport documentation.</p></section>
+    <section id="reveal" style="height:0px;width:300px;overflow:hidden"><p>Previously collapsed documentation becomes visible.</p></section>
+    <section id="neighbor"><p id="edited">Current neighboring source documentation.</p><p id="removed">Source removed later by the page.</p><a id="link" href="/original">Current documentation link</a></section>
+    <pre id="code"><code>function ProtectedExample() { return 'Do not translate source code'; }</code></pre>
+  </main>
+  <script>
+    document.getElementById('motion-widget').attachShadow({mode:'open'}).innerHTML = '<style>section {color:black;background:black;padding:8px} p {font:20px/30px sans-serif;margin:0} span {color:white;transition:color 400ms linear} section.light {background:white} section.light span {color:black}</style><section><p><span>Shadow documentation with a smooth color theme transition.</span></p></section>';
+  </script>
+</body>
+</html>

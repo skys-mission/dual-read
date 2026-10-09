@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Live presentation updates regression</title>
+  <style>
+    html { --source-paint:white; --surface:black; }
+    html.presentation-light, html[data-presentation-theme="light"] { --source-paint:black; --surface:white; }
+    body { margin:8px; font:16px/20px sans-serif; color:black; }
+    main { width:1900px; }
+    p { margin:0; }
+    #surface { padding:12px; background:var(--surface); width:600px; }
+    #themed-source { color:var(--source-paint); font-size:20px; line-height:30px; }
+    .media-row { display:grid; grid-template-columns:200px 400px; width:600px; margin-left:1300px; }
+    .media-row img { width:auto; height:100%; }
+    .bounded { width:260px; height:80px; overflow:hidden; }
+    .bounded pre { margin:0; }
+    read-widget, other-widget { display:block; }
+    #receiver { width:200px; height:80px; }
+  </style>
+</head>
+<body>
+  <main>
+    <section id="surface"><p id="themed"><span id="themed-source">Theme-dependent documentation.</span></p></section>
+    <section class="media-row"><div><p id="media-copy">Media caption documentation.</p></div><div><img id="media-image" alt="Diagram" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='royalblue'/%3E%3C/svg%3E"></div></section>
+    <section class="media-row"><div><p id="other-media-copy">Media caption adjacent documentation.</p></div><div><img id="other-media-image" alt="Second diagram" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='orange'/%3E%3C/svg%3E"></div></section>
+    <section id="bounded-rich" class="bounded"><p id="rich-copy">Read <strong id="rich-source">Expansion rich documentation</strong> and <a id="rich-link" href="/guide">the guide</a>.</p></section>
+    <section id="bounded-mixed" class="bounded"><div id="mixed-copy">Expansion mixed documentation.<pre>const example = 1;</pre></div></section>
+    <read-widget id="widget"><p id="slotted" slot="copy">Assigned slot documentation.</p></read-widget>
+    <other-widget></other-widget>
+    <section id="receiver"></section>
+  </main>
+  <script>
+    const root = document.getElementById('widget').attachShadow({mode:'open'});
+    root.innerHTML = '<div id="inner"><slot name="copy"></slot><nested-widget></nested-widget></div>';
+    root.querySelector('nested-widget').attachShadow({mode:'open'}).innerHTML = '<p style="color:black;background:black"><span id="shadow-theme-source" style="color:white">Nested component documentation.</span></p>';
+    document.querySelector('other-widget').attachShadow({mode:'open'}).innerHTML = '<p>Unrelated component documentation.</p>';
+  </script>
+</body>
+</html>

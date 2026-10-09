@@ -112,8 +112,15 @@ export async function waitFirstPaintMs(
 }
 
 export async function readHeapUsed(page: Page): Promise<number | null> {
-  return page.evaluate(() => {
-    const mem = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory;
-    return mem?.usedJSHeapSize ?? null;
-  });
+  // Measure retained memory across page and content-script worlds. Optional
+  // window.gc() is normally absent, and performance.memory is quantized;
+  // sampling either without a collection can mistake allocation churn for a leak.
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await cdp.send('HeapProfiler.collectGarbage');
+    const { usedSize } = await cdp.send('Runtime.getHeapUsage');
+    return usedSize;
+  } finally {
+    await cdp.detach();
+  }
 }

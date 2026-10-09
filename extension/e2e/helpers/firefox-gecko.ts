@@ -189,7 +189,7 @@ export async function launchFirefoxGeckoContext(): Promise<{
  */
 export async function installFirefoxDualRead(
   page: Page,
-  opts?: { batchMode?: FirefoxBatchMode },
+  opts?: { batchMode?: FirefoxBatchMode; translate?: (texts: string[]) => Promise<string[]> },
 ): Promise<void> {
   const batchMode = opts?.batchMode ?? 'ok';
   const { js, css } = readFirefoxAssets();
@@ -200,7 +200,7 @@ export async function installFirefoxDualRead(
       err.code = 'AUTH_INVALID';
       throw err;
     }
-    return texts.map((t) => `译:${t}`);
+    return opts?.translate ? opts.translate(texts) : texts.map((t) => `译:${t}`);
   });
 
   await page.evaluate((code) => {
@@ -271,6 +271,15 @@ export async function firefoxRestore(page: Page): Promise<void> {
       if (!keep) resolve();
     });
   });
+}
+
+export async function firefoxStatus(page: Page): Promise<Record<string, unknown>> {
+  return page.evaluate(() => new Promise<Record<string, unknown>>((resolve) => {
+    const g = globalThis as typeof globalThis & {
+      __DUAL_READ__: { handleMessage(req: unknown, sender: unknown, reply: (value: unknown) => void): boolean };
+    };
+    g.__DUAL_READ__.handleMessage({ action: 'getStatus' }, null, (value) => resolve(value as Record<string, unknown>));
+  }));
 }
 
 export async function firefoxStopWatch(page: Page): Promise<void> {

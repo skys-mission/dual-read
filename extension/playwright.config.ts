@@ -12,7 +12,7 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium-ext',
-      testMatch: /(popup|translate|lab|perf|connection|real-proxy|live-upstream)\.spec\.ts/,
+      testMatch: /(popup|translate|lab|regression|perf|connection|real-proxy|live-upstream)\.spec\.ts/,
     },
     {
       name: 'firefox-ext',

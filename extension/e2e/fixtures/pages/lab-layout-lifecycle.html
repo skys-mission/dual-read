@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Translation layout lifecycle regression</title>
+  <style>
+    body {margin:8px;font:16px/20px sans-serif}
+    #themed, #styled {color:black;font:20px/30px sans-serif;margin:0;min-height:80px;background:black;padding:12px}
+    #toggle:not(:checked) ~ #themed #theme-source, #lifecycle-source {color:white}
+    #toggle:checked ~ #themed {background:white}
+    #toggle:checked ~ #themed #theme-source {color:black}
+    #flow {display:flex;align-items:center;font:16px/20px sans-serif}
+    #flow svg {width:16px;height:16px;flex-shrink:0}
+    #media {display:grid;grid-template-columns:200px 400px;width:600px;margin-left:1300px}
+    #media p {margin:0;font:16px/20px sans-serif}
+    #image {height:100%;width:auto}
+    #bounded {height:80px;width:260px;overflow:hidden}
+    #bounded p, #frame p {margin:0;font:16px/20px sans-serif}
+    #frame {position:relative;width:260px;padding-bottom:40px;overflow:hidden}
+    #footer {position:absolute;left:0;right:0}
+    read-state {display:block}
+  </style>
+</head>
+<body>
+  <main>
+    <input id="toggle" type="checkbox" aria-label="Light theme">
+    <p id="themed"><span id="theme-source">Documentation controlled by a sibling theme checkbox.</span></p>
+    <p id="styled"><span id="lifecycle-source">Independent styled lifecycle documentation.</span></p>
+    <p id="flow"><svg aria-hidden="true"></svg>Flow documentation with <source-lifecycle id="lifecycle">current source element</source-lifecycle>.</p>
+    <section id="media"><div><p id="media-copy">Media caption lifecycle documentation.</p></div><div><img id="image" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='royalblue'/%3E%3C/svg%3E"></div></section>
+    <section id="bounded"><p id="first">Expansion first documentation.</p><p id="second">Expansion second documentation.</p></section>
+    <section id="frame"><div><p>Anchored footer documentation.</p></div><div id="footer" style="top:24px;height:calc(100% - 24px)"><button id="next">Next</button></div></section>
+    <read-state id="state-widget"></read-state>
+    <pre id="protected-code"><code>function Example() { return 'Untranslated source code'; }</code></pre>
+  </main>
+  <script>
+    window.lifecycleArmed = false;
+    customElements.define('source-lifecycle',class extends HTMLElement {
+      connectedCallback() {if(window.lifecycleArmed) document.getElementById('lifecycle-source').style.color='red';}
+    });
+    document.getElementById('state-widget').attachShadow({mode:'open'}).innerHTML = '<style>p {color:black;background:black;font:20px/30px sans-serif} input:not(:checked) ~ p span {color:white} input:checked ~ p {background:white} input:checked ~ p span {color:black}</style><input type="checkbox"><p><span>Shadow documentation controlled by a sibling checkbox.</span></p>';
+  </script>
+</body>
+</html>

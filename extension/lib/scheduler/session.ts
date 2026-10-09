@@ -1,5 +1,6 @@
 import type { PublicSessionConfig, TranslateStatus, TranslationPayload, TranslationUnit } from '../types';
-import { collectUnits, collectUnitsAsync, mutationHasNewContent, mutationIndexDelta } from '../collector';
+import { collectSlotTextNodes, collectUnits, collectUnitsAsync, isVisibilityMutation, mutationHasNewContent, mutationIndexDelta } from '../collector';
+import { composedContains } from '../dom-tree';
 import { yieldToMain } from '../runtime/yield';
 import {
   renderBatch,
@@ -7,8 +8,20 @@ import {
   restoreDom,
   clearNode,
   restoreUnit,
+  restoreMovedRichNodes,
   readShellDecisions,
   applyShellDecisions,
+  readBoundedLayouts,
+  applyBoundedLayouts,
+  readCompactLayouts,
+  applyCompactLayouts,
+  applyMediaLayouts,
+  captureMediaLayouts,
+  readMediaLayouts,
+  readSourceTypography,
+  applyAnchoredLayouts,
+  captureAnchoredLayouts,
+  readAnchoredLayouts,
   type ShellReservation,
 } from '../renderer';
 import { lookup, store } from '../cache';
@@ -65,6 +78,10 @@ interface Entry {
   attempts: number;
   status: EntryStatus;
   retryTimer: ReturnType<typeof setTimeout> | null;
+  /** Current source/rendered text nodes, excluding extension chrome. No layout reads. */
+  source: { node: Text; ancestors: Element[]; value: string }[];
+  /** Originals remain owned while rich/plain replacement paints different nodes. */
+  originalSource: Text[];
 }
 
 interface SlotJob {
@@ -134,7 +151,7 @@ export class ContentSession {
   private lastIndexMs = 0;
   private lastMutationIndexMs = 0;
 
-  private renderBuf: { unit: TranslationUnit; payload: TranslationPayload }[] = [];
+  private renderBuf: { entry: Entry; payload: TranslationPayload }[] = [];
   private renderTimer: ReturnType<typeof setTimeout> | null = null;
   private initialCheck: (() => void) | null = null;
 
@@ -317,6 +334,7 @@ export class ContentSession {
     this.renderTimer = null;
     this.renderBuf = [];
     this.pendingShells = [];
+    this.pendingLayouts = [];
     this.disconnectPorts();
     this.io?.disconnect();
     this.registry?.dispose();
@@ -383,6 +401,7 @@ export class ContentSession {
    * flush frame (read pass runs while layout is still clean → no forced layout).
    */
   private pendingShells: ShellReservation[] = [];
+  private pendingLayouts: HTMLElement[] = [];
 
   private flushRenders(): void {
     // Frame-start order matters — every layout read happens before the frame's
@@ -393,8 +412,13 @@ export class ContentSession {
     const settling = this.pendingShells;
     this.pendingShells = [];
     const decisions = settling.length ? readShellDecisions(settling) : [];
+    const layouts = readBoundedLayouts(this.pendingLayouts);
+    const compact = readCompactLayouts(this.pendingLayouts);
+    const media = readMediaLayouts(this.pendingLayouts);
+    const anchors = readAnchoredLayouts(this.pendingLayouts);
+    this.pendingLayouts = [...settling.map(({ node }) => node), ...compact, ...layouts.map(({ owner }) => owner)];
 
-    const items = this.renderBuf;
+    const items = this.renderBuf.filter(({ entry }) => this.isLiveEntry(entry) && !this.sourceChanged(entry));
     this.renderBuf = [];
     if (this.disposed && this.disposeReason === 'restore') {
       // DOM is about to be restored; skip pending paints.
@@ -402,7 +426,12 @@ export class ContentSession {
     }
 
     const measured = new Map<HTMLElement, number>();
-    for (const { unit } of items) {
+    const typography = readSourceTypography(items.map(({ entry }) => entry.unit));
+    captureMediaLayouts(items.map(({ entry }) => entry.unit.el));
+    if (this.config.mode !== 'replace') {
+      captureAnchoredLayouts(items.map(({ entry }) => entry.unit.el));
+    }
+    for (const { entry: { unit } } of items) {
       if (unit.kind !== 'block' || measured.has(unit.el)) continue;
       try {
         measured.set(unit.el, unit.el.getBoundingClientRect().height);
@@ -412,8 +441,15 @@ export class ContentSession {
     }
 
     if (decisions.length) applyShellDecisions(decisions);
+    applyBoundedLayouts(layouts);
+    applyCompactLayouts(compact);
+    applyMediaLayouts(media);
+    applyAnchoredLayouts(anchors);
 
-    if (!items.length) return;
+    if (!items.length) {
+      if (this.pendingLayouts.length) requestAnimationFrame(() => this.flushRenders());
+      return;
+    }
     const mode = this.config.mode ?? 'bilingual';
     const opts = this.renderOpts();
     // Time-slice oversized flushes across frames: render in fixed small chunks
@@ -426,7 +462,10 @@ export class ContentSession {
     while (done < items.length) {
       const chunk = items.slice(done, done + RENDER_CHUNK_SIZE);
       done += chunk.length;
-      this.pendingShells.push(...renderBatch(chunk, mode, opts, measured));
+      this.pendingShells.push(...renderBatch(chunk.map(({ entry, payload }) => ({ unit: entry.unit, payload })), mode, opts, measured, typography));
+      // Rich replace and inline flows intentionally move/change source nodes.
+      // Capture the resulting tree before observer callbacks see our writes.
+      for (const { entry } of chunk) entry.source = this.captureSource(entry.unit);
       if (done >= items.length) break;
       if (performance.now() < sliceEnd) continue;
       // Re-queue the remainder ahead of anything buffered since, then yield
@@ -436,14 +475,14 @@ export class ContentSession {
       return;
     }
     // Settle this frame's shells at the next frame start (clean-layout reads).
-    if (this.pendingShells.length) {
+    if (this.pendingShells.length || this.pendingLayouts.length) {
       requestAnimationFrame(() => this.flushRenders());
     }
   }
 
-  private bufferRender(unit: TranslationUnit, payload: TranslationPayload): void {
+  private bufferRender(entry: Entry, payload: TranslationPayload): void {
     if (this.disposed) return;
-    this.renderBuf.push({ unit, payload });
+    this.renderBuf.push({ entry, payload });
     if (!this.renderTimer) {
       const delay = this.initialDrainActive ? RENDER_BUFFER_INITIAL_MS : RENDER_BUFFER_MS;
       this.renderTimer = setTimeout(() => {
@@ -556,7 +595,7 @@ export class ContentSession {
     };
 
     const finalizeEntry = (entry: Entry): void => {
-      if (!this.isCurrent(gen)) return;
+      if (!this.isCurrent(gen) || !this.isLiveEntry(entry)) return;
       const arr = slotResults.get(entry);
       if (!arr || arr.some((t) => t == null)) {
         this.fail(entry, toUserFacingError(new DualReadError('RESPONSE_MALFORMED', { detail: 'empty' })), gen);
@@ -589,7 +628,7 @@ export class ContentSession {
       if (missJobs.length) {
         try {
           const translations = await translateBatchViaPort(missTexts, {
-            sessionId: this.id,
+            config,
             ports: this.activePorts,
             signal: this.batchAbort?.signal,
           });
@@ -599,7 +638,7 @@ export class ContentSession {
           const fresh: { text: string; translation: string }[] = [];
           missJobs.forEach((job, i) => {
             const tr = translations[i];
-            if (tr) {
+            if (tr && this.isLiveEntry(job.entry) && !this.sourceChanged(job.entry)) {
               markSlot(job, tr);
               fresh.push({ text: job.text, translation: tr });
             }
@@ -644,6 +683,36 @@ export class ContentSession {
     return this.alive && this.generation === gen;
   }
 
+  private isLiveEntry(entry: Entry): boolean {
+    return entry.unit.el.isConnected && this.entries.get(entry.unit.el) === entry;
+  }
+
+  private captureSource(unit: TranslationUnit): Entry['source'] {
+    return collectSlotTextNodes(unit.el).map((node) => {
+      const ancestors: Element[] = [];
+      for (let el = node.parentElement; el && el !== unit.el; el = el.parentElement) ancestors.push(el);
+      return { node, ancestors, value: node.nodeValue ?? '' };
+    });
+  }
+
+  private ownsSource(entry: Entry, parent: Element | null): boolean {
+    for (let el = parent; el && el !== entry.unit.el; el = el.parentElement) {
+      if (this.entries.has(el as HTMLElement)) return false;
+    }
+    return true;
+  }
+
+  private sourceChanged(entry: Entry): boolean {
+    // Mixed segments can contain independent link/label units. Their replace
+    // renders must not invalidate this entry. Capture the ancestor path so a
+    // later move to another unit cannot hide a source removal from this one.
+    const source = entry.source.filter(({ ancestors }) => !ancestors.some((el) => this.entries.has(el as HTMLElement)));
+    const nodes = collectSlotTextNodes(entry.unit.el).filter((node) => this.ownsSource(entry, node.parentElement));
+    return nodes.length !== source.length || nodes.some((node, i) =>
+      node !== source[i].node || (node.nodeValue ?? '') !== source[i].value,
+    );
+  }
+
   /**
    * Floating async work (re-index, cache store) must never reject unhandled:
    * aborts from pause/dispose are expected, anything else is logged.
@@ -656,10 +725,10 @@ export class ContentSession {
   }
 
   private succeed(entry: Entry, payload: TranslationPayload, gen: number): void {
-    if (!this.isCurrent(gen)) return;
+    if (!this.isCurrent(gen) || !this.isLiveEntry(entry) || this.sourceChanged(entry)) return;
     entry.status = 'done';
     this.counts.translated++;
-    this.bufferRender(entry.unit, payload);
+    this.bufferRender(entry, payload);
     this.unobserve(entry);
   }
 
@@ -668,7 +737,7 @@ export class ContentSession {
     error: ReturnType<typeof toUserFacingError> | string,
     gen: number,
   ): void {
-    if (!this.isCurrent(gen)) return;
+    if (!this.isCurrent(gen) || !this.isLiveEntry(entry) || this.sourceChanged(entry)) return;
     entry.attempts++;
     const uf = typeof error === 'string' ? toUserFacingError(new Error(error)) : error;
     // Non-retryable failures (auth/model/config…) go terminal immediately:
@@ -737,7 +806,8 @@ export class ContentSession {
 
   private ensureEntry(unit: TranslationUnit): Entry | null {
     if (this.entries.has(unit.el)) return null;
-    const entry: Entry = { unit, attempts: 0, status: 'idle', retryTimer: null };
+    const source = this.captureSource(unit);
+    const entry: Entry = { unit, attempts: 0, status: 'idle', retryTimer: null, source, originalSource: source.map(({ node }) => node) };
     this.entries.set(unit.el, entry);
     return entry;
   }
@@ -745,9 +815,13 @@ export class ContentSession {
   private dropEntry(host: HTMLElement): void {
     const entry = this.entries.get(host);
     if (!entry) return;
-    if (entry.retryTimer) clearTimeout(entry.retryTimer);
+    if (entry.retryTimer) {
+      clearTimeout(entry.retryTimer);
+      this.pendingRetries = Math.max(0, this.pendingRetries - 1);
+    }
     this.unobserve(entry);
     this.queue = this.queue.filter((e) => e !== entry);
+    this.renderBuf = this.renderBuf.filter((item) => item.entry !== entry);
     this.entries.delete(host);
     if (entry.status === 'done') this.counts.translated = Math.max(0, this.counts.translated - 1);
     if (entry.status === 'error') this.counts.failed = Math.max(0, this.counts.failed - 1);
@@ -784,6 +858,11 @@ export class ContentSession {
 
     for (const scope of scopes) {
       if (!this.alive || !this.io) break;
+      // Root discovery can collect a transferred copy before the debounced
+      // mutation path runs. Every scope must contain source before indexing.
+      const restoreStarted = performance.now();
+      restoreMovedRichNodes([scope]);
+      cpuMs += performance.now() - restoreStarted;
       const collected = await collectUnitsAsync(scope, {
         budgetMs: INDEX_SLICE_MS,
         signal: this.batchAbort?.signal,
@@ -840,7 +919,16 @@ export class ContentSession {
     this.registry?.pruneDisconnected();
     this.refreshDiagnostics();
 
-    const delta = mutationIndexDelta(mutations, this.entries.keys());
+    restoreMovedRichNodes(mutations.flatMap((mutation) => Array.from(mutation.addedNodes)));
+
+    const delta = mutationIndexDelta(mutations, this.entries.keys(), (host) => {
+      const entry = this.entries.get(host);
+      return Boolean(entry && this.sourceChanged(entry));
+    }, (host, box) => {
+      const entry = this.entries.get(host);
+      return Boolean(entry && [...entry.originalSource, ...entry.source.map(({ node }) => node)]
+        .some(node => node.isConnected && host.contains(node) && composedContains(box, node) && this.ownsSource(entry, node.parentElement)));
+    });
 
     for (const host of delta.removed) {
       this.dropEntry(host);
@@ -861,7 +949,14 @@ export class ContentSession {
       if (!host.isConnected) this.dropEntry(host);
     }
 
-    const toAdd = [...delta.added];
+    const composedScopes = this.registry?.affectedComposedScopes(mutations.filter(isVisibilityMutation)) ?? [];
+    // Restoration can enqueue an original span beside the reveal attribute.
+    // The affected composed scope already collects its paragraph consistently;
+    // do not register that span and the paragraph as overlapping source owners.
+    const toAdd = delta.added.filter(unit => !composedScopes.some(scope => scope.contains(unit.el)));
+    for (const scope of composedScopes) {
+      for (const unit of collectUnits(scope)) toAdd.push(unit);
+    }
     for (const host of delta.invalidated) {
       if (!host.isConnected) continue;
       for (const unit of collectUnits(host)) toAdd.push(unit);
@@ -888,8 +983,12 @@ export class ContentSession {
     this.registry = new RootRegistry(
       (mutations) => {
         if (!this.alive) return;
-        this.pendingMutations.push(...mutations);
-        if (this.moTimer) clearTimeout(this.moTimer);
+        const relevant = mutations.filter(mutation => mutation.type !== 'attributes' || isVisibilityMutation(mutation));
+        if (!relevant.length) return;
+        this.pendingMutations.push(...relevant);
+        // Bound latency from the first record: unrelated attribute animations
+        // must not keep postponing appended or edited source indefinitely.
+        if (this.moTimer) return;
         this.moTimer = setTimeout(() => {
           this.moTimer = null;
           const batch = this.pendingMutations;

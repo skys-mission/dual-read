@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Source flow and style input regression</title>
+  <style>
+    body {margin:8px;font:16px/24px sans-serif}
+    .flow-row {display:flex;width:800px;align-items:center;gap:16px}
+    .flow-row > a.action {display:inline-flex;flex:0 0 160px;height:40px;align-items:center;justify-content:center;color:white;background:rgb(9,105,218);border-radius:6px;text-decoration:none}
+    #surface {font-size:40px;line-height:60px}
+    #clip-copy {margin:0;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden;width:360px;font-size:14px;line-height:21px}
+    #clip-source {font-size:20px;line-height:30px}
+    .panel p {margin:0;font:16px/20px sans-serif}
+    .footer-box {position:relative;width:260px;height:80px;padding-bottom:40px;box-sizing:border-box;overflow:hidden}
+    .footer-box p {margin:0;font:16px/20px sans-serif}
+    .footer {display:flex;align-items:center}
+    variable-state {display:block}
+  </style>
+</head>
+<body>
+  <main>
+    <ul>
+      <li id="flow-rich" class="flow-row">Read the account documentation. <a id="action-rich" class="action" href="/account">Account settings</a> for more information.</li>
+      <li id="flow-mixed" class="flow-row">Read the mixed documentation. <a id="action-mixed" class="action" href="/account">Account settings</a> for more information.<button id="mixed-close">Close</button></li>
+    </ul>
+    <section id="surface"><p id="clip-copy"><span id="clip-source">Styled clipped source documentation.</span></p></section>
+    <section id="rescan-card"><div id="rescan-row"><p id="rescan-price">Rescan product price with <a href="/terms">pricing terms</a>.</p><p id="rescan-description">Rescan independent product description.</p></div></section>
+    <section id="reveal-local" class="panel" style="--panel-height:0px;height:var(--panel-height);width:400px;overflow:hidden"><p>Local variable documentation becomes visible.</p></section>
+    <section id="reveal-inherited" class="panel" style="--alias:var(--shared-reveal);height:var(--alias);width:400px;overflow:hidden"><p>Inherited variable documentation becomes visible.</p></section>
+    <variable-state id="variable-widget"><p id="slotted-copy" slot="copy">Slotted variable documentation becomes visible.</p></variable-state>
+    <section id="variable-policy" class="panel" style="--panel-height:80px;height:var(--panel-height);width:260px;overflow:hidden"><p>Expansion variable-controlled documentation.</p></section>
+    <section id="footer-box" class="footer-box"><p>Expansion absolute footer source documentation.</p><div id="footer" class="footer" style="position:absolute;top:48px;height:calc(100% - 48px)"><button id="footer-action">Read more</button></div></section>
+    <section id="receiver"></section>
+    <p id="removed">Page documentation removed before restoration.</p>
+    <pre id="code"><code>function ProtectedExample() { return 'Do not translate code'; }</code></pre>
+  </main>
+  <script>
+    document.documentElement.style.setProperty('--shared-reveal','0px');
+    document.getElementById('variable-widget').attachShadow({mode:'open'}).innerHTML = '<style>p {margin:0;font:16px/20px sans-serif}</style><div id="shadow-panel" style="height:var(--shared-reveal);width:400px;overflow:hidden"><p id="shadow-copy">Shadow variable documentation becomes visible.</p><slot name="copy"></slot></div>';
+    for (const id of ['action-rich','action-mixed','mixed-close','footer-action']) {
+      const element = document.getElementById(id);
+      element.addEventListener('click', event => {event.preventDefault();element.dataset.clicked='yes';});
+    }
+  </script>
+</body>
+</html>

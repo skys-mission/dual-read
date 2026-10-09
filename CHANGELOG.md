@@ -7,6 +7,58 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Honor the active session's target language for site and selection translation;
+  reject batches whose provider changed, and invalidate old language cache entries.
+- Retranslate source text replaced by dynamic pages, discard obsolete requests
+  and buffered paints, and preserve source content and node identity when pages
+  reparent rich-text descendants, including transfers between hosts and shadow
+  roots. Merge text appended around filled slots back into the source, and keep
+  independent link translations intact during parent updates.
+- Apply translation styles and restore original content in nested and late
+  Shadow DOM roots, including translation mode switches.
+- Preserve source Text nodes when pages split or normalize translated text;
+  recover transferred source before newly discovered shadow roots are indexed.
+- Preserve edits between rich-text slots and recover cross-host source transfers
+  after normalization, including a merged survivor moved into a new wrapper.
+- Replay edits made after normalization and repeated text splitting; recover
+  normalized transfers into untranslated containers without losing source Texts.
+- Recover complete source slots independently after normalized text is split,
+  wrapped, reordered, transferred or removed, including identical translations
+  and another normalization at the destination. Preserve page changes to rich
+  element attributes when restoring the original nodes, and keep new page Texts
+  and real removals intact even when text values match a translation.
+- Recover complete retained slots beside emptied slots after normalization and
+  transfers, including single-slot `splitText(0)` transfers and another
+  normalization at the destination.
+- Keep the last known source in its original position when a transfer was
+  normalized before its destination was observed, or a merged range edit has
+  indistinguishable equal-valued source slots. Leave the page's current text
+  intact when its ownership cannot be proven; do not rewrite equal-valued new
+  page Texts or revive explicitly replaced source nodes.
+- Preserve page deletions and replacements inside containers unwrapped by the
+  rich-text skeleton, retaining original wrappers and the order of new text
+  between their surviving children.
+- Restore reordered rich-text siblings through omitted and nested wrappers
+  without moving surrounding prose; preserve page order when runs from multiple
+  omitted containers are interleaved.
+- Use the extension's public session config in the live Chrome translation
+  probe, including provider identity, local headers and site overrides.
+- Propagate cache clears to existing tabs and frames; enforce TTL and memory
+  limits for in-memory translations, including private browsing.
+
+### Security
+
+- Update the server's indirect `golang.org/x/sys` dependency to v0.44.0.
+
+### Changed
+
+- Update the pinned Go linter to support the project's Go toolchain and newer
+  developer installations.
+- Measure SPA retained heap after warm-up and explicit GC instead of optional
+  page GC and quantized memory sampling; retain the existing performance budgets.
+
 ## [0.1.1] - 2026-08-04
 
 ### Changed

@@ -1,0 +1,1566 @@
+{
+  "date": "2026-10-07",
+  "subject": "Repair four confirmed layout lifecycle bugs from the latest uncommitted-change review",
+  "completed": true,
+  "scope": {
+    "baseCommit": "995498672da7fdbddf4e00f21224ba6cfabf0163",
+    "comparedAgainst": "frozen working tree before the four repairs",
+    "changedProductionFiles": [
+      "lib/renderer/anchored-layout.ts",
+      "lib/renderer/bounded-layout.ts",
+      "lib/renderer/layout-updates.ts",
+      "lib/renderer/source-typography.ts"
+    ],
+    "addedProductionFiles": [],
+    "deletedProductionFiles": [],
+    "sourceCssUnchanged": true,
+    "beforeJsHash": "df3aaa30a5369fbc33b7f6ec4f216e4e8a69efdc7cbccbb3377dcb2b5a251ddc",
+    "afterJsHash": "c54c2f6dc2eb78b3706ca13dadd8bcaeea6f867f243fc5daf567805800ef322e",
+    "chromeJsHash": "c54c2f6dc2eb78b3706ca13dadd8bcaeea6f867f243fc5daf567805800ef322e",
+    "firefoxJsHash": "c54c2f6dc2eb78b3706ca13dadd8bcaeea6f867f243fc5daf567805800ef322e",
+    "afterCssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1"
+  },
+  "reviewAndRepairContract": [
+    "Page source nodes, their identity, order, current text, attributes, transfers and removals remain owned by the page.",
+    "Typography updates re-read retained source runs after CSS selector state changes. They do not dispatch translation or modify source styles.",
+    "Reconnecting the shared observer preserves pending page records for surviving readers; final disposal cancels all queued work.",
+    "Installed anchor rules are tracked lazily. Changed source positioning, width, ancestry or removal releases the owned rule; shared valid owners retain it.",
+    "Releasing one bounded owner relaxes the historical expansion floor after DOM restoration, retaining the originally measured box floor and auto-sized content. Subsequent frame measurement can expand again if remaining content still overflows.",
+    "Bounded and anchor watchers release disconnected or transferred owners, and full restore removes owned marker styles and cancels queued refreshes.",
+    "No page CSS, original inline styles, code ownership, translation API, collector heuristics, permissions or domain rules change.",
+    "Pure CSSOM changes without an observable DOM, form-state, viewport or system-color event remain outside this change."
+  ],
+  "fixes": [
+    {
+      "issue": "Sibling selector and native form-state changes left companion typography stale.",
+      "solution": "Re-read retained source typography for relevant page mutations and captured input/change events, including observed ShadowRoots. Coalesce reads once per frame and skip unchanged writes.",
+      "files": [
+        "extension/lib/renderer/source-typography.ts",
+        "extension/lib/renderer/layout-updates.ts"
+      ],
+      "evidence": "A white source/target becomes black after the sibling checkbox changes, without requiring a viewport resize. Page-owned companion color overrides remain respected."
+    },
+    {
+      "issue": "Disconnecting the shared MutationObserver discarded undelivered records needed by surviving subscribers.",
+      "solution": "Drain and retain page-owned records before reconnecting document and surviving ShadowRoot observations. Final subscriber disposal cancels pending work and removes listeners.",
+      "files": [
+        "extension/lib/renderer/layout-updates.ts"
+      ],
+      "evidence": "A custom-element page callback changes an unrelated source to red during restoration; its companion updates immediately after the other layout subscriber is released."
+    },
+    {
+      "issue": "An installed important anchor rule outlived changes to the original position/size contract.",
+      "solution": "Lazily observe installed rules and release them when source positioning, containing width, ancestry, or ownership becomes invalid. Revisit existing rules rather than capturing already translated geometry.",
+      "files": [
+        "extension/lib/renderer/anchored-layout.ts"
+      ],
+      "evidence": "Page-owned top:10px and height:32px take effect immediately instead of remaining overridden by top:329px and the old calculated height."
+    },
+    {
+      "issue": "Releasing one shared bounded-layout owner kept the old maximum expansion floor.",
+      "solution": "After partial restoration, relax the historical minimum to the original source box floor, preserve auto-sized remaining content and original grid minima, and remeasure overflow in the subsequent frame.",
+      "files": [
+        "extension/lib/renderer/bounded-layout.ts"
+      ],
+      "evidence": "The shared box contracts from 650px to approximately 345px with one companion remaining; the original source floor remains 80px. Removal and transfer cases release stale rules too."
+    }
+  ],
+  "measurements": {
+    "chromium": {
+      "before": {
+        "boundedAfterOneOwnerRestore": {
+          "heightPx": 650,
+          "minHeight": "650px",
+          "contentBottomWithinBoxPx": 341.90625,
+          "remainingTargets": 1
+        },
+        "anchorAfterPageStyleChange": {
+          "top": "329px",
+          "height": "36.0938px",
+          "inline": "top: 10px; height: 32px;",
+          "parentHeight": 365,
+          "rule": true,
+          "styles": 1
+        },
+        "siblingThemeAfterCheckboxChange": {
+          "source": "rgb(0, 0, 0)",
+          "background": "rgba(0, 0, 0, 0)",
+          "target": "color(srgb 1 1 1 / 0.84)",
+          "inline": "color-mix(in srgb, rgb(255, 255, 255) 84%, transparent 16%)"
+        },
+        "typographyAfterPageCallbackAndObserverReconnect": {
+          "source": "rgb(255, 0, 0)",
+          "target": "color(srgb 1 1 1 / 0.84)",
+          "inline": "color-mix(in srgb, rgb(255, 255, 255) 84%, transparent 16%)",
+          "mediaStyles": 0
+        },
+        "pageErrors": []
+      },
+      "after": {
+        "boundedAfterOneOwnerRestore": {
+          "heightPx": 345.09375,
+          "minHeight": "80px",
+          "contentBottomWithinBoxPx": 341.90625,
+          "remainingTargets": 1
+        },
+        "anchorAfterPageStyleChange": {
+          "top": "10px",
+          "height": "32px",
+          "inline": "top: 10px; height: 32px;",
+          "parentHeight": 365,
+          "rule": false,
+          "styles": 0
+        },
+        "siblingThemeAfterCheckboxChange": {
+          "source": "rgb(0, 0, 0)",
+          "background": "rgba(0, 0, 0, 0)",
+          "target": "color(srgb 0 0 0 / 0.84)",
+          "inline": ""
+        },
+        "typographyAfterPageCallbackAndObserverReconnect": {
+          "source": "rgb(255, 0, 0)",
+          "target": "color(srgb 1 0 0 / 0.84)",
+          "inline": "color-mix(in srgb, rgb(255, 0, 0) 84%, transparent 16%)",
+          "mediaStyles": 0
+        },
+        "pageErrors": []
+      }
+    },
+    "firefox": {
+      "before": {
+        "boundedAfterOneOwnerRestore": {
+          "heightPx": 650,
+          "minHeight": "650px",
+          "contentBottomWithinBoxPx": 341.91668701171875,
+          "remainingTargets": 1
+        },
+        "anchorAfterPageStyleChange": {
+          "top": "329px",
+          "height": "36.1167px",
+          "inline": "top: 10px; height: 32px;",
+          "parentHeight": 365,
+          "rule": true,
+          "styles": 1
+        },
+        "siblingThemeAfterCheckboxChange": {
+          "source": "rgb(0, 0, 0)",
+          "background": "rgba(0, 0, 0, 0)",
+          "target": "color(srgb 1 1 1 / 0.84)",
+          "inline": "color-mix(in srgb, rgb(255, 255, 255) 84%, transparent 16%)"
+        },
+        "typographyAfterPageCallbackAndObserverReconnect": {
+          "source": "rgb(255, 0, 0)",
+          "target": "color(srgb 1 1 1 / 0.84)",
+          "inline": "color-mix(in srgb, rgb(255, 255, 255) 84%, transparent 16%)",
+          "mediaStyles": 0
+        },
+        "pageErrors": []
+      },
+      "after": {
+        "boundedAfterOneOwnerRestore": {
+          "heightPx": 345.1166687011719,
+          "minHeight": "80px",
+          "contentBottomWithinBoxPx": 341.91668701171875,
+          "remainingTargets": 1
+        },
+        "anchorAfterPageStyleChange": {
+          "top": "10px",
+          "height": "32px",
+          "inline": "top: 10px; height: 32px;",
+          "parentHeight": 365,
+          "rule": false,
+          "styles": 0
+        },
+        "siblingThemeAfterCheckboxChange": {
+          "source": "rgb(0, 0, 0)",
+          "background": "rgba(0, 0, 0, 0)",
+          "target": "color(srgb 0 0 0 / 0.84)",
+          "inline": ""
+        },
+        "typographyAfterPageCallbackAndObserverReconnect": {
+          "source": "rgb(255, 0, 0)",
+          "target": "color(srgb 1 0 0 / 0.84)",
+          "inline": "color-mix(in srgb, rgb(255, 0, 0) 84%, transparent 16%)",
+          "mediaStyles": 0
+        },
+        "pageErrors": []
+      }
+    }
+  },
+  "regressionTests": {
+    "files": [
+      "extension/tests/layout-updates.test.ts",
+      "extension/tests/source-typography.test.ts",
+      "extension/tests/anchored-layout.test.ts",
+      "extension/tests/bounded-layout.test.ts",
+      "extension/e2e/fixtures/pages/lab-layout-lifecycle.html",
+      "extension/e2e/helpers/layout-lifecycle-regressions.ts",
+      "extension/e2e/lab.spec.ts",
+      "extension/e2e/firefox.spec.ts"
+    ],
+    "nativeMatrix": {
+      "modes": [
+        "bilingual",
+        "replace"
+      ],
+      "watching": [
+        "active",
+        "paused"
+      ],
+      "formStateTriggers": [
+        "attribute mutation",
+        "native checkbox input/change"
+      ],
+      "recordDelivery": [
+        "queued at restore",
+        "already delivered before restore"
+      ],
+      "engines": [
+        "Chromium",
+        "Firefox Gecko"
+      ],
+      "cases": 32
+    },
+    "contracts": [
+      "Document and ShadowRoot sibling selectors follow page state while translation watching is active or paused.",
+      "Shared observer reconnection keeps unrelated page callback mutations; final unsubscribe cancels pending writes and events.",
+      "Page-owned anchor style/position changes, containing-width changes, subtree transfer and owner removal invalidate installed rules.",
+      "Partial bounded owner restoration, removal and transfer relax the old height; the final owner removal clears the rule.",
+      "Original/current text-node identities, values, source attributes and page-owned node removals survive restore, mode switches and repeated restore.",
+      "Page-owned companion styling remains respected and code sources remain untouched."
+    ]
+  },
+  "validation": {
+    "before": {
+      "frozenContentSha256": "df3aaa30a5369fbc33b7f6ec4f216e4e8a69efdc7cbccbb3377dcb2b5a251ddc",
+      "newAndExistingFocusedUnitTests": {
+        "total": 60,
+        "failed": 18,
+        "passed": 42,
+        "log": ".codex/layout-lifecycle-fixes-2026-10-07/pre-fix-unit.log"
+      },
+      "nativePendingRecordRegressions": {
+        "total": 2,
+        "expectedFailures": 2,
+        "log": ".codex/layout-lifecycle-fixes-2026-10-07/pre-fix-browser.log"
+      },
+      "note": "18 of the 19 new unit regressions fail against the frozen pre-fix tree. The final-disposal cancellation guard already passes there."
+    },
+    "after": {
+      "typescript": {
+        "passed": true,
+        "command": "cd extension && npm run compile",
+        "log": ".codex/layout-lifecycle-fixes-2026-10-07/compile.log"
+      },
+      "eslint": {
+        "passed": true,
+        "command": "cd extension && npm run lint",
+        "log": ".codex/layout-lifecycle-fixes-2026-10-07/lint.log"
+      },
+      "unit": {
+        "passed": 1324,
+        "files": 41,
+        "added": 19,
+        "log": ".codex/layout-lifecycle-fixes-2026-10-07/unit.log"
+      },
+      "nativeNewRegressions": {
+        "passed": 32,
+        "chromium": 16,
+        "firefox": 16,
+        "log": ".codex/layout-lifecycle-fixes-2026-10-07/browser-lifecycle.log"
+      },
+      "functionalBrowserSuite": {
+        "passed": 488,
+        "command": "cd extension && npx playwright test --grep-invert \"perf budget lab|live DeepSeek\"",
+        "log": ".codex/layout-lifecycle-fixes-2026-10-07/browser-functional.log",
+        "note": "Includes the 32 new cases. Chromium exercises the actual installed extension. Firefox combines the fresh add-on smoke check with native Gecko DOM regressions using the project runtime shim."
+      },
+      "performance": {
+        "passed": 8,
+        "command": "cd extension && PERF_FULL=1 npx playwright test --project=chromium-ext e2e/perf.spec.ts",
+        "strictBudgets": false,
+        "coverage": [
+          "first translation paint",
+          "standard and dense page CLS",
+          "5k source indexing",
+          "SPA mutation indexing",
+          "20k-source long tasks",
+          "30 SPA navigations heap growth",
+          "30 rich replace SPA navigations heap growth"
+        ],
+        "log": ".codex/layout-lifecycle-fixes-2026-10-07/browser-perf-full.log"
+      },
+      "builds": {
+        "chrome": "c54c2f6dc2eb78b3706ca13dadd8bcaeea6f867f243fc5daf567805800ef322e",
+        "firefox": "c54c2f6dc2eb78b3706ca13dadd8bcaeea6f867f243fc5daf567805800ef322e",
+        "css": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1"
+      }
+    }
+  },
+  "liveWebsiteRegression": {
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "sampleCount": 8,
+    "sourceAndTranslatedScreenshots": 64,
+    "beforeAfterTranslatedComparisons": 24,
+    "engine": "Chromium running the exact packaged production content script in an isolated world, with a local background/API bridge",
+    "translationProvider": "User-authorized MiMo provider pipeline; the local bridge reuses cached translations where available.",
+    "strictAfterRestoreChecks": 16,
+    "outcome": "No additional horizontal overflow, clipping/squeeze candidates, source restoration failures or code translation were introduced by these four repairs.",
+    "samples": [
+      {
+        "id": "popular-1-2",
+        "category": "popular",
+        "site": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Internet",
+        "unitsBefore": 681,
+        "unitsAfter": 681,
+        "views": {
+          "source-top": {
+            "before": {
+              "targets": 0,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 0,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          },
+          "bilingual-top": {
+            "before": {
+              "targets": 138,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 138,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          },
+          "bilingual-scroll": {
+            "before": {
+              "targets": 140,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 140,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          },
+          "replace-top": {
+            "before": {
+              "targets": 274,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 274,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          }
+        },
+        "bilingualRestore": {
+          "originalNodes": 8618,
+          "retainedNodes": 8618,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "replaceRestore": {
+          "originalNodes": 8618,
+          "retainedNodes": 8618,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "comparisonImage": ".codex/layout-lifecycle-fixes-2026-10-07/contacts/popular-1-2.png",
+        "detailedBeforeReport": ".codex/layout-lifecycle-fixes-2026-10-07/live-before/popular-1-2-report.json",
+        "detailedAfterReport": ".codex/layout-lifecycle-fixes-2026-10-07/live-after/popular-1-2-report.json",
+        "visualComparison": "Reviewed all three translated before/after views; no regression attributable to these four repairs was found."
+      },
+      {
+        "id": "popular-2-2",
+        "category": "popular",
+        "site": "GitHub",
+        "url": "https://github.com/golang/go",
+        "unitsBefore": 115,
+        "unitsAfter": 120,
+        "views": {
+          "source-top": {
+            "before": {
+              "targets": 0,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 0,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          },
+          "bilingual-top": {
+            "before": {
+              "targets": 79,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 2,
+              "squeezeCandidates": 1,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 80,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 2,
+              "squeezeCandidates": 1,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          },
+          "bilingual-scroll": {
+            "before": {
+              "targets": 81,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 83,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          },
+          "replace-top": {
+            "before": {
+              "targets": 131,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 136,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          }
+        },
+        "bilingualRestore": {
+          "originalNodes": 589,
+          "retainedNodes": 571,
+          "removedByPage": 18,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "replaceRestore": {
+          "originalNodes": 589,
+          "retainedNodes": 571,
+          "removedByPage": 18,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "comparisonImage": ".codex/layout-lifecycle-fixes-2026-10-07/contacts/popular-2-2.png",
+        "detailedBeforeReport": ".codex/layout-lifecycle-fixes-2026-10-07/live-before/popular-2-2-report.json",
+        "detailedAfterReport": ".codex/layout-lifecycle-fixes-2026-10-07/live-after/popular-2-2-report.json",
+        "visualComparison": "Reviewed all three translated before/after views; no regression attributable to these four repairs was found."
+      },
+      {
+        "id": "popular-7-2",
+        "category": "popular",
+        "site": "Apple",
+        "url": "https://www.apple.com/mac/",
+        "unitsBefore": 162,
+        "unitsAfter": 162,
+        "views": {
+          "source-top": {
+            "before": {
+              "targets": 0,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 0,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          },
+          "bilingual-top": {
+            "before": {
+              "targets": 45,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 1,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 45,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 1,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          },
+          "bilingual-scroll": {
+            "before": {
+              "targets": 59,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 59,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          },
+          "replace-top": {
+            "before": {
+              "targets": 98,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 1,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 98,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 1,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          }
+        },
+        "bilingualRestore": {
+          "originalNodes": 1202,
+          "retainedNodes": 1201,
+          "removedByPage": 1,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "replaceRestore": {
+          "originalNodes": 1202,
+          "retainedNodes": 1201,
+          "removedByPage": 1,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "comparisonImage": ".codex/layout-lifecycle-fixes-2026-10-07/contacts/popular-7-2.png",
+        "detailedBeforeReport": ".codex/layout-lifecycle-fixes-2026-10-07/live-before/popular-7-2-report.json",
+        "detailedAfterReport": ".codex/layout-lifecycle-fixes-2026-10-07/live-after/popular-7-2-report.json",
+        "visualComparison": "Reviewed all three translated before/after views; no regression attributable to these four repairs was found."
+      },
+      {
+        "id": "commercial-1-2",
+        "category": "commercial",
+        "site": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/azure/architecture/",
+        "unitsBefore": 65,
+        "unitsAfter": 65,
+        "views": {
+          "source-top": {
+            "before": {
+              "targets": 0,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 0,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          },
+          "bilingual-top": {
+            "before": {
+              "targets": 62,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 62,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          },
+          "bilingual-scroll": {
+            "before": {
+              "targets": 62,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 62,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          },
+          "replace-top": {
+            "before": {
+              "targets": 106,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 106,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          }
+        },
+        "bilingualRestore": {
+          "originalNodes": 852,
+          "retainedNodes": 852,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "replaceRestore": {
+          "originalNodes": 852,
+          "retainedNodes": 852,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "comparisonImage": ".codex/layout-lifecycle-fixes-2026-10-07/contacts/commercial-1-2.png",
+        "detailedBeforeReport": ".codex/layout-lifecycle-fixes-2026-10-07/live-before/commercial-1-2-report.json",
+        "detailedAfterReport": ".codex/layout-lifecycle-fixes-2026-10-07/live-after/commercial-1-2-report.json",
+        "visualComparison": "Reviewed all three translated before/after views; no regression attributable to these four repairs was found."
+      },
+      {
+        "id": "commercial-7-2",
+        "category": "commercial",
+        "site": "Shopify Developer",
+        "url": "https://shopify.dev/docs/apps/build",
+        "unitsBefore": 102,
+        "unitsAfter": 102,
+        "views": {
+          "source-top": {
+            "before": {
+              "targets": 0,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 0,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          },
+          "bilingual-top": {
+            "before": {
+              "targets": 41,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 1,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 41,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 1,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          },
+          "bilingual-scroll": {
+            "before": {
+              "targets": 45,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 1,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 45,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 1,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          },
+          "replace-top": {
+            "before": {
+              "targets": 77,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 77,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 0,
+              "retainedCodeNodes": 0,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          }
+        },
+        "bilingualRestore": {
+          "originalNodes": 291,
+          "retainedNodes": 291,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "replaceRestore": {
+          "originalNodes": 291,
+          "retainedNodes": 291,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "comparisonImage": ".codex/layout-lifecycle-fixes-2026-10-07/contacts/commercial-7-2.png",
+        "detailedBeforeReport": ".codex/layout-lifecycle-fixes-2026-10-07/live-before/commercial-7-2-report.json",
+        "detailedAfterReport": ".codex/layout-lifecycle-fixes-2026-10-07/live-after/commercial-7-2-report.json",
+        "visualComparison": "Reviewed all three translated before/after views; no regression attributable to these four repairs was found."
+      },
+      {
+        "id": "commercial-8-2",
+        "category": "commercial",
+        "site": "Stripe Docs",
+        "url": "https://docs.stripe.com/payments/accept-a-payment",
+        "unitsBefore": 173,
+        "unitsAfter": 173,
+        "views": {
+          "source-top": {
+            "before": {
+              "targets": 0,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 257,
+              "retainedCodeNodes": 257,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 0,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 257,
+              "retainedCodeNodes": 257,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          },
+          "bilingual-top": {
+            "before": {
+              "targets": 73,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 257,
+              "retainedCodeNodes": 257,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 73,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 257,
+              "retainedCodeNodes": 257,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          },
+          "bilingual-scroll": {
+            "before": {
+              "targets": 73,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 257,
+              "retainedCodeNodes": 257,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 73,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 257,
+              "retainedCodeNodes": 257,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          },
+          "replace-top": {
+            "before": {
+              "targets": 133,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 257,
+              "retainedCodeNodes": 257,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 133,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 257,
+              "retainedCodeNodes": 257,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          }
+        },
+        "bilingualRestore": {
+          "originalNodes": 629,
+          "retainedNodes": 629,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "replaceRestore": {
+          "originalNodes": 629,
+          "retainedNodes": 629,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "comparisonImage": ".codex/layout-lifecycle-fixes-2026-10-07/contacts/commercial-8-2.png",
+        "detailedBeforeReport": ".codex/layout-lifecycle-fixes-2026-10-07/live-before/commercial-8-2-report.json",
+        "detailedAfterReport": ".codex/layout-lifecycle-fixes-2026-10-07/live-after/commercial-8-2-report.json",
+        "visualComparison": "Reviewed all three translated before/after views; no regression attributable to these four repairs was found."
+      },
+      {
+        "id": "open_source-1-1",
+        "category": "open_source",
+        "site": "React",
+        "url": "https://react.dev/",
+        "unitsBefore": 120,
+        "unitsAfter": 120,
+        "views": {
+          "source-top": {
+            "before": {
+              "targets": 0,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 500,
+              "retainedCodeNodes": 500,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 0,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 500,
+              "retainedCodeNodes": 500,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          },
+          "bilingual-top": {
+            "before": {
+              "targets": 12,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 500,
+              "retainedCodeNodes": 500,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 12,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 500,
+              "retainedCodeNodes": 500,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          },
+          "bilingual-scroll": {
+            "before": {
+              "targets": 15,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 500,
+              "retainedCodeNodes": 500,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 15,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 500,
+              "retainedCodeNodes": 500,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          },
+          "replace-top": {
+            "before": {
+              "targets": 32,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 500,
+              "retainedCodeNodes": 500,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            },
+            "after": {
+              "targets": 32,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 500,
+              "retainedCodeNodes": 500,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 0
+            }
+          }
+        },
+        "bilingualRestore": {
+          "originalNodes": 710,
+          "retainedNodes": 710,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "replaceRestore": {
+          "originalNodes": 710,
+          "retainedNodes": 710,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "comparisonImage": ".codex/layout-lifecycle-fixes-2026-10-07/contacts/open_source-1-1.png",
+        "detailedBeforeReport": ".codex/layout-lifecycle-fixes-2026-10-07/live-before/open_source-1-1-report.json",
+        "detailedAfterReport": ".codex/layout-lifecycle-fixes-2026-10-07/live-after/open_source-1-1-report.json",
+        "visualComparison": "Reviewed all three translated before/after views; no regression attributable to these four repairs was found."
+      },
+      {
+        "id": "open_source-2-2",
+        "category": "open_source",
+        "site": "Vue",
+        "url": "https://vuejs.org/guide/introduction.html",
+        "unitsBefore": 149,
+        "unitsAfter": 149,
+        "views": {
+          "source-top": {
+            "before": {
+              "targets": 0,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 369,
+              "retainedCodeNodes": 369,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 2
+            },
+            "after": {
+              "targets": 0,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 369,
+              "retainedCodeNodes": 369,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 2
+            }
+          },
+          "bilingual-top": {
+            "before": {
+              "targets": 70,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 369,
+              "retainedCodeNodes": 369,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 2
+            },
+            "after": {
+              "targets": 70,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 369,
+              "retainedCodeNodes": 369,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 2
+            }
+          },
+          "bilingual-scroll": {
+            "before": {
+              "targets": 76,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 369,
+              "retainedCodeNodes": 369,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 2
+            },
+            "after": {
+              "targets": 76,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 369,
+              "retainedCodeNodes": 369,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 2
+            }
+          },
+          "replace-top": {
+            "before": {
+              "targets": 144,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 369,
+              "retainedCodeNodes": 369,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 2
+            },
+            "after": {
+              "targets": 143,
+              "horizontalOverflowPx": 0,
+              "clippingCandidates": 0,
+              "squeezeCandidates": 0,
+              "codeNodes": 369,
+              "retainedCodeNodes": 369,
+              "changedCodeValues": 0,
+              "codeTranslationTargets": 0,
+              "hiddenCodeBlocks": 2
+            }
+          }
+        },
+        "bilingualRestore": {
+          "originalNodes": 674,
+          "retainedNodes": 674,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "replaceRestore": {
+          "originalNodes": 674,
+          "retainedNodes": 674,
+          "removedByPage": 0,
+          "sourceOrder": true,
+          "orderDifferences": [],
+          "changedValues": 0,
+          "changedLinks": 0,
+          "overwrittenCurrentValues": 0,
+          "overwrittenCurrentLinks": 0,
+          "retainedCurrentOrder": true,
+          "removedSinceRestoreSnapshot": [],
+          "remainingTargets": 0
+        },
+        "comparisonImage": ".codex/layout-lifecycle-fixes-2026-10-07/contacts/open_source-2-2.png",
+        "detailedBeforeReport": ".codex/layout-lifecycle-fixes-2026-10-07/live-before/open_source-2-2-report.json",
+        "detailedAfterReport": ".codex/layout-lifecycle-fixes-2026-10-07/live-after/open_source-2-2-report.json",
+        "visualComparison": "Reviewed all three translated before/after views; no regression attributable to these four repairs was found."
+      }
+    ],
+    "supplementalStripeScroll": {
+      "reason": "The initial keyboard PageDown did not meaningfully scroll Stripe main content. Repeat with native wheel input over the content scroll container.",
+      "verifiedNativeScroll": true,
+      "beforeScroll": {
+        "windowY": 0,
+        "containers": [
+          {
+            "tag": "DIV",
+            "id": "",
+            "cls": "⚙  as-3r as-5p as-3x as-10 as-5q as-5r as-5s as-0 ⚙1hps5wf",
+            "top": 0,
+            "height": 887,
+            "scrollHeight": 2020
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "cls": "Content Box-root",
+            "top": 0,
+            "height": 968,
+            "scrollHeight": 6820
+          }
+        ]
+      },
+      "afterScroll": {
+        "windowY": 0,
+        "containers": [
+          {
+            "tag": "DIV",
+            "id": "",
+            "cls": "⚙  as-3r as-5p as-3x as-10 as-5q as-5r as-5s as-0 ⚙1hps5wf",
+            "top": 0,
+            "height": 887,
+            "scrollHeight": 2020
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "cls": "Content Box-root",
+            "top": 900,
+            "height": 968,
+            "scrollHeight": 6927
+          }
+        ]
+      },
+      "code": {
+        "codeBlocks": 5,
+        "liveCodeBlocks": 5,
+        "originalCodeNodes": 257,
+        "retainedCodeNodes": 257,
+        "overwrittenCodeValues": 0,
+        "hiddenCodeBlocks": 0,
+        "codeTranslationTargets": 0,
+        "codeTranslationSamples": [],
+        "proseTranslationTargets": 77
+      },
+      "beforeView": {
+        "targets": 77,
+        "horizontalOverflowPx": 0,
+        "clippingCandidates": 1,
+        "squeezeCandidates": 0,
+        "codeNodes": 257,
+        "retainedCodeNodes": 257,
+        "changedCodeValues": 0,
+        "codeTranslationTargets": 0,
+        "hiddenCodeBlocks": 0
+      },
+      "afterView": {
+        "targets": 77,
+        "horizontalOverflowPx": 0,
+        "clippingCandidates": 1,
+        "squeezeCandidates": 0,
+        "codeNodes": 257,
+        "retainedCodeNodes": 257,
+        "changedCodeValues": 0,
+        "codeTranslationTargets": 0,
+        "hiddenCodeBlocks": 0
+      },
+      "strictRestoresPassed": 2,
+      "comparisonImage": ".codex/layout-lifecycle-fixes-2026-10-07/contacts/stripe-wheel.png"
+    }
+  },
+  "inAppBrowser": {
+    "url": "https://react.dev/",
+    "buildHash": "c54c2f6dc2eb78b3706ca13dadd8bcaeea6f867f243fc5daf567805800ef322e",
+    "viewport": {
+      "height": 1080,
+      "scrollY": 1060,
+      "width": 1920
+    },
+    "sourceNodesRetained": 710,
+    "strictBilingualRestore": {
+      "changedLinks": 0,
+      "changedValues": 0,
+      "orderDifferences": [],
+      "originalNodes": 710,
+      "overwrittenCurrentLinks": 0,
+      "overwrittenCurrentValues": 0,
+      "remainingTargets": 0,
+      "removedByPage": 0,
+      "removedSinceRestoreSnapshot": [],
+      "retainedCurrentOrder": true,
+      "retainedNodes": 710,
+      "sourceOrder": true
+    },
+    "strictReplaceRestore": {
+      "changedLinks": 0,
+      "changedValues": 0,
+      "orderDifferences": [],
+      "originalNodes": 710,
+      "overwrittenCurrentLinks": 0,
+      "overwrittenCurrentValues": 0,
+      "remainingTargets": 0,
+      "removedByPage": 0,
+      "removedSinceRestoreSnapshot": [],
+      "retainedCurrentOrder": true,
+      "retainedNodes": 710,
+      "sourceOrder": true
+    },
+    "code": {
+      "codeBlocks": 4,
+      "codeTranslationSamples": [],
+      "codeTranslationTargets": 0,
+      "hiddenCodeBlocks": 0,
+      "liveCodeBlocks": 8,
+      "originalCodeNodes": 500,
+      "overwrittenCodeValues": 0,
+      "proseTranslationTargets": 15,
+      "retainedCodeNodes": 500
+    },
+    "leftAs": "Bilingual production-content injection, watching paused, 1920x1080 viewport retained at the original Video.js example",
+    "screenshot": ".codex/layout-lifecycle-fixes-2026-10-07/iab-after/react-final.jpg",
+    "note": "The in-app browser runs a production-content injection through the existing local bridge; this does not install an extension in that browser. Its screenshot omits the viewport scrollbar gutter; all headless sample PNGs are exactly 1920x1080."
+  },
+  "preExistingObservations": [
+    "GitHub: two clipped companions and one squeeze candidate remain inside 1x1 visually hidden accessibility label wrappers. Both versions have identical candidates and geometry.",
+    "Apple: one carousel item is outside the horizontal carousel viewport in each top view. The page intentionally clips its horizontal carousel; the before/after candidate geometry is identical.",
+    "Shopify: the existing narrow sidebar clips part of the translated Events and webhooks label in bilingual mode. The before/after candidate and geometry are identical.",
+    "Vue: two code blocks are hidden by the page API-style tabs even before translation; code visibility remains unchanged in all views.",
+    "Stripe supplemental scroll: the single clipping candidate is content above the scroll viewport after scrolling; both versions agree.",
+    "GitHub shows a different repository header and latest commit between requests. The source screenshots already differ before content injection, so raw target counts are not treated as a layout regression."
+  ],
+  "limitations": [
+    "This repair reruns eight sampled websites and supplemental nested scrolling; it does not rerun the entire historical 70-page audit.",
+    "Pure CSSOM edits without a DOM, form-state, viewport or system-color event remain outside this change.",
+    "No domain-specific rule, translation-provider behavior, permission, source CSS or collector heuristic was added or changed by this repair."
+  ],
+  "evidenceDirectory": ".codex/layout-lifecycle-fixes-2026-10-07"
+}

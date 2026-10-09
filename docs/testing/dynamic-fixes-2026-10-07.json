@@ -1,0 +1,3134 @@
+{
+  "date": "2026-10-07",
+  "preview": false,
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "sourceBefore": "88fa0d2406d8184e77a88ad6c6ffa4bb034854b88caf58be4309e8aa53e8bca9",
+  "sourceAfter": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01",
+  "cssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+  "domainRulesAdded": 0,
+  "tests": {
+    "unit": 1276,
+    "browser": 424,
+    "performance": 5
+  },
+  "newRegressionTests": {
+    "unit": 20,
+    "preFixFailures": 19,
+    "browser": 32
+  },
+  "sample": {
+    "pages": 8,
+    "restores": 16,
+    "codeBlocks": 48,
+    "codeNodes": 2014,
+    "buildHash": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01",
+    "passed": true
+  },
+  "repairScope": {
+    "changedProductionFiles": [
+      "extension/lib/collector/code-content.ts",
+      "extension/lib/collector/index.ts",
+      "extension/lib/dom-tree.ts",
+      "extension/lib/renderer/anchored-layout.ts",
+      "extension/lib/renderer/index.ts",
+      "extension/lib/scheduler/session.ts"
+    ],
+    "packagedCssUnchanged": true,
+    "serverChanges": false,
+    "domainRulesAdded": 0
+  },
+  "repairs": [
+    {
+      "issue": "共享底部控件",
+      "change": "局部恢复结束后，在下一帧按剩余译文重测偏移；完整恢复取消重测。"
+    },
+    {
+      "issue": "中间图标",
+      "change": "在独立图标、媒体、控件、代码块处分段包装，保留原始父节点和当前顺序。"
+    },
+    {
+      "issue": "动态索引饥饿",
+      "change": "从第一条变更记录起安排有界索引，持续属性动画不再重置等待时间。"
+    },
+    {
+      "issue": "Shadow DOM 代码识别",
+      "change": "收集与失效判断共用组合树祖先关系，覆盖嵌套 shadow 宿主及命名插槽。"
+    }
+  ],
+  "verifiedFixes": [
+    {
+      "browser": "chromium",
+      "checks": {
+        "iconsPreserveDirectParentAndSize": true,
+        "remainingFooterVisible": true,
+        "newProsePaintsDuringAnimation": true,
+        "shadowCodeRestoredBothModes": true,
+        "errorsAbsent": true,
+        "viewport16by9": true
+      }
+    },
+    {
+      "browser": "firefox",
+      "checks": {
+        "iconsPreserveDirectParentAndSize": true,
+        "remainingFooterVisible": true,
+        "newProsePaintsDuringAnimation": true,
+        "shadowCodeRestoredBothModes": true,
+        "errorsAbsent": true,
+        "viewport16by9": true
+      }
+    }
+  ],
+  "reproductions": {
+    "chromium": {
+      "before": {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "interleavedIcon": {
+          "unit": {
+            "text": "Continuewith your account",
+            "kind": "nav"
+          },
+          "source": {
+            "icon": {
+              "x": 74.671875,
+              "y": 9,
+              "width": 16,
+              "height": 16,
+              "top": 9,
+              "left": 74.671875,
+              "right": 90.671875,
+              "bottom": 25
+            },
+            "action": {
+              "x": 8,
+              "y": 8,
+              "width": 206.203125,
+              "height": 18,
+              "top": 8,
+              "left": 8,
+              "right": 214.203125,
+              "bottom": 26
+            },
+            "parent": "action"
+          },
+          "translated": {
+            "icon": {
+              "x": 66.671875,
+              "y": 8,
+              "width": 174.203125,
+              "height": 174.203125,
+              "top": 8,
+              "left": 66.671875,
+              "right": 240.875,
+              "bottom": 182.203125
+            },
+            "action": {
+              "x": 8,
+              "y": 8,
+              "width": 174.203125,
+              "height": 200.203125,
+              "top": 8,
+              "left": 8,
+              "right": 182.203125,
+              "bottom": 208.203125
+            },
+            "parent": "dual-read-flow"
+          },
+          "restored": {
+            "icon": {
+              "x": 74.671875,
+              "y": 9,
+              "width": 16,
+              "height": 16,
+              "top": 9,
+              "left": 74.671875,
+              "right": 90.671875,
+              "bottom": 25
+            },
+            "parent": "action"
+          }
+        },
+        "sharedFooterRemoval": {
+          "before": {
+            "frame": {
+              "x": 8,
+              "y": 8,
+              "width": 300,
+              "height": 80,
+              "top": 8,
+              "left": 8,
+              "right": 308,
+              "bottom": 88
+            },
+            "footer": {
+              "x": 8,
+              "y": 48,
+              "width": 300,
+              "height": 40,
+              "top": 48,
+              "left": 8,
+              "right": 308,
+              "bottom": 88
+            },
+            "footerTop": "40px"
+          },
+          "both": {
+            "frame": {
+              "x": 8,
+              "y": 8,
+              "width": 300,
+              "height": 330.1875,
+              "top": 8,
+              "left": 8,
+              "right": 308,
+              "bottom": 338.1875
+            },
+            "footer": {
+              "x": 8,
+              "y": 298,
+              "width": 300,
+              "height": 40.1875,
+              "top": 298,
+              "left": 8,
+              "right": 308,
+              "bottom": 338.1875
+            },
+            "footerTop": "290px",
+            "rule": true
+          },
+          "afterRestoreFirst": {
+            "frame": {
+              "x": 8,
+              "y": 8,
+              "width": 300,
+              "height": 105.09375,
+              "top": 8,
+              "left": 8,
+              "right": 308,
+              "bottom": 113.09375
+            },
+            "footer": {
+              "x": 8,
+              "y": 298,
+              "width": 300,
+              "height": 0,
+              "top": 298,
+              "left": 8,
+              "right": 308,
+              "bottom": 298
+            },
+            "footerTop": "290px",
+            "rule": true,
+            "secondTarget": true
+          }
+        },
+        "shadowHydration": {
+          "bilingual": {
+            "before": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "review-chromium-before-bilingual-0.09817239968459002",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.4999999403953552,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "targets": 1
+            },
+            "afterHydration": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "review-chromium-before-bilingual-0.09817239968459002",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.4999999403953552,
+                  "lastMutationIndexMs": 0.30000001192092896
+                }
+              },
+              "targets": 1,
+              "hiddenOriginals": 0,
+              "visibleText": "function Component() { return null; }\n译:function Component() { return null; }"
+            },
+            "afterRestore": {
+              "freshUnits": [],
+              "text": "function Component() { return null; }"
+            }
+          },
+          "replace": {
+            "before": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "review-chromium-before-replace-0.6278413539903769",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.19999998807907104,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "targets": 1
+            },
+            "afterHydration": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "review-chromium-before-replace-0.6278413539903769",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.19999998807907104,
+                  "lastMutationIndexMs": 0.10000002384185791
+                }
+              },
+              "targets": 1,
+              "hiddenOriginals": 1,
+              "visibleText": "译:function Component() { return null; }"
+            },
+            "afterRestore": {
+              "freshUnits": [],
+              "text": "function Component() { return null; }"
+            }
+          }
+        },
+        "shadowReveal": {
+          "concealed": {
+            "translating": false,
+            "count": 0,
+            "failed": 0,
+            "total": 0,
+            "watching": true,
+            "sessionId": "review-chromium-before-bilingual-0.08754845706092018",
+            "revision": 1,
+            "shadowRoots": 1,
+            "frames": {
+              "sameOrigin": 0,
+              "crossOrigin": 0,
+              "opaque": 0
+            },
+            "perf": {
+              "lastIndexMs": 0.699999988079071,
+              "lastMutationIndexMs": 0
+            }
+          },
+          "revealed": {
+            "status": {
+              "translating": false,
+              "count": 0,
+              "failed": 0,
+              "total": 0,
+              "watching": true,
+              "sessionId": "review-chromium-before-bilingual-0.08754845706092018",
+              "revision": 1,
+              "shadowRoots": 1,
+              "frames": {
+                "sameOrigin": 0,
+                "crossOrigin": 0,
+                "opaque": 0
+              },
+              "perf": {
+                "lastIndexMs": 0.699999988079071,
+                "lastMutationIndexMs": 0.19999998807907104
+              }
+            },
+            "targets": 0,
+            "freshUnits": [
+              "Previously hidden component documentation."
+            ]
+          }
+        },
+        "watchedFooterRemoval": {
+          "before": {
+            "frame": {
+              "width": 300,
+              "height": 330.1875,
+              "top": 8,
+              "bottom": 338.1875
+            },
+            "footer": {
+              "width": 300,
+              "height": 40.1875,
+              "top": 298,
+              "bottom": 338.1875
+            },
+            "button": {
+              "width": 43.421875,
+              "height": 21,
+              "top": 298,
+              "bottom": 319
+            },
+            "footerTop": "290px",
+            "clippedButton": false,
+            "targets": [
+              1,
+              1
+            ]
+          },
+          "after": {
+            "frame": {
+              "width": 300,
+              "height": 105.09375,
+              "top": 8,
+              "bottom": 113.09375
+            },
+            "footer": {
+              "width": 300,
+              "height": 0,
+              "top": 298,
+              "bottom": 298
+            },
+            "button": {
+              "width": 43.421875,
+              "height": 21,
+              "top": 298,
+              "bottom": 319
+            },
+            "footerTop": "290px",
+            "clippedButton": true,
+            "targets": [
+              0,
+              1
+            ]
+          }
+        },
+        "mutationStarvation": {
+          "duringAnimation": {
+            "status": {
+              "translating": false,
+              "count": 1,
+              "failed": 0,
+              "total": 1,
+              "watching": true,
+              "sessionId": "review-chromium-before-bilingual-0.2864644399320624",
+              "revision": 1,
+              "shadowRoots": 0,
+              "frames": {
+                "sameOrigin": 0,
+                "crossOrigin": 0,
+                "opaque": 0
+              },
+              "perf": {
+                "lastIndexMs": 0.699999988079071,
+                "lastMutationIndexMs": 0
+              }
+            },
+            "targets": 0
+          },
+          "afterAnimation": {
+            "status": {
+              "translating": false,
+              "count": 2,
+              "failed": 0,
+              "total": 2,
+              "watching": true,
+              "sessionId": "review-chromium-before-bilingual-0.2864644399320624",
+              "revision": 1,
+              "shadowRoots": 0,
+              "frames": {
+                "sameOrigin": 0,
+                "crossOrigin": 0,
+                "opaque": 0
+              },
+              "perf": {
+                "lastIndexMs": 0.699999988079071,
+                "lastMutationIndexMs": 1
+              }
+            },
+            "targets": 1
+          }
+        },
+        "pageErrors": []
+      },
+      "after": {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "interleavedIcon": {
+          "unit": {
+            "text": "Continuewith your account",
+            "kind": "nav"
+          },
+          "source": {
+            "icon": {
+              "x": 74.671875,
+              "y": 9,
+              "width": 16,
+              "height": 16,
+              "top": 9,
+              "left": 74.671875,
+              "right": 90.671875,
+              "bottom": 25
+            },
+            "action": {
+              "x": 8,
+              "y": 8,
+              "width": 206.203125,
+              "height": 18,
+              "top": 8,
+              "left": 8,
+              "right": 214.203125,
+              "bottom": 26
+            },
+            "parent": "action"
+          },
+          "translated": {
+            "icon": {
+              "x": 74.671875,
+              "y": 11,
+              "width": 16,
+              "height": 16,
+              "top": 11,
+              "left": 74.671875,
+              "right": 90.671875,
+              "bottom": 27
+            },
+            "action": {
+              "x": 8,
+              "y": 8,
+              "width": 339.84375,
+              "height": 22,
+              "top": 8,
+              "left": 8,
+              "right": 347.84375,
+              "bottom": 30
+            },
+            "parent": ""
+          },
+          "restored": {
+            "icon": {
+              "x": 74.671875,
+              "y": 9,
+              "width": 16,
+              "height": 16,
+              "top": 9,
+              "left": 74.671875,
+              "right": 90.671875,
+              "bottom": 25
+            },
+            "parent": "action"
+          }
+        },
+        "sharedFooterRemoval": {
+          "before": {
+            "frame": {
+              "x": 8,
+              "y": 8,
+              "width": 300,
+              "height": 80,
+              "top": 8,
+              "left": 8,
+              "right": 308,
+              "bottom": 88
+            },
+            "footer": {
+              "x": 8,
+              "y": 48,
+              "width": 300,
+              "height": 40,
+              "top": 48,
+              "left": 8,
+              "right": 308,
+              "bottom": 88
+            },
+            "footerTop": "40px"
+          },
+          "both": {
+            "frame": {
+              "x": 8,
+              "y": 8,
+              "width": 300,
+              "height": 330.1875,
+              "top": 8,
+              "left": 8,
+              "right": 308,
+              "bottom": 338.1875
+            },
+            "footer": {
+              "x": 8,
+              "y": 298,
+              "width": 300,
+              "height": 40.1875,
+              "top": 298,
+              "left": 8,
+              "right": 308,
+              "bottom": 338.1875
+            },
+            "footerTop": "290px",
+            "rule": true
+          },
+          "afterRestoreFirst": {
+            "frame": {
+              "x": 8,
+              "y": 8,
+              "width": 300,
+              "height": 105.09375,
+              "top": 8,
+              "left": 8,
+              "right": 308,
+              "bottom": 113.09375
+            },
+            "footer": {
+              "x": 8,
+              "y": 73,
+              "width": 300,
+              "height": 40.09375,
+              "top": 73,
+              "left": 8,
+              "right": 308,
+              "bottom": 113.09375
+            },
+            "footerTop": "65px",
+            "rule": true,
+            "secondTarget": true
+          }
+        },
+        "shadowHydration": {
+          "bilingual": {
+            "before": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "review-chromium-after-bilingual-0.2612712015248182",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.30000001192092896,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "targets": 1
+            },
+            "afterHydration": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "review-chromium-after-bilingual-0.2612712015248182",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.30000001192092896,
+                  "lastMutationIndexMs": 0.10000002384185791
+                }
+              },
+              "targets": 0,
+              "hiddenOriginals": 0,
+              "visibleText": "function Component() { return null; }"
+            },
+            "afterRestore": {
+              "freshUnits": [],
+              "text": "function Component() { return null; }"
+            }
+          },
+          "replace": {
+            "before": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "review-chromium-after-replace-0.5253266756423789",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.5,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "targets": 1
+            },
+            "afterHydration": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "review-chromium-after-replace-0.5253266756423789",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.5,
+                  "lastMutationIndexMs": 0.20000004768371582
+                }
+              },
+              "targets": 0,
+              "hiddenOriginals": 0,
+              "visibleText": "function Component() { return null; }"
+            },
+            "afterRestore": {
+              "freshUnits": [],
+              "text": "function Component() { return null; }"
+            }
+          }
+        },
+        "shadowReveal": {
+          "concealed": {
+            "translating": false,
+            "count": 0,
+            "failed": 0,
+            "total": 0,
+            "watching": true,
+            "sessionId": "review-chromium-after-bilingual-0.22793805541576195",
+            "revision": 1,
+            "shadowRoots": 1,
+            "frames": {
+              "sameOrigin": 0,
+              "crossOrigin": 0,
+              "opaque": 0
+            },
+            "perf": {
+              "lastIndexMs": 0.3999999761581421,
+              "lastMutationIndexMs": 0
+            }
+          },
+          "revealed": {
+            "status": {
+              "translating": false,
+              "count": 0,
+              "failed": 0,
+              "total": 0,
+              "watching": true,
+              "sessionId": "review-chromium-after-bilingual-0.22793805541576195",
+              "revision": 1,
+              "shadowRoots": 1,
+              "frames": {
+                "sameOrigin": 0,
+                "crossOrigin": 0,
+                "opaque": 0
+              },
+              "perf": {
+                "lastIndexMs": 0.3999999761581421,
+                "lastMutationIndexMs": 0.19999998807907104
+              }
+            },
+            "targets": 0,
+            "freshUnits": [
+              "Previously hidden component documentation."
+            ]
+          }
+        },
+        "watchedFooterRemoval": {
+          "before": {
+            "frame": {
+              "width": 300,
+              "height": 330.1875,
+              "top": 8,
+              "bottom": 338.1875
+            },
+            "footer": {
+              "width": 300,
+              "height": 40.1875,
+              "top": 298,
+              "bottom": 338.1875
+            },
+            "button": {
+              "width": 43.421875,
+              "height": 21,
+              "top": 298,
+              "bottom": 319
+            },
+            "footerTop": "290px",
+            "clippedButton": false,
+            "targets": [
+              1,
+              1
+            ]
+          },
+          "after": {
+            "frame": {
+              "width": 300,
+              "height": 105.09375,
+              "top": 8,
+              "bottom": 113.09375
+            },
+            "footer": {
+              "width": 300,
+              "height": 40.09375,
+              "top": 73,
+              "bottom": 113.09375
+            },
+            "button": {
+              "width": 43.421875,
+              "height": 21,
+              "top": 73,
+              "bottom": 94
+            },
+            "footerTop": "65px",
+            "clippedButton": false,
+            "targets": [
+              0,
+              1
+            ]
+          }
+        },
+        "mutationStarvation": {
+          "duringAnimation": {
+            "status": {
+              "translating": false,
+              "count": 2,
+              "failed": 0,
+              "total": 2,
+              "watching": true,
+              "sessionId": "review-chromium-after-bilingual-0.5104917161756131",
+              "revision": 1,
+              "shadowRoots": 0,
+              "frames": {
+                "sameOrigin": 0,
+                "crossOrigin": 0,
+                "opaque": 0
+              },
+              "perf": {
+                "lastIndexMs": 0.19999998807907104,
+                "lastMutationIndexMs": 0.10000002384185791
+              }
+            },
+            "targets": 1
+          },
+          "afterAnimation": {
+            "status": {
+              "translating": false,
+              "count": 2,
+              "failed": 0,
+              "total": 2,
+              "watching": true,
+              "sessionId": "review-chromium-after-bilingual-0.5104917161756131",
+              "revision": 1,
+              "shadowRoots": 0,
+              "frames": {
+                "sameOrigin": 0,
+                "crossOrigin": 0,
+                "opaque": 0
+              },
+              "perf": {
+                "lastIndexMs": 0.19999998807907104,
+                "lastMutationIndexMs": 0.10000002384185791
+              }
+            },
+            "targets": 1
+          }
+        },
+        "pageErrors": []
+      }
+    },
+    "firefox": {
+      "before": {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "interleavedIcon": {
+          "unit": {
+            "text": "Continuewith your account",
+            "kind": "nav"
+          },
+          "source": {
+            "icon": {
+              "x": 74.66667175292969,
+              "y": 9.600006103515625,
+              "width": 16,
+              "height": 16,
+              "top": 9.600006103515625,
+              "left": 74.66667175292969,
+              "right": 90.66667175292969,
+              "bottom": 25.600006103515625
+            },
+            "action": {
+              "x": 8,
+              "y": 8,
+              "width": 206.1999969482422,
+              "height": 19.199996948242188,
+              "top": 8,
+              "left": 8,
+              "right": 214.1999969482422,
+              "bottom": 27.199996948242188
+            },
+            "parent": "action"
+          },
+          "translated": {
+            "icon": {
+              "x": 66.66667175292969,
+              "y": 8,
+              "width": 174.1999969482422,
+              "height": 174.1999969482422,
+              "top": 8,
+              "left": 66.66667175292969,
+              "right": 240.86666870117188,
+              "bottom": 182.1999969482422
+            },
+            "action": {
+              "x": 8,
+              "y": 8,
+              "width": 174.1999969482422,
+              "height": 202.8000030517578,
+              "top": 8,
+              "left": 8,
+              "right": 182.1999969482422,
+              "bottom": 210.8000030517578
+            },
+            "parent": "dual-read-flow"
+          },
+          "restored": {
+            "icon": {
+              "x": 74.66667175292969,
+              "y": 9.600006103515625,
+              "width": 16,
+              "height": 16,
+              "top": 9.600006103515625,
+              "left": 74.66667175292969,
+              "right": 90.66667175292969,
+              "bottom": 25.600006103515625
+            },
+            "parent": "action"
+          }
+        },
+        "sharedFooterRemoval": {
+          "before": {
+            "frame": {
+              "x": 8,
+              "y": 8,
+              "width": 300,
+              "height": 80,
+              "top": 8,
+              "left": 8,
+              "right": 308,
+              "bottom": 88
+            },
+            "footer": {
+              "x": 8,
+              "y": 48,
+              "width": 300,
+              "height": 40,
+              "top": 48,
+              "left": 8,
+              "right": 308,
+              "bottom": 88
+            },
+            "footerTop": "40px"
+          },
+          "both": {
+            "frame": {
+              "x": 8,
+              "y": 8,
+              "width": 300,
+              "height": 330.23333740234375,
+              "top": 8,
+              "left": 8,
+              "right": 308,
+              "bottom": 338.23333740234375
+            },
+            "footer": {
+              "x": 8,
+              "y": 298,
+              "width": 300,
+              "height": 40.23333740234375,
+              "top": 298,
+              "left": 8,
+              "right": 308,
+              "bottom": 338.23333740234375
+            },
+            "footerTop": "290px",
+            "rule": true
+          },
+          "afterRestoreFirst": {
+            "frame": {
+              "x": 8,
+              "y": 8,
+              "width": 300,
+              "height": 105.11666870117188,
+              "top": 8,
+              "left": 8,
+              "right": 308,
+              "bottom": 113.11666870117188
+            },
+            "footer": {
+              "x": 8,
+              "y": 298,
+              "width": 300,
+              "height": 0,
+              "top": 298,
+              "left": 8,
+              "right": 308,
+              "bottom": 298
+            },
+            "footerTop": "290px",
+            "rule": true,
+            "secondTarget": true
+          }
+        },
+        "shadowHydration": {
+          "bilingual": {
+            "before": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "review-firefox-before-bilingual-0.5740177986546791",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "targets": 1
+            },
+            "afterHydration": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "review-firefox-before-bilingual-0.5740177986546791",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0,
+                  "lastMutationIndexMs": 1
+                }
+              },
+              "targets": 1,
+              "hiddenOriginals": 0,
+              "visibleText": "function Component() { return null; }\n译:function Component() { return null; }"
+            },
+            "afterRestore": {
+              "freshUnits": [],
+              "text": "function Component() { return null; }"
+            }
+          },
+          "replace": {
+            "before": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "review-firefox-before-replace-0.03690196256344369",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "targets": 1
+            },
+            "afterHydration": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "review-firefox-before-replace-0.03690196256344369",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "targets": 1,
+              "hiddenOriginals": 1,
+              "visibleText": "译:function Component() { return null; }"
+            },
+            "afterRestore": {
+              "freshUnits": [],
+              "text": "function Component() { return null; }"
+            }
+          }
+        },
+        "shadowReveal": {
+          "concealed": {
+            "translating": false,
+            "count": 0,
+            "failed": 0,
+            "total": 0,
+            "watching": true,
+            "sessionId": "review-firefox-before-bilingual-0.9508494627265216",
+            "revision": 1,
+            "shadowRoots": 1,
+            "frames": {
+              "sameOrigin": 0,
+              "crossOrigin": 0,
+              "opaque": 0
+            },
+            "perf": {
+              "lastIndexMs": 1,
+              "lastMutationIndexMs": 0
+            }
+          },
+          "revealed": {
+            "status": {
+              "translating": false,
+              "count": 0,
+              "failed": 0,
+              "total": 0,
+              "watching": true,
+              "sessionId": "review-firefox-before-bilingual-0.9508494627265216",
+              "revision": 1,
+              "shadowRoots": 1,
+              "frames": {
+                "sameOrigin": 0,
+                "crossOrigin": 0,
+                "opaque": 0
+              },
+              "perf": {
+                "lastIndexMs": 1,
+                "lastMutationIndexMs": 1
+              }
+            },
+            "targets": 0,
+            "freshUnits": [
+              "Previously hidden component documentation."
+            ]
+          }
+        },
+        "watchedFooterRemoval": {
+          "before": {
+            "frame": {
+              "width": 300,
+              "height": 330.23333740234375,
+              "top": 8,
+              "bottom": 338.23333740234375
+            },
+            "footer": {
+              "width": 300,
+              "height": 40.23333740234375,
+              "top": 298,
+              "bottom": 338.23333740234375
+            },
+            "button": {
+              "width": 40.69999694824219,
+              "height": 22,
+              "top": 298,
+              "bottom": 320
+            },
+            "footerTop": "290px",
+            "clippedButton": false,
+            "targets": [
+              1,
+              1
+            ]
+          },
+          "after": {
+            "frame": {
+              "width": 300,
+              "height": 105.11666870117188,
+              "top": 8,
+              "bottom": 113.11666870117188
+            },
+            "footer": {
+              "width": 300,
+              "height": 0,
+              "top": 298,
+              "bottom": 298
+            },
+            "button": {
+              "width": 40.69999694824219,
+              "height": 22,
+              "top": 298,
+              "bottom": 320
+            },
+            "footerTop": "290px",
+            "clippedButton": true,
+            "targets": [
+              0,
+              1
+            ]
+          }
+        },
+        "mutationStarvation": {
+          "duringAnimation": {
+            "status": {
+              "translating": false,
+              "count": 1,
+              "failed": 0,
+              "total": 1,
+              "watching": true,
+              "sessionId": "review-firefox-before-bilingual-0.30391887507191306",
+              "revision": 1,
+              "shadowRoots": 0,
+              "frames": {
+                "sameOrigin": 0,
+                "crossOrigin": 0,
+                "opaque": 0
+              },
+              "perf": {
+                "lastIndexMs": 0,
+                "lastMutationIndexMs": 0
+              }
+            },
+            "targets": 0
+          },
+          "afterAnimation": {
+            "status": {
+              "translating": false,
+              "count": 2,
+              "failed": 0,
+              "total": 2,
+              "watching": true,
+              "sessionId": "review-firefox-before-bilingual-0.30391887507191306",
+              "revision": 1,
+              "shadowRoots": 0,
+              "frames": {
+                "sameOrigin": 0,
+                "crossOrigin": 0,
+                "opaque": 0
+              },
+              "perf": {
+                "lastIndexMs": 0,
+                "lastMutationIndexMs": 1
+              }
+            },
+            "targets": 1
+          }
+        },
+        "pageErrors": []
+      },
+      "after": {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "interleavedIcon": {
+          "unit": {
+            "text": "Continuewith your account",
+            "kind": "nav"
+          },
+          "source": {
+            "icon": {
+              "x": 74.66667175292969,
+              "y": 9.600006103515625,
+              "width": 16,
+              "height": 16,
+              "top": 9.600006103515625,
+              "left": 74.66667175292969,
+              "right": 90.66667175292969,
+              "bottom": 25.600006103515625
+            },
+            "action": {
+              "x": 8,
+              "y": 8,
+              "width": 206.1999969482422,
+              "height": 19.199996948242188,
+              "top": 8,
+              "left": 8,
+              "right": 214.1999969482422,
+              "bottom": 27.199996948242188
+            },
+            "parent": "action"
+          },
+          "translated": {
+            "icon": {
+              "x": 74.66667175292969,
+              "y": 11.5,
+              "width": 16,
+              "height": 16,
+              "top": 11.5,
+              "left": 74.66667175292969,
+              "right": 90.66667175292969,
+              "bottom": 27.5
+            },
+            "action": {
+              "x": 8,
+              "y": 8,
+              "width": 339.8833312988281,
+              "height": 23,
+              "top": 8,
+              "left": 8,
+              "right": 347.8833312988281,
+              "bottom": 31
+            },
+            "parent": ""
+          },
+          "restored": {
+            "icon": {
+              "x": 74.66667175292969,
+              "y": 9.600006103515625,
+              "width": 16,
+              "height": 16,
+              "top": 9.600006103515625,
+              "left": 74.66667175292969,
+              "right": 90.66667175292969,
+              "bottom": 25.600006103515625
+            },
+            "parent": "action"
+          }
+        },
+        "sharedFooterRemoval": {
+          "before": {
+            "frame": {
+              "x": 8,
+              "y": 8,
+              "width": 300,
+              "height": 80,
+              "top": 8,
+              "left": 8,
+              "right": 308,
+              "bottom": 88
+            },
+            "footer": {
+              "x": 8,
+              "y": 48,
+              "width": 300,
+              "height": 40,
+              "top": 48,
+              "left": 8,
+              "right": 308,
+              "bottom": 88
+            },
+            "footerTop": "40px"
+          },
+          "both": {
+            "frame": {
+              "x": 8,
+              "y": 8,
+              "width": 300,
+              "height": 330.23333740234375,
+              "top": 8,
+              "left": 8,
+              "right": 308,
+              "bottom": 338.23333740234375
+            },
+            "footer": {
+              "x": 8,
+              "y": 298,
+              "width": 300,
+              "height": 40.23333740234375,
+              "top": 298,
+              "left": 8,
+              "right": 308,
+              "bottom": 338.23333740234375
+            },
+            "footerTop": "290px",
+            "rule": true
+          },
+          "afterRestoreFirst": {
+            "frame": {
+              "x": 8,
+              "y": 8,
+              "width": 300,
+              "height": 105.11666870117188,
+              "top": 8,
+              "left": 8,
+              "right": 308,
+              "bottom": 113.11666870117188
+            },
+            "footer": {
+              "x": 8,
+              "y": 73,
+              "width": 300,
+              "height": 40.116668701171875,
+              "top": 73,
+              "left": 8,
+              "right": 308,
+              "bottom": 113.11666870117188
+            },
+            "footerTop": "65px",
+            "rule": true,
+            "secondTarget": true
+          }
+        },
+        "shadowHydration": {
+          "bilingual": {
+            "before": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "review-firefox-after-bilingual-0.9756783564327725",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "targets": 1
+            },
+            "afterHydration": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "review-firefox-after-bilingual-0.9756783564327725",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 1
+                }
+              },
+              "targets": 0,
+              "hiddenOriginals": 0,
+              "visibleText": "function Component() { return null; }"
+            },
+            "afterRestore": {
+              "freshUnits": [],
+              "text": "function Component() { return null; }"
+            }
+          },
+          "replace": {
+            "before": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "review-firefox-after-replace-0.0119162458122819",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "targets": 1
+            },
+            "afterHydration": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "review-firefox-after-replace-0.0119162458122819",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "targets": 0,
+              "hiddenOriginals": 0,
+              "visibleText": "function Component() { return null; }"
+            },
+            "afterRestore": {
+              "freshUnits": [],
+              "text": "function Component() { return null; }"
+            }
+          }
+        },
+        "shadowReveal": {
+          "concealed": {
+            "translating": false,
+            "count": 0,
+            "failed": 0,
+            "total": 0,
+            "watching": true,
+            "sessionId": "review-firefox-after-bilingual-0.017721413758191806",
+            "revision": 1,
+            "shadowRoots": 1,
+            "frames": {
+              "sameOrigin": 0,
+              "crossOrigin": 0,
+              "opaque": 0
+            },
+            "perf": {
+              "lastIndexMs": 0,
+              "lastMutationIndexMs": 0
+            }
+          },
+          "revealed": {
+            "status": {
+              "translating": false,
+              "count": 0,
+              "failed": 0,
+              "total": 0,
+              "watching": true,
+              "sessionId": "review-firefox-after-bilingual-0.017721413758191806",
+              "revision": 1,
+              "shadowRoots": 1,
+              "frames": {
+                "sameOrigin": 0,
+                "crossOrigin": 0,
+                "opaque": 0
+              },
+              "perf": {
+                "lastIndexMs": 0,
+                "lastMutationIndexMs": 1
+              }
+            },
+            "targets": 0,
+            "freshUnits": [
+              "Previously hidden component documentation."
+            ]
+          }
+        },
+        "watchedFooterRemoval": {
+          "before": {
+            "frame": {
+              "width": 300,
+              "height": 330.23333740234375,
+              "top": 8,
+              "bottom": 338.23333740234375
+            },
+            "footer": {
+              "width": 300,
+              "height": 40.23333740234375,
+              "top": 298,
+              "bottom": 338.23333740234375
+            },
+            "button": {
+              "width": 40.69999694824219,
+              "height": 22,
+              "top": 298,
+              "bottom": 320
+            },
+            "footerTop": "290px",
+            "clippedButton": false,
+            "targets": [
+              1,
+              1
+            ]
+          },
+          "after": {
+            "frame": {
+              "width": 300,
+              "height": 105.11666870117188,
+              "top": 8,
+              "bottom": 113.11666870117188
+            },
+            "footer": {
+              "width": 300,
+              "height": 40.116668701171875,
+              "top": 73,
+              "bottom": 113.11666870117188
+            },
+            "button": {
+              "width": 40.69999694824219,
+              "height": 22,
+              "top": 73,
+              "bottom": 95
+            },
+            "footerTop": "65px",
+            "clippedButton": false,
+            "targets": [
+              0,
+              1
+            ]
+          }
+        },
+        "mutationStarvation": {
+          "duringAnimation": {
+            "status": {
+              "translating": false,
+              "count": 2,
+              "failed": 0,
+              "total": 2,
+              "watching": true,
+              "sessionId": "review-firefox-after-bilingual-0.0032304111223895315",
+              "revision": 1,
+              "shadowRoots": 0,
+              "frames": {
+                "sameOrigin": 0,
+                "crossOrigin": 0,
+                "opaque": 0
+              },
+              "perf": {
+                "lastIndexMs": 1,
+                "lastMutationIndexMs": 0
+              }
+            },
+            "targets": 1
+          },
+          "afterAnimation": {
+            "status": {
+              "translating": false,
+              "count": 2,
+              "failed": 0,
+              "total": 2,
+              "watching": true,
+              "sessionId": "review-firefox-after-bilingual-0.0032304111223895315",
+              "revision": 1,
+              "shadowRoots": 0,
+              "frames": {
+                "sameOrigin": 0,
+                "crossOrigin": 0,
+                "opaque": 0
+              },
+              "perf": {
+                "lastIndexMs": 1,
+                "lastMutationIndexMs": 0
+              }
+            },
+            "targets": 1
+          }
+        },
+        "pageErrors": []
+      }
+    }
+  },
+  "pages": [
+    {
+      "id": "popular-2-2",
+      "site": "GitHub",
+      "url": "https://github.com/golang/go",
+      "category": "popular",
+      "beforeHash": "88fa0d2406d8184e77a88ad6c6ffa4bb034854b88caf58be4309e8aa53e8bca9",
+      "afterHash": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01",
+      "before": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 115,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 115,
+          "translationTargets": 79,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 115,
+          "translationTargets": 81,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 115,
+          "translationTargets": 130,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "after": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 115,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 115,
+          "translationTargets": 79,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 115,
+          "translationTargets": 81,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 115,
+          "translationTargets": 130,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "restoreBilingual": {
+        "originalNodes": 764,
+        "retainedNodes": 764,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 764,
+        "retainedNodes": 764,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "codeAudit": {
+        "source-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 0
+        },
+        "bilingual-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 79
+        },
+        "bilingual-scroll": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 81
+        },
+        "replace-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 46
+        }
+      }
+    },
+    {
+      "id": "popular-7-2",
+      "site": "Apple",
+      "url": "https://www.apple.com/mac/",
+      "category": "popular",
+      "beforeHash": "88fa0d2406d8184e77a88ad6c6ffa4bb034854b88caf58be4309e8aa53e8bca9",
+      "afterHash": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01",
+      "before": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 162,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 162,
+          "translationTargets": 45,
+          "documentOverflow": 0,
+          "clippingCandidates": 1,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 162,
+          "translationTargets": 59,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 162,
+          "translationTargets": 98,
+          "documentOverflow": 0,
+          "clippingCandidates": 1,
+          "squeezedCandidates": 0
+        }
+      },
+      "after": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 162,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 162,
+          "translationTargets": 45,
+          "documentOverflow": 0,
+          "clippingCandidates": 1,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 162,
+          "translationTargets": 59,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 162,
+          "translationTargets": 98,
+          "documentOverflow": 0,
+          "clippingCandidates": 1,
+          "squeezedCandidates": 0
+        }
+      },
+      "restoreBilingual": {
+        "originalNodes": 1202,
+        "retainedNodes": 1201,
+        "removedByPage": 1,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 1202,
+        "retainedNodes": 1201,
+        "removedByPage": 1,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "codeAudit": {
+        "source-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 0
+        },
+        "bilingual-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 45
+        },
+        "bilingual-scroll": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 59
+        },
+        "replace-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 44
+        }
+      }
+    },
+    {
+      "id": "commercial-2-1",
+      "site": "Adobe Developer",
+      "url": "https://developer.adobe.com/developer-console/docs/guides/",
+      "category": "commercial",
+      "beforeHash": "88fa0d2406d8184e77a88ad6c6ffa4bb034854b88caf58be4309e8aa53e8bca9",
+      "afterHash": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01",
+      "before": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 34,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 34,
+          "translationTargets": 33,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 34,
+          "translationTargets": 33,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 34,
+          "translationTargets": 51,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "after": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 34,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 34,
+          "translationTargets": 33,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 34,
+          "translationTargets": 33,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 34,
+          "translationTargets": 51,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "restoreBilingual": {
+        "originalNodes": 473,
+        "retainedNodes": 473,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 473,
+        "retainedNodes": 473,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "codeAudit": {
+        "source-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 0
+        },
+        "bilingual-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 33
+        },
+        "bilingual-scroll": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 33
+        },
+        "replace-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 19
+        }
+      }
+    },
+    {
+      "id": "commercial-3-1",
+      "site": "Salesforce Developers",
+      "url": "https://developer.salesforce.com/docs",
+      "category": "commercial",
+      "beforeHash": "88fa0d2406d8184e77a88ad6c6ffa4bb034854b88caf58be4309e8aa53e8bca9",
+      "afterHash": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01",
+      "before": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 119,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 119,
+          "translationTargets": 42,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 119,
+          "translationTargets": 51,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 119,
+          "translationTargets": 121,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "after": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 119,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 119,
+          "translationTargets": 42,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 119,
+          "translationTargets": 51,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 119,
+          "translationTargets": 121,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "restoreBilingual": {
+        "originalNodes": 1180,
+        "retainedNodes": 1180,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 1180,
+        "retainedNodes": 1180,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "codeAudit": {
+        "source-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 0
+        },
+        "bilingual-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 42
+        },
+        "bilingual-scroll": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 51
+        },
+        "replace-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 60
+        }
+      }
+    },
+    {
+      "id": "commercial-4-1",
+      "site": "Atlassian Developer",
+      "url": "https://developer.atlassian.com/",
+      "category": "commercial",
+      "beforeHash": "88fa0d2406d8184e77a88ad6c6ffa4bb034854b88caf58be4309e8aa53e8bca9",
+      "afterHash": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01",
+      "before": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 32,
+          "translationTargets": 0,
+          "documentOverflow": 37,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 32,
+          "translationTargets": 25,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 32,
+          "translationTargets": 27,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 32,
+          "translationTargets": 50,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "after": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 32,
+          "translationTargets": 0,
+          "documentOverflow": 37,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 32,
+          "translationTargets": 27,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 32,
+          "translationTargets": 29,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 32,
+          "translationTargets": 50,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "restoreBilingual": {
+        "originalNodes": 174,
+        "retainedNodes": 171,
+        "removedByPage": 3,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 1,
+        "changedLinks": 1,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 174,
+        "retainedNodes": 171,
+        "removedByPage": 3,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "codeAudit": {
+        "source-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 0
+        },
+        "bilingual-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 27
+        },
+        "bilingual-scroll": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 29
+        },
+        "replace-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 25
+        }
+      }
+    },
+    {
+      "id": "open_source-1-1",
+      "site": "React",
+      "url": "https://react.dev/",
+      "category": "open_source",
+      "beforeHash": "88fa0d2406d8184e77a88ad6c6ffa4bb034854b88caf58be4309e8aa53e8bca9",
+      "afterHash": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01",
+      "before": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 120,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 120,
+          "translationTargets": 12,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 120,
+          "translationTargets": 15,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 120,
+          "translationTargets": 28,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "after": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 120,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 120,
+          "translationTargets": 12,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 120,
+          "translationTargets": 15,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 120,
+          "translationTargets": 30,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "restoreBilingual": {
+        "originalNodes": 710,
+        "retainedNodes": 710,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 1,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 710,
+        "retainedNodes": 710,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 1,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "codeAudit": {
+        "source-top": {
+          "codeBlocks": 4,
+          "liveCodeBlocks": 8,
+          "originalCodeNodes": 500,
+          "retainedCodeNodes": 500,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 0
+        },
+        "bilingual-top": {
+          "codeBlocks": 4,
+          "liveCodeBlocks": 8,
+          "originalCodeNodes": 500,
+          "retainedCodeNodes": 500,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 12
+        },
+        "bilingual-scroll": {
+          "codeBlocks": 4,
+          "liveCodeBlocks": 8,
+          "originalCodeNodes": 500,
+          "retainedCodeNodes": 500,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 15
+        },
+        "replace-top": {
+          "codeBlocks": 4,
+          "liveCodeBlocks": 8,
+          "originalCodeNodes": 500,
+          "retainedCodeNodes": 500,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 14
+        }
+      }
+    },
+    {
+      "id": "open_source-4-2",
+      "site": "Svelte",
+      "url": "https://svelte.dev/docs/svelte/overview",
+      "category": "open_source",
+      "beforeHash": "88fa0d2406d8184e77a88ad6c6ffa4bb034854b88caf58be4309e8aa53e8bca9",
+      "afterHash": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01",
+      "before": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 117,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 117,
+          "translationTargets": 27,
+          "documentOverflow": 0,
+          "clippingCandidates": 2,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 117,
+          "translationTargets": 27,
+          "documentOverflow": 0,
+          "clippingCandidates": 2,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 117,
+          "translationTargets": 50,
+          "documentOverflow": 0,
+          "clippingCandidates": 1,
+          "squeezedCandidates": 0
+        }
+      },
+      "after": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 117,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 117,
+          "translationTargets": 27,
+          "documentOverflow": 0,
+          "clippingCandidates": 2,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 117,
+          "translationTargets": 27,
+          "documentOverflow": 0,
+          "clippingCandidates": 2,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 117,
+          "translationTargets": 50,
+          "documentOverflow": 0,
+          "clippingCandidates": 1,
+          "squeezedCandidates": 0
+        }
+      },
+      "restoreBilingual": {
+        "originalNodes": 319,
+        "retainedNodes": 319,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 319,
+        "retainedNodes": 319,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "codeAudit": {
+        "source-top": {
+          "codeBlocks": 2,
+          "liveCodeBlocks": 2,
+          "originalCodeNodes": 120,
+          "retainedCodeNodes": 120,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 1,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 0
+        },
+        "bilingual-top": {
+          "codeBlocks": 2,
+          "liveCodeBlocks": 2,
+          "originalCodeNodes": 120,
+          "retainedCodeNodes": 120,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 1,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 27
+        },
+        "bilingual-scroll": {
+          "codeBlocks": 2,
+          "liveCodeBlocks": 2,
+          "originalCodeNodes": 120,
+          "retainedCodeNodes": 120,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 1,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 27
+        },
+        "replace-top": {
+          "codeBlocks": 2,
+          "liveCodeBlocks": 2,
+          "originalCodeNodes": 120,
+          "retainedCodeNodes": 120,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 1,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 24
+        }
+      }
+    },
+    {
+      "id": "open_source-9-2",
+      "site": "Python",
+      "url": "https://docs.python.org/3/tutorial/introduction.html",
+      "category": "open_source",
+      "beforeHash": "88fa0d2406d8184e77a88ad6c6ffa4bb034854b88caf58be4309e8aa53e8bca9",
+      "afterHash": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01",
+      "before": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 109,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 109,
+          "translationTargets": 36,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 109,
+          "translationTargets": 40,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 109,
+          "translationTargets": 66,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "after": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 109,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 109,
+          "translationTargets": 36,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 109,
+          "translationTargets": 40,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 109,
+          "translationTargets": 66,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "restoreBilingual": {
+        "originalNodes": 2364,
+        "retainedNodes": 2364,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 2364,
+        "retainedNodes": 2364,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "codeAudit": {
+        "source-top": {
+          "codeBlocks": 42,
+          "liveCodeBlocks": 42,
+          "originalCodeNodes": 1394,
+          "retainedCodeNodes": 1394,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 0
+        },
+        "bilingual-top": {
+          "codeBlocks": 42,
+          "liveCodeBlocks": 42,
+          "originalCodeNodes": 1394,
+          "retainedCodeNodes": 1394,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 36
+        },
+        "bilingual-scroll": {
+          "codeBlocks": 42,
+          "liveCodeBlocks": 42,
+          "originalCodeNodes": 1394,
+          "retainedCodeNodes": 1394,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 40
+        },
+        "replace-top": {
+          "codeBlocks": 42,
+          "liveCodeBlocks": 42,
+          "originalCodeNodes": 1394,
+          "retainedCodeNodes": 1394,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 25
+        }
+      }
+    }
+  ],
+  "inApp": {
+    "bilingualCode": {
+      "codeBlocks": 4,
+      "codeTranslationSamples": [],
+      "codeTranslationTargets": 0,
+      "hiddenCodeBlocks": 0,
+      "liveCodeBlocks": 8,
+      "originalCodeNodes": 500,
+      "overwrittenCodeValues": 0,
+      "proseTranslationTargets": 15,
+      "retainedCodeNodes": 500
+    },
+    "replaceCode": {
+      "codeBlocks": 4,
+      "codeTranslationSamples": [],
+      "codeTranslationTargets": 0,
+      "hiddenCodeBlocks": 0,
+      "liveCodeBlocks": 8,
+      "originalCodeNodes": 500,
+      "overwrittenCodeValues": 0,
+      "proseTranslationTargets": 15,
+      "retainedCodeNodes": 500
+    },
+    "restoreBilingual": {
+      "changedLinks": 0,
+      "changedValues": 0,
+      "orderDifferences": [],
+      "originalNodes": 710,
+      "overwrittenCurrentLinks": 0,
+      "overwrittenCurrentValues": 0,
+      "remainingTargets": 0,
+      "removedByPage": 0,
+      "removedSinceRestoreSnapshot": [],
+      "retainedCurrentOrder": true,
+      "retainedNodes": 710,
+      "sourceOrder": true
+    },
+    "restoreReplace": {
+      "changedLinks": 0,
+      "changedValues": 0,
+      "orderDifferences": [],
+      "originalNodes": 710,
+      "overwrittenCurrentLinks": 0,
+      "overwrittenCurrentValues": 0,
+      "remainingTargets": 0,
+      "removedByPage": 0,
+      "removedSinceRestoreSnapshot": [],
+      "retainedCurrentOrder": true,
+      "retainedNodes": 710,
+      "sourceOrder": true
+    }
+  },
+  "limits": [
+    "网页自身的轮播、动画、文本更新和节点删除会使前后截图不同；恢复按操作前的当前页面状态校验。",
+    "Svelte 和 Apple 原有的裁剪候选保持不变；本次未增加候选。",
+    "Firefox 的页面行为通过 Gecko 内容脚本测试验证，原生扩展加载另有套件覆盖。"
+  ]
+}
