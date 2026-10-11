@@ -20,10 +20,42 @@ export interface SourceLayoutPolicy {
   complete: boolean;
   /** A page animation currently owns one of the selected properties. */
   animated?: boolean;
+  /** Reading the author cascade exceeded the optional layout-work limit. */
+  limited?: boolean;
 }
 type LayerPart = string | number;
 const animationIds = new WeakMap<Animation, number>();
 let animationSequence = 0;
+
+interface PolicyRead {
+  started: number;
+  rules: WeakMap<CSSRuleList, SourceRule[]>;
+  kinds: WeakMap<CSSRule, { uncertain: boolean; scoped: boolean; layer: boolean }>;
+  selected: WeakMap<CSSStyleDeclaration, Map<string, boolean>>;
+  sheets: Map<Document | ShadowRoot, CSSStyleSheet[]>;
+  policies: WeakMap<HTMLElement, Map<string, SourceLayoutPolicy>>;
+}
+let activeRead: PolicyRead | null = null;
+const MAX_POLICY_RULES = 25000;
+const MAX_POLICY_READ_MS = 96;
+const SOFT_POLICY_READ_MS = 24;
+const READ_LIMIT = Symbol('source layout read limit');
+
+/** Share immutable author inputs only during a synchronous read pass. Nothing
+ * survives a write, an async yield, or a later CSSOM/page/motion update. */
+export function withSourceLayoutRead<T>(read: () => T): T {
+  if (activeRead) return read();
+  activeRead = { started: performance.now(), rules: new WeakMap(), kinds: new WeakMap(), selected: new WeakMap(),
+    sheets: new Map(), policies: new WeakMap() };
+  try { return read(); }
+  finally { activeRead = null; }
+}
+
+/** Yield between owners; a pathological single cascade also has a hard cap.
+ * Optional corrections must never delay translation by scanning indefinitely. */
+export function sourceLayoutReadSpent(): boolean {
+  return !!activeRead && performance.now() - activeRead.started >= SOFT_POLICY_READ_MS;
+}
 
 /** Keep time out of the signature: a sizing effect owns the property for its
  * whole lifetime, including forwards fill. Paint-only effects stay unrelated. */
@@ -54,7 +86,22 @@ export function readSourceLayoutPolicy(element: HTMLElement, properties: readonl
 /** Unknown conditions and opaque sheets cannot prove an unchanged cascade.
  * Keep that uncertainty separate from the declarations we can inspect. */
 export function readSourceLayoutPolicyState(element: HTMLElement, properties: readonly string[], computed?: CSSStyleDeclaration): SourceLayoutPolicy {
-  return readPolicy(element, properties, computed, 0);
+  return withSourceLayoutRead(() => {
+    const key = properties.join('|');
+    const policies = activeRead!.policies.get(element) ?? new Map<string, SourceLayoutPolicy>();
+    const cached = policies.get(key);
+    if (cached) return cached;
+    let policy: SourceLayoutPolicy;
+    try { policy = readPolicy(element, properties, computed, 0); }
+    catch (error) {
+      if (error !== READ_LIMIT) throw error;
+      // This is not an opaque-sheet fallback: partial declarations cannot
+      // establish ownership. Callers omit/release optional corrections.
+      policy = { signature: '[["@read-limit"]]', complete: false, limited: true };
+    }
+    policies.set(key, policy); activeRead!.policies.set(element, policies);
+    return policy;
+  });
 }
 
 function readPolicy(element: HTMLElement, properties: readonly string[], computed: CSSStyleDeclaration | undefined, depth: number): SourceLayoutPolicy {
@@ -74,7 +121,16 @@ function readPolicy(element: HTMLElement, properties: readonly string[], compute
   const selected = relatedLayoutProperties(properties, cascadeProperty);
   const shorthands = LAYOUT_SHORTHANDS.filter(property =>
     layoutLonghands(property).some(longhand => selected.includes(longhand)));
-  const hasSelected = (style: CSSStyleDeclaration): boolean => [...selected, ...shorthands].some(property => style.getPropertyValue(property));
+  const selectedKey = selected.join('|');
+  const hasSelected = (style: CSSStyleDeclaration): boolean => {
+    const reads = activeRead!.selected.get(style) ?? new Map<string, boolean>();
+    let result = reads.get(selectedKey);
+    if (result === undefined) {
+      result = [...selected, ...shorthands].some(property => style.getPropertyValue(property));
+      reads.set(selectedKey, result); activeRead!.selected.set(style, reads);
+    }
+    return result;
+  };
   let anonymous = 0;
   const usedAnonymous = new Map<number, number>();
   // Anonymous identities are local to this read. Number only participating
@@ -142,14 +198,35 @@ function readPolicy(element: HTMLElement, properties: readonly string[], compute
     }
   };
   const mediaMatches = (media: string): boolean => !media || typeof window.matchMedia !== 'function' || window.matchMedia(media).matches;
+  let visited = 0;
   const visit = (rules: CSSRuleList, parentSelector = '', conditional = false, inScope = false, layer: LayerPart[] = []): void => {
-    for (const raw of Array.from(rules)) {
-      const rule = raw as SourceRule;
+    let sourceRules = activeRead!.rules.get(rules);
+    if (!sourceRules) {
+      if (rules.length > MAX_POLICY_RULES) throw READ_LIMIT;
+      sourceRules = Array.from(rules) as SourceRule[]; activeRead!.rules.set(rules, sourceRules);
+    }
+    for (const rule of sourceRules) {
+      if (++visited > MAX_POLICY_RULES || (visited % 64 === 1 && performance.now() - activeRead!.started >= MAX_POLICY_READ_MS)) throw READ_LIMIT;
       if (rule.type === 4 && !mediaMatches(rule.conditionText || '')) continue;
       if (rule.type === 12 && typeof CSS !== 'undefined' && !CSS.supports(rule.conditionText || '')) continue;
-      const uncertain = conditional || /^\s*@(container|scope)\b/i.test(rule.cssText);
-      const scoped = inScope || /^\s*@scope\b/i.test(rule.cssText);
-      if (/^\s*@layer\b/i.test(rule.cssText)) {
+      let kind = activeRead!.kinds.get(rule);
+      if (!kind) {
+        // Serializing a grouping rule also serializes all its descendants.
+        // Native grouping interfaces identify their context without producing
+        // that text. Retain the textual fallback for partial DOM/CSS engines.
+        const name = rule.type === 1 ? '' : rule.constructor.name;
+        const scoped = name === 'CSSScopeRule', container = name === 'CSSContainerRule';
+        const layer = name === 'CSSLayerBlockRule' || name === 'CSSLayerStatementRule';
+        const known = scoped || container || layer || [1, 3, 4, 5, 7, 8, 12].includes(rule.type);
+        if (!known && rule.cssRules && rule.cssRules.length > MAX_POLICY_RULES) throw READ_LIMIT;
+        const text = known ? '' : rule.cssText;
+        kind = { uncertain: container || scoped || /^\s*@(container|scope)\b/i.test(text),
+          scoped: scoped || /^\s*@scope\b/i.test(text), layer: layer || /^\s*@layer\b/i.test(text) };
+        activeRead!.kinds.set(rule, kind);
+      }
+      const uncertain = conditional || kind.uncertain;
+      const scoped = inScope || kind.scoped;
+      if (kind.layer) {
         if (rule.cssRules) {
           if (typeof rule.name !== 'string') complete = false;
           visit(rule.cssRules, parentSelector, uncertain, scoped, registerLayer(layer, rule.name ?? ''));
@@ -209,18 +286,25 @@ function readPolicy(element: HTMLElement, properties: readonly string[], compute
     if (seen.has(sheet) || sheet.disabled || !mediaMatches(sheet.media?.mediaText || '')) return;
     seen.add(sheet);
     try { visit(sheet.cssRules, '', false, false, layer); }
-    catch { complete = false; /* the browser cascade can still read an opaque sheet */ }
+    catch (error) {
+      if (error === READ_LIMIT) throw error;
+      complete = false; /* the browser cascade can still read an opaque sheet */
+    }
   };
   const root = element.getRootNode();
   if (root instanceof Document || root instanceof ShadowRoot) {
     // ownerNode is absent in some DOM implementations and on adopted sheets.
-    const owners = new Map(Array.from(root.querySelectorAll<HTMLStyleElement | HTMLLinkElement>('style,link[rel="stylesheet"]'))
-      .filter(node => node.sheet).map(node => [node.sheet!, node]));
-    for (const sheet of new Set([...Array.from(root.styleSheets || []), ...root.adoptedStyleSheets || []])) {
-      const owner = sheet.ownerNode ?? owners.get(sheet);
-      if (owner instanceof Element && Array.from(owner.attributes).some(attribute => attribute.name.startsWith(`data-${P}-`))) continue;
-      visitSheet(sheet);
+    let sheets = activeRead!.sheets.get(root);
+    if (!sheets) {
+      const owners = new Map(Array.from(root.querySelectorAll<HTMLStyleElement | HTMLLinkElement>('style,link[rel="stylesheet"]'))
+        .filter(node => node.sheet).map(node => [node.sheet!, node]));
+      sheets = [...new Set([...Array.from(root.styleSheets || []), ...root.adoptedStyleSheets || []])].filter(sheet => {
+        const owner = sheet.ownerNode ?? owners.get(sheet);
+        return !(owner instanceof Element && Array.from(owner.attributes).some(attribute => attribute.name.startsWith(`data-${P}-`)));
+      });
+      activeRead!.sheets.set(root, sheets);
     }
+    for (const sheet of sheets) visitSheet(sheet);
   }
   add(element.style);
   // Only precedence among competing declarations matters. Adding classes to

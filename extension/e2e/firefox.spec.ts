@@ -25,6 +25,7 @@ import {sharedPolicyGroups, translateSharedPolicyText, verifySharedPolicyRegress
 import {nestingPaddingCases, translateNestingPaddingText, verifyNestingPaddingRegression} from './helpers/nesting-padding-regressions';
 import {logicalNestingCases, translateLogicalText, verifyLogicalNestingRegression} from './helpers/logical-nesting-regressions';
 import { startRealProxy } from './helpers/real-proxy';
+import { layoutWorkloadCases, verifyLayoutWorkload, verifySynchronousLayoutChange, stylesheetWorkloadModes, translateStylesheetWorkloadText, verifyStylesheetWorkload } from './helpers/stylesheet-workload-regressions';
 import { sourceRegressions, setupSourceRegression, verifySourceRegression } from './helpers/source-regressions';
 import { normalizeRegressions, setupNormalizeRegression, verifyNormalizeRegression } from './helpers/normalize-regressions';
 import { reconcileRegressions, setupReconcileRegression, verifyReconcileRegression, translateReconcileSource } from './helpers/reconcile-regressions';
@@ -43,6 +44,71 @@ import {
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIREFOX_EXT = path.resolve(dirname, '../output/firefox-mv3');
+
+for (const mode of stylesheetWorkloadModes) {
+  test(`large stylesheet workload: ${mode}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext(), requests: string[] = [];
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => {
+        requests.push(...texts); return texts.map(translateStylesheetWorkloadText);
+      } });
+      await verifyStylesheetWorkload(page, mode, {
+        translate: () => firefoxTranslatePage(page, mode), pause: () => firefoxStopWatch(page),
+        restore: () => firefoxRestore(page),
+      }, requests);
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
+
+for (const scenario of layoutWorkloadCases) for (const mode of stylesheetWorkloadModes) {
+  test(`layout stylesheet workload: ${scenario} / ${mode}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext();
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => texts.map(translateStylesheetWorkloadText) });
+      await verifyLayoutWorkload(page, scenario, mode, {
+        translate: () => firefoxTranslatePage(page, mode), pause: () => firefoxStopWatch(page),
+        restore: () => firefoxRestore(page),
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
+
+for (const mode of stylesheetWorkloadModes) {
+  test(`layout write source guard: ${mode}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext();
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => texts.map(translateStylesheetWorkloadText) });
+      await verifySynchronousLayoutChange(page, {
+        translate: () => firefoxTranslatePage(page, mode), restore: () => firefoxRestore(page),
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
+
+import { pauseResumeCases, verifyPauseResume } from './helpers/pause-resume-regressions';
+
+for (const scenario of pauseResumeCases) for (const mode of stylesheetWorkloadModes) {
+  test(`paused source resume: ${scenario} / ${mode}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext(), sources: string[] = [];
+    let delay = 0, requests = 0;
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => {
+        requests++; sources.push(...texts);
+        if (delay) await new Promise(resolve => setTimeout(resolve, delay));
+        return texts.map(text => `译:${text}`);
+      } });
+      await verifyPauseResume(page, scenario, mode, {
+        translate: () => firefoxTranslatePage(page, mode), pause: () => firefoxStopWatch(page),
+        restore: () => firefoxRestore(page), status: () => firefoxStatus(page),
+        requests: () => requests, delay: ms => { delay = ms; }, sources,
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
 
 for (const scenario of motionPolicyGroups) {
   test(scenario.name, async () => {

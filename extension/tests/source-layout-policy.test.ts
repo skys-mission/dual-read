@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import {afterEach, describe, expect, it, vi} from 'vitest';
-import {readComputedSizing, readSourceLayoutPolicy, readSourceLayoutPolicyState, readUnmaskedLayoutProperty} from '../lib/renderer/source-layout-policy';
+import {readComputedSizing, readSourceLayoutPolicy, readSourceLayoutPolicyState, readUnmaskedLayoutProperty, withSourceLayoutRead} from '../lib/renderer/source-layout-policy';
 
 afterEach(() => {
   document.body.innerHTML = '';
@@ -14,6 +14,45 @@ function fixture(css: string): {box: HTMLElement; sheet: HTMLStyleElement} {
   document.head.appendChild(sheet);
   return {box: document.getElementById('box')!, sheet};
 }
+
+describe('bounded source layout reads', () => {
+  it('reuses one synchronous read but observes CSSOM and source changes on the next pass', () => {
+    const {box, sheet} = fixture('#box{height:80px}');
+    const matches = vi.spyOn(box, 'matches');
+    const before = withSourceLayoutRead(() => {
+      const first = readSourceLayoutPolicyState(box, ['height']);
+      const calls = matches.mock.calls.length;
+      expect(readSourceLayoutPolicyState(box, ['height'])).toBe(first);
+      expect(matches).toHaveBeenCalledTimes(calls);
+      return first;
+    });
+    (sheet.sheet!.cssRules[0] as CSSStyleRule).style.setProperty('height', '40px');
+    expect(readSourceLayoutPolicyState(box, ['height']).signature).not.toBe(before.signature);
+    box.style.height = '20px';
+    expect(readSourceLayoutPolicyState(box, ['height']).signature).toContain('20px');
+  });
+
+  it('does not claim a partial cascade is a complete or opaque-sheet contract', () => {
+    const {box, sheet} = fixture('#box{height:80px}');
+    Object.defineProperty(sheet.sheet, 'cssRules', {value: Array.from({length: 25001}, () => sheet.sheet!.cssRules[0])});
+    const policy = readSourceLayoutPolicyState(box, ['height']);
+    expect(policy).toMatchObject({complete: false, limited: true});
+    expect(policy.signature).not.toContain('80px');
+  });
+
+  it('bounds a slow selector pass and retries from fresh inputs on a later read', () => {
+    const {box} = fixture('#box{height:80px}');
+    let time = 0;
+    vi.spyOn(performance, 'now').mockImplementation(() => time);
+    const parent = document.getElementById('parent')!;
+    withSourceLayoutRead(() => {
+      expect(readSourceLayoutPolicyState(box, ['height']).complete).toBe(true);
+      time = 100;
+      expect(readSourceLayoutPolicyState(parent, ['height'])).toMatchObject({limited: true, complete: false});
+    });
+    expect(readSourceLayoutPolicyState(parent, ['height']).limited).toBeUndefined();
+  });
+});
 
 describe('layout dependencies and page motion', () => {
   it.each(['height', 'min-height', 'max-height', 'block-size', 'padding-top', 'border-top-width'])('tracks the inherited %s source and ignores parent paint', property => {

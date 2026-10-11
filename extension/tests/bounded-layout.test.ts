@@ -23,6 +23,29 @@ function fixture(containerStyle = 'height:80px;overflow:hidden'): { box: HTMLEle
 }
 
 describe('bounded prose layout', () => {
+  it('revalidates a later box after a synchronous page callback changes its source', () => {
+    const {box, target} = fixture();
+    const other = document.createElement('section'); other.style.cssText = 'height:80px;overflow:hidden';
+    const owner = document.createElement('span'); owner.textContent = 'Another translation.'; other.append(owner);
+    box.after(other);
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function(this: Element) {
+      const height = this === box || this === other ? 80 : this === target || this === owner ? 120 : 220;
+      const top = this === target || this === owner ? 32 : 0;
+      return {x:0,y:top,width:320,height,top,bottom:top+height,left:0,right:320,toJSON(){}} as DOMRect;
+    });
+    Object.defineProperty(other, 'scrollHeight', {value:170});
+    const set = box.setAttribute.bind(box);
+    vi.spyOn(box, 'setAttribute').mockImplementation((name, value) => {
+      set(name, value);
+      // Model a custom element's synchronous attributeChangedCallback.
+      if (name === 'data-dual-read-layout-height') other.style.height = '0px';
+    });
+    applyBoundedLayouts(readBoundedLayouts([target, owner]));
+    expect(box.hasAttribute('data-dual-read-layout-height')).toBe(true);
+    expect(other.style.height).toBe('0px');
+    expect(other.hasAttribute('data-dual-read-layout-height')).toBe(false);
+  });
+
   it('yields when a page removes padding from a translated zero-content-height panel', async () => {
     const {box, target} = fixture('height:0;padding:24px;overflow:hidden');
     applyBoundedLayouts(readBoundedLayouts([target])); expect(box.hasAttribute('data-dual-read-layout-height')).toBe(true);

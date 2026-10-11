@@ -1,6 +1,7 @@
 import { P } from '../dom-const';
 import { watchLayoutUpdates } from './layout-updates';
-import { readSourceLayoutPolicy, readSourceLayoutPolicyState } from './source-layout-policy';
+import { readSourceLayoutPolicyState, withSourceLayoutRead } from './source-layout-policy';
+import { takeLayoutWork } from './layout-work';
 
 const ANCHOR = `data-${P}-layout-anchor`;
 const STYLE = `data-${P}-anchor-style`;
@@ -24,6 +25,7 @@ let parents = new WeakMap<HTMLElement, AnchorSnapshot[]>();
 let hosts = new WeakMap<HTMLElement, AnchorSnapshot[]>();
 let owners = new WeakMap<HTMLElement, AnchorSnapshot[]>();
 const applied = new Map<HTMLElement, AnchorRule>();
+const pendingUpdates = new Set<HTMLElement>();
 let watcher: ReturnType<typeof watchLayoutUpdates> | null = null;
 let sequence = 0;
 
@@ -31,6 +33,10 @@ let sequence = 0;
  * height:calc(100% - Npx). Capture that explicit relationship before prose
  * grows, so the footer follows the added height without covering actions. */
 export function captureAnchoredLayouts(elements: readonly HTMLElement[]): void {
+  withSourceLayoutRead(() => captureAnchoredLayoutsInPass(elements));
+}
+
+function captureAnchoredLayoutsInPass(elements: readonly HTMLElement[]): void {
   for (const host of elements) {
     if (hosts.has(host) || host.closest(CHROME)) continue;
     const snapshots: AnchorSnapshot[] = [];
@@ -49,9 +55,11 @@ export function captureAnchoredLayouts(elements: readonly HTMLElement[]): void {
             || getComputedStyle(parent).position !== 'relative') continue;
           const offset = Number(top[1]);
           if (offset < 24 || parent.clientHeight < offset + 20 || !parent.clientWidth) continue;
+          const policy = readSourceLayoutPolicyState(child, ANCHOR_POLICY);
+          if (policy.limited) continue;
           anchors.push({ element: child, parent, top: offset, sourceTop: child.style.top, sourceHeight: child.style.height,
             sourceTopPriority: child.style.getPropertyPriority('top'), sourceHeightPriority: child.style.getPropertyPriority('height'),
-            parentHeight: parent.clientHeight, parentWidth: parent.clientWidth, policy: readSourceLayoutPolicy(child, ANCHOR_POLICY) });
+            parentHeight: parent.clientHeight, parentWidth: parent.clientWidth, policy: policy.signature });
         }
         parents.set(parent, anchors);
       }
@@ -75,11 +83,15 @@ function sourceContractIntact(snapshot: AnchorSnapshot): boolean {
     && element.style.top === snapshot.sourceTop && element.style.height === snapshot.sourceHeight
     && element.style.getPropertyPriority('top') === snapshot.sourceTopPriority
     && element.style.getPropertyPriority('height') === snapshot.sourceHeightPriority
-    && !policy.animated && policy.signature === snapshot.policy;
+    && !policy.animated && !policy.limited && policy.signature === snapshot.policy;
 }
 
 /** Read only: layout growth is measured in the containing block's CSS pixels. */
 export function readAnchoredLayouts(nodes: readonly HTMLElement[]): AnchorChange[] {
+  return withSourceLayoutRead(() => readAnchoredLayoutsInPass(nodes));
+}
+
+function readAnchoredLayoutsInPass(nodes: readonly HTMLElement[]): AnchorChange[] {
   const changes: AnchorChange[] = [];
   for (const owner of nodes) {
     if (!owner.isConnected) continue;
@@ -118,6 +130,7 @@ function clearAnchor(element: HTMLElement): void {
   if (element.getAttribute(ANCHOR) === rule.id) element.removeAttribute(ANCHOR);
   rule.style.remove();
   applied.delete(element);
+  pendingUpdates.delete(element);
   if (!applied.size) { watcher?.dispose(); watcher = null; }
 }
 
@@ -125,7 +138,7 @@ export function applyAnchoredLayouts(changes: readonly AnchorChange[]): void {
   for (const { snapshot, owner, top } of changes) {
     const { element } = snapshot;
     if (top === null) { clearAnchor(element); continue; }
-    if (!sourceContractIntact(snapshot)) { clearAnchor(element); continue; }
+    if (!withSourceLayoutRead(() => sourceContractIntact(snapshot))) { clearAnchor(element); continue; }
     if (!element.isConnected || !owner.isConnected) continue;
     let rule = applied.get(element);
     if (!rule || !rule.style.isConnected) {
@@ -149,11 +162,16 @@ export function applyAnchoredLayouts(changes: readonly AnchorChange[]): void {
 
 /** Only revisit installed rules: page changes may invalidate a captured
  * footer, but must never create an anchor from already translated geometry. */
-function readUpdates(): (() => void) | undefined {
-  const states = [...applied].map(([element, rule]) => ({ element, rule,
-    remaining: [...rule.owners].filter(owner => owner.isConnected && rule.snapshot.parent.contains(owner)),
-    detached: !element.isConnected || element.getRootNode() !== rule.style.getRootNode(),
-  }));
+function readUpdates(mutations: readonly MutationRecord[] | null): (() => void) | undefined {
+  if (!mutations || mutations.length) for (const element of applied.keys()) pendingUpdates.add(element);
+  const states = takeLayoutWork(pendingUpdates).flatMap(element => {
+    pendingUpdates.delete(element);
+    const rule = applied.get(element);
+    return rule ? [{ element, rule,
+      remaining: [...rule.owners].filter(owner => owner.isConnected && rule.snapshot.parent.contains(owner)),
+      detached: !element.isConnected || element.getRootNode() !== rule.style.getRootNode(),
+    }] : [];
+  });
   const changes = readAnchoredLayouts(states.filter(state => !state.detached).flatMap(state => state.remaining));
   return () => {
     for (const { element, rule, remaining, detached } of states) {
@@ -162,6 +180,7 @@ function readUpdates(): (() => void) | undefined {
       if (detached || !remaining.length) clearAnchor(element);
     }
     applyAnchoredLayouts(changes.filter(({ snapshot }) => applied.has(snapshot.element)));
+    if (pendingUpdates.size) watcher?.refresh(false);
   };
 }
 

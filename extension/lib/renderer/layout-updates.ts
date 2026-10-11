@@ -1,8 +1,10 @@
 import { HIDE, OURS_SEL, P } from '../dom-const';
+import { sourceLayoutReadSpent, withSourceLayoutRead } from './source-layout-policy';
 
 /** Read all subscribed layouts before applying any owned style writes. */
 type LayoutRead = (mutations: readonly MutationRecord[] | null) => (() => void) | undefined;
 const readers = new Map<LayoutRead, Set<ShadowRoot>>();
+const pendingReads = new Map<LayoutRead, readonly MutationRecord[] | null>();
 const observed = new Set<ShadowRoot>();
 let observer: MutationObserver | null = null;
 let frame: number | null = null;
@@ -84,8 +86,21 @@ function queueUpdate(): void {
       disconnected = true;
     }
     if (disconnected) reconnectObserver();
-    const writes = [...readers.keys()].map(read => read(batch));
+    if (batch === null || batch.length) for (const read of readers.keys()) {
+      const previous = pendingReads.get(read);
+      pendingReads.set(read, previous === null || batch === null ? null : [...previous ?? [], ...batch]);
+    }
+    const writes = withSourceLayoutRead(() => {
+      const writes: ((() => void) | undefined)[] = [];
+      for (const [read, mutations] of pendingReads) {
+        if (writes.length && sourceLayoutReadSpent()) break;
+        pendingReads.delete(read);
+        if (readers.has(read)) writes.push(read(mutations));
+      }
+      return writes;
+    });
     for (const write of writes) write?.();
+    if (pendingReads.size) queueUpdate();
   });
 }
 
@@ -135,7 +150,13 @@ export function watchLayoutUpdates(read: LayoutRead): { addRoot: (root: Node) =>
   return {
     // An owned write can need a follow-up read without invalidating every
     // source again. Page/browser events still request a global refresh.
-    refresh: (global = true) => global ? globalUpdate() : queueUpdate(),
+    refresh: (global = true) => {
+      if (global) globalUpdate();
+      else {
+        if (!pendingReads.has(read)) pendingReads.set(read, []);
+        queueUpdate();
+      }
+    },
     addRoot(root) {
       if (!(root instanceof ShadowRoot)) return;
       roots.add(root);
@@ -143,6 +164,7 @@ export function watchLayoutUpdates(read: LayoutRead): { addRoot: (root: Node) =>
     },
     dispose() {
       readers.delete(read);
+      pendingReads.delete(read);
       if (readers.size) {
         const retained = new Set([...readers.values()].flatMap(roots => [...roots]));
         for (const root of observed) {
@@ -161,6 +183,7 @@ export function watchLayoutUpdates(read: LayoutRead): { addRoot: (root: Node) =>
       if (frame !== null) cancelAnimationFrame(frame);
       frame = null;
       records = [];
+      pendingReads.clear();
       globalChange = false;
       for (const root of observed) {
         root.removeEventListener('load', loadUpdate, true);

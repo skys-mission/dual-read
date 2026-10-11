@@ -1,0 +1,89 @@
+{
+  "date": "2026-10-09",
+  "baseCommit": "a4b97669964d7f7a08698825b860d23f67a51b71",
+  "scope": "High-risk extension runtime paths in main...HEAD, plus the pending bounded-layout crash fix. Focus on stylesheet work cardinality, layout update scheduling, source ownership and pause/resume.",
+  "productionCodeChangedDuringReview": false,
+  "viewport": { "width": 1920, "height": 1080 },
+  "browser": "Isolated Chromium profiles loading the real packaged extension; loopback mock API, production background and content relay.",
+  "beforeContentScriptSha256": "17e88ebfe83aa3bc6a1e548e8c5f16c38a3ae04289f5414695acd853da019c5a",
+  "currentContentScriptSha256": "a2c6220392245eb8cec5e2f8b8f779415457a1876fa7682a46c8d1c8d7a98daa",
+  "decision": "The pending package fixes the reported GitHub observation but is not ready for stable acceptance. Two additional performance paths and one session lifecycle defect remain reproducible.",
+  "findings": [
+    {
+      "id": "R1",
+      "priority": "P1",
+      "title": "Multiple bounded containers still block a frame; paused layout updates recheck every installed source contract",
+      "file": "extension/lib/renderer/bounded-layout.ts",
+      "lines": [125, 139, 174, 277, 281],
+      "cause": "Candidate selection avoids reads for ordinary fitting flow, but each actual candidate still scans author sheets. The update path calls sourceSizing/contextIntact for all installed corrections before deciding whether a mutation affects them. Neither path has a work or time budget.",
+      "reproduction": "6000 rules in an author layer, 24 fixed-height cards with two paragraphs each, long deterministic translations. Translate, pause, then change an unused attribute. All 48 units complete, yet a single main-thread task lasts seconds.",
+      "currentMaxFrameGapMs": 4868.7,
+      "currentPausedBodyMutationGapMs": 5029.6,
+      "beforeMaxFrameGapMs": 8440.3,
+      "beforePausedBodyMutationGapMs": 12489.4,
+      "withoutProfiler": {
+        "initialGapMs": 4654.2,
+        "pausedBodyMutationGapMs": 5007.4,
+        "pausedAttributeOnSeparatePreElementGapMs": 2572.4
+      },
+      "smallStylesheetControl": { "rules": 200, "initialGapMs": 163.2, "pausedBodyMutationGapMs": 164.7 },
+      "recommendedScope": "Bound stylesheet and candidate work across all layout readers, reuse safe metadata within a read pass, include reads and ownership rechecks in scheduling budgets, and preserve source restoration when extra geometry corrections are abandoned. Do not replace author policy checks with an unbounded persistent cache."
+    },
+    {
+      "id": "R2",
+      "priority": "P1",
+      "title": "Media policy capture and validation perform repeated whole-sheet scans outside the render slice",
+      "file": "extension/lib/renderer/media-layout.ts",
+      "lines": [114, 128, 152, 205, 208],
+      "relatedFile": "extension/lib/scheduler/session.ts",
+      "relatedLines": [417, 430, 460],
+      "cause": "Media snapshots scan the image, shared row and up to 16 ancestors. sourceContractIntact repeats those scans for each associated owner before testing whether a width correction is needed. Capture and read passes run before RENDER_SLICE_MS starts, so rendering text in chunks does not bound this work.",
+      "reproduction": "6000 rules with ordinary flex image/prose cards. Eight cards block one frame for about 1.7 seconds; 24 cards block about 5 seconds.",
+      "eightCards": { "currentGapMs": 1672.2, "beforeGapMs": 1677.2 },
+      "twentyFourCards": { "currentGapMs": 5054, "withoutProfilerGapMs": 4919.8 },
+      "smallStylesheetControl": { "rules": 200, "cards": 24, "gapMs": 160.9 },
+      "recommendedScope": "Deduplicate shared snapshot/source reads and schedule the capture, validation and geometry phases with bounded work. Preserve snapshots measured before translation; collecting source geometry after rendering is not an equivalent fallback."
+    },
+    {
+      "id": "R3",
+      "priority": "P2",
+      "title": "A source edit while paused strands the resumed entry with a stale unit and source snapshot",
+      "file": "extension/lib/scheduler/session.ts",
+      "lines": [284, 295, 300, 302, 638, 725, 738, 807],
+      "cause": "resumeWatch re-observes existing entries without reconciling edits made while the registry was disconnected. ensureEntry keeps the old entry. A resumed request uses its old unit text; sourceChanged correctly rejects the returned old translation, but success/failure guards leave the entry unschedulable rather than rebuilding it.",
+      "reproduction": "Translate one stable paragraph; append a second paragraph and delay its provider response. Pause with that second request in flight, edit its original Text while paused, then continue translation. The second paragraph stays untranslated, count=1/total=2/failed=0/translating=false, and another Translate click is a no-op.",
+      "reproducedModes": ["bilingual", "replace"],
+      "reproducedOnPreviousBuild": true,
+      "unchangedSourceResumeControl": { "translated": 2, "total": 2, "failed": 0, "passed": true },
+      "sourceRestoredAfterTest": true,
+      "recommendedScope": "Reconcile connected entries against current source on resume and restore/drop/recollect changed owners before observing and dispatching them. Keep generation-based rejection of stale responses and preserve page edits."
+    }
+  ],
+  "reviewEvidence": {
+    "privateEvidenceDirectory": ".codex/github-crash-2026-10-09/review",
+    "cpuHotPath": "The source-layout-policy CSS rule visitor. The bounded test recorded about 6.7 seconds of visitor self time across its observed translation work; media-card sampling identifies the same function.",
+    "timingMethod": "Wait for subsequent animation frames before reading observations; use performance.now inside frame callbacks and observe long tasks. Initial page parsing/layout is excluded. Repeat representative cases without CPU profiling.",
+    "restoration": "Completed workload runs preserve original source Text identities and values after restore; the resume scenario preserves the paused page edit. No source corruption was observed in these cases."
+  },
+  "coverageGaps": [
+    "The 20k-node performance fixture has only a small stylesheet; large DOM and large stylesheet cardinality are different dimensions.",
+    "The new 6000-rule regression has one bounded container and mostly ordinary flow, so it does not cover many distinct candidates or media snapshot ownership.",
+    "The render slice budget starts after expensive layout reads and capture phases.",
+    "A performance snapshot taken before a subsequent frame/observer delivery can report zero long tasks even while a layout callback is blocking. Earlier live zero values are not sufficient on their own to certify responsiveness.",
+    "The existing pause/resume test covers a paused in-flight entry without a source edit; paused restoration tests do not establish resumed scheduling after an edit."
+  ],
+  "nextAcceptance": [
+    "Fix R1 and R2 with a shared bounded-work design, including initial rendering and paused/dynamic updates.",
+    "Fix R3 and cover paused source edits for both display modes, alongside unchanged-source resume and stale-response controls.",
+    "Cross stylesheet size with multiple fixed-height, media and anchored layouts; include shared owners and inherited sizing dependencies.",
+    "Use native fresh Chromium and Firefox content builds for affected lifecycle/ownership regression cases and verify restoration independently of translation counts.",
+    "Run the established performance budgets and sample the reported GitHub page plus other structurally different real pages after the fixes. Treat screenshot correctness and main-thread responsiveness as separate acceptance evidence.",
+    "Complete one independent review of the final fix diff. Reopen review only for a new reproducible issue, failed gate or changed scope."
+  ],
+  "limits": [
+    "These are synthetic stress cases using deliberately long deterministic translations, not measurements of model translation quality.",
+    "New reproduction runs in this review use Chromium. Shared source indicates Firefox needs regression coverage, but new Firefox timing behavior was not measured here.",
+    "A browser process or GPU crash was not reproduced; seconds-long main-thread blocking was reproduced.",
+    "No new claim is made about exhaustive DOM mutation combinations or all websites. The earlier Go long-mock visual boundary remains recorded in github-crash-fix-2026-10-09.json."
+  ]
+}

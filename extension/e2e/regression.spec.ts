@@ -6,6 +6,72 @@ import { normalizeRegressions, setupNormalizeRegression, verifyNormalizeRegressi
 import { chromeTranslate } from '../tools/live-translate-probe/chrome-control.mjs';
 import { reconcileRegressions, setupReconcileRegression, verifyReconcileRegression, translateReconcileSource } from './helpers/reconcile-regressions';
 import { boundaryRegressions, setupBoundaryRegression, verifyBoundaryRegression, translateBoundarySource } from './helpers/boundary-regressions';
+import { layoutWorkloadCases, verifyLayoutWorkload, verifySynchronousLayoutChange, stylesheetWorkloadModes, translateStylesheetWorkloadText, verifyStylesheetWorkload } from './helpers/stylesheet-workload-regressions';
+
+for (const mode of stylesheetWorkloadModes) {
+  test(`large stylesheet workload: ${mode}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer(), requests: string[] = [];
+    mock.setTranslator(text => { requests.push(text); return translateStylesheetWorkloadText(text); });
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyStylesheetWorkload(page, mode, {
+        translate: () => translateTab(sw, tabId, mode), pause: () => stopWatchTab(sw, tabId),
+        restore: () => restoreTab(sw, tabId),
+      }, requests);
+    } finally { await mock.close(); }
+  });
+}
+
+for (const scenario of layoutWorkloadCases) for (const mode of stylesheetWorkloadModes) {
+  test(`layout stylesheet workload: ${scenario} / ${mode}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer();
+    mock.setTranslator(translateStylesheetWorkloadText);
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyLayoutWorkload(page, scenario, mode, {
+        translate: () => translateTab(sw, tabId, mode), pause: () => stopWatchTab(sw, tabId),
+        restore: () => restoreTab(sw, tabId),
+      });
+    } finally { await mock.close(); }
+  });
+}
+
+for (const mode of stylesheetWorkloadModes) {
+  test(`layout write source guard: ${mode}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer(); mock.setTranslator(translateStylesheetWorkloadText);
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifySynchronousLayoutChange(page, {
+        translate: () => translateTab(sw, tabId, mode), restore: () => restoreTab(sw, tabId),
+      });
+    } finally { await mock.close(); }
+  });
+}
+
+import { pauseResumeCases, verifyPauseResume } from './helpers/pause-resume-regressions';
+
+for (const scenario of pauseResumeCases) for (const mode of stylesheetWorkloadModes) {
+  test(`paused source resume: ${scenario} / ${mode}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer(), sources: string[] = [];
+    mock.setTranslator(text => { sources.push(text); return `译:${text}`; });
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyPauseResume(page, scenario, mode, {
+        translate: () => translateTab(sw, tabId, mode), pause: () => stopWatchTab(sw, tabId),
+        restore: () => restoreTab(sw, tabId), status: () => getTabStatus(sw, tabId),
+        requests: () => mock.getRequestCount(), delay: ms => mock.setResponseDelay(ms), sources,
+      });
+    } finally { await mock.close(); }
+  });
+}
 
 import { unwrappedRegressions, setupUnwrappedRegression, verifyUnwrappedRegression } from './helpers/unwrapped-regressions';
 

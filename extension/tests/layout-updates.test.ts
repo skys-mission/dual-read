@@ -11,7 +11,7 @@ beforeEach(() => {
   vi.stubGlobal('cancelAnimationFrame', (id: number) => { frames.delete(id); });
   document.body.innerHTML = '<p id="source">Current page source.</p>';
 });
-afterEach(() => { for (const subscription of subscriptions.splice(0)) subscription.dispose(); document.body.innerHTML = ''; vi.unstubAllGlobals(); });
+afterEach(() => { for (const subscription of subscriptions.splice(0)) subscription.dispose(); document.body.innerHTML = ''; vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
 function subscribe(read: Parameters<typeof watchLayoutUpdates>[0]) {
   const subscription = watchLayoutUpdates(read); subscriptions.push(subscription); return subscription;
@@ -97,4 +97,29 @@ it('can schedule an owned follow-up read without repeating global invalidation',
   const read = vi.fn(); const subscription = subscribe(read);
   subscription.refresh(false); flushFrame(); expect(read.mock.calls[0][0]).toEqual([]);
   subscription.refresh(); flushFrame(); expect(read.mock.calls[1][0]).toBeNull();
+});
+
+it('yields between expensive readers, retaining page records and global refreshes', async () => {
+  let time = 0;
+  vi.spyOn(performance, 'now').mockImplementation(() => time);
+  const first = vi.fn(() => { time += 30; return vi.fn(); }), second = vi.fn();
+  subscribe(first); subscribe(second);
+  document.getElementById('source')!.className = 'changed';
+  await Promise.resolve(); flushFrame();
+  expect(first).toHaveBeenCalledOnce(); expect(second).not.toHaveBeenCalled();
+  expect(frames.size).toBe(1);
+  flushFrame();
+  expect(second).toHaveBeenCalledOnce();
+  expect(second.mock.calls[0][0]).toEqual(expect.arrayContaining([expect.objectContaining({attributeName:'class'})]));
+  window.dispatchEvent(new Event('resize')); flushFrame(); flushFrame();
+  expect(second.mock.calls[1][0]).toBeNull();
+});
+
+it('an owned continuation wakes only its reader and disposal cancels deferred work', () => {
+  const first = vi.fn(), second = vi.fn();
+  const subscription = subscribe(first); subscribe(second);
+  subscription.refresh(false); flushFrame();
+  expect(first).toHaveBeenCalledOnce(); expect(second).not.toHaveBeenCalled();
+  subscription.refresh(false); subscription.dispose(); flushFrame();
+  expect(first).toHaveBeenCalledOnce(); expect(second).not.toHaveBeenCalled();
 });

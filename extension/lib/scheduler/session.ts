@@ -2,6 +2,7 @@ import type { PublicSessionConfig, TranslateStatus, TranslationPayload, Translat
 import { collectSlotTextNodes, collectUnits, collectUnitsAsync, isVisibilityMutation, mutationHasNewContent, mutationIndexDelta } from '../collector';
 import { composedContains } from '../dom-tree';
 import { yieldToMain } from '../runtime/yield';
+import { sourceLayoutReadSpent, withSourceLayoutRead } from '../renderer/source-layout-policy';
 import {
   renderBatch,
   renderError,
@@ -51,15 +52,8 @@ const INITIAL_MAX_MS = 8_000;
 /** Soft CPU budget per index turn — leave headroom under the 50ms Long Task floor. */
 const INDEX_SLICE_MS = 12;
 /**
- * Soft CPU budget per render flush turn. A viewport batch can hold 50+ block
- * companions; rendering them all in one rAF callback exceeds the 50ms Long
- * Task floor on slower machines, so oversized flushes continue next frame.
- */
-const RENDER_SLICE_MS = 24;
-/**
- * Units rendered per renderBatch call inside a flush. Small enough that one
- * chunk cannot overshoot the slice budget by more than a few ms; large enough
- * to keep the read/write pass coalescing effective.
+ * Bound the whole read/capture/write flush, including optional source-layout
+ * policy work, rather than limiting only the final renderBatch loop.
  */
 const RENDER_CHUNK_SIZE = 8;
 
@@ -78,10 +72,10 @@ interface Entry {
   attempts: number;
   status: EntryStatus;
   retryTimer: ReturnType<typeof setTimeout> | null;
-  /** Current source/rendered text nodes, excluding extension chrome. No layout reads. */
+  /** Current source/rendered text snapshot, excluding extension chrome. */
   source: { node: Text; ancestors: Element[]; value: string }[];
   /** Originals remain owned while rich/plain replacement paints different nodes. */
-  originalSource: Text[];
+  originalSource: { node: Text; ancestors: Element[]; value: string }[];
 }
 
 interface SlotJob {
@@ -290,16 +284,42 @@ export class ContentSession {
       rootMargin: PREFETCH_MARGIN,
     });
     this.watching = true;
+    this.startMutationWatch();
+    this.ignoreFloating(this.reconcileResume(this.generation));
+  }
+
+  private async reconcileResume(gen: number): Promise<void> {
+    let started = performance.now();
     // Reset entries stranded mid-flight (e.g. by an older pause) so they can
     // be re-queued when visible again.
     for (const entry of this.entries.values()) {
+      if (!this.isCurrent(gen) || !this.io) return;
+      if (performance.now() - started >= INDEX_SLICE_MS) {
+        await yieldToMain();
+        if (!this.isCurrent(gen) || !this.io) return;
+        started = performance.now();
+      }
+      if (!entry.unit.el.isConnected) {
+        this.dropEntry(entry.unit.el);
+        continue;
+      }
+      // Paused mutations have no registry records. Reconcile the live source
+      // before observing old entries, so neither dispatch nor its response
+      // guard can strand an edited unit with obsolete text/snapshots.
+      const originalChanged = entry.originalSource.some(({ node, ancestors, value }) =>
+        !ancestors.some(element => this.entries.has(element as HTMLElement))
+        && (!entry.unit.el.contains(node) || node.nodeValue !== value));
+      if (originalChanged || this.sourceChanged(entry)) {
+        restoreUnit(entry.unit.el);
+        this.dropEntry(entry.unit.el);
+        continue;
+      }
       if (entry.status === 'queued' || entry.status === 'inflight') {
         entry.status = 'idle';
       }
     }
     this.startObserving();
-    this.startMutationWatch();
-    this.ignoreFloating(this.indexFullDocument());
+    await this.indexFullDocument();
   }
 
   restore(): void {
@@ -332,7 +352,11 @@ export class ContentSession {
     this.flushTimer = null;
     if (this.renderTimer) clearTimeout(this.renderTimer);
     this.renderTimer = null;
+    if (this.renderFrame !== null) cancelAnimationFrame(this.renderFrame);
+    this.renderFrame = null;
     this.renderBuf = [];
+    this.captureBuf = [];
+    this.capturedBuf = [];
     this.pendingShells = [];
     this.pendingLayouts = [];
     this.disconnectPorts();
@@ -402,82 +426,97 @@ export class ContentSession {
    */
   private pendingShells: ShellReservation[] = [];
   private pendingLayouts: HTMLElement[] = [];
+  private captureBuf: typeof this.renderBuf = [];
+  private capturedBuf: typeof this.renderBuf = [];
+  private renderFrame: number | null = null;
+
+  private scheduleRenderFrame(): void {
+    if (this.renderFrame !== null) return;
+    this.renderFrame = requestAnimationFrame(() => {
+      this.renderFrame = null;
+      this.flushRenders();
+    });
+  }
 
   private flushRenders(): void {
-    // Frame-start order matters — every layout read happens before the frame's
-    // first DOM write, so no read forces a synchronous layout:
-    //   1. read last frame's filled shell heights (clean layout)
-    //   2. pre-measure this flush's block host heights (still clean)
-    //   3. apply shell keep/clear writes + render chunks (writes only)
-    const settling = this.pendingShells;
-    this.pendingShells = [];
-    const decisions = settling.length ? readShellDecisions(settling) : [];
-    const layouts = readBoundedLayouts(this.pendingLayouts);
-    const compact = readCompactLayouts(this.pendingLayouts);
-    const media = readMediaLayouts(this.pendingLayouts);
-    const anchors = readAnchoredLayouts(this.pendingLayouts);
-    this.pendingLayouts = [...settling.map(({ node }) => node), ...compact, ...layouts.map(({ owner }) => owner)];
-
-    const items = this.renderBuf.filter(({ entry }) => this.isLiveEntry(entry) && !this.sourceChanged(entry));
-    this.renderBuf = [];
-    if (this.disposed && this.disposeReason === 'restore') {
-      // DOM is about to be restored; skip pending paints.
-      return;
+    if (this.disposed && this.disposeReason === 'restore') return;
+    // Prepare a fixed cohort before any of its text/layout writes. A sibling
+    // translation can stretch a shared outer grid row, even when each image
+    // belongs to a distinct inner row. Yield during capture without measuring
+    // the remainder against that already translated geometry. New responses
+    // wait for the next cohort, so arrivals cannot keep extending this one.
+    if (!this.captureBuf.length && !this.capturedBuf.length) {
+      this.captureBuf = this.renderBuf;
+      this.renderBuf = [];
     }
-
+    if (this.captureBuf.length) {
+      const pending = this.captureBuf.splice(0, RENDER_CHUNK_SIZE);
+      let done = 0;
+      withSourceLayoutRead(() => {
+        for (const item of pending) {
+          if (done && sourceLayoutReadSpent()) break;
+          done++;
+          const { entry } = item;
+          if (!this.isLiveEntry(entry) || this.sourceChanged(entry)) continue;
+          captureMediaLayouts([entry.unit.el]);
+          if (this.config.mode !== 'replace') captureAnchoredLayouts([entry.unit.el]);
+          this.capturedBuf.push(item);
+        }
+      });
+      this.captureBuf.unshift(...pending.slice(done));
+      if (this.captureBuf.length) { this.scheduleRenderFrame(); return; }
+    }
+    // Bound the geometry/validation phases as well as text rendering.
+    const settling = this.pendingShells.splice(0, RENDER_CHUNK_SIZE);
+    const nodes = this.pendingLayouts.splice(0, RENDER_CHUNK_SIZE);
+    const buffered = this.capturedBuf.splice(0, RENDER_CHUNK_SIZE);
     const measured = new Map<HTMLElement, number>();
-    const typography = readSourceTypography(items.map(({ entry }) => entry.unit));
-    captureMediaLayouts(items.map(({ entry }) => entry.unit.el));
-    if (this.config.mode !== 'replace') {
-      captureAnchoredLayouts(items.map(({ entry }) => entry.unit.el));
-    }
-    for (const { entry: { unit } } of items) {
-      if (unit.kind !== 'block' || measured.has(unit.el)) continue;
-      try {
-        measured.set(unit.el, unit.el.getBoundingClientRect().height);
-      } catch {
-        /* jsdom / detached */
+    const { decisions, layouts, compact, media, anchors } = withSourceLayoutRead(() => {
+      const decisions = readShellDecisions(settling);
+      const layouts: ReturnType<typeof readBoundedLayouts> = [], compact: HTMLElement[] = [];
+      const media: ReturnType<typeof readMediaLayouts> = [], anchors: ReturnType<typeof readAnchoredLayouts> = [];
+      let done = 0;
+      for (const node of nodes) {
+        if (done && sourceLayoutReadSpent()) break;
+        layouts.push(...readBoundedLayouts([node])); compact.push(...readCompactLayouts([node]));
+        media.push(...readMediaLayouts([node])); anchors.push(...readAnchoredLayouts([node]));
+        done++;
       }
-    }
-
+      this.pendingLayouts.unshift(...nodes.slice(done));
+      return { decisions, layouts, compact, media, anchors };
+    });
+    const { items, typography } = withSourceLayoutRead(() => {
+      const items: typeof buffered = [];
+      const typography: ReturnType<typeof readSourceTypography> = new Map();
+      let done = 0;
+      for (const item of buffered) {
+        if (done && sourceLayoutReadSpent()) break;
+        done++;
+        const { entry } = item, { unit } = entry;
+        if (!this.isLiveEntry(entry) || this.sourceChanged(entry)) continue;
+        items.push(item);
+        for (const [element, source] of readSourceTypography([unit])) typography.set(element, source);
+        if (unit.kind !== 'block' || measured.has(unit.el)) continue;
+        try { measured.set(unit.el, unit.el.getBoundingClientRect().height); }
+        catch { /* detached / partial DOM */ }
+      }
+      this.capturedBuf.unshift(...buffered.slice(done));
+      return { items, typography };
+    });
+    this.pendingLayouts.push(...settling.map(({ node }) => node), ...compact, ...layouts.map(({ owner }) => owner));
     if (decisions.length) applyShellDecisions(decisions);
     applyBoundedLayouts(layouts);
     applyCompactLayouts(compact);
     applyMediaLayouts(media);
     applyAnchoredLayouts(anchors);
-
-    if (!items.length) {
-      if (this.pendingLayouts.length) requestAnimationFrame(() => this.flushRenders());
-      return;
-    }
-    const mode = this.config.mode ?? 'bilingual';
-    const opts = this.renderOpts();
-    // Time-slice oversized flushes across frames: render in fixed small chunks
-    // and hand the remainder to the next frame once the soft CPU budget is
-    // spent, so every rAF task stays under the Long Task floor even on slow
-    // shared-CPU machines. Shell reservations returned by renderBatch are
-    // settled at the start of the next flush frame.
-    const sliceEnd = performance.now() + RENDER_SLICE_MS;
-    let done = 0;
-    while (done < items.length) {
-      const chunk = items.slice(done, done + RENDER_CHUNK_SIZE);
-      done += chunk.length;
-      this.pendingShells.push(...renderBatch(chunk.map(({ entry, payload }) => ({ unit: entry.unit, payload })), mode, opts, measured, typography));
+    if (items.length) {
+      this.pendingShells.push(...renderBatch(items.map(({ entry, payload }) => ({ unit: entry.unit, payload })),
+        this.config.mode ?? 'bilingual', this.renderOpts(), measured, typography));
       // Rich replace and inline flows intentionally move/change source nodes.
       // Capture the resulting tree before observer callbacks see our writes.
-      for (const { entry } of chunk) entry.source = this.captureSource(entry.unit);
-      if (done >= items.length) break;
-      if (performance.now() < sliceEnd) continue;
-      // Re-queue the remainder ahead of anything buffered since, then yield
-      // the rest of the flush to the next frame.
-      this.renderBuf = items.slice(done).concat(this.renderBuf);
-      requestAnimationFrame(() => this.flushRenders());
-      return;
+      for (const { entry } of items) entry.source = this.captureSource(entry.unit);
     }
-    // Settle this frame's shells at the next frame start (clean-layout reads).
-    if (this.pendingShells.length || this.pendingLayouts.length) {
-      requestAnimationFrame(() => this.flushRenders());
-    }
+    if (this.renderBuf.length || this.capturedBuf.length || this.pendingShells.length || this.pendingLayouts.length) this.scheduleRenderFrame();
   }
 
   private bufferRender(entry: Entry, payload: TranslationPayload): void {
@@ -491,7 +530,7 @@ export class ContentSession {
           this.renderBuf = [];
           return;
         }
-        requestAnimationFrame(() => this.flushRenders());
+        this.scheduleRenderFrame();
       }, delay);
     }
   }
@@ -807,7 +846,7 @@ export class ContentSession {
   private ensureEntry(unit: TranslationUnit): Entry | null {
     if (this.entries.has(unit.el)) return null;
     const source = this.captureSource(unit);
-    const entry: Entry = { unit, attempts: 0, status: 'idle', retryTimer: null, source, originalSource: source.map(({ node }) => node) };
+    const entry: Entry = { unit, attempts: 0, status: 'idle', retryTimer: null, source, originalSource: source };
     this.entries.set(unit.el, entry);
     return entry;
   }
@@ -926,7 +965,7 @@ export class ContentSession {
       return Boolean(entry && this.sourceChanged(entry));
     }, (host, box) => {
       const entry = this.entries.get(host);
-      return Boolean(entry && [...entry.originalSource, ...entry.source.map(({ node }) => node)]
+      return Boolean(entry && [...entry.originalSource.map(({ node }) => node), ...entry.source.map(({ node }) => node)]
         .some(node => node.isConnected && host.contains(node) && composedContains(box, node) && this.ownsSource(entry, node.parentElement)));
     });
 

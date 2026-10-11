@@ -2,7 +2,8 @@ import { P } from '../dom-const';
 import { composedContains } from '../dom-tree';
 import { stylesheetChanged, watchLayoutUpdates } from './layout-updates';
 import { applyAnchoredLayouts, readAnchoredLayouts } from './anchored-layout';
-import { readComputedSizing, readSourceLayoutPolicyState, readUnmaskedLayoutProperty, type SourceLayoutPolicy } from './source-layout-policy';
+import { readComputedSizing, readSourceLayoutPolicyState, readUnmaskedLayoutProperty, withSourceLayoutRead, type SourceLayoutPolicy } from './source-layout-policy';
+import { takeLayoutWork } from './layout-work';
 
 const HEIGHT = `data-${P}-layout-height`;
 const STYLE = `data-${P}-layout-style`;
@@ -36,6 +37,7 @@ const retained = new Map<HTMLElement, AppliedExpansion>();
 const owned = new WeakMap<HTMLElement, Set<HTMLElement>>();
 const pendingRelax = new Set<HTMLElement>();
 const pendingMeasure = new Set<HTMLElement>();
+const pendingUpdates = new Map<HTMLElement, boolean>();
 let watcher: ReturnType<typeof watchLayoutUpdates> | null = null;
 let blocked = new WeakMap<HTMLElement, { sizing: string; policy: string }>();
 let resizeObserver: ResizeObserver | null = null;
@@ -50,7 +52,7 @@ function pageSizing(box: HTMLElement, computed?: CSSStyleDeclaration, source?: S
   const height = state?.style.isConnected ? readUnmaskedLayoutProperty(box, 'height', state.style)
     : (computed ?? getComputedStyle(box)).height;
   const collapsed = parseFloat(height) >= 0 && parseFloat(height) <= 2;
-  return JSON.stringify([policy.signature, collapsed, policy.complete ? null
+  return JSON.stringify([policy.signature, collapsed, policy.limited ? '@read-limit' : policy.complete ? null
     : readComputedSizing(box, SIZING, state?.style.isConnected ? state.style : undefined)]);
 }
 
@@ -123,36 +125,65 @@ function rememberOwner(box: HTMLElement, owner: HTMLElement, state: AppliedExpan
  * Scroll viewports, chrome, line clamps, and positioned overlays retain their
  * original policies. Horizontal carousel clipping remains in place. */
 export function readBoundedLayouts(nodes: readonly HTMLElement[]): Expansion[] {
+  return withSourceLayoutRead(() => readBoundedLayoutsInPass(nodes));
+}
+
+function readBoundedLayoutsInPass(nodes: readonly HTMLElement[]): Expansion[] {
   const changes: Expansion[] = [];
+  // Shared ancestors need one cascade read in this pass, never a persistent
+  // cache: page CSSOM edits and inherited inputs must be seen on the next read.
+  const styles = new Map<HTMLElement, CSSStyleDeclaration>();
+  const sources = new Map<HTMLElement, SourceLayoutPolicy>();
+  const sizes = new Map<HTMLElement, string>();
+  const style = (box: HTMLElement): CSSStyleDeclaration => {
+    let value = styles.get(box);
+    if (!value) { value = getComputedStyle(box); styles.set(box, value); }
+    return value;
+  };
+  const source = (box: HTMLElement): SourceLayoutPolicy => {
+    let value = sources.get(box);
+    if (!value) { value = readSourceLayoutPolicyState(box, SIZING, style(box)); sources.set(box, value); }
+    return value;
+  };
+  const sizing = (box: HTMLElement): string => {
+    let value = sizes.get(box);
+    if (value === undefined) { value = pageSizing(box, style(box), source(box)); sizes.set(box, value); }
+    return value;
+  };
   for (const owner of nodes) {
     if (!owner.isConnected || owner.closest(CHROME)) continue;
     if (owner.matches('.dual-read-target--inner, .dual-read-target--inline, .dual-read-nav-sub, .dual-read-target--compact')) continue;
     const target = owner.getBoundingClientRect();
     if (!target.width || !target.height) continue;
-    const context: Expansion['context'] = [];
+    const ancestors: HTMLElement[] = [];
     for (let box = owner.parentElement; box && box !== document.body; box = box.parentElement) {
-      const s = getComputedStyle(box);
-      // A filled sizing animation still owns this dimension. Do not mask it
-      // with an important auto height, or expand its containing ancestors.
-      const source = readSourceLayoutPolicyState(box, SIZING, s);
-      if (source.animated) break;
+      const s = style(box);
       const overflowY = s.overflowY || s.overflow;
       if (s.position === 'absolute' || s.position === 'fixed'
         || /auto|scroll/.test(overflowY) || box.matches(CHROME)) break;
       if (blockedByPage(box, s)) break;
-      const sizing = pageSizing(box, s, source), inner = [...context];
-      context.push({box, sizing});
-      if (!expansionPolicy(box, s)) continue;
       const bounds = box.getBoundingClientRect();
       const state = applied.get(box);
-      if (state && (sizing !== state.sizing || !expansionPolicy(box, s))) break;
-      if (state?.style.isConnected && box.getAttribute(HEIGHT) === state.id) rememberOwner(box, owner, state, inner);
-      if (bounds.height < 24 || target.bottom <= bounds.bottom + 1
-        || target.left < bounds.left - 1 || target.right > bounds.right + 1) continue;
+      const eligible = expansionPolicy(box, s);
+      const spills = eligible && bounds.height >= 24 && target.bottom > bounds.bottom + 1
+        && target.left >= bounds.left - 1 && target.right <= bounds.right + 1;
       const borders = (parseFloat(s.borderTopWidth) || 0) + (parseFloat(s.borderBottomWidth) || 0);
       const padding = (parseFloat(s.paddingTop) || 0) + (parseFloat(s.paddingBottom) || 0);
-      const required = Math.max(box.scrollHeight + borders, bounds.height + target.bottom - bounds.bottom);
-      if (required > Math.max(bounds.height * 2, window.innerHeight)) continue;
+      const required = spills ? Math.max(box.scrollHeight + borders, bounds.height + target.bottom - bounds.bottom) : 0;
+      const expand = spills && required <= Math.max(bounds.height * 2, window.innerHeight);
+      // Ordinary flow already contains its translation. Do not scan the whole
+      // site's stylesheets for each of its ancestors. Only an expansion or an
+      // existing owned rule needs a source contract and its inner dependencies.
+      if (!state && !expand) { ancestors.push(box); continue; }
+      // A sizing animation on any inner ancestor still owns the containing
+      // geometry, including forwards fill and custom-property dependencies.
+      if ([...ancestors, box].some(element => source(element).animated || source(element).limited)) break;
+      const currentSizing = sizing(box);
+      const inner = ancestors.map(element => ({box: element, sizing: sizing(element)}));
+      if (state && (currentSizing !== state.sizing || !eligible)) break;
+      if (state?.style.isConnected && box.getAttribute(HEIGHT) === state.id) rememberOwner(box, owner, state, inner);
+      ancestors.push(box);
+      if (!expand) continue;
       // Measured product/document rows may have explicit pixel tracks. Keep
       // their source minimums and named lines, while allowing content growth.
       const rows = s.gridTemplateRows;
@@ -160,7 +191,7 @@ export function readBoundedLayouts(nodes: readonly HTMLElement[]): Expansion[] {
         ? rows.replace(/(\d+(?:\.\d+)?)px/g, 'minmax($1px, auto)') : undefined;
       const inset = s.boxSizing === 'border-box' ? 0 : padding + borders;
       changes.push({ box, owner, height: Math.ceil(required - inset),
-        sourceFloor: Math.max(0, bounds.height - inset), sizing, policy: policySignature(s), gridRows, context: inner });
+        sourceFloor: Math.max(0, bounds.height - inset), sizing: currentSizing, policy: policySignature(s), gridRows, context: inner });
     }
   }
   return changes;
@@ -169,7 +200,10 @@ export function readBoundedLayouts(nodes: readonly HTMLElement[]): Expansion[] {
 /** Apply owned CSS rules without overwriting any page style or class. */
 export function applyBoundedLayouts(changes: readonly Expansion[]): void {
   for (const { box, height, owner, sourceFloor, sizing, policy, gridRows, context } of changes) {
-    if (!box.isConnected || !owner.isConnected || blockedByPage(box) || pageSizing(box) !== sizing) continue;
+    // An earlier owned write can run a custom-element callback or change an
+    // author container query. Never reuse its pre-write contract afterward.
+    if (!withSourceLayoutRead(() => box.isConnected && owner.isConnected
+      && !blockedByPage(box) && pageSizing(box) === sizing)) continue;
     let state = applied.get(box);
     if (!state || !state.style.isConnected) {
       if (state) clearRule(box);
@@ -213,6 +247,7 @@ function clearRule(box: HTMLElement, keepOwners = false): void {
   unobserveUnused(box);
   pendingRelax.delete(box);
   pendingMeasure.delete(box);
+  pendingUpdates.delete(box);
   if (!applied.size && !retained.size) {
     watcher?.dispose(); watcher = null;
     resizeObserver?.disconnect(); resizeObserver = null; resizeNodes.clear(); resizeSizes.clear();
@@ -220,9 +255,23 @@ function clearRule(box: HTMLElement, keepOwners = false): void {
 }
 
 function readUpdates(mutations: readonly MutationRecord[] | null): (() => void) | undefined {
-  const measured = new Set(pendingMeasure);
-  pendingMeasure.clear();
   const global = !mutations || stylesheetChanged(mutations);
+  // Arbitrary attributes and sibling selectors can affect the cascade outside
+  // the source ancestry. Validate these contracts in small batches, while
+  // only ancestry/global reflow relaxes an existing height floor.
+  const policyChange = global || mutations.some(record => record.type !== 'characterData');
+  for (const [box] of [...applied, ...retained]) {
+    const reflow = global || mutations?.some(record => {
+      const target = record.target instanceof Element ? record.target : record.target.parentElement;
+      return !!target && (box.contains(target) || composedContains(target, box));
+    });
+    if (policyChange || reflow || !box.isConnected || pendingRelax.has(box) || pendingMeasure.has(box)) {
+      pendingUpdates.set(box, !!reflow || !!pendingUpdates.get(box));
+    }
+  }
+  const selected = new Map(takeLayoutWork(pendingUpdates));
+  for (const box of selected.keys()) pendingUpdates.delete(box);
+  const measured = new Set([...selected.keys()].filter(box => pendingMeasure.delete(box)));
   const sources = new Map<HTMLElement, string>();
   const sourceSizing = (box: HTMLElement): string => {
     let sizing = sources.get(box);
@@ -238,7 +287,7 @@ function readUpdates(mutations: readonly MutationRecord[] | null): (() => void) 
   // A paused page can close and reopen a translated panel. Keep only live
   // owners while its sizing is overridden, then resume the original contract
   // without recollecting text or making another translation request.
-  const dormant = [...retained].map(([box, state]) => {
+  const dormant = [...retained].filter(([box]) => selected.has(box)).map(([box, state]) => {
     const remaining = [...state.owners].filter(owner => owner.isConnected && box.contains(owner));
     const detached = !box.isConnected || box.getRootNode() !== state.root || !remaining.length || contextRemoved(box, state, remaining);
     const style = !detached && sourceSizing(box) === state.sizing && contextIntact(state, remaining) ? getComputedStyle(box) : null;
@@ -249,15 +298,12 @@ function readUpdates(mutations: readonly MutationRecord[] | null): (() => void) 
   const resumable = new Set(dormant.filter(item => item.resume).map(item => item.box));
   const revivals = readBoundedLayouts(dormant.filter(item => item.resume).flatMap(item => item.remaining))
     .filter(change => resumable.has(change.box));
-  const states = [...applied].map(([box, state]) => {
+  const states = [...applied].filter(([box]) => selected.has(box)).map(([box, state]) => {
     const remaining = [...state.owners].filter(owner => owner.isConnected && box.contains(owner));
     const detached = !box.isConnected || !state.style.isConnected || box.getRootNode() !== state.style.getRootNode() || box.getAttribute(HEIGHT) !== state.id || contextRemoved(box, state, remaining);
     const style = detached ? null : getComputedStyle(box);
     const invalidPolicy = !!style && (sourceSizing(box) !== state.sizing || !contextIntact(state, remaining) || !expansionPolicy(box, style));
-    const reflow = global || mutations?.some(record => {
-      const target = record.target instanceof Element ? record.target : record.target.parentElement;
-      return !!target && (box.contains(target) || composedContains(target, box));
-    });
+    const reflow = selected.get(box);
     return { box, state, remaining, invalidPolicy, detached, policy: style ? policySignature(style) : '',
       relax: pendingRelax.delete(box) || remaining.length !== state.owners.size || reflow };
   });
@@ -294,7 +340,7 @@ function readUpdates(mutations: readonly MutationRecord[] | null): (() => void) 
     for (const { box } of revivals) if (applied.has(box)) pendingMeasure.add(box);
     applyBoundedLayouts(changes.filter(change => applied.has(change.box) && !pendingMeasure.has(change.box)));
     applyAnchoredLayouts(anchors);
-    if (pendingMeasure.size) watcher?.refresh(false);
+    if (pendingMeasure.size || pendingUpdates.size) watcher?.refresh(false);
   };
 }
 

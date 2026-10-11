@@ -1,7 +1,8 @@
 import { P } from '../dom-const';
 import { composedContains } from '../dom-tree';
 import { stylesheetChanged, watchLayoutUpdates } from './layout-updates';
-import { readComputedSizing, readSourceLayoutPolicyState, readUnmaskedLayout, type SourceLayoutPolicy } from './source-layout-policy';
+import { readComputedSizing, readSourceLayoutPolicyState, readUnmaskedLayout, withSourceLayoutRead, type SourceLayoutPolicy } from './source-layout-policy';
+import { takeLayoutWork } from './layout-work';
 
 const BOUND = `data-${P}-media-bound`;
 const STYLE = `data-${P}-media-style`;
@@ -30,6 +31,7 @@ let rows = new WeakMap<Element, MediaSnapshot[]>();
 let hosts = new WeakMap<HTMLElement, MediaSnapshot[]>();
 let owners = new WeakMap<HTMLElement, MediaSnapshot[]>();
 const applied = new Map<HTMLImageElement, MediaRule>();
+const pendingUpdates = new Set<HTMLImageElement>();
 const SOURCE_ATTRIBUTES = ['src', 'srcset', 'sizes', 'width', 'height', 'class', 'style'];
 let watcher: ReturnType<typeof watchLayoutUpdates> | null = null;
 let sequence = 0;
@@ -80,6 +82,10 @@ function sameMediaShape(source: MediaShape, current: MediaShape): boolean {
  * translation makes the shared grid/flex row taller. Retain its source ratio
  * to the containing column, including intentional source overhang. */
 export function captureMediaLayouts(elements: readonly HTMLElement[]): void {
+  withSourceLayoutRead(() => captureMediaLayoutsInPass(elements));
+}
+
+function captureMediaLayoutsInPass(elements: readonly HTMLElement[]): void {
   const styles = new Map<Element, CSSStyleDeclaration>();
   const style = (el: Element): CSSStyleDeclaration => {
     let s = styles.get(el);
@@ -106,13 +112,17 @@ export function captureMediaLayouts(elements: readonly HTMLElement[]): void {
           const width = parent.getBoundingClientRect().width;
           const cssWidth = parseFloat(style(image).width), parentWidth = contentSize(style(parent), 'width');
           const cssSizing = cssWidth > 0 && parentWidth > 0;
-          if (width > 0) snapshots.push({ image, parent, source: image.currentSrc || image.src,
+          if (width > 0) {
+            const policy = readSourceLayoutPolicyState(image, MEDIA_POLICY), rowPolicy = readSourceLayoutPolicyState(row, ROW_POLICY);
+            const containers = containerPolicies(parent);
+            if (policy.limited || rowPolicy.limited || containers.some(container => container.policy.limited)) continue;
+            snapshots.push({ image, parent, source: image.currentSrc || image.src,
             // max-width percentages use the containing block's content box;
             // the image's used width follows its own box-sizing declaration.
             widthRatio: cssSizing ? cssWidth / parentWidth : rect.width / width, cssSizing,
             row, root: image.getRootNode(), attributes: SOURCE_ATTRIBUTES.map(name => image.getAttribute(name)),
-            policy: readSourceLayoutPolicyState(image, MEDIA_POLICY), rowPolicy: readSourceLayoutPolicyState(row, ROW_POLICY),
-            containers: containerPolicies(parent), shape: readMediaShape(image, parent, style(image)) });
+            policy, rowPolicy, containers, shape: readMediaShape(image, parent, style(image)) });
+          }
         }
         rows.set(row, snapshots);
       }
@@ -130,7 +140,7 @@ function containerPolicies(parent: Element): MediaSnapshot['containers'] {
   for (let element: Element | null = parent, depth = 0; element && element !== document.body && depth < 16; element = element.parentElement, depth++) {
     if (element instanceof HTMLElement) {
       const policy = readSourceLayoutPolicyState(element, CONTAINER_POLICY);
-      containers.push({element, policy, sizing: policy.complete ? null : readComputedSizing(element, CONTAINER_POLICY)});
+      containers.push({element, policy, sizing: policy.complete || policy.limited ? null : readComputedSizing(element, CONTAINER_POLICY)});
     }
   }
   return containers;
@@ -143,13 +153,20 @@ export function attachMediaLayouts(host: HTMLElement, owner: HTMLElement): void 
 }
 
 export function readMediaLayouts(nodes: readonly HTMLElement[]): MediaChange[] {
+  return withSourceLayoutRead(() => readMediaLayoutsInPass(nodes));
+}
+
+function readMediaLayoutsInPass(nodes: readonly HTMLElement[]): MediaChange[] {
   const changes: MediaChange[] = [];
+  const contracts = new Map<MediaSnapshot, boolean>();
   for (const owner of nodes) {
     if (!owner.isConnected) continue;
     for (const snapshot of owners.get(owner) || []) {
       const { image, parent, widthRatio } = snapshot;
       const rule = applied.get(image);
-      if (!sourceContractIntact(snapshot)) {
+      let intact = contracts.get(snapshot);
+      if (intact === undefined) { intact = sourceContractIntact(snapshot); contracts.set(snapshot, intact); }
+      if (!intact) {
         if (rule?.snapshot === snapshot) changes.push({ snapshot, owner, release: true });
         continue;
       }
@@ -176,7 +193,7 @@ export function applyMediaLayouts(changes: readonly MediaChange[]): void {
       if (applied.get(image)?.snapshot === snapshot) { snapshot.retired = true; clearMediaRule(image); }
       continue;
     }
-    if (!sourceContractIntact(snapshot) || !snapshot.row.contains(owner)) continue;
+    if (!withSourceLayoutRead(() => sourceContractIntact(snapshot) && snapshot.row.contains(owner))) continue;
     if (!image.isConnected || !owner.isConnected) continue;
     let rule = applied.get(image);
     if (!rule || !rule.style.isConnected) {
@@ -204,9 +221,10 @@ function sourceContractIntact(snapshot: MediaSnapshot): boolean {
     || !SOURCE_ATTRIBUTES.every((name, index) => image.getAttribute(name) === snapshot.attributes[index])) return false;
   const policy = readSourceLayoutPolicyState(image, MEDIA_POLICY);
   const rowPolicy = readSourceLayoutPolicyState(snapshot.row as HTMLElement, ROW_POLICY);
+  if (policy.limited || rowPolicy.limited) return false;
   if (policy.signature !== snapshot.policy.signature || rowPolicy.signature !== snapshot.rowPolicy.signature) return false;
   const containers = containerPolicies(snapshot.parent);
-  if (policy.animated || rowPolicy.animated || containers.some(container => container.policy.animated)) return false;
+  if (policy.animated || rowPolicy.animated || containers.some(container => container.policy.animated || container.policy.limited)) return false;
   if (containers.length !== snapshot.containers.length || containers.some((container, index) =>
     container.element !== snapshot.containers[index].element || container.policy.signature !== snapshot.containers[index].policy.signature
     || container.sizing !== snapshot.containers[index].sizing)) return false;
@@ -224,6 +242,7 @@ function clearMediaRule(image: HTMLImageElement): void {
   if (image.getAttribute(BOUND) === rule.id) image.removeAttribute(BOUND);
   rule.style.remove();
   applied.delete(image);
+  pendingUpdates.delete(image);
   if (!applied.size) { watcher?.dispose(); watcher = null; }
 }
 
@@ -239,13 +258,18 @@ function readUpdates(mutations: readonly MutationRecord[] | null): (() => void) 
       return !!target && (composedContains(target, image) || rule.snapshot.row.contains(target)
         || record.type === 'childList' && [...record.removedNodes].some(node => node === rule.snapshot.row || node.contains(rule.snapshot.row)));
     });
-    if (!affected) continue;
+    if (affected) pendingUpdates.add(image);
+  }
+  for (const image of takeLayoutWork(pendingUpdates)) {
+    pendingUpdates.delete(image);
+    const rule = applied.get(image);
+    if (!rule) continue;
     const remaining = [...rule.owners].filter(owner => owner.isConnected && rule.snapshot.row.contains(owner));
     const style = image.isConnected ? getComputedStyle(image) : null;
     const invalidSource = !sourceContractIntact(rule.snapshot) || !!style && (style.transform !== 'none' || /absolute|fixed/.test(style.position));
     if (invalidSource || remaining.length !== rule.owners.size) releases.push({ image, rule, invalidSource, remaining });
   }
-  if (!releases.length) return;
+  if (!releases.length && !pendingUpdates.size) return;
   return () => {
     for (const { image, rule, invalidSource, remaining } of releases) {
       if (applied.get(image) !== rule) continue;
@@ -253,6 +277,7 @@ function readUpdates(mutations: readonly MutationRecord[] | null): (() => void) 
       rule.owners = new Set(remaining);
       if (invalidSource || !remaining.length) clearMediaRule(image);
     }
+    if (pendingUpdates.size) watcher?.refresh(false);
   };
 }
 

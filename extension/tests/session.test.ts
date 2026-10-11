@@ -409,6 +409,66 @@ describe('ContentSession scheduling state machine', () => {
     session.dispose('stop');
   });
 
+  it.each(['bilingual', 'replace'] as const)('recollects source edited while paused before resuming %s', async (mode) => {
+    vi.useFakeTimers();
+    document.body.innerHTML = '<main><p id="stable">A stable translated paragraph.</p><p id="changing">The old pending paragraph.</p></main>';
+    const changing = document.getElementById('changing')!;
+    const original = changing.firstChild!;
+    const pending: ((translations: string[]) => void)[] = [];
+    vi.mocked(translateBatchViaPort).mockImplementation((texts) => texts.includes('The old pending paragraph.')
+      ? new Promise(resolve => pending.push(resolve)) : Promise.resolve(texts.map(text => `译:${text}`)));
+    const session = new ContentSession(config({ mode, batchSize: 1 }));
+    const start = session.start();
+    try {
+      await vi.advanceTimersByTimeAsync(800);
+      expect(pending).toHaveLength(1);
+      expect(document.getElementById('stable')!.textContent).toContain('译:A stable translated paragraph.');
+      session.pause();
+      original.nodeValue = 'The current paragraph edited while paused.';
+      session.resumeWatch();
+      await vi.advanceTimersByTimeAsync(1600);
+      pending[0]!(['An obsolete response.']);
+      await vi.advanceTimersByTimeAsync(8000);
+      await start;
+      expect(vi.mocked(translateBatchViaPort).mock.calls.map(([texts]) => texts)).toContainEqual(['The current paragraph edited while paused.']);
+      expect(changing.textContent).toContain('译:The current paragraph edited while paused.');
+      expect(session.status()).toMatchObject({ count: 2, total: 2, failed: 0, translating: false });
+      session.restore();
+      expect(changing.firstChild).toBe(original);
+      expect(changing.textContent).toBe('The current paragraph edited while paused.');
+    } finally { session.dispose(); }
+  });
+
+  it.each((['bilingual', 'replace'] as const).flatMap(mode => ['edit', 'replace', 'remove'].map(change => ({mode, change}))))(
+    'reconciles delivered source $change after a pause in $mode', async ({mode, change}) => {
+      vi.useFakeTimers();
+      document.body.innerHTML = '<main><p id="stable">A stable paragraph.</p><p id="changing"><strong>Original title</strong> with an explanation.</p></main>';
+      const host = document.getElementById('changing')!, title = host.querySelector('strong')!;
+      const original = title.firstChild!;
+      const fresh = document.createTextNode('Current page title');
+      vi.mocked(translateBatchViaPort).mockImplementation(async texts => texts.map(text => `译:${text}`));
+      const session = new ContentSession(config({mode, batchSize: 1}));
+      const start = session.start();
+      try {
+        await vi.advanceTimersByTimeAsync(1600); await start;
+        session.pause();
+        if (change === 'remove') host.remove();
+        else if (change === 'replace') original.replaceWith(fresh);
+        else original.nodeValue = 'Current page title';
+        session.resumeWatch();
+        await vi.advanceTimersByTimeAsync(1600);
+        expect(session.status()).toMatchObject({count: change === 'remove' ? 1 : 2, total: change === 'remove' ? 1 : 2, failed: 0, translating: false});
+        if (change !== 'remove') expect(host.textContent).toContain('译:Current page title');
+        session.restore();
+        if (change === 'remove') expect(host.isConnected).toBe(false);
+        else {
+          expect(host.querySelector('strong')).toBe(title);
+          expect(title.firstChild).toBe(change === 'replace' ? fresh : original);
+          expect(host.textContent).toBe('Current page title with an explanation.');
+        }
+      } finally { session.dispose(); }
+    });
+
   it('ignores an old response after a source update replaces its entry', async () => {
     vi.useFakeTimers();
     paragraphs(1);
