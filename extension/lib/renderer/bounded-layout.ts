@@ -225,7 +225,7 @@ export function applyBoundedLayouts(changes: readonly Expansion[]): void {
       state.gridRows ??= gridRows;
       writeRule(state);
     }
-    watcher ??= watchLayoutUpdates(readUpdates);
+    watcher ??= watchLayoutUpdates(readUpdates, { checkSourcePolicies: true });
     watcher.addRoot(box.getRootNode());
     observeSize(box);
   }
@@ -254,12 +254,12 @@ function clearRule(box: HTMLElement, keepOwners = false): void {
   }
 }
 
-function readUpdates(mutations: readonly MutationRecord[] | null): (() => void) | undefined {
+function readUpdates(mutations: readonly MutationRecord[] | null, checkSourcePolicies = false): (() => void) | undefined {
   const global = !mutations || stylesheetChanged(mutations);
   // Arbitrary attributes and sibling selectors can affect the cascade outside
   // the source ancestry. Validate these contracts in small batches, while
   // only ancestry/global reflow relaxes an existing height floor.
-  const policyChange = global || mutations.some(record => record.type !== 'characterData');
+  const policyChange = checkSourcePolicies || global || mutations.some(record => record.type !== 'characterData');
   for (const [box] of [...applied, ...retained]) {
     const reflow = global || mutations?.some(record => {
       const target = record.target instanceof Element ? record.target : record.target.parentElement;

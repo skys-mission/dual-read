@@ -55,6 +55,145 @@ for (const mode of stylesheetWorkloadModes) {
 }
 
 import { pauseResumeCases, verifyPauseResume } from './helpers/pause-resume-regressions';
+import { partialVisibilityCases, cssomCases, translateCssomSource, verifyPartialVisibility, verifyCssomChange, verifyRichResponse } from './helpers/visibility-cssom-regressions';
+import { typographyCssomCases, verifyTypographyCssom } from './helpers/typography-cssom-regressions';
+import { relocatedLifecycleCases, relocatedTypographyCases, relocatedFollowCases, verifyRelocatedLifecycle, verifyRelocatedTypography, verifyRelocatedFollow, verifyRelocatedLateReuse } from './helpers/relocated-companion-regressions';
+import { armIndexYieldMutation, verifyIndexYield } from './helpers/index-yield-regressions';
+
+for (const scenario of relocatedFollowCases) {
+  test(`relocated companion follows source: ${scenario.operation} / ${scenario.state}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer();
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyRelocatedFollow(page, scenario, {
+        translate: mode => translateTab(sw, tabId, mode), pause: () => stopWatchTab(sw, tabId),
+        restore: () => restoreTab(sw, tabId), status: () => getTabStatus(sw, tabId), requests: () => mock.getRequestCount(),
+      });
+    } finally { await mock.close(); }
+  });
+}
+
+for (const delivery of ['delivered', 'undelivered'] as const) {
+  test(`relocated companion late reuse after restore: ${delivery}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer();
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyRelocatedLateReuse(page, delivery, {
+        translate: mode => translateTab(sw, tabId, mode), pause: () => stopWatchTab(sw, tabId),
+        restore: () => restoreTab(sw, tabId), status: () => getTabStatus(sw, tabId), requests: () => mock.getRequestCount(),
+      });
+    } finally { await mock.close(); }
+  });
+}
+
+for (const structure of ['plain', 'rich'] as const) for (const mode of ['bilingual', 'replace'] as const) {
+  test(`source snapshot during index yield: ${structure} / ${mode}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer();
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyIndexYield(page, structure, mode, {
+        arm: () => sw.evaluate(`chrome.scripting.executeScript({ target: { tabId: ${tabId} }, func: ${armIndexYieldMutation.toString()} })`),
+        translate: next => translateTab(sw, tabId, next), restore: () => restoreTab(sw, tabId),
+      });
+    } finally { await mock.close(); }
+  });
+}
+
+for (const scenario of relocatedLifecycleCases) {
+  test(`relocated companion lifecycle: ${scenario.operation} / ${scenario.state}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer();
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyRelocatedLifecycle(page, scenario, {
+        translate: mode => translateTab(sw, tabId, mode), pause: () => stopWatchTab(sw, tabId),
+        restore: () => restoreTab(sw, tabId), status: () => getTabStatus(sw, tabId), requests: () => mock.getRequestCount(),
+      });
+    } finally { await mock.close(); }
+  });
+}
+
+for (const scenario of relocatedTypographyCases) {
+  test(`relocated companion typography: ${scenario}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer();
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyRelocatedTypography(page, scenario, {
+        translate: mode => translateTab(sw, tabId, mode), pause: () => stopWatchTab(sw, tabId),
+        restore: () => restoreTab(sw, tabId), status: () => getTabStatus(sw, tabId), requests: () => mock.getRequestCount(),
+      });
+    } finally { await mock.close(); }
+  });
+}
+
+for (const scenario of typographyCssomCases) for (const mode of stylesheetWorkloadModes) {
+  test(`CSSOM copied typography: ${scenario} / ${mode}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer();
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyTypographyCssom(page, scenario, mode, {
+        translate: next => translateTab(sw, tabId, next), pause: () => stopWatchTab(sw, tabId),
+        restore: () => restoreTab(sw, tabId), requests: () => mock.getRequestCount(),
+      });
+    } finally { await mock.close(); }
+  });
+}
+
+for (const mode of stylesheetWorkloadModes) {
+  test(`rich response scheduling: ${mode}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer();
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyRichResponse(page, mode, {
+        translate: next => translateTab(sw, tabId, next), pause: () => stopWatchTab(sw, tabId),
+        restore: () => restoreTab(sw, tabId), requests: () => mock.getRequestCount(),
+      });
+    } finally { await mock.close(); }
+  });
+}
+
+for (const scenario of partialVisibilityCases) for (const mode of stylesheetWorkloadModes) {
+  test(`partial source visibility: ${scenario} / ${mode}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer();
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyPartialVisibility(page, scenario, mode, {
+        translate: next => translateTab(sw, tabId, next), pause: () => stopWatchTab(sw, tabId),
+        restore: () => restoreTab(sw, tabId), status: () => getTabStatus(sw, tabId),
+        requests: () => mock.getRequestCount(), delay: ms => mock.setResponseDelay(ms),
+      });
+    } finally { await mock.close(); }
+  });
+}
+
+for (const scenario of cssomCases) for (const mode of stylesheetWorkloadModes) {
+  test(`CSSOM source policy: ${scenario} / ${mode}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer(); mock.setTranslator(translateCssomSource);
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyCssomChange(page, scenario, mode, {
+        translate: next => translateTab(sw, tabId, next), pause: () => stopWatchTab(sw, tabId), restore: () => restoreTab(sw, tabId),
+      });
+    } finally { await mock.close(); }
+  });
+}
 
 for (const scenario of pauseResumeCases) for (const mode of stylesheetWorkloadModes) {
   test(`paused source resume: ${scenario} / ${mode}`, async ({ extContext, extensionId, sw }) => {

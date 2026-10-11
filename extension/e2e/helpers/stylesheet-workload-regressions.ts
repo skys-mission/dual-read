@@ -4,7 +4,7 @@ import type { TranslationMode } from '../../lib/types';
 declare global { interface Window { __layoutSourceWrites: number } }
 
 export const stylesheetWorkloadModes = ['bilingual', 'replace'] as const;
-export const layoutWorkloadCases = ['bounds', 'media', 'media-grid', 'anchors'] as const;
+export const layoutWorkloadCases = ['bounds', 'media', 'media-grid', 'anchors', 'clamps'] as const;
 type LayoutWorkload = typeof layoutWorkloadCases[number];
 export const translateStylesheetWorkloadText = (text: string): string => text.startsWith('Bounded workload')
   || text.startsWith('Layout workload')
@@ -136,6 +136,11 @@ export async function verifyLayoutWorkload(
     const media = '<div class="image"><img width="180" height="90" src="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27180%27 height=%2790%27/%3E"></div>';
     const anchor = '<div class="anchor" style="top:60px;height:calc(100% - 60px)"><button>Continue</button></div>';
     document.body.innerHTML = `<style>@layer utilities{${utilities}}body{margin:8px;font:16px/20px sans-serif}main{display:grid;grid-template-columns:repeat(4,280px);gap:12px}p{margin:0 0 8px}.card{position:relative;min-height:100px}.bounds{height:100px;overflow:hidden}.media{display:flex;align-items:stretch}.media-grid{display:grid;grid-template-columns:180px 100px}.image{width:180px;flex:none}.image img{display:block;height:100%;width:auto;max-width:none}.prose{flex:1;min-width:0}.anchor{position:absolute;left:0;width:100%}body[data-author-change] .card{max-height:40px;overflow:hidden}</style><main>${Array.from({ length: 24 }, (_, index) => `<section id="card-${index}" class="card ${scenario}">${scenario.startsWith('media') ? media : ''}<div class="prose"><p id="source-${index}-0">Layout workload card ${index}, first explanation.</p><p id="source-${index}-1">Layout workload card ${index}, second explanation.</p></div>${scenario === 'anchors' ? anchor : ''}</section>`).join('')}</main><pre id="outside">Outside the translated cards.</pre>`;
+    if (scenario === 'clamps') {
+      const style = document.createElement('style');
+      style.textContent = '.clamps .prose{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}';
+      document.head.append(style);
+    }
     const texts: WorkloadSource['texts'] = [];
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     while (walker.nextNode()) {
@@ -177,8 +182,12 @@ export async function verifyLayoutWorkload(
   if (scenario === 'bounds') await expect(page.locator('.card[data-dual-read-layout-height]')).toHaveCount(24);
   if (scenario === 'media-grid') await expect(page.locator('[data-dual-read-media-bound]')).toHaveCount(24);
   if (scenario === 'anchors' && mode === 'bilingual') await expect(page.locator('[data-dual-read-layout-anchor]')).toHaveCount(24);
+  if (scenario === 'clamps' && mode === 'bilingual') await expect(page.locator('.card > .dual-read-target')).toHaveCount(48);
   await checkClock('translation');
   await controls.pause();
+  await startClock();
+  await page.waitForTimeout(2200);
+  await checkClock('idle source policy checks');
   await startClock();
   await page.evaluate(() => document.getElementById('outside')!.setAttribute('data-unused-workload', '1'));
   await checkClock('paused sibling attribute');

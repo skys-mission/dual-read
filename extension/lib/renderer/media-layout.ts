@@ -209,7 +209,7 @@ export function applyMediaLayouts(changes: readonly MediaChange[]): void {
       applied.set(image, rule);
     }
     rule.owners.add(owner);
-    watcher ??= watchLayoutUpdates(readUpdates);
+    watcher ??= watchLayoutUpdates(readUpdates, { checkSourcePolicies: true });
     watcher.addRoot(image.getRootNode());
   }
 }
@@ -246,11 +246,11 @@ function clearMediaRule(image: HTMLImageElement): void {
   if (!applied.size) { watcher?.dispose(); watcher = null; }
 }
 
-function readUpdates(mutations: readonly MutationRecord[] | null): (() => void) | undefined {
+function readUpdates(mutations: readonly MutationRecord[] | null, checkSourcePolicies = false): (() => void) | undefined {
   const releases: { image: HTMLImageElement; rule: MediaRule; invalidSource: boolean; remaining: HTMLElement[] }[] = [];
   // Sibling selectors and :has() can change an image without touching its
   // ancestry. Recheck installed contracts once per frame, without new renders.
-  const global = !mutations || stylesheetChanged(mutations)
+  const global = checkSourcePolicies || !mutations || stylesheetChanged(mutations)
     || mutations.some(record => record.type === 'attributes' || record.type === 'childList');
   for (const [image, rule] of applied) {
     const affected = !image.isConnected || global || mutations?.some(record => {

@@ -244,18 +244,44 @@ export function mutationIndexDelta(
   sourceChanged?: (host: HTMLElement) => boolean,
   containsSource?: (host: HTMLElement, box: Element) => boolean,
 ): MutationIndexDelta {
+  // Visibility and source comparisons share ancestor styles only for this
+  // synchronous read pass. Restoration/recollection happens after it ends.
+  return withCollectCache(() => readMutationIndexDelta(mutations, knownHosts, sourceChanged, containsSource));
+}
+
+function readMutationIndexDelta(
+  mutations: MutationRecord[],
+  knownHosts: Iterable<HTMLElement>,
+  sourceChanged?: (host: HTMLElement) => boolean,
+  containsSource?: (host: HTMLElement, box: Element) => boolean,
+): MutationIndexDelta {
   const known = new Set<HTMLElement>();
   for (const h of knownHosts) known.add(h);
 
   const removed = new Set<HTMLElement>();
   const invalidated = new Set<HTMLElement>();
+  const sourceChanges = new Map<HTMLElement, boolean>();
+  const visibilityRoots = new Set<Element>();
+
+  // All records describe the same live tree in this synchronous read pass.
+  // Renderer moves and page edits can produce many records for one source;
+  // inspect it once, without retaining the result for a later mutation batch.
+  const changedSource = (host: HTMLElement): boolean => {
+    if (!sourceChanged) return true;
+    let changed = sourceChanges.get(host);
+    if (changed === undefined) {
+      changed = sourceChanged(host);
+      sourceChanges.set(host, changed);
+    }
+    return changed;
+  };
 
   const invalidateAncestors = (node: Node): void => {
     let el = node.nodeType === Node.ELEMENT_NODE ? node as Element : node.parentElement;
     if (!el || el.closest(OURS_SEL) || el.closest(EDITABLE)) return;
     while (el) {
       const host = el as HTMLElement;
-      if (known.has(host) && (!sourceChanged || sourceChanged(host))) invalidated.add(host);
+      if (known.has(host) && changedSource(host)) invalidated.add(host);
       el = el.parentElement;
     }
   };
@@ -275,12 +301,19 @@ export function mutationIndexDelta(
       invalidateAncestors(m.target);
     } else if (isVisibilityMutation(m)) {
       const box = m.target as Element;
+      visibilityRoots.add(box);
       for (const host of known) {
         if (composedContains(box, host) && (isA11yHidden(host) || inNonProse(host))) invalidated.add(host);
         // An editor can appear inside a previously aggregated prose unit.
         // Source ownership prevents existing editor animations from invalidating
         // an adjacent prose segment that merely shares the same container.
         else if (composedContains(host, box) && inNonProse(box) && (!containsSource || containsSource(host, box))) invalidated.add(host);
+        // A still-visible paragraph can lose/gain only part of its source.
+        // The response guard rejects that old snapshot, so it must also be
+        // restored/recollected here. Cosmetic changes keep the same snapshot.
+        else if (sourceChanged && (composedContains(host, box) || composedContains(box, host))) {
+          if (changedSource(host)) invalidated.add(host);
+        }
       }
     } else if (m.type === 'childList') {
       // A textContent/replaceChildren update replaces text nodes rather than
@@ -305,6 +338,11 @@ export function mutationIndexDelta(
     // restoreUnit + collectUnits(host) after clearing DONE.
     for (const host of invalidated) {
       if (host.contains(r) || host === r) return false;
+    }
+    // A cosmetic attribute on an owned source span must not create a second
+    // entry while its enclosing paragraph is still waiting for a response.
+    if (visibilityRoots.has(r)) for (let parent = composedParent(r); parent; parent = composedParent(parent)) {
+      if (known.has(parent as HTMLElement) && containsSource?.(parent as HTMLElement, r)) return false;
     }
     return r.isConnected;
   });
@@ -547,6 +585,15 @@ function isVisible(el: Element | null): boolean {
   }
   collectCache?.visible.set(el, true);
   return true;
+}
+
+/** Live companions share the collector's visibility policy. Use a fresh batch
+ * cache, independent of any cooperative collection currently suspended. */
+export function readSourceVisibility(elements: Iterable<Element>): Map<Element, boolean> {
+  const previous = collectCache;
+  collectCache = newCollectCache();
+  try { return new Map(Array.from(elements, element => [element, isVisible(element)])); }
+  finally { collectCache = previous; }
 }
 
 /** A shadow host's unassigned direct text is not part of its rendered tree. */
@@ -1221,6 +1268,9 @@ export interface CollectUnitsAsyncOptions {
   /** Soft CPU budget per turn before yielding (ms). Default 12. */
   budgetMs?: number;
   signal?: AbortSignal;
+  /** Called for each new unit before any yield can separate its request text
+   * from the source identities/values used by the caller's stale-work guard. */
+  onCollected?: (unit: TranslationUnit) => void;
 }
 
 export interface CollectUnitsAsyncResult {
@@ -1249,8 +1299,13 @@ export async function collectUnitsAsync(
   let cpuMs = 0;
   let sliceCpu = 0;
   let sliceMark = performance.now();
+  let captured = 0;
 
   const bump = async (): Promise<void> => {
+    while (captured < units.length) {
+      const unit = units[captured++];
+      options.onCollected?.(unit);
+    }
     if (signal?.aborted) {
       throw new DOMException('collectUnitsAsync aborted', 'AbortError');
     }

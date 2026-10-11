@@ -47,6 +47,62 @@ async function settlePresentation(): Promise<void> {
   await new Promise(resolve => setTimeout(resolve, 100));
 }
 
+it.each(['direct', 'nested', 'rich'] as const)('tracks the source-host paint and metrics of a relocated %s paragraph', async structure => {
+  const unit = fixture();
+  unit.el.innerHTML = structure === 'direct' ? 'Styled paragraph on a dark surface.'
+    : structure === 'nested' ? '<span>Styled paragraph on a dark surface.</span>'
+      : '<strong>Styled paragraph</strong> on a dark surface.';
+  if (structure === 'rich') unit.rich = { slots: ['Styled paragraph', 'on a dark surface.'] };
+  unit.el.style.cssText = 'color:white;font-size:20px;line-height:30px;font-family:Georgia;display:-webkit-box;-webkit-line-clamp:2';
+  const originals = Array.from(unit.el.childNodes);
+  const payload = structure === 'rich' ? ['深色背景上的', '正文译文。'] : '深色背景上的正文译文。';
+  render(unit, payload, 'bilingual');
+  const target = document.querySelector<HTMLElement>('.dual-read-target')!;
+  expect(target.parentElement).toBe(unit.el.parentElement);
+  expect(target.style.color).toContain('255');
+  expect(target.style.fontSize).toBe('20px');
+  unit.el.style.color = 'lime';
+  unit.el.style.fontSize = '28px';
+  unit.el.style.lineHeight = '42px';
+  unit.el.style.fontFamily = 'monospace';
+  unit.el.style.textAlign = 'right';
+  await settlePresentation();
+  expect(target.style.color).toContain('0, 255, 0');
+  expect(target.style.fontSize).toBe('28px');
+  expect(target.style.lineHeight).toBe('42px');
+  expect(target.style.fontFamily).toBe('monospace');
+  expect(target.style.textAlign).toBe('right');
+  if (structure === 'rich') expect(target.querySelector('strong')?.textContent).toBe('深色背景上的');
+  target.style.setProperty('font-size', '24px', 'important');
+  unit.el.style.fontSize = '32px';
+  unit.el.style.color = 'red';
+  await settlePresentation();
+  expect(target.style.fontSize).toBe('24px');
+  expect(target.style.getPropertyPriority('font-size')).toBe('important');
+  expect(target.style.color).toContain('255, 0, 0');
+  restoreDom(); restoreDom();
+  expect(Array.from(unit.el.childNodes)).toEqual(originals);
+  expect(unit.el.style.fontSize).toBe('32px');
+  expect(unit.el.style.color).toBe('red');
+});
+
+it('keeps relocated translations wrappable as source whitespace changes', async () => {
+  const unit = fixture();
+  unit.el.textContent = unit.text;
+  unit.el.style.cssText = 'white-space:nowrap;display:-webkit-box;-webkit-line-clamp:2';
+  render(unit, '需要换行的正文译文。', 'bilingual');
+  const target = document.querySelector<HTMLElement>('.dual-read-target')!;
+  expect(target.style.whiteSpace).toBe('normal');
+  expect(target.style.getPropertyValue('text-wrap')).toBe('wrap');
+  expect(target.style.overflowWrap).toBe('anywhere');
+  unit.el.style.whiteSpace = 'pre'; await settlePresentation();
+  expect(target.style.whiteSpace).toBe('pre-wrap');
+  unit.el.style.whiteSpace = 'pre-line'; unit.el.style.overflowWrap = 'break-word';
+  await settlePresentation();
+  expect(target.style.whiteSpace).toBe('pre-line');
+  expect(target.style.overflowWrap).toBe('break-word');
+});
+
 it.each(['inherited', 'mixed'] as const)('restores the current relocated source-host font after nested typography becomes %s', async operation => {
   const unit = fixture();
   unit.el.parentElement!.style.fontSize = '40px';

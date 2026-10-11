@@ -1,10 +1,14 @@
 import { HIDE, OURS_SEL, P } from '../dom-const';
 import { sourceLayoutReadSpent, withSourceLayoutRead } from './source-layout-policy';
+import { watchStylesheetChanges } from './stylesheet-updates';
 
 /** Read all subscribed layouts before applying any owned style writes. */
-type LayoutRead = (mutations: readonly MutationRecord[] | null) => (() => void) | undefined;
+type LayoutRead = (mutations: readonly MutationRecord[] | null, checkSourcePolicies?: boolean) => (() => void) | undefined;
+interface PendingRead { mutations: readonly MutationRecord[] | null; checkSourcePolicies: boolean }
 const readers = new Map<LayoutRead, Set<ShadowRoot>>();
-const pendingReads = new Map<LayoutRead, readonly MutationRecord[] | null>();
+const pendingReads = new Map<LayoutRead, PendingRead>();
+const policyReaders = new Set<LayoutRead>();
+let stopPolicyChecks: (() => void) | null = null;
 const observed = new Set<ShadowRoot>();
 let observer: MutationObserver | null = null;
 let frame: number | null = null;
@@ -12,6 +16,25 @@ let records: MutationRecord[] = [];
 let globalChange = false;
 let colorScheme: MediaQueryList | null = null;
 const MOTION_EVENTS = ['transitionrun', 'transitionend', 'transitioncancel', 'animationstart', 'animationend', 'animationcancel'] as const;
+
+function enqueueRead(read: LayoutRead, mutations: readonly MutationRecord[] | null, checkSourcePolicies = false): void {
+  const previous = pendingReads.get(read);
+  pendingReads.set(read, {
+    mutations: previous?.mutations === null || mutations === null ? null : [...previous?.mutations ?? [], ...mutations],
+    checkSourcePolicies: checkSourcePolicies || !!previous?.checkSourcePolicies,
+  });
+}
+
+/** CSSOM edits emit no DOM records and owned rules can mask resize signals.
+ * Only existing source overrides opt in; policy checks do not imply reflow. */
+function checkPolicies(): void {
+  if (document.visibilityState === 'hidden') return;
+  for (const read of policyReaders) {
+    // Merge with unfinished work so a one-off CSSOM change is never lost.
+    enqueueRead(read, [], true);
+  }
+  if (pendingReads.size) queueUpdate();
+}
 
 function watchMotion(root: Document | ShadowRoot, add: boolean): void {
   for (const event of MOTION_EVENTS) {
@@ -87,15 +110,14 @@ function queueUpdate(): void {
     }
     if (disconnected) reconnectObserver();
     if (batch === null || batch.length) for (const read of readers.keys()) {
-      const previous = pendingReads.get(read);
-      pendingReads.set(read, previous === null || batch === null ? null : [...previous ?? [], ...batch]);
+      enqueueRead(read, batch);
     }
     const writes = withSourceLayoutRead(() => {
       const writes: ((() => void) | undefined)[] = [];
-      for (const [read, mutations] of pendingReads) {
+      for (const [read, pending] of pendingReads) {
         if (writes.length && sourceLayoutReadSpent()) break;
         pendingReads.delete(read);
-        if (readers.has(read)) writes.push(read(mutations));
+        if (readers.has(read)) writes.push(read(pending.mutations, pending.checkSourcePolicies));
       }
       return writes;
     });
@@ -131,9 +153,13 @@ function observeShadow(root: ShadowRoot): void {
 
 /** Exists only while a rendered companion or media rule needs live styling.
  * Independent of translation watching, so a paused page still follows themes. */
-export function watchLayoutUpdates(read: LayoutRead): { addRoot: (root: Node) => void; refresh: (global?: boolean) => void; dispose: () => void } {
+export function watchLayoutUpdates(read: LayoutRead, options: { checkSourcePolicies?: boolean } = {}): { addRoot: (root: Node) => void; refresh: (global?: boolean) => void; dispose: () => void } {
   const roots = new Set<ShadowRoot>();
   readers.set(read, roots);
+  if (options.checkSourcePolicies) {
+    policyReaders.add(read);
+    stopPolicyChecks ??= watchStylesheetChanges(() => observed, checkPolicies);
+  }
   if (!observer) {
     observer = new MutationObserver(retainRecords);
     observer.observe(document.documentElement, OPTIONS);
@@ -153,7 +179,7 @@ export function watchLayoutUpdates(read: LayoutRead): { addRoot: (root: Node) =>
     refresh: (global = true) => {
       if (global) globalUpdate();
       else {
-        if (!pendingReads.has(read)) pendingReads.set(read, []);
+        if (!pendingReads.has(read)) enqueueRead(read, []);
         queueUpdate();
       }
     },
@@ -165,6 +191,10 @@ export function watchLayoutUpdates(read: LayoutRead): { addRoot: (root: Node) =>
     dispose() {
       readers.delete(read);
       pendingReads.delete(read);
+      policyReaders.delete(read);
+      if (!policyReaders.size) {
+        stopPolicyChecks?.(); stopPolicyChecks = null;
+      }
       if (readers.size) {
         const retained = new Set([...readers.values()].flatMap(roots => [...roots]));
         for (const root of observed) {

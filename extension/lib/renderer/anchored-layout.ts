@@ -154,16 +154,17 @@ export function applyAnchoredLayouts(changes: readonly AnchorChange[]): void {
     }
     rule.owners.add(owner);
     rule.top = top;
-    rule.style.textContent = `[${ANCHOR}="${rule.id}"] { top: ${top}px !important; height: calc(100% - ${top}px) !important; }`;
-    watcher ??= watchLayoutUpdates(readUpdates);
+    const css = `[${ANCHOR}="${rule.id}"] { top: ${top}px !important; height: calc(100% - ${top}px) !important; }`;
+    if (rule.style.textContent !== css) rule.style.textContent = css;
+    watcher ??= watchLayoutUpdates(readUpdates, { checkSourcePolicies: true });
     watcher.addRoot(element.getRootNode());
   }
 }
 
 /** Only revisit installed rules: page changes may invalidate a captured
  * footer, but must never create an anchor from already translated geometry. */
-function readUpdates(mutations: readonly MutationRecord[] | null): (() => void) | undefined {
-  if (!mutations || mutations.length) for (const element of applied.keys()) pendingUpdates.add(element);
+function readUpdates(mutations: readonly MutationRecord[] | null, checkSourcePolicies = false): (() => void) | undefined {
+  if (checkSourcePolicies || !mutations || mutations.length) for (const element of applied.keys()) pendingUpdates.add(element);
   const states = takeLayoutWork(pendingUpdates).flatMap(element => {
     pendingUpdates.delete(element);
     const rule = applied.get(element);

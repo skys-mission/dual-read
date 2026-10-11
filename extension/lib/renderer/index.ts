@@ -17,6 +17,7 @@ import { applyCompactLayouts, readCompactLayouts } from './compact-layout';
 import { applyMediaLayouts, attachMediaLayouts, captureMediaLayouts, readMediaLayouts, releaseMediaLayout, restoreMediaLayouts } from './media-layout';
 import { applySourceTypography, readSourceTypography, releaseSourceTypography, restoreSourceTypography, type SourceTypography } from './source-typography';
 import { applyAnchoredLayouts, attachAnchoredLayouts, captureAnchoredLayouts, readAnchoredLayouts, releaseAnchoredLayout, restoreAnchoredLayouts } from './anchored-layout';
+import { relocateCompanion, releaseRelocatedLayout, restoreRelocatedLayouts } from './relocated-layout';
 
 export { buildSafeRichSkeleton, sanitizeHref, isForbiddenAttr } from './rich';
 export { restoreMovedRichNodes } from './rich-replace';
@@ -288,20 +289,37 @@ export function repairStructure(root: ParentNode = document): void {
 }
 
 function rememberCompanion(host: Element, node: Element): Element {
+  const previous = companions.get(host);
+  if (previous && previous !== node) releaseRelocatedLayout(previous);
   companions.set(host, node);
   companionHosts.set(node, host);
   return node;
 }
 
 function removeCompanion(node: Element): void {
+  releaseRelocatedLayout(node);
   releaseSourceTypography(node);
   releaseBoundedLayout(node);
   releaseMediaLayout(node);
   releaseAnchoredLayout(node);
   const host = companionHosts.get(node);
-  if (host && companions.get(host) === node) companions.delete(host);
+  if (host && companions.get(host) === node) {
+    if (!host.isConnected && !host.contains(node)) {
+      host.removeAttribute(DONE);
+      host.removeAttribute(MODE);
+    }
+    companions.delete(host);
+  }
   companionHosts.delete(node);
   node.remove();
+}
+
+/** A clipped source can disappear while its owned sibling stays on the page.
+ * Only drop that registered companion; never restore or relocate page content. */
+export function removeDetachedCompanion(host: HTMLElement): void {
+  const node = companions.get(host);
+  if (host.isConnected || !node || host.contains(node)) return;
+  removeCompanion(node);
 }
 
 function ownsCompanion(host: Element, node: Element): boolean {
@@ -437,49 +455,13 @@ function placeBlockCompanion(host: HTMLElement, node: HTMLElement, avoidClipping
     node.style.whiteSpace = sourceWhiteSpace === 'pre' ? 'pre-wrap' : 'normal';
     node.style.overflowWrap = 'anywhere';
   }
-  if (avoidClipping) {
-    let clippingBox: HTMLElement | null = null;
-    for (let box: HTMLElement | null = host; box?.parentElement; box = box.parentElement) {
-      // Keep translated text inside the source's original interactive hit area.
-      if (box.matches('a[href], button, [role="button"], [role="tab"], body')) break;
-      const style = getComputedStyle(box);
-      const clamp = parseInt(style.getPropertyValue('line-clamp'), 10)
-        || parseInt(style.getPropertyValue('-webkit-line-clamp'), 10);
-      if (clamp > 0) clippingBox = box;
-    }
-    // Nested excerpt clamps can otherwise hide a companion moved out of only
-    // the innermost box. Stay inside the original card/link ownership boundary.
-    const box = clippingBox;
-    if (box?.parentElement) {
-      const parentStyle = getComputedStyle(box.parentElement);
-      // A new sibling must have a block row, rather than a squeezed flex/grid
-      // track beside the source. Ordinary blocks and column flex cards allow it.
-      if (!parentStyle.display.includes('grid')
-        && (!parentStyle.display.includes('flex') || parentStyle.flexDirection.startsWith('column'))) {
-        let after: Element = box;
-        for (let next = after.nextElementSibling; next && next !== node; next = after.nextElementSibling) {
-          const owner = companionHosts.get(next);
-          if (!owner || !box.contains(owner)
-            || !(owner.compareDocumentPosition(host) & Node.DOCUMENT_POSITION_FOLLOWING)) break;
-          after = next;
-        }
-        if (after.nextElementSibling !== node) after.insertAdjacentElement('afterend', node);
-        // Relocated companions still share the source's text metrics, even when
-        // the card shell has a different font or whitespace policy.
-        const sourceStyle = getComputedStyle(host);
-        for (const property of ['font-family', 'font-size', 'font-weight', 'font-style', 'line-height', 'letter-spacing', 'text-align', 'white-space', 'text-wrap', 'word-break', 'overflow-wrap']) {
-          if ((sourceWhiteSpace === 'nowrap' || sourceWhiteSpace === 'pre')
-            && (property === 'white-space' || property === 'overflow-wrap')) continue;
-          const value = sourceStyle.getPropertyValue(property);
-          if (value) node.style.setProperty(property, value);
-        }
-        return;
-      }
-    }
-  }
-  nestCompanionInHost(host, node);
-  markListContentBox(host);
-  markFlexBreak(host, node);
+  const nest = () => {
+    nestCompanionInHost(host, node);
+    markListContentBox(host);
+    markFlexBreak(host, node);
+  };
+  if (avoidClipping && relocateCompanion(host, node, nest)) return;
+  nest();
 }
 
 /**
@@ -940,7 +922,7 @@ export function render(
     captureAnchoredLayouts([unit.el]);
   }
   renderCore(unit, payload, mode, opts, (host, node) => {
-    applySourceTypography(node, typography.get(unit.el));
+    applySourceTypography(node, typography.get(unit.el), host);
     reserveBlockShell(host, node);
     stabilizeBlockShell(node);
     attachMediaLayouts(unit.el, node);
@@ -1034,7 +1016,7 @@ export function renderBatch(
   for (const { unit, payload } of items) {
     try {
       renderCore(unit, payload, mode, opts, (host, node) => {
-        applySourceTypography(node, typography.get(unit.el));
+        applySourceTypography(node, typography.get(unit.el), host);
         attachMediaLayouts(unit.el, node);
         attachAnchoredLayouts(unit.el, node);
         pending.push({ host, node });
@@ -1172,6 +1154,7 @@ export function restoreDom(): void {
     restoreRoot(root);
     removeTranslationStyles(root);
   }
+  restoreRelocatedLayouts(restoreUnit);
   restoreSourceTypography();
 }
 

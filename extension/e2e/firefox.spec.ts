@@ -89,6 +89,146 @@ for (const mode of stylesheetWorkloadModes) {
 }
 
 import { pauseResumeCases, verifyPauseResume } from './helpers/pause-resume-regressions';
+import { partialVisibilityCases, cssomCases, translateCssomSource, verifyPartialVisibility, verifyCssomChange, verifyRichResponse } from './helpers/visibility-cssom-regressions';
+import { typographyCssomCases, verifyTypographyCssom } from './helpers/typography-cssom-regressions';
+import { relocatedLifecycleCases, relocatedTypographyCases, relocatedFollowCases, verifyRelocatedLifecycle, verifyRelocatedTypography, verifyRelocatedFollow, verifyRelocatedLateReuse } from './helpers/relocated-companion-regressions';
+import { armIndexYieldMutation, verifyIndexYield } from './helpers/index-yield-regressions';
+
+for (const scenario of relocatedFollowCases) {
+  test(`relocated companion follows source: ${scenario.operation} / ${scenario.state}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext();
+    let requests = 0;
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => { requests++; return texts.map(text => `译:${text}`); } });
+      await verifyRelocatedFollow(page, scenario, {
+        translate: mode => firefoxTranslatePage(page, mode), pause: () => firefoxStopWatch(page),
+        restore: () => firefoxRestore(page), status: () => firefoxStatus(page), requests: () => requests,
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
+
+for (const delivery of ['delivered', 'undelivered'] as const) {
+  test(`relocated companion late reuse after restore: ${delivery}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext();
+    let requests = 0;
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => { requests++; return texts.map(text => `译:${text}`); } });
+      await verifyRelocatedLateReuse(page, delivery, {
+        translate: mode => firefoxTranslatePage(page, mode), pause: () => firefoxStopWatch(page),
+        restore: () => firefoxRestore(page), status: () => firefoxStatus(page), requests: () => requests,
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
+
+for (const structure of ['plain', 'rich'] as const) for (const mode of ['bilingual', 'replace'] as const) {
+  test(`source snapshot during index yield: ${structure} / ${mode}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext();
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => texts.map(text => `译:${text}`) });
+      await verifyIndexYield(page, structure, mode, {
+        arm: () => page.evaluate(armIndexYieldMutation), translate: next => firefoxTranslatePage(page, next), restore: () => firefoxRestore(page),
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
+
+for (const scenario of relocatedLifecycleCases) {
+  test(`relocated companion lifecycle: ${scenario.operation} / ${scenario.state}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext();
+    let requests = 0;
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => { requests++; return texts.map(text => `译:${text}`); } });
+      await verifyRelocatedLifecycle(page, scenario, {
+        translate: mode => firefoxTranslatePage(page, mode), pause: () => firefoxStopWatch(page),
+        restore: () => firefoxRestore(page), status: () => firefoxStatus(page), requests: () => requests,
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
+
+for (const scenario of relocatedTypographyCases) {
+  test(`relocated companion typography: ${scenario}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext();
+    let requests = 0;
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => { requests++; return texts.map(text => `译:${text}`); } });
+      await verifyRelocatedTypography(page, scenario, {
+        translate: mode => firefoxTranslatePage(page, mode), pause: () => firefoxStopWatch(page),
+        restore: () => firefoxRestore(page), status: () => firefoxStatus(page), requests: () => requests,
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
+
+for (const scenario of typographyCssomCases) for (const mode of stylesheetWorkloadModes) {
+  test(`CSSOM copied typography: ${scenario} / ${mode}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext();
+    let requests = 0;
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => { requests++; return texts.map(text => `译:${text}`); } });
+      await verifyTypographyCssom(page, scenario, mode, {
+        translate: next => firefoxTranslatePage(page, next), pause: () => firefoxStopWatch(page),
+        restore: () => firefoxRestore(page), requests: () => requests,
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
+
+for (const mode of stylesheetWorkloadModes) {
+  test(`rich response scheduling: ${mode}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext();
+    let requests = 0;
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => { requests++; return texts.map(text => `译:${text}`); } });
+      await verifyRichResponse(page, mode, {
+        translate: next => firefoxTranslatePage(page, next), pause: () => firefoxStopWatch(page),
+        restore: () => firefoxRestore(page), requests: () => requests,
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
+
+for (const scenario of partialVisibilityCases) for (const mode of stylesheetWorkloadModes) {
+  test(`partial source visibility: ${scenario} / ${mode}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext();
+    let delay = 0, requests = 0;
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => {
+        requests++;
+        if (delay) await new Promise(resolve => setTimeout(resolve, delay));
+        return texts.map(text => `译:${text}`);
+      } });
+      await verifyPartialVisibility(page, scenario, mode, {
+        translate: next => firefoxTranslatePage(page, next), pause: () => firefoxStopWatch(page),
+        restore: () => firefoxRestore(page), status: () => firefoxStatus(page),
+        requests: () => requests, delay: ms => { delay = ms; },
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
+
+for (const scenario of cssomCases) for (const mode of stylesheetWorkloadModes) {
+  test(`CSSOM source policy: ${scenario} / ${mode}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext();
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => texts.map(translateCssomSource) });
+      await verifyCssomChange(page, scenario, mode, {
+        translate: next => firefoxTranslatePage(page, next), pause: () => firefoxStopWatch(page), restore: () => firefoxRestore(page),
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
 
 for (const scenario of pauseResumeCases) for (const mode of stylesheetWorkloadModes) {
   test(`paused source resume: ${scenario} / ${mode}`, async () => {

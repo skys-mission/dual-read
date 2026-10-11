@@ -8,6 +8,7 @@ import {
   renderError,
   restoreDom,
   clearNode,
+  removeDetachedCompanion,
   restoreUnit,
   restoreMovedRichNodes,
   readShellDecisions,
@@ -153,6 +154,8 @@ export class ContentSession {
   private registry: RootRegistry | null = null;
   private moTimer: ReturnType<typeof setTimeout> | null = null;
   private pendingMutations: MutationRecord[] = [];
+  /** Snapshot mismatches can come from CSS/media changes with no DOM record. */
+  private pendingSourceRefreshes = new Set<Entry>();
   private watching = false;
   /** True while awaiting the first viewport drain — longer render coalesce. */
   private initialDrainActive = false;
@@ -170,9 +173,8 @@ export class ContentSession {
   }
 
   status(): TranslateStatus {
-    const translating = this.inflight > 0 || this.queue.length > 0 || this.pendingRetries > 0;
     return {
-      translating: translating && this.alive,
+      translating: this.hasPendingWork() && this.alive,
       count: this.counts.translated,
       failed: this.counts.failed,
       total: this.counts.total,
@@ -255,6 +257,7 @@ export class ContentSession {
     if (this.moTimer) clearTimeout(this.moTimer);
     this.moTimer = null;
     this.pendingMutations = [];
+    this.pendingSourceRefreshes.clear();
     if (this.flushTimer) clearTimeout(this.flushTimer);
     this.flushTimer = null;
     for (const entry of this.entries.values()) {
@@ -366,6 +369,7 @@ export class ContentSession {
     if (this.moTimer) clearTimeout(this.moTimer);
     this.moTimer = null;
     this.pendingMutations = [];
+    this.pendingSourceRefreshes.clear();
     this.io = null;
     this.initialCheck = null;
   }
@@ -457,7 +461,7 @@ export class ContentSession {
           if (done && sourceLayoutReadSpent()) break;
           done++;
           const { entry } = item;
-          if (!this.isLiveEntry(entry) || this.sourceChanged(entry)) continue;
+          if (!this.acceptSource(entry)) continue;
           captureMediaLayouts([entry.unit.el]);
           if (this.config.mode !== 'replace') captureAnchoredLayouts([entry.unit.el]);
           this.capturedBuf.push(item);
@@ -493,7 +497,7 @@ export class ContentSession {
         if (done && sourceLayoutReadSpent()) break;
         done++;
         const { entry } = item, { unit } = entry;
-        if (!this.isLiveEntry(entry) || this.sourceChanged(entry)) continue;
+        if (!this.acceptSource(entry)) continue;
         items.push(item);
         for (const [element, source] of readSourceTypography([unit])) typography.set(element, source);
         if (unit.kind !== 'block' || measured.has(unit.el)) continue;
@@ -675,13 +679,29 @@ export class ContentSession {
 
           this.consecutiveFailures = 0;
           const fresh: { text: string; translation: string }[] = [];
-          missJobs.forEach((job, i) => {
+          let previous: Entry | null = null;
+          let accepted = false;
+          let started = performance.now();
+          for (let i = 0; i < missJobs.length; i++) {
+            const job = missJobs[i];
+            // expandJobs and the cache filter keep a unit's slots adjacent.
+            // Validate once per unit, and yield only between units so no
+            // accepted snapshot is reused after a page/mutation callback.
+            if (job.entry !== previous) {
+              if (previous && performance.now() - started >= INDEX_SLICE_MS) {
+                await yieldToMain();
+                if (!this.isCurrent(gen)) return;
+                started = performance.now();
+              }
+              previous = job.entry;
+              accepted = this.acceptSource(job.entry);
+            }
             const tr = translations[i];
-            if (tr && this.isLiveEntry(job.entry) && !this.sourceChanged(job.entry)) {
+            if (tr && accepted) {
               markSlot(job, tr);
               fresh.push({ text: job.text, translation: tr });
             }
-          });
+          }
           if (fresh.length) this.ignoreFloating(store(fresh, config));
         } catch (err) {
           if (!this.isCurrent(gen)) return;
@@ -726,6 +746,19 @@ export class ContentSession {
     return entry.unit.el.isConnected && this.entries.get(entry.unit.el) === entry;
   }
 
+  /** Reject obsolete work and arrange its replacement even without a page
+   * mutation. Reuse the mutation batch so concurrent edits cannot collect the
+   * same source twice, and defer restoration until all layout reads finish. */
+  private acceptSource(entry: Entry): boolean {
+    if (!this.isLiveEntry(entry)) return false;
+    if (!this.sourceChanged(entry)) return true;
+    if (this.watching && this.io) {
+      this.pendingSourceRefreshes.add(entry);
+      this.scheduleMutationIndex();
+    }
+    return false;
+  }
+
   private captureSource(unit: TranslationUnit): Entry['source'] {
     return collectSlotTextNodes(unit.el).map((node) => {
       const ancestors: Element[] = [];
@@ -764,7 +797,7 @@ export class ContentSession {
   }
 
   private succeed(entry: Entry, payload: TranslationPayload, gen: number): void {
-    if (!this.isCurrent(gen) || !this.isLiveEntry(entry) || this.sourceChanged(entry)) return;
+    if (!this.isCurrent(gen) || !this.acceptSource(entry)) return;
     entry.status = 'done';
     this.counts.translated++;
     this.bufferRender(entry, payload);
@@ -776,7 +809,7 @@ export class ContentSession {
     error: ReturnType<typeof toUserFacingError> | string,
     gen: number,
   ): void {
-    if (!this.isCurrent(gen) || !this.isLiveEntry(entry) || this.sourceChanged(entry)) return;
+    if (!this.isCurrent(gen) || !this.acceptSource(entry)) return;
     entry.attempts++;
     const uf = typeof error === 'string' ? toUserFacingError(new Error(error)) : error;
     // Non-retryable failures (auth/model/config…) go terminal immediately:
@@ -837,15 +870,17 @@ export class ContentSession {
     return n;
   }
 
-  private checkSettle(): void {
-    if (this.queue.length === 0 && this.inflight === 0 && this.pendingRetries === 0) {
-      this.initialCheck?.();
-    }
+  private hasPendingWork(): boolean {
+    return this.queue.length > 0 || this.inflight > 0 || this.pendingRetries > 0 || this.pendingSourceRefreshes.size > 0;
   }
 
-  private ensureEntry(unit: TranslationUnit): Entry | null {
+  private checkSettle(): void {
+    if (!this.hasPendingWork()) this.initialCheck?.();
+  }
+
+  private ensureEntry(unit: TranslationUnit, source?: Entry['source']): Entry | null {
     if (this.entries.has(unit.el)) return null;
-    const source = this.captureSource(unit);
+    source ??= this.captureSource(unit);
     const entry: Entry = { unit, attempts: 0, status: 'idle', retryTimer: null, source, originalSource: source };
     this.entries.set(unit.el, entry);
     return entry;
@@ -854,6 +889,8 @@ export class ContentSession {
   private dropEntry(host: HTMLElement): void {
     const entry = this.entries.get(host);
     if (!entry) return;
+    removeDetachedCompanion(host);
+    this.pendingSourceRefreshes.delete(entry);
     if (entry.retryTimer) {
       clearTimeout(entry.retryTimer);
       this.pendingRetries = Math.max(0, this.pendingRetries - 1);
@@ -902,9 +939,11 @@ export class ContentSession {
       const restoreStarted = performance.now();
       restoreMovedRichNodes([scope]);
       cpuMs += performance.now() - restoreStarted;
+      const sources = new WeakMap<TranslationUnit, Entry['source']>();
       const collected = await collectUnitsAsync(scope, {
         budgetMs: INDEX_SLICE_MS,
         signal: this.batchAbort?.signal,
+        onCollected: unit => sources.set(unit, this.captureSource(unit)),
       });
       cpuMs += collected.cpuMs;
       sliceCpu = 0;
@@ -912,7 +951,7 @@ export class ContentSession {
       for (const unit of collected.units) {
         if (!this.alive || !this.io) break;
         const t0 = performance.now();
-        const entry = this.ensureEntry(unit);
+        const entry = this.ensureEntry(unit, sources.get(unit));
         if (entry) {
           this.counts.total++;
           this.io.observe(unit.el);
@@ -951,7 +990,7 @@ export class ContentSession {
    * Incremental re-index from MutationRecords: only scan added/changed roots,
    * drop disconnected hosts, and invalidate characterData hosts.
    */
-  private indexFromMutations(mutations: MutationRecord[]): void {
+  private indexFromMutations(mutations: MutationRecord[], staleSources: readonly Entry[] = []): void {
     if (!this.alive || !this.io) return;
     const t0 = performance.now();
 
@@ -968,6 +1007,11 @@ export class ContentSession {
       return Boolean(entry && [...entry.originalSource.map(({ node }) => node), ...entry.source.map(({ node }) => node)]
         .some(node => node.isConnected && host.contains(node) && composedContains(box, node) && this.ownsSource(entry, node.parentElement)));
     });
+
+    for (const entry of staleSources) {
+      // A delivered mutation may already have replaced the entry on this host.
+      if (this.isLiveEntry(entry) && !delta.invalidated.includes(entry.unit.el)) delta.invalidated.push(entry.unit.el);
+    }
 
     for (const host of delta.removed) {
       this.dropEntry(host);
@@ -1025,31 +1069,7 @@ export class ContentSession {
         const relevant = mutations.filter(mutation => mutation.type !== 'attributes' || isVisibilityMutation(mutation));
         if (!relevant.length) return;
         this.pendingMutations.push(...relevant);
-        // Bound latency from the first record: unrelated attribute animations
-        // must not keep postponing appended or edited source indefinitely.
-        if (this.moTimer) return;
-        this.moTimer = setTimeout(() => {
-          this.moTimer = null;
-          const batch = this.pendingMutations;
-          this.pendingMutations = [];
-          if (!this.alive || !batch.length) return;
-          const lateShadows = this.registry?.rescan(document) ?? [];
-          if (lateShadows.length) this.ignoreFloating(this.indexScopes(lateShadows));
-          if (mutationHasNewContent(batch) || lateShadows.length) {
-            if (mutationHasNewContent(batch)) this.indexFromMutations(batch);
-            else this.refreshDiagnostics();
-            return;
-          }
-          let pruned = false;
-          for (const host of Array.from(this.entries.keys())) {
-            if (!host.isConnected) {
-              this.dropEntry(host);
-              pruned = true;
-            }
-          }
-          this.registry?.pruneDisconnected();
-          if (pruned) this.checkSettle();
-        }, 320);
+        this.scheduleMutationIndex();
       },
       (addedRoots) => {
         if (!this.alive) return;
@@ -1059,6 +1079,34 @@ export class ContentSession {
     );
     this.registry.bootstrap(document);
     this.refreshDiagnostics();
+  }
+
+  private scheduleMutationIndex(): void {
+    // Bound latency from the first record or rejected snapshot: unrelated
+    // attribute animations must not keep postponing source recovery.
+    if (this.moTimer) return;
+    this.moTimer = setTimeout(() => {
+      this.moTimer = null;
+      const batch = this.pendingMutations;
+      const staleSources = [...this.pendingSourceRefreshes];
+      this.pendingMutations = [];
+      this.pendingSourceRefreshes.clear();
+      if (!this.alive || !this.watching || !this.io || !batch.length && !staleSources.length) return;
+      const lateShadows = this.registry?.rescan(document) ?? [];
+      if (lateShadows.length) this.ignoreFloating(this.indexScopes(lateShadows));
+      if (mutationHasNewContent(batch) || staleSources.length) {
+        this.indexFromMutations(batch, staleSources);
+        this.checkSettle();
+        return;
+      }
+      let pruned = false;
+      for (const host of Array.from(this.entries.keys())) {
+        if (!host.isConnected) { this.dropEntry(host); pruned = true; }
+      }
+      this.registry?.pruneDisconnected();
+      if (lateShadows.length) this.refreshDiagnostics();
+      if (pruned) this.checkSettle();
+    }, 320);
   }
 
   private awaitInitialDrain(): Promise<void> {
@@ -1073,7 +1121,7 @@ export class ContentSession {
         resolve();
       };
       this.initialCheck = () => {
-        if (this.queue.length === 0 && this.inflight === 0 && this.pendingRetries === 0) finish();
+        if (!this.hasPendingWork()) finish();
       };
       const idleTimer = setTimeout(() => this.initialCheck?.(), INITIAL_SETTLE_MS);
       const maxTimer = setTimeout(finish, INITIAL_MAX_MS);

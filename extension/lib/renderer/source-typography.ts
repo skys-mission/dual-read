@@ -5,8 +5,9 @@ import type { TranslationUnit } from '../types';
 import { stylesheetChanged, watchLayoutUpdates } from './layout-updates';
 
 const PROPERTIES = ['color', 'font-size', 'line-height', 'font-weight', 'font-style', 'letter-spacing'] as const;
+const RELOCATED_PROPERTIES = [...PROPERTIES, 'font-family', 'text-align', 'white-space', 'text-wrap', 'word-break', 'overflow-wrap'] as const;
 export type SourceTypography = ReadonlyMap<string, string>;
-interface SourceRun { host: HTMLElement; nodes: Text[]; parents: Element[] }
+interface SourceRun { host: HTMLElement; nodes: Text[]; parents: Element[]; relocated?: boolean }
 interface TypographyState {
   run: SourceRun;
   values: Map<string, string>;
@@ -24,7 +25,7 @@ function textStyleHost(node: Text, host: HTMLElement): Element | null {
   return parent;
 }
 
-function readTypography(run: SourceRun, styles: Map<Element, CSSStyleDeclaration>, baseline?: SourceTypography): Map<string, string> | undefined {
+function readTypography(run: SourceRun, styles: Map<Element, CSSStyleDeclaration>): Map<string, string> | undefined {
   const style = (element: Element): CSSStyleDeclaration => {
     let value = styles.get(element);
     if (!value) { value = getComputedStyle(element); styles.set(element, value); }
@@ -37,11 +38,21 @@ function readTypography(run: SourceRun, styles: Map<Element, CSSStyleDeclaration
     : run.parents.filter(parent => parent !== run.host && parent.isConnected && run.host.contains(parent) && parent.textContent?.trim());
   const host = style(run.host);
   const changes = new Map<string, string>();
-  // Outside-clamp companions cannot inherit these copied metrics from their
-  // source host. Keep its current baseline even when a nested run becomes mixed.
-  for (const [property, value] of baseline ?? []) {
-    const current = host.getPropertyValue(property);
-    if (value && current) changes.set(property, current);
+  // Outside-clamp companions no longer inherit their source host's paint or
+  // metrics. Track that baseline even for direct text or a mixed rich skeleton.
+  if (run.relocated) {
+    for (const property of RELOCATED_PROPERTIES) {
+      const value = host.getPropertyValue(property);
+      if (property === 'color' && (value === 'transparent' || value === 'rgba(0, 0, 0, 0)' || host.webkitTextFillColor === 'transparent')) continue;
+      if (value) changes.set(property, value);
+    }
+    if (host.whiteSpace === 'nowrap' || host.whiteSpace === 'pre') {
+      changes.set('white-space', host.whiteSpace === 'pre' ? 'pre-wrap' : 'normal');
+      // text-wrap shares wrap-mode with white-space; copying source `nowrap`
+      // would undo the prose wrapping policy in native browsers.
+      changes.set('text-wrap', 'wrap');
+      changes.set('overflow-wrap', 'anywhere');
+    }
   }
   const first = parents[0];
   if (!first) return changes.size ? changes : undefined;
@@ -77,18 +88,22 @@ export function readSourceTypography(units: readonly TranslationUnit[]): Map<HTM
 }
 
 /** Write only our companion; the page's source style and nodes stay intact. */
-export function applySourceTypography(node: HTMLElement, typography: SourceTypography | undefined): void {
-  if (!typography) return;
-  const run = prepared.get(typography);
+export function applySourceTypography(node: HTMLElement, typography: SourceTypography | undefined, host?: HTMLElement): void {
+  let run = typography && prepared.get(typography);
+  if (host && !host.contains(node)) {
+    run = { ...(run ?? { host, nodes: [], parents: [] }), relocated: true };
+    typography = readTypography(run, new Map());
+  }
   if (!run) return;
   let state = active.get(node);
   if (!state) {
-    state = { run, values: new Map(), inputs: new Map(), baseline: new Map(PROPERTIES.map(property => [property, node.style.getPropertyValue(property)])), overrides: new Set() };
+    state = { run, values: new Map(), inputs: new Map(), baseline: new Map(RELOCATED_PROPERTIES.map(property => [property, node.style.getPropertyValue(property)])), overrides: new Set() };
     active.set(node, state);
   } else state.run = run;
   writeTypography(node, state, typography);
-  watcher ??= watchLayoutUpdates(readUpdates);
+  watcher ??= watchLayoutUpdates(readUpdates, { checkSourcePolicies: true });
   watcher.addRoot(node.getRootNode());
+  watcher.addRoot(run.host.getRootNode());
   for (const source of run.nodes) watcher.addRoot(source.getRootNode());
 }
 
@@ -120,16 +135,22 @@ function writeTypography(node: HTMLElement, state: TypographyState, typography: 
   }
 }
 
-function readUpdates(mutations: readonly MutationRecord[] | null): (() => void) | undefined {
+function readUpdates(mutations: readonly MutationRecord[] | null, checkSourcePolicies = false): (() => void) | undefined {
   const changes: { node: HTMLElement; state: TypographyState; typography?: SourceTypography }[] = [];
   const styles = new Map<Element, CSSStyleDeclaration>();
   // CSS sibling selectors and :has() can change a source's paint without
   // mutating any of its ancestors. Re-read retained runs once per frame;
   // writeTypography still skips unchanged values and respects page overrides.
-  const global = !mutations || stylesheetChanged(mutations)
+  // Copied paint is an override too: CSSOM edits can change its source without
+  // a DOM record or resize. Reuse the shared stylesheet-change notification.
+  const global = checkSourcePolicies || !mutations || stylesheetChanged(mutations)
     || mutations.some(record => record.type === 'attributes' || record.type === 'childList');
   for (const [node, state] of active) {
-    if (!node.isConnected) { changes.push({ node, state }); continue; }
+    // Relocated layouts retain paused, detached cards for reuse. Their owner
+    // releases this subscription on drop/full restore; do not lose its copied
+    // style tracking just because both nodes temporarily leave the document.
+    if (state.run.relocated && !node.isConnected && !state.run.host.isConnected) continue;
+    if (!node.isConnected && !state.run.host.isConnected) { changes.push({ node, state }); continue; }
     const affected = global || mutations?.some(record => {
       const target = record.target instanceof Element ? record.target : record.target.parentElement;
       return !!target && (state.run.nodes.some(source => composedContains(target, source))
@@ -137,14 +158,18 @@ function readUpdates(mutations: readonly MutationRecord[] | null): (() => void) 
         || record.type === 'childList' && (target === state.run.host
           || [...record.removedNodes].some(removed => state.run.nodes.some(source => removed === source || removed.contains(source)))));
     });
-    if (affected) changes.push({ node, state, typography: readTypography(state.run, styles, state.baseline) });
+    if (affected) changes.push({ node, state, typography: readTypography(state.run, styles) });
   }
   if (!changes.length) return;
   return () => {
     for (const { node, state, typography } of changes) {
       if (active.get(node) !== state) continue;
       if (!node.isConnected) releaseSourceTypography(node);
-      else writeTypography(node, state, typography);
+      else {
+        writeTypography(node, state, typography);
+        watcher?.addRoot(node.getRootNode());
+        watcher?.addRoot(state.run.host.getRootNode());
+      }
     }
   };
 }

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { collectUnits, collectUnitsAsync, collectVisibleTextNodes, dedupeNestedRoots, mutationHasNewContent, mutationIndexDelta } from '../lib/collector';
 import { DONE } from '../lib/dom-const';
 
@@ -352,6 +352,52 @@ describe('incremental mutation index', () => {
     const delta = mutationIndexDelta(mutations, known);
     expect(delta.invalidated).toContain(host);
     expect(delta.removed).toHaveLength(0);
+  });
+
+  it.each((['children', 'text', 'mixed'] as const).flatMap(operation =>
+    [false, true].map(changed => ({ operation, changed })),
+  ))('checks each source once per $operation batch, changed=$changed', ({ operation, changed }) => {
+    document.body.innerHTML = `<main>${['first', 'second'].map(id =>
+      `<p id="${id}">${'<strong>Original source. </strong>'.repeat(16)}</p>`,
+    ).join('')}</main>`;
+    const hosts = Array.from(document.querySelectorAll<HTMLElement>('p'));
+    hosts.forEach(host => host.setAttribute(DONE, 'true'));
+    const sources = new Map(hosts.map(host => [host, Array.from(host.querySelectorAll('strong')).map(element =>
+      ({ node: element.firstChild as Text, value: element.textContent! })),
+    ]));
+    const inspectSource = vi.fn((host: HTMLElement) => sources.get(host)!
+      .some(({ node, value }) => !host.contains(node) || node.data !== value));
+    const observer = new MutationObserver(() => {});
+    observer.observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeOldValue: true });
+    try {
+      for (const host of hosts) {
+        if (operation !== 'text') {
+          // Renderer moves create many records even when source is unchanged.
+          const fragment = document.createDocumentFragment();
+          for (const child of Array.from(host.childNodes)) fragment.appendChild(child);
+          while (fragment.firstChild) host.appendChild(fragment.firstChild);
+        }
+        if (operation !== 'children') for (const { node, value } of sources.get(host)!) {
+          node.data = 'Intermediate page text.';
+          node.data = value;
+        }
+        if (changed) sources.get(host)!.at(-1)!.node.data = 'Final page edit.';
+      }
+      if (operation === 'mixed') document.querySelector('main')!.className = 'cosmetic-change';
+      const delta = mutationIndexDelta(observer.takeRecords(), hosts, inspectSource);
+      expect(delta.invalidated).toEqual(changed ? hosts : []);
+      expect(delta.removed).toEqual([]);
+      expect(inspectSource).toHaveBeenCalledTimes(hosts.length);
+      for (const host of hosts) expect(inspectSource).toHaveBeenCalledWith(host);
+
+      // A new batch must read new page edits, including after a negative result.
+      inspectSource.mockClear();
+      sources.get(hosts[0])![0].node.data = 'A later independent edit.';
+      const later = mutationIndexDelta(observer.takeRecords(), hosts, inspectSource);
+      expect(later.invalidated).toEqual([hosts[0]]);
+      expect(inspectSource).toHaveBeenCalledOnce();
+      expect(inspectSource).toHaveBeenCalledWith(hosts[0]);
+    } finally { observer.disconnect(); }
   });
 });
 
