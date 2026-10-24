@@ -6,6 +6,7 @@ import { lookup } from '../lib/cache';
 import { yieldToMain } from '../lib/runtime/yield';
 import { DualReadError } from '../lib/errors';
 import type { PublicSessionConfig } from '../lib/types';
+import * as mediaLayouts from '../lib/renderer/media-layout';
 
 vi.mock('../lib/messaging', async () => {
   const errors = await vi.importActual<typeof import('../lib/errors')>('../lib/errors');
@@ -188,6 +189,29 @@ describe('ContentSession scheduling state machine', () => {
     Element.prototype.getBoundingClientRect = realRect;
     document.body.innerHTML = '';
     vi.useRealTimers();
+  });
+
+  it.each(['bilingual', 'replace'] as const)('retries media capture before rendering the source cohort in %s mode', async mode => {
+    vi.useFakeTimers();
+    paragraphs(3);
+    const sources = [...document.querySelectorAll('p')].map(host => ({ host, text: host.firstChild, value: host.textContent }));
+    vi.mocked(translateBatchViaPort).mockImplementation(async texts => texts.map(text => `译:${text}`));
+    const capture = vi.spyOn(mediaLayouts, 'captureMediaLayouts');
+    let calls = 0;
+    capture.mockImplementation(() => {
+      expect(document.querySelector('.dual-read-target,.dual-read-replace-text')).toBeNull();
+      return ++calls !== 2;
+    });
+    const session = new ContentSession(config({ mode }));
+    try {
+      const start = session.start(); await vi.advanceTimersByTimeAsync(1600); await start;
+      expect(calls).toBe(4);
+      expect(document.querySelectorAll('p[data-dual-read-done]')).toHaveLength(3);
+      session.restore(); session.restore();
+      for (const { host, text, value } of sources) {
+        expect(host.firstChild).toBe(text); expect(host.textContent).toBe(value);
+      }
+    } finally { session.restore(); capture.mockRestore(); }
   });
 
   it.each((['bilingual', 'replace'] as const).flatMap(mode =>

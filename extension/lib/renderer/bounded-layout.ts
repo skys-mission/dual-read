@@ -1,4 +1,5 @@
 import { P } from '../dom-const';
+import { isEllipsizedTextHost } from '../dom-role';
 import { composedContains, composedParent } from '../dom-tree';
 import { stylesheetChanged, watchLayoutUpdates } from './layout-updates';
 import { applyAnchoredLayouts, readAnchoredLayouts } from './anchored-layout';
@@ -38,6 +39,7 @@ const owned = new WeakMap<HTMLElement, Set<HTMLElement>>();
 const pendingRelax = new Set<HTMLElement>();
 const pendingMeasure = new Set<HTMLElement>();
 const pendingUpdates = new Map<HTMLElement, boolean>();
+const policyRetries = new WeakSet<HTMLElement>();
 let watcher: ReturnType<typeof watchLayoutUpdates> | null = null;
 let blocked = new WeakMap<HTMLElement, { sizing: string; policy: string }>();
 let resizeObserver: ResizeObserver | null = null;
@@ -53,7 +55,9 @@ function pageSizing(box: HTMLElement, computed?: CSSStyleDeclaration, source?: S
     : (computed ?? getComputedStyle(box)).height;
   const collapsed = parseFloat(height) >= 0 && parseFloat(height) <= 2;
   return JSON.stringify([policy.signature, collapsed, policy.limited ? '@read-limit' : policy.complete ? null
-    : readComputedSizing(box, SIZING, state?.style.isConnected ? state.style : undefined)]);
+    // Inherited minimums must not fingerprint a parent's owned floor: its
+    // later removal is our change, not permission to override page sizing.
+    : readSourceFloor(box, () => readComputedSizing(box, SIZING, state?.style.isConnected ? state.style : undefined))]);
 }
 
 function policySignature(style: CSSStyleDeclaration): string {
@@ -198,10 +202,40 @@ function readBoundedLayoutsInPass(nodes: readonly HTMLElement[]): Expansion[] {
       const layoutHeight = s.height.endsWith('px') ? parseFloat(s.height) + inset : box.offsetHeight || bounds.height;
       const scaleY = layoutHeight > 0 ? bounds.height / layoutHeight : 0;
       if (!(scaleY > 0)) continue;
-      const spills = eligible && layoutHeight >= 24 && target.bottom > bounds.bottom + scaleY
+      // Center/end-aligned column items can overflow above the box as well as
+      // below it. scrollHeight excludes unreachable negative overflow; include
+      // the source/translation branch and its margins in the required height.
+      let flexOverflow = 0;
+      if (/^(inline-)?flex$/.test(s.display) && /^column/.test(s.flexDirection)) {
+        const child = ancestors.at(-1) ?? owner, childStyle = style(child);
+        if (!/^(absolute|fixed)$/.test(childStyle.position)) {
+          const rect = child.getBoundingClientRect();
+          const top = (parseFloat(s.borderTopWidth) || 0) + (parseFloat(s.paddingTop) || 0);
+          const bottom = (parseFloat(s.borderBottomWidth) || 0) + (parseFloat(s.paddingBottom) || 0);
+          flexOverflow = Math.max(0, (bounds.top - rect.top) / scaleY + top + (parseFloat(childStyle.marginTop) || 0))
+            + Math.max(0, (rect.bottom - bounds.bottom) / scaleY + bottom + (parseFloat(childStyle.marginBottom) || 0));
+        }
+      }
+      // Ellipsized single-line prose can be shorter than the generic 24px
+      // floor. Its block translation still needs a visible row inside the
+      // source hit target; collapsed boxes and compact controls stay excluded.
+      const spills = eligible && (layoutHeight >= 24 || layoutHeight > 2 && isEllipsizedTextHost(box))
+        && (target.bottom > bounds.bottom + scaleY || flexOverflow > 1)
         && target.left >= bounds.left - 1 && target.right <= bounds.right + 1;
-      const required = spills ? Math.max(box.scrollHeight + borders, layoutHeight + (target.bottom - bounds.bottom) / scaleY) : 0;
-      const expand = spills && required <= Math.max(layoutHeight * 2, window.innerHeight / scaleY);
+      const required = spills ? Math.max(box.scrollHeight + borders, layoutHeight + flexOverflow,
+        layoutHeight + (target.bottom - bounds.bottom) / scaleY) : 0;
+      let expand = spills && required <= Math.max(layoutHeight * 2, window.innerHeight / scaleY);
+      // A percentage-height sibling can push the companion down by exactly
+      // our height increase. Stop growing a floor that does not reduce the
+      // overflow, rather than feeding a cycle through related containers.
+      if (expand && state && target.bottom > bounds.bottom + scaleY) {
+        const ineffective = readUnmaskedLayout(box, state.style, () => {
+          const original = box.getBoundingClientRect();
+          return original.height < bounds.height - scaleY
+            && owner.getBoundingClientRect().bottom - original.bottom <= target.bottom - bounds.bottom + scaleY;
+        });
+        if (ineffective) expand = false;
+      }
       // Ordinary flow already contains its translation. Do not scan the whole
       // site's stylesheets for each of its ancestors. Only an expansion or an
       // existing owned rule needs a source contract and its inner dependencies.
@@ -248,25 +282,51 @@ export function applyBoundedLayouts(changes: readonly Expansion[]): void {
       applied.set(box, state);
       setSourceExpansionStyle(box, style);
       box.setAttribute(HEIGHT, id);
+      pendingMeasure.add(box);
       for (const node of previous?.owners || []) if (node.isConnected && box.contains(node)) rememberOwner(box, node, state, previous?.contexts.get(node));
     }
     rememberOwner(box, owner, state, context);
     if (height > state.height || gridRows && !state.gridRows) {
       state.height = Math.max(height, state.height);
       state.gridRows ??= gridRows;
-      writeRule(state);
+      writeRule(box, state);
     }
     watcher ??= watchLayoutUpdates(readUpdates, { checkSourcePolicies: true });
     watcher.addRoot(box);
     observeSize(box);
   }
+  if (pendingMeasure.size) watcher?.refresh(false);
 }
 
-function writeRule(state: AppliedExpansion): void {
+function writeRule(box: HTMLElement, state: AppliedExpansion, shrinking = false): void {
   // A minimum expands fixed-height boxes too. Preserve the authored height so
   // percentages, viewport units and containing-block changes still resolve in
   // the browser, including CSSOM updates while translation watching is paused.
   state.style.textContent = `[${HEIGHT}="${state.id}"] { min-height: ${state.height}px !important; ${state.gridRows ? `grid-template-rows: ${state.gridRows} !important;` : ''} }`;
+  // A new inner floor can move the same companion past an outer boundary
+  // without resizing the companion itself; an outer floor also changes its
+  // percentage-height descendants. Recheck the other boxes for this owner
+  // within the usual frame budget. Do not recursively recheck this box: a
+  // percentage-height sibling can move the target by exactly our increase.
+  for (const owner of state.owners) for (const related of owned.get(owner) || []) {
+    if (related !== box && applied.has(related)) {
+      pendingMeasure.add(related);
+      if (shrinking && related.contains(box)) pendingRelax.add(related);
+    }
+  }
+}
+
+/** An expanded parent can mask how much space its percentage-height child
+ * needs. Read that child's floor against the authored ancestor heights. */
+function readSourceFloor<T>(box: HTMLElement, read: () => T): T {
+  const chain: { box: HTMLElement; style: HTMLStyleElement }[] = [];
+  for (let node: HTMLElement | null = box; node; node = node.parentElement) {
+    const state = applied.get(node);
+    if (state?.style.isConnected) chain.push({ box: node, style: state.style });
+  }
+  const probe = (index: number): T => index < chain.length
+    ? readUnmaskedLayout(chain[index].box, chain[index].style, () => probe(index + 1)) : read();
+  return probe(0);
 }
 
 function clearRule(box: HTMLElement, keepOwners = false): void {
@@ -283,6 +343,7 @@ function clearRule(box: HTMLElement, keepOwners = false): void {
   pendingRelax.delete(box);
   pendingMeasure.delete(box);
   pendingUpdates.delete(box);
+  policyRetries.delete(box);
   if (!applied.size && !retained.size) {
     watcher?.dispose(); watcher = null;
     resizeObserver?.disconnect(); resizeObserver = null; resizeNodes.clear(); resizeSizes.clear();
@@ -304,13 +365,21 @@ function readUpdates(mutations: readonly MutationRecord[] | null, checkSourcePol
       pendingUpdates.set(box, !!reflow || !!pendingUpdates.get(box));
     }
   }
-  const selected = new Map(takeLayoutWork(pendingUpdates));
+  // A shared pass can run out of time after earlier owners. Give that box a
+  // fresh pass of its own before treating an unreadable policy as changed.
+  const retry = [...pendingUpdates].find(([box]) => policyRetries.has(box));
+  const selected = new Map(retry ? [retry] : takeLayoutWork(pendingUpdates));
   for (const box of selected.keys()) pendingUpdates.delete(box);
   const measured = new Set([...selected.keys()].filter(box => pendingMeasure.delete(box)));
   const sources = new Map<HTMLElement, string>();
+  const limited = new Set<HTMLElement>();
   const sourceSizing = (box: HTMLElement): string => {
     let sizing = sources.get(box);
-    if (sizing === undefined) { sizing = pageSizing(box); sources.set(box, sizing); }
+    if (sizing === undefined) {
+      const policy = readSourceLayoutPolicyState(box, SIZING);
+      if (policy.limited) limited.add(box);
+      sizing = pageSizing(box, undefined, policy); sources.set(box, sizing);
+    }
     return sizing;
   };
   // An outer correction must not feed a changed inner inherit/animation
@@ -338,23 +407,33 @@ function readUpdates(mutations: readonly MutationRecord[] | null, checkSourcePol
     const detached = !box.isConnected || !state.style.isConnected || box.getRootNode() !== state.style.getRootNode() || box.getAttribute(HEIGHT) !== state.id || contextRemoved(box, state, remaining);
     const style = detached ? null : getComputedStyle(box);
     const invalidPolicy = !!style && (sourceSizing(box) !== state.sizing || !contextIntact(state, remaining) || !expansionPolicy(box, style));
+    const unread = limited.has(box) || remaining.some(owner => state.contexts.get(owner)?.some(source => limited.has(source.box)));
     const reflow = selected.get(box);
-    return { box, state, remaining, invalidPolicy, detached, policy: style ? policySignature(style) : '',
+    return { box, state, remaining, invalidPolicy, detached, deferred: unread && !policyRetries.has(box), policy: style ? policySignature(style) : '',
       relax: pendingRelax.delete(box) || remaining.length !== state.owners.size || reflow };
   });
-  const changes = readBoundedLayouts(states.filter(item => measured.has(item.box) && !item.detached && !item.invalidPolicy)
-    .flatMap(item => item.remaining)).filter(change => measured.has(change.box));
-  const anchors = readAnchoredLayouts(states.filter(item => measured.has(item.box) && !item.detached && !item.invalidPolicy)
+  const changes = readBoundedLayouts(states.filter(item => measured.has(item.box) && !item.detached && !item.invalidPolicy && !item.deferred)
+    .flatMap(item => item.remaining)).filter(change => measured.has(change.box) || !applied.has(change.box) && !retained.has(change.box));
+  // An inner expansion can expose an outer boundary that did not spill in
+  // the original read (for example, an end-aligned percentage-height child).
+  const fresh = new Set(changes.filter(change => !applied.has(change.box)).map(change => change.box));
+  const anchors = readAnchoredLayouts(states.filter(item => measured.has(item.box) && !item.detached && !item.invalidPolicy && !item.deferred)
     .flatMap(item => item.remaining));
   // Measure a smaller floor with our rule synchronously omitted. The source
   // probe restores styles and scroll offsets before returning; committing a
   // collapsed floor for a frame would clamp scrolling fixed-height panels.
-  const floors = new Map(states.filter(item => item.relax && !item.detached && !item.invalidPolicy && item.remaining.length)
-    .map(({ box, state, remaining }) => [box, readUnmaskedLayout(box, state.style, () =>
+  const floors = new Map(states.filter(item => item.relax && !item.detached && !item.invalidPolicy && !item.deferred && item.remaining.length)
+    .map(({ box, state, remaining }) => [box, readSourceFloor(box, () =>
       Math.max(state.sourceFloor, ...readBoundedLayouts(remaining).filter(change => change.box === box).map(change => change.height)))]));
   return () => {
-    for (const { box, state, remaining, relax, detached, invalidPolicy, policy } of states) {
+    for (const { box, state, remaining, relax, detached, invalidPolicy, deferred, policy } of states) {
       if (applied.get(box) !== state) continue;
+      if (deferred && !detached && remaining.length) {
+        policyRetries.add(box);
+        pendingUpdates.set(box, !!relax); pendingMeasure.add(box);
+        continue;
+      }
+      policyRetries.delete(box);
       for (const owner of state.owners) if (!remaining.includes(owner)) forgetOwner(box, owner);
       state.owners = new Set(remaining);
       if (detached || invalidPolicy || !remaining.length) {
@@ -364,7 +443,10 @@ function readUpdates(mutations: readonly MutationRecord[] | null, checkSourcePol
       }
       if (!relax) continue;
       const height = floors.get(box)!;
-      if (state.height !== height) { state.height = height; writeRule(state); }
+      if (state.height !== height) {
+        const shrinking = height < state.height;
+        state.height = height; writeRule(box, state, shrinking);
+      }
       pendingMeasure.add(box);
     }
     for (const { box, state, remaining, detached } of dormant) {
@@ -377,7 +459,7 @@ function readUpdates(mutations: readonly MutationRecord[] | null, checkSourcePol
     // The containing height can also revive a previously captured absolute
     // footer. Measure that source snapshot after this owned write has settled.
     for (const { box } of revivals) if (applied.has(box)) pendingMeasure.add(box);
-    applyBoundedLayouts(changes.filter(change => applied.has(change.box) && !pendingMeasure.has(change.box)));
+    applyBoundedLayouts(changes.filter(change => (applied.has(change.box) || fresh.has(change.box)) && !pendingMeasure.has(change.box)));
     applyAnchoredLayouts(anchors);
     if (pendingMeasure.size || pendingUpdates.size) watcher?.refresh(false);
   };

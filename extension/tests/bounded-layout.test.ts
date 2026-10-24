@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { applyBoundedLayouts, readBoundedLayouts, releaseBoundedLayout, restoreBoundedLayouts } from '../lib/renderer/bounded-layout';
 import { readSourceVisibility } from '../lib/collector';
+import * as sourcePolicy from '../lib/renderer/source-layout-policy';
 
 afterEach(() => {
   restoreBoundedLayouts(document);
@@ -24,6 +25,102 @@ function fixture(containerStyle = 'height:80px;overflow:hidden'): { box: HTMLEle
 }
 
 describe('bounded prose layout', () => {
+  it.each(['transient', 'persistent'] as const)('bounds retries after a %s policy read limit', async limit => {
+    const { box, target } = fixture();
+    applyBoundedLayouts(readBoundedLayouts([target]));
+    const policy = vi.spyOn(sourcePolicy, 'readSourceLayoutPolicyState');
+    const exhausted = () => ({ signature: '[["@read-limit"]]', complete: false, limited: true });
+    if (limit === 'transient') policy.mockImplementationOnce(exhausted);
+    else policy.mockImplementation(exhausted);
+    window.dispatchEvent(new Event('resize'));
+    await new Promise(resolve => setTimeout(resolve, 120));
+    expect(box.hasAttribute('data-dual-read-layout-height')).toBe(limit === 'transient');
+    expect(target.isConnected).toBe(true);
+    const reads = policy.mock.calls.length;
+    await new Promise(resolve => setTimeout(resolve, 80));
+    expect(policy.mock.calls.length).toBe(reads);
+  });
+
+  it.each(['center', 'flex-end'])('includes source overflow above a %s column flex box', align => {
+    const { box, target } = fixture(`height:80px;overflow:hidden;display:flex;flex-direction:column;justify-content:${align}`);
+    const paragraph = target.parentElement!;
+    paragraph.style.margin = '8px';
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function(this: Element) {
+      const top = this === paragraph ? (align === 'center' ? -12 : -32) : this === target ? (align === 'center' ? 32 : 12) : 0;
+      const height = this === box ? 80 : this === paragraph ? 104 : this === target ? 60 : 220;
+      return { x: 0, y: top, width: 320, height, top, bottom: top + height, left: 0, right: 320, toJSON() {} } as DOMRect;
+    });
+    // A scroll extent omits the unreachable negative overflow. With end
+    // alignment even the translation fits, while the original is clipped.
+    Object.defineProperty(box, 'scrollHeight', { configurable: true, value: align === 'center' ? 100 : 80 });
+    const change = readBoundedLayouts([target]).find(change => change.box === box);
+    expect(change?.height).toBe(120);
+  });
+
+  it('bounds follow-up work when a percentage sibling moves with every height correction', async () => {
+    const { box, target } = fixture();
+    box.querySelector('p')!.style.height = '100%';
+    box.append(target);
+    const height = () => {
+      const rule = document.querySelector<HTMLStyleElement>('style[data-dual-read-layout-style]')?.sheet?.cssRules[0] as CSSStyleRule | undefined;
+      return Math.max(80, parseFloat(rule?.style.getPropertyValue('min-height') || '') || 0);
+    };
+    const computed = getComputedStyle;
+    vi.spyOn(window, 'getComputedStyle').mockImplementation(element => {
+      const style = computed(element);
+      return element !== box ? style : new Proxy(style, { get(style, key) {
+        if (key === 'height') return `${height()}px`;
+        return Reflect.get(style, key, style);
+      } });
+    });
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function(this: Element) {
+      const top = this === target ? height() + 2 : 0;
+      const size = this === box ? height() : this === target ? 60 : 1000;
+      return { x: 0, y: top, width: 320, height: size, top, bottom: top + size, left: 0, right: 320, toJSON() {} } as DOMRect;
+    });
+    Object.defineProperty(box, 'scrollHeight', { configurable: true, get: () => height() + 65 });
+    applyBoundedLayouts(readBoundedLayouts([target]));
+    const firstFloor = height();
+    await new Promise(resolve => setTimeout(resolve, 150));
+    expect(height()).toBe(firstFloor);
+    await new Promise(resolve => setTimeout(resolve, 100));
+    expect(height()).toBe(firstFloor);
+  });
+
+  it.each([
+    { height: 16, extra: '', expands: true },
+    { height: 20, extra: '', expands: true },
+    { height: 23.5, extra: '', expands: true },
+    { height: 0, extra: '', expands: false },
+    { height: 2, extra: '', expands: false },
+    { height: 20, extra: 'text-overflow:clip', expands: false },
+    { height: 20, extra: 'overflow:auto', expands: false },
+    { height: 20, extra: '-webkit-line-clamp:1', expands: false },
+    { height: 20, extra: '', role: 'button', expands: false },
+  ])('keeps a $height px ellipsis translation visible with $extra, expands=$expands', ({ height, extra, role, expands }) => {
+    const { box, target } = fixture(`display:block;height:${height}px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;${extra}`);
+    if (role) box.setAttribute('role', role);
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function(this: Element) {
+      const top = this === target ? 22 : 0;
+      const size = this === box ? height : this === target ? 20 : 100;
+      return { x: 0, y: top, width: 320, height: size, top, bottom: top + size, left: 0, right: 320, toJSON() {} } as DOMRect;
+    });
+    Object.defineProperty(box, 'scrollHeight', { configurable: true, value: 44 });
+    const children = [...box.childNodes];
+    const authored = box.getAttribute('style');
+    applyBoundedLayouts(readBoundedLayouts([target]));
+    expect(box.hasAttribute('data-dual-read-layout-height')).toBe(expands);
+    if (expands) {
+      expect(document.querySelector('style[data-dual-read-layout-style]')!.textContent).toContain('min-height: 44px');
+    }
+    expect(box.getAttribute('style')).toBe(authored);
+    releaseBoundedLayout(target);
+    restoreBoundedLayouts(document);
+    expect([...box.childNodes]).toEqual(children);
+    expect(box.getAttribute('style')).toBe(authored);
+    expect(document.querySelector('[data-dual-read-layout-height],style[data-dual-read-layout-style]')).toBeNull();
+  });
+
   it.each(['open', 'collapsed', 'padded'] as const)('reads %s source visibility before the expansion frame runs', state => {
     const { box, target } = fixture('height:80px;width:320px;overflow:hidden');
     const source = box.querySelector('p')!;

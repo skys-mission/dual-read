@@ -12,7 +12,7 @@ import {flowStyleCases, translateFlowStyleText, verifyFlowStyleRegression} from 
 import {stylesheetLayoutCases, translateStylesheetText, verifyStylesheetLayoutRegression} from './helpers/stylesheet-layout-regressions';
 import {mediaPolicyCases, translateMediaPolicyText, verifyMediaPolicyRegression} from './helpers/media-policy-regressions';
 import {inlineVisibilityCases, verifyInlineVisibilityRegression} from './helpers/inline-visibility-regressions';
-import {layoutNeighborCases, translateNeighborText, verifyLayoutNeighborRegression} from './helpers/layout-neighbor-regressions';
+import {delayMediaPolicyRead, layoutNeighborCases, translateNeighborText, verifyLayoutNeighborRegression} from './helpers/layout-neighbor-regressions';
 import {cascadeLayoutCases, translateCascadeText, verifyCascadeLayoutRegression} from './helpers/cascade-layout-regressions';
 import {positionedLayoutCases, translatePositionedText, verifyPositionedLayoutRegression} from './helpers/positioned-layout-regressions';
 import {specificityVisibilityCases, translateSpecificityText, verifySpecificityVisibilityRegression} from './helpers/specificity-visibility-regressions';
@@ -153,6 +153,7 @@ for (const scenario of layoutNeighborCases) {
       await seedSettings(extContext, extensionId, {apiBase:mock.apiBase});
       const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('lab-layout-neighbors.html'));
       const tabId = await getTabId(page,sw);
+      if (scenario.policyDelay) await sw.evaluate(`chrome.scripting.executeScript({target:{tabId:${tabId}},func:${delayMediaPolicyRead.toString()}})`);
       await sw.evaluate(async id => {await chrome.scripting.executeScript({target:{tabId:id},func:() => {
         document.addEventListener('layout-neighbor-test:restore',() => globalThis.__DUAL_READ__?.restore());
       }});}, tabId);

@@ -461,10 +461,10 @@ export class ContentSession {
       withSourceLayoutRead(() => {
         for (const item of pending) {
           if (done && sourceLayoutReadSpent()) break;
-          done++;
           const { entry } = item;
-          if (!this.acceptSource(entry)) continue;
-          captureMediaLayouts([entry.unit.el]);
+          if (!this.acceptSource(entry)) { done++; continue; }
+          if (!captureMediaLayouts([entry.unit.el])) break;
+          done++;
           if (this.config.mode !== 'replace') captureAnchoredLayouts([entry.unit.el]);
           this.capturedBuf.push(item);
         }

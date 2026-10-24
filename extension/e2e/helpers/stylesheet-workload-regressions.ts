@@ -188,15 +188,20 @@ export async function verifyLayoutWorkload(
   await startClock();
   await page.waitForTimeout(2200);
   await checkClock('idle source policy checks');
+  if (scenario === 'media-grid') await expect(page.locator('[data-dual-read-media-bound]')).toHaveCount(24);
   await startClock();
   await page.evaluate(() => document.getElementById('outside')!.setAttribute('data-unused-workload', '1'));
   await checkClock('paused sibling attribute');
+  if (scenario === 'media-grid') await expect(page.locator('[data-dual-read-media-bound]')).toHaveCount(24);
   await startClock();
   await page.evaluate(() => document.body.setAttribute('data-author-change', 'true'));
   await expect(page.locator('[data-dual-read-layout-height],[data-dual-read-media-bound]')).toHaveCount(0);
   await checkClock('paused author sizing');
   await controls.restore();
   expect(await page.evaluate(() => window.__stylesheetWorkload.texts.every(({ node, value }) => node.isConnected && node.data === value))).toBe(true);
+  await controls.restore();
+  expect(await page.evaluate(() => window.__stylesheetWorkload.paragraph.childNodes.length === window.__stylesheetWorkload.children.length
+    && window.__stylesheetWorkload.children.every((node, index) => window.__stylesheetWorkload.paragraph.childNodes[index] === node))).toBe(true);
   await expect(page.locator('.dual-read-target,.dual-read-replace-text,.dual-read-original-hidden,[data-dual-read-layout-height],[data-dual-read-media-bound],[data-dual-read-layout-anchor]')).toHaveCount(0);
   await expect(page.locator('body')).toHaveAttribute('data-author-change', 'true');
 }

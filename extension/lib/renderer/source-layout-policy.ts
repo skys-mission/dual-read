@@ -29,7 +29,7 @@ let animationSequence = 0;
 
 interface PolicyRead {
   started: number;
-  rules: WeakMap<CSSRuleList, SourceRule[]>;
+  rules: WeakMap<CSSRuleList, { all: SourceRule[]; other?: number[]; classes?: Map<string, number[]> }>;
   kinds: WeakMap<CSSRule, { uncertain: boolean; scoped: boolean; layer: boolean }>;
   selected: WeakMap<CSSStyleDeclaration, Map<string, boolean>>;
   sheets: Map<Document | ShadowRoot, CSSStyleSheet[]>;
@@ -40,15 +40,18 @@ const MAX_POLICY_RULES = 25000;
 const MAX_POLICY_READ_MS = 96;
 const SOFT_POLICY_READ_MS = 24;
 const READ_LIMIT = Symbol('source layout read limit');
+const PLAIN_CLASS = /^\.([a-zA-Z_][\w-]*)$/;
 
 /** Share immutable author inputs only during a synchronous read pass. Nothing
- * survives a write, an async yield, or a later CSSOM/page/motion update. */
-export function withSourceLayoutRead<T>(read: () => T): T {
-  if (activeRead) return read();
+ * survives a write, an async yield, or a later CSSOM/page/motion update. A
+ * deferred retry can request its own budget instead of inheriting spent work. */
+export function withSourceLayoutRead<T>(read: () => T, fresh = false): T {
+  if (activeRead && !fresh) return read();
+  const previous = activeRead;
   activeRead = { started: performance.now(), rules: new WeakMap(), kinds: new WeakMap(), selected: new WeakMap(),
     sheets: new Map(), policies: new WeakMap() };
   try { return read(); }
-  finally { activeRead = null; }
+  finally { activeRead = previous; }
 }
 
 /** Yield between owners; a pathological single cascade also has a hard cap.
@@ -106,6 +109,7 @@ export function readSourceLayoutPolicyState(element: HTMLElement, properties: re
 
 function readPolicy(element: HTMLElement, properties: readonly string[], computed: CSSStyleDeclaration | undefined, depth: number): SourceLayoutPolicy {
   const inputs: string[][][] = [];
+  const classes = element.ownerDocument.compatMode === 'CSS1Compat' ? new Set(element.classList) : null;
   // :host/::slotted rules can live inside another root; ::part rules can live
   // outside this one. A closed slot also reports assignedSlot=null. Let the
   // browser resolve these cascades, including custom elements when privileged
@@ -206,13 +210,35 @@ function readPolicy(element: HTMLElement, properties: readonly string[], compute
   const mediaMatches = (media: string): boolean => !media || typeof window.matchMedia !== 'function' || window.matchMedia(media).matches;
   let visited = 0;
   const visit = (rules: CSSRuleList, parentSelector = '', conditional = false, inScope = false, layer: LayerPart[] = []): void => {
-    let sourceRules = activeRead!.rules.get(rules);
-    if (!sourceRules) {
+    let indexed = activeRead!.rules.get(rules);
+    if (!indexed) {
       if (rules.length > MAX_POLICY_RULES) throw READ_LIMIT;
-      sourceRules = Array.from(rules) as SourceRule[]; activeRead!.rules.set(rules, sourceRules);
+      indexed = { all: Array.from(rules) as SourceRule[] }; activeRead!.rules.set(rules, indexed);
     }
-    for (const rule of sourceRules) {
-      if (++visited > MAX_POLICY_RULES || (visited % 64 === 1 && performance.now() - activeRead!.started >= MAX_POLICY_READ_MS)) throw READ_LIMIT;
+    visited += indexed.all.length;
+    if (visited > MAX_POLICY_RULES) throw READ_LIMIT;
+    // Image, row and ancestor policies inspect the same sheet in one pass.
+    // Index leaf class rules once, keeping all grouping/nesting rules and
+    // restoring source order for the classes that can match this subject.
+    // The index expires with the read pass, including after CSSOM/DOM edits.
+    if (classes && !indexed.classes) {
+      const byClass = new Map<string, number[]>(), other: number[] = [];
+      for (let index = 0; index < indexed.all.length; index++) {
+        if (index % 64 === 0 && performance.now() - activeRead!.started >= MAX_POLICY_READ_MS) throw READ_LIMIT;
+        const rule = indexed.all[index];
+        const name = rule.type === 1 && !rule.cssRules?.length ? rule.selectorText?.match(PLAIN_CLASS)?.[1] : undefined;
+        if (!name) { other.push(index); continue; }
+        const matches = byClass.get(name) ?? []; matches.push(index); byClass.set(name, matches);
+      }
+      indexed.classes = byClass; indexed.other = other;
+    }
+    const sourceRules = classes
+      ? [...indexed.other!, ...[...classes].flatMap(name => indexed.classes!.get(name) ?? [])]
+        .sort((left, right) => left - right).map(index => indexed.all[index])
+      : indexed.all;
+    for (let index = 0; index < sourceRules.length; index++) {
+      if (index % 64 === 0 && performance.now() - activeRead!.started >= MAX_POLICY_READ_MS) throw READ_LIMIT;
+      const rule = sourceRules[index];
       if (rule.type === 4 && !mediaMatches(rule.conditionText || '')) continue;
       if (rule.type === 12 && typeof CSS !== 'undefined' && !CSS.supports(rule.conditionText || '')) continue;
       let kind = activeRead!.kinds.get(rule);
@@ -270,7 +296,12 @@ function readPolicy(element: HTMLElement, properties: readonly string[], compute
           if (!selector) complete = false;
         } else if (rule.type === 0 && parentSelector) complete = false;
       }
-      if (selector && rule.style && hasSelected(rule.style)) {
+      // Large utility sheets mostly contain plain, unmatched classes. Reject
+      // those before probing every requested CSSOM property. Keep native
+      // matching for escaped/compound selectors and quirks-mode class casing;
+      // nested descendants below this rule must still be visited.
+      const plainClass = classes && selector?.match(PLAIN_CLASS)?.[1];
+      if ((!plainClass || classes!.has(plainClass)) && selector && rule.style && hasSelected(rule.style)) {
         // Element.matches uses the element as :scope. An author @scope uses
         // its own root, including the implicit root selected by &. A false
         // result therefore cannot prove that these declarations do not apply.

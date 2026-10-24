@@ -174,10 +174,9 @@ export async function launchFirefoxGeckoContext(): Promise<{
     context,
     userDataDir,
     async close() {
-      await Promise.race([
-        context.close().catch(() => undefined),
-        new Promise((r) => setTimeout(r, 3_000)),
-      ]);
+      // Tracing for the next test must not start while a previous persistent
+      // context is still closing under load.
+      await context.close().catch(() => undefined);
       fs.rmSync(userDataDir, { recursive: true, force: true });
     },
   };

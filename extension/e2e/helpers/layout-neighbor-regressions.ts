@@ -1,11 +1,30 @@
 import {expect, type Page} from '@playwright/test';
 import type {TranslationMode} from '../../lib/types';
 
-export const layoutNeighborCases = (['padding', 'sibling-media', 'parent-media', 'conditional-sizing'] as const).flatMap(family =>
-  (['bilingual', 'replace'] as const).flatMap(mode => [false, true].flatMap(paused => [false, true].map(delivered => ({family, mode, paused, delivered,
+const neighborCases = (['padding', 'sibling-media', 'parent-media', 'conditional-sizing'] as const).flatMap(family =>
+  (['bilingual', 'replace'] as const).flatMap(mode => [false, true].flatMap(paused => [false, true].map(delivered => ({family, mode, paused, delivered, policyDelay: false,
     name: `layout neighbor regression: ${family}, ${mode}, paused=${paused}, delivered=${delivered}`})))),
 );
+export const layoutNeighborCases = [...neighborCases, ...neighborCases
+  .filter(scenario => scenario.family === 'sibling-media' && scenario.delivered)
+  .map(scenario => ({...scenario, policyDelay: true,
+    name: `layout neighbor policy budget: sibling-media, ${scenario.mode}, paused=${scenario.paused}`}))];
 type NeighborCase = typeof layoutNeighborCases[number];
+
+/** Run in the content script's world. Model one slow cascade read without
+ * making the test depend on machine load or changing the author's layout. */
+export function delayMediaPolicyRead(): void {
+  const matches = Element.prototype.matches;
+  Element.prototype.matches = function(selector: string): boolean {
+    if (this.id === 'photo-control' && this.hasAttribute('data-dual-read-media-bound') && selector === '.row img') {
+      Element.prototype.matches = matches;
+      const until = performance.now() + 110;
+      while (performance.now() < until) { /* One read exceeds the 96ms budget. */ }
+      document.documentElement.setAttribute('data-media-policy-delayed', 'true');
+    }
+    return matches.call(this, selector);
+  };
+}
 export const translateNeighborText = (text: string): string => text.startsWith('Expansion')
   ? '用于检查作者尺寸变化及正常译文布局的文字。'.repeat(12) : `译:${text}`;
 interface NeighborSource {
@@ -75,6 +94,7 @@ export async function verifyLayoutNeighborRegression(
     expect(await page.locator('#box').evaluate(box => getComputedStyle(box,'::before').content)).toBe('"*"');
   } else {
     for (const id of ['a', ...(scenario.family === 'sibling-media' ? ['b'] : []), 'control']) await expect(page.locator('#photo-'+id)).toHaveAttribute('data-dual-read-media-bound',/.+/);
+    if (scenario.policyDelay) await expect(page.locator('html')).toHaveAttribute('data-media-policy-delayed', 'true');
   }
   if (scenario.paused) await controls.pause();
   if (scenario.family === 'padding') {

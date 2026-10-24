@@ -16,7 +16,7 @@ import {flowStyleCases, translateFlowStyleText, verifyFlowStyleRegression} from 
 import {stylesheetLayoutCases, translateStylesheetText, verifyStylesheetLayoutRegression} from './helpers/stylesheet-layout-regressions';
 import {mediaPolicyCases, translateMediaPolicyText, verifyMediaPolicyRegression} from './helpers/media-policy-regressions';
 import {inlineVisibilityCases, verifyInlineVisibilityRegression} from './helpers/inline-visibility-regressions';
-import {layoutNeighborCases, translateNeighborText, verifyLayoutNeighborRegression} from './helpers/layout-neighbor-regressions';
+import {delayMediaPolicyRead, layoutNeighborCases, translateNeighborText, verifyLayoutNeighborRegression} from './helpers/layout-neighbor-regressions';
 import {cascadeLayoutCases, translateCascadeText, verifyCascadeLayoutRegression} from './helpers/cascade-layout-regressions';
 import {positionedLayoutCases, translatePositionedText, verifyPositionedLayoutRegression} from './helpers/positioned-layout-regressions';
 import {specificityVisibilityCases, translateSpecificityText, verifySpecificityVisibilityRegression} from './helpers/specificity-visibility-regressions';
@@ -49,7 +49,23 @@ import { shadowSizingCases, translateShadowSizingText, verifyShadowSizing } from
 import { layoutCascadeCases, translateLayoutCascadeText, verifyLayoutCascade } from './helpers/layout-cascade-regressions';
 import { layoutCollapseCases, controlCollapseFrames, translateCollapseSource, verifyLayoutCollapse } from './helpers/layout-collapse-regressions';
 import { scrollProbeCases, controlScrollProbe, translateScrollProbe, verifyScrollProbe } from './helpers/scroll-probe-regressions';
-import { boundedScaleCases, boundedPercentageCases, translateBoundedSizingText, verifyBoundedScale, verifyBoundedPercentage } from './helpers/bounded-sizing-regressions';
+import { boundedScaleCases, boundedPercentageCases, boundedFlexCases, translateBoundedSizingText, verifyBoundedScale, verifyBoundedPercentage, verifyBoundedFlex } from './helpers/bounded-sizing-regressions';
+import { ellipsisCases, translateEllipsisText, verifyEllipsis } from './helpers/ellipsis-regressions';
+
+for (const scenario of ellipsisCases) {
+  test(`fixed-height ellipsis: ${scenario.sizing} / ${scenario.length} / paused=${scenario.paused}`, async () => {
+    const mock = await startMockServer();
+    const fx = await launchFirefoxGeckoContext();
+    try {
+      const page = await fx.context.newPage();
+      await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => texts.map(translateEllipsisText) });
+      await verifyEllipsis(page, scenario, {
+        translate: mode => firefoxTranslatePage(page, mode), pause: () => firefoxStopWatch(page), restore: () => firefoxRestore(page),
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
 
 for (const scenario of boundedScaleCases) {
   test(`bounded scale: ${scenario.transform} / ${scenario.mode}`, async () => {
@@ -58,6 +74,19 @@ for (const scenario of boundedScaleCases) {
       const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
       await installFirefoxDualRead(page, { translate: async texts => texts.map(translateBoundedSizingText) });
       await verifyBoundedScale(page, scenario, {
+        translate: mode => firefoxTranslatePage(page, mode), pause: () => firefoxStopWatch(page), restore: () => firefoxRestore(page),
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
+
+for (const scenario of boundedFlexCases) {
+  test(`bounded flex: ${scenario.align} / paused=${scenario.paused}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext();
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => texts.map(translateBoundedSizingText) });
+      await verifyBoundedFlex(page, scenario, {
         translate: mode => firefoxTranslatePage(page, mode), pause: () => firefoxStopWatch(page), restore: () => firefoxRestore(page),
       });
     } finally { await fx.close(); await mock.close(); }
@@ -455,6 +484,7 @@ for (const scenario of layoutNeighborCases) {
     try {
       const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('lab-layout-neighbors.html'));
       await installFirefoxDualRead(page,{translate:async texts => {requests.push(...texts); return texts.map(translateNeighborText);}});
+      if (scenario.policyDelay) await page.evaluate(delayMediaPolicyRead);
       await page.evaluate(() => {document.addEventListener('layout-neighbor-test:restore',() => globalThis.__DUAL_READ__?.restore());});
       await verifyLayoutNeighborRegression(page,scenario,{translate:mode => firefoxTranslatePage(page,mode),restore:() => firefoxRestore(page),pause:() => firefoxStopWatch(page)},requests);
     } finally {await fx.close(); await mock.close();}

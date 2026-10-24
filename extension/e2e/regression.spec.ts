@@ -11,7 +11,24 @@ import { shadowSizingCases, translateShadowSizingText, verifyShadowSizing } from
 import { layoutCascadeCases, translateLayoutCascadeText, verifyLayoutCascade } from './helpers/layout-cascade-regressions';
 import { layoutCollapseCases, controlCollapseFrames, translateCollapseSource, verifyLayoutCollapse } from './helpers/layout-collapse-regressions';
 import { scrollProbeCases, controlScrollProbe, translateScrollProbe, verifyScrollProbe } from './helpers/scroll-probe-regressions';
-import { boundedScaleCases, boundedPercentageCases, translateBoundedSizingText, verifyBoundedScale, verifyBoundedPercentage } from './helpers/bounded-sizing-regressions';
+import { boundedScaleCases, boundedPercentageCases, boundedFlexCases, translateBoundedSizingText, verifyBoundedScale, verifyBoundedPercentage, verifyBoundedFlex } from './helpers/bounded-sizing-regressions';
+import { ellipsisCases, translateEllipsisText, verifyEllipsis } from './helpers/ellipsis-regressions';
+
+for (const scenario of ellipsisCases) {
+  test(`fixed-height ellipsis: ${scenario.sizing} / ${scenario.length} / paused=${scenario.paused}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer();
+    mock.setTranslator(translateEllipsisText);
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage();
+      await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyEllipsis(page, scenario, {
+        translate: mode => translateTab(sw, tabId, mode), pause: () => stopWatchTab(sw, tabId), restore: () => restoreTab(sw, tabId),
+      });
+    } finally { await mock.close(); }
+  });
+}
 
 for (const scenario of boundedScaleCases) {
   test(`bounded scale: ${scenario.transform} / ${scenario.mode}`, async ({ extContext, extensionId, sw }) => {
@@ -21,6 +38,20 @@ for (const scenario of boundedScaleCases) {
       const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
       const tabId = await getTabId(page, sw);
       await verifyBoundedScale(page, scenario, {
+        translate: mode => translateTab(sw, tabId, mode), pause: () => stopWatchTab(sw, tabId), restore: () => restoreTab(sw, tabId),
+      });
+    } finally { await mock.close(); }
+  });
+}
+
+for (const scenario of boundedFlexCases) {
+  test(`bounded flex: ${scenario.align} / paused=${scenario.paused}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer(); mock.setTranslator(translateBoundedSizingText);
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyBoundedFlex(page, scenario, {
         translate: mode => translateTab(sw, tabId, mode), pause: () => stopWatchTab(sw, tabId), restore: () => restoreTab(sw, tabId),
       });
     } finally { await mock.close(); }

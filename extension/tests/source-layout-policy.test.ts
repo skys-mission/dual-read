@@ -17,6 +17,63 @@ function fixture(css: string): {box: HTMLElement; sheet: HTMLStyleElement} {
 }
 
 describe('bounded source layout reads', () => {
+  it('shares an unmatched utility index across the policies in one read pass', () => {
+    const { box, sheet } = fixture(Array.from({length:6000}, (_, index) => `.utility-${index}{height:50px}`).join('') + '#box{height:80px}');
+    let time = 0;
+    vi.spyOn(performance, 'now').mockImplementation(() => time);
+    for (const rule of Array.from(sheet.sheet!.cssRules).slice(0, 6000) as CSSStyleRule[]) {
+      const selector = rule.selectorText;
+      Object.defineProperty(rule, 'selectorText', {get: () => { time += 0.005; return selector; }, configurable: true});
+    }
+    let before = '';
+    withSourceLayoutRead(() => {
+      for (const properties of [['height'], ['width'], ['max-height'], ['padding-top']]) {
+        // Supply computed axes so JSDOM's own style resolver does not read
+        // the instrumented selectors on behalf of getComputedStyle.
+        const policy = readSourceLayoutPolicyState(box, properties, box.style);
+        expect(policy.limited).toBeUndefined();
+        if (properties[0] === 'height') before = policy.signature;
+      }
+    });
+    expect(time).toBeLessThan(60);
+    Object.defineProperty(sheet.sheet!.cssRules[0], 'selectorText', { value: '#box', configurable: true });
+    expect(readSourceLayoutPolicyState(box, ['height'], box.style).signature).not.toBe(before);
+  });
+
+  it('keeps unmatched utility declarations out of the cascade read budget', () => {
+    const { box, sheet } = fixture(Array.from({length:6000}, (_, index) => `.utility-${index}{height:50px;padding:2px}`).join('') + '#box{height:80px}');
+    const utilities = new Set(Array.from(sheet.sheet!.cssRules).slice(0, 6000).map(rule => (rule as CSSStyleRule).style));
+    const prototype = Object.getPrototypeOf([...utilities][0]) as CSSStyleDeclaration;
+    const read = prototype.getPropertyValue;
+    let time = 0;
+    vi.spyOn(performance, 'now').mockImplementation(() => time);
+    // Model CSSOM access cost, independently of the host's current CPU load.
+    vi.spyOn(prototype, 'getPropertyValue').mockImplementation(function(this: CSSStyleDeclaration, property: string) {
+      if (utilities.has(this)) time += 0.05;
+      return read.call(this, property);
+    });
+    const policy = readSourceLayoutPolicyState(box, ['height', 'padding-top', 'grid-template-rows']);
+    expect(policy.limited).toBeUndefined(); expect(policy.signature).toContain('80px');
+    expect(time).toBeLessThan(5);
+    box.classList.add('utility-5999');
+    expect(readSourceLayoutPolicyState(box, ['height', 'padding-top', 'grid-template-rows']).signature).not.toBe(policy.signature);
+  });
+
+  it('isolates a deferred read budget without replacing the enclosing pass cache', () => {
+    const { box } = fixture('#box{height:80px}');
+    let time = 0;
+    vi.spyOn(performance, 'now').mockImplementation(() => time);
+    withSourceLayoutRead(() => {
+      time = 100;
+      const exhausted = readSourceLayoutPolicyState(box, ['height']);
+      expect(exhausted.limited).toBe(true);
+      const retry = withSourceLayoutRead(() => readSourceLayoutPolicyState(box, ['height']), true);
+      expect(retry.limited).toBeUndefined();
+      expect(retry.signature).toContain('80px');
+      expect(readSourceLayoutPolicyState(box, ['height'])).toBe(exhausted);
+    });
+  });
+
   it('keeps a cold utility stylesheet within the selector parsing budget', () => {
     const {box} = fixture(Array.from({length:6000}, (_, index) => `.utility-${index}{height:50px}`).join('') + '#box{height:80px}');
     const processor = selectorParser(), parse = processor.astSync;
@@ -321,6 +378,16 @@ describe('authored layout policy', () => {
     Object.defineProperty(sheet.sheet!, 'cssRules', {value:[parent], configurable:true});
     return {box, sheet, parent, nested, nestedStyle};
   }
+
+  it('still visits nested descendants when the parent class does not match the subject', () => {
+    const {box, parent, nestedStyle} = nestedFixture('.ancestor');
+    box.parentElement!.className = 'ancestor';
+    parent.cssRules = [{type:1, selectorText:'& #box', style:nestedStyle}];
+    const before = readSourceLayoutPolicyState(box, ['height']);
+    expect(before.signature).toContain('80px');
+    box.parentElement!.className = '';
+    expect(readSourceLayoutPolicyState(box, ['height']).signature).not.toBe(before.signature);
+  });
 
   it('reads declarations after nested rules at their original cascade position', () => {
     const {box, parent, nested, nestedStyle} = nestedFixture();

@@ -3,10 +3,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { applyMediaLayouts, attachMediaLayouts, captureMediaLayouts, readMediaLayouts, releaseMediaLayout, restoreMediaLayouts } from '../lib/renderer/media-layout';
 import { renderBatch, restoreUnit } from '../lib/renderer';
 import type { TranslationUnit } from '../lib/types';
+import * as sourcePolicy from '../lib/renderer/source-layout-policy';
 
 afterEach(() => { restoreMediaLayouts(document); document.body.innerHTML = ''; vi.restoreAllMocks(); });
 
-function fixture() {
+function fixture(capture = true) {
   document.body.innerHTML = '<main><section id="row" style="display:grid;grid-template-columns:200px 200px"><div><p id="host">Original prose.</p></div><div id="column"><img src="/diagram.svg" style="transform:none;position:static" alt="Diagram"></div></section></main>';
   const host = document.getElementById('host')!;
   const column = document.getElementById('column')!;
@@ -18,12 +19,100 @@ function fixture() {
     return { x, y: 0, width: w, height: 100, top: 0, bottom: 100, left: x, right: x + w, toJSON() {} } as DOMRect;
   });
   Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1024 });
-  captureMediaLayouts([host]);
+  if (capture) captureMediaLayouts([host]);
   const owner = document.createElement('span'); host.appendChild(owner); attachMediaLayouts(host, owner);
   return { host, column, image, owner, resize: (w: number, col = 200) => { width = w; columnWidth = col; } };
 }
 
 describe('media sharing a prose row', () => {
+  it('gives a deferred source capture its own budget even when other readers consume the next frame', () => {
+    const { host, image, owner, resize } = fixture(false);
+    const sheet = document.createElement('style'); sheet.textContent = '.unrelated {height:80px}'; document.head.appendChild(sheet);
+    let time = 0;
+    vi.spyOn(performance, 'now').mockImplementation(() => time);
+    try {
+      sourcePolicy.withSourceLayoutRead(() => {
+        time += 100;
+        expect(captureMediaLayouts([host])).toBe(false);
+      });
+      sourcePolicy.withSourceLayoutRead(() => {
+        time += 100;
+        expect(captureMediaLayouts([host])).toBe(true);
+      });
+      attachMediaLayouts(host, owner); resize(700);
+      applyMediaLayouts(readMediaLayouts([owner]));
+      expect(image.hasAttribute('data-dual-read-media-bound')).toBe(true);
+    } finally { sheet.remove(); }
+  });
+
+  it.each(['transient', 'persistent'] as const)('bounds source capture retries after a %s policy read limit', limit => {
+    const { host, image, owner, resize } = fixture(false);
+    const policy = vi.spyOn(sourcePolicy, 'readSourceLayoutPolicyState');
+    const exhausted = () => ({ signature: '[["@read-limit"]]', complete: false, limited: true });
+    if (limit === 'transient') policy.mockImplementationOnce(exhausted);
+    else policy.mockImplementation(exhausted);
+    expect(captureMediaLayouts([host])).toBe(false);
+    // The scheduler retries before rendering any member of this source cohort.
+    expect(captureMediaLayouts([host])).toBe(true);
+    policy.mockRestore();
+    attachMediaLayouts(host, owner); resize(700);
+    applyMediaLayouts(readMediaLayouts([owner]));
+    expect(image.hasAttribute('data-dual-read-media-bound')).toBe(limit === 'transient');
+  });
+
+  it.each((['read', 'apply', 'update'] as const).flatMap(phase =>
+    (['transient', 'persistent'] as const).map(limit => ({ phase, limit })),
+  ))('bounds retries after a $limit policy read limit during $phase', async ({ phase, limit }) => {
+    const { host, image, owner, resize } = fixture(); resize(700);
+    const source = host.firstChild, style = image.getAttribute('style');
+    const changes = phase !== 'read' ? readMediaLayouts([owner]) : [];
+    if (phase === 'update') applyMediaLayouts(changes);
+    const policy = vi.spyOn(sourcePolicy, 'readSourceLayoutPolicyState');
+    const exhausted = () => ({ signature: '[["@read-limit"]]', complete: false, limited: true });
+    if (limit === 'transient') policy.mockImplementationOnce(exhausted);
+    else policy.mockImplementation(exhausted);
+    if (phase === 'update') window.dispatchEvent(new Event('resize'));
+    else applyMediaLayouts(phase === 'read' ? readMediaLayouts([owner]) : changes);
+    await new Promise(resolve => setTimeout(resolve, 120));
+    expect(image.hasAttribute('data-dual-read-media-bound')).toBe(limit === 'transient');
+    expect(host.firstChild).toBe(source); expect(image.getAttribute('style')).toBe(style);
+    const reads = policy.mock.calls.length;
+    await new Promise(resolve => setTimeout(resolve, 80));
+    expect(policy.mock.calls.length).toBe(reads);
+    restoreMediaLayouts(document); restoreMediaLayouts(document);
+    expect(image.hasAttribute('data-dual-read-media-bound')).toBe(false);
+    expect(document.querySelector('style[data-dual-read-media-style]')).toBeNull();
+  });
+
+  it.each(['author-sizing', 'owner-removal'] as const)('honors %s while an uninstalled constraint awaits a policy retry', async change => {
+    const { image, owner, resize } = fixture(); resize(700);
+    vi.spyOn(sourcePolicy, 'readSourceLayoutPolicyState').mockImplementationOnce(() =>
+      ({ signature: '[["@read-limit"]]', complete: false, limited: true }));
+    applyMediaLayouts(readMediaLayouts([owner]));
+    if (change === 'author-sizing') { image.style.height = '80px'; image.style.objectFit = 'cover'; }
+    else { owner.remove(); releaseMediaLayout(owner); }
+    const style = image.getAttribute('style');
+    await new Promise(resolve => setTimeout(resolve, 120));
+    expect(image.hasAttribute('data-dual-read-media-bound')).toBe(false);
+    expect(image.getAttribute('style')).toBe(style);
+    expect(owner.isConnected).toBe(change !== 'owner-removal');
+    expect(readMediaLayouts([owner])).toEqual([]);
+  });
+
+  it('retains existing owners when a later companion needs a policy retry', async () => {
+    const { host, image, owner, resize } = fixture(); resize(700);
+    applyMediaLayouts(readMediaLayouts([owner]));
+    const second = document.createElement('span'); host.appendChild(second); attachMediaLayouts(host, second);
+    vi.spyOn(sourcePolicy, 'readSourceLayoutPolicyState').mockImplementationOnce(() =>
+      ({ signature: '[["@read-limit"]]', complete: false, limited: true }));
+    applyMediaLayouts(readMediaLayouts([second]));
+    await new Promise(resolve => setTimeout(resolve, 120));
+    releaseMediaLayout(second);
+    expect(image.hasAttribute('data-dual-read-media-bound')).toBe(true);
+    releaseMediaLayout(owner);
+    expect(image.hasAttribute('data-dual-read-media-bound')).toBe(false);
+  });
+
   it.each(['min-inline-size', 'max-inline-size', 'min-block-size', 'max-block-size'])('releases when an external selector changes the author %s constraint', async property => {
     const {image, owner, resize} = fixture(); resize(700);
     const toggle = document.createElement('div'); toggle.id = 'toggle'; document.getElementById('row')!.before(toggle);
