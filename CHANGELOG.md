@@ -57,7 +57,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 - Update the server's indirect `golang.org/x/sys` dependency to v0.44.0.
 - Upgrade Zod to v4.6.7 to resolve the runtime dependency audit finding while
-  preserving settings normalization, defaults, and migration behavior.
+  preserving settings normalization, defaults, and migration behavior. Disable
+  its JIT parser to respect the extension's Content Security Policy.
 - Upgrade the Go toolchain and Docker build images to 1.26.10 to address
   reachable standard-library vulnerabilities reported by govulncheck.
 
