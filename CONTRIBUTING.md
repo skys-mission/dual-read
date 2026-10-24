@@ -50,10 +50,10 @@ npx playwright test --project=chromium-ext
 npx playwright test --project=firefox-ext
 ```
 
-CI runs each browser project in four test-level shards with one worker per
+CI runs each browser project in eight test-level shards with one worker per
 runner. To reproduce one shard locally, use
-`CI=1 npx playwright test --project=chromium-ext --shard=1/4` (or `firefox-ext`).
-The `Extension (WXT / TypeScript)` check requires the build and all eight shards
+`CI=1 npx playwright test --project=chromium-ext --shard=1/8` (or `firefox-ext`).
+The `Extension (WXT / TypeScript)` check requires the build and all sixteen shards
 to pass; failed shards upload their Playwright traces.
 
 ### Server

@@ -93,7 +93,7 @@ jobs:
           if-no-files-found: error
 
   extension-e2e:
-    name: E2E ${{ matrix.browser }} (${{ matrix.shard }}/4)
+    name: E2E ${{ matrix.browser }} (${{ matrix.shard }}/8)
     needs: extension-build
     runs-on: ubuntu-latest
     timeout-minutes: 35
@@ -101,7 +101,7 @@ jobs:
       fail-fast: false
       matrix:
         browser: [chromium, firefox]
-        shard: [1, 2, 3, 4]
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
     defaults:
       run:
         working-directory: extension
@@ -125,7 +125,7 @@ jobs:
       - name: Install Playwright browser
         run: npx playwright install --with-deps ${{ matrix.browser }}
       - name: E2E
-        run: npx playwright test --project=${{ matrix.browser }}-ext --shard=${{ matrix.shard }}/4
+        run: npx playwright test --project=${{ matrix.browser }}-ext --shard=${{ matrix.shard }}/8
       - name: Upload failure traces
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
