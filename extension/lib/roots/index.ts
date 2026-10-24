@@ -8,7 +8,8 @@
  */
 
 import { ensureTranslationStyles } from '../renderer/styles';
-import { composedContains } from '../dom-tree';
+import { composedContains, getShadowRoot } from '../dom-tree';
+export { getShadowRoot } from '../dom-tree';
 
 export type WatchRoot = Document | ShadowRoot | Element;
 
@@ -24,20 +25,6 @@ export interface RootDiagnostics {
     crossOrigin: number;
     opaque: number;
   };
-}
-
-/** Prefer open shadowRoot; fall back to chrome.dom.openOrClosedShadowRoot when present. */
-export function getShadowRoot(el: Element): ShadowRoot | null {
-  if (el.shadowRoot) return el.shadowRoot;
-  try {
-    const openOrClosed = chrome?.dom?.openOrClosedShadowRoot;
-    if (typeof openOrClosed === 'function' && el instanceof HTMLElement) {
-      return openOrClosed(el) ?? null;
-    }
-  } catch {
-    /* API absent or denied */
-  }
-  return null;
 }
 
 /** Depth-first walk of open (or feature-detected) shadow roots under `scope`. */

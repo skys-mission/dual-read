@@ -46,6 +46,20 @@ const dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIREFOX_EXT = path.resolve(dirname, '../output/firefox-mv3');
 
 import { shadowSizingCases, translateShadowSizingText, verifyShadowSizing } from './helpers/shadow-sizing-regressions';
+import { layoutCascadeCases, translateLayoutCascadeText, verifyLayoutCascade } from './helpers/layout-cascade-regressions';
+
+for (const scenario of layoutCascadeCases) {
+  test(`layout cascade ownership: ${scenario.family} / ${scenario.mode} / paused=${scenario.paused}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext();
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => texts.map(translateLayoutCascadeText) });
+      await verifyLayoutCascade(page, scenario, {
+        translate: mode => firefoxTranslatePage(page, mode), pause: () => firefoxStopWatch(page), restore: () => firefoxRestore(page),
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
 
 for (const scenario of shadowSizingCases) {
   test(`shadow author sizing: ${scenario.scope} / ${scenario.change} / ${scenario.mode} / paused=${scenario.paused}`, async () => {

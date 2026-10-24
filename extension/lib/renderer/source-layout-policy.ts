@@ -1,7 +1,7 @@
 import { P } from '../dom-const';
 import { matchingSpecificity, resolveNestedSelector, resolveRootSelector } from './selector-specificity';
 import { LAYOUT_SHORTHANDS, layoutLonghands, physicalLayoutProperty, relatedLayoutProperties } from './layout-properties';
-import { composedParent } from '../dom-tree';
+import { composedParent, getShadowRoot } from '../dom-tree';
 
 type SourceRule = CSSRule & {
   style?: CSSStyleDeclaration;
@@ -106,10 +106,13 @@ export function readSourceLayoutPolicyState(element: HTMLElement, properties: re
 
 function readPolicy(element: HTMLElement, properties: readonly string[], computed: CSSStyleDeclaration | undefined, depth: number): SourceLayoutPolicy {
   const inputs: string[][][] = [];
-  // A host's :host rules and an assigned element's ::slotted rules live in
-  // another root. A scan of getRootNode() cannot prove their cascade complete;
-  // let the browser resolve these inputs through the unmasked sizing fallback.
-  let complete = !element.shadowRoot && !element.assignedSlot;
+  // :host/::slotted rules can live inside another root; ::part rules can live
+  // outside this one. A closed slot also reports assignedSlot=null. Let the
+  // browser resolve these cascades, including custom elements when privileged
+  // closed-root access is unavailable (e.g. a page-world renderer harness).
+  const shadowHost = (node: Element): boolean => !!getShadowRoot(node) || node.localName.includes('-') || node.hasAttribute('is');
+  let complete = !(element.getRootNode() instanceof ShadowRoot) && !shadowHost(element)
+    && !element.assignedSlot && !(element.parentElement && shadowHost(element.parentElement));
   const variables = new Set<string>();
   const inherited = new Set<string>();
   const layerOrder = new Map<string, LayerPart[]>();

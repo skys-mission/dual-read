@@ -1,5 +1,5 @@
 import { HIDE, OURS_SEL, P } from '../dom-const';
-import { composedParent } from '../dom-tree';
+import { composedParent, getShadowRoot } from '../dom-tree';
 import { sourceLayoutReadSpent, withSourceLayoutRead } from './source-layout-policy';
 import { watchStylesheetChanges } from './stylesheet-updates';
 
@@ -17,6 +17,7 @@ let records: MutationRecord[] = [];
 let globalChange = false;
 let colorScheme: MediaQueryList | null = null;
 const MOTION_EVENTS = ['transitionrun', 'transitionend', 'transitioncancel', 'animationstart', 'animationend', 'animationcancel'] as const;
+const STATE_EVENTS = ['focusin', 'focusout', 'pointerover', 'pointerout', 'pointerdown', 'pointerup', 'pointercancel'] as const;
 
 function enqueueRead(read: LayoutRead, mutations: readonly MutationRecord[] | null, checkSourcePolicies = false): void {
   const previous = pendingReads.get(read);
@@ -37,10 +38,17 @@ function checkPolicies(): void {
   if (pendingReads.size) queueUpdate();
 }
 
-function watchMotion(root: Document | ShadowRoot, add: boolean): void {
+function watchEvents(root: Document | ShadowRoot, add: boolean): void {
   for (const event of MOTION_EVENTS) {
     if (add) root.addEventListener(event, motionUpdate, true);
     else root.removeEventListener(event, motionUpdate, true);
+  }
+  // Pseudo-classes change without DOM/CSSOM writes. Even an interaction on
+  // translated chrome can change its source ancestor's :hover/:focus-within.
+  // Coalesce native state transitions into the existing frame-based read pass.
+  for (const event of STATE_EVENTS) {
+    if (add) root.addEventListener(event, globalUpdate, true);
+    else root.removeEventListener(event, globalUpdate, true);
   }
 }
 
@@ -104,7 +112,7 @@ function queueUpdate(): void {
       root.removeEventListener('load', loadUpdate, true);
       root.removeEventListener('input', globalUpdate, true);
       root.removeEventListener('change', globalUpdate, true);
-      watchMotion(root, false);
+      watchEvents(root, false);
       observed.delete(root);
       for (const roots of readers.values()) roots.delete(root);
       disconnected = true;
@@ -149,7 +157,7 @@ function observeShadow(root: ShadowRoot): void {
   root.addEventListener('load', loadUpdate, true);
   root.addEventListener('input', globalUpdate, true);
   root.addEventListener('change', globalUpdate, true);
-  watchMotion(root, true);
+  watchEvents(root, true);
 }
 
 /** Exists only while a rendered companion or media rule needs live styling.
@@ -167,7 +175,7 @@ export function watchLayoutUpdates(read: LayoutRead, options: { checkSourcePolic
     document.addEventListener('load', loadUpdate, true);
     document.addEventListener('input', globalUpdate, true);
     document.addEventListener('change', globalUpdate, true);
-    watchMotion(document, true);
+    watchEvents(document, true);
     window.addEventListener('resize', globalUpdate);
     if (typeof window.matchMedia === 'function') {
       colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
@@ -196,7 +204,8 @@ export function watchLayoutUpdates(read: LayoutRead, options: { checkSourcePolic
       // inputs, so CSSOM edits reach the same readers as ordinary DOM changes.
       for (let element = node instanceof Element ? node : composedParent(node); element; element = composedParent(element)) {
         add(element.getRootNode());
-        if (element.shadowRoot) add(element.shadowRoot);
+        const shadow = getShadowRoot(element);
+        if (shadow) add(shadow);
       }
     },
     dispose() {
@@ -213,7 +222,7 @@ export function watchLayoutUpdates(read: LayoutRead, options: { checkSourcePolic
           root.removeEventListener('load', loadUpdate, true);
           root.removeEventListener('input', globalUpdate, true);
           root.removeEventListener('change', globalUpdate, true);
-          watchMotion(root, false);
+          watchEvents(root, false);
           observed.delete(root);
         }
         reconnectObserver();
@@ -230,13 +239,13 @@ export function watchLayoutUpdates(read: LayoutRead, options: { checkSourcePolic
         root.removeEventListener('load', loadUpdate, true);
         root.removeEventListener('input', globalUpdate, true);
         root.removeEventListener('change', globalUpdate, true);
-        watchMotion(root, false);
+        watchEvents(root, false);
       }
       observed.clear();
       document.removeEventListener('load', loadUpdate, true);
       document.removeEventListener('input', globalUpdate, true);
       document.removeEventListener('change', globalUpdate, true);
-      watchMotion(document, false);
+      watchEvents(document, false);
       window.removeEventListener('resize', globalUpdate);
       colorScheme?.removeEventListener?.('change', globalUpdate);
       colorScheme = null;

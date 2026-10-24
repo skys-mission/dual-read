@@ -8,6 +8,21 @@ import { reconcileRegressions, setupReconcileRegression, verifyReconcileRegressi
 import { boundaryRegressions, setupBoundaryRegression, verifyBoundaryRegression, translateBoundarySource } from './helpers/boundary-regressions';
 import { layoutWorkloadCases, verifyLayoutWorkload, verifySynchronousLayoutChange, stylesheetWorkloadModes, translateStylesheetWorkloadText, verifyStylesheetWorkload } from './helpers/stylesheet-workload-regressions';
 import { shadowSizingCases, translateShadowSizingText, verifyShadowSizing } from './helpers/shadow-sizing-regressions';
+import { layoutCascadeCases, translateLayoutCascadeText, verifyLayoutCascade } from './helpers/layout-cascade-regressions';
+
+for (const scenario of layoutCascadeCases) {
+  test(`layout cascade ownership: ${scenario.family} / ${scenario.mode} / paused=${scenario.paused}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer(); mock.setTranslator(translateLayoutCascadeText);
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyLayoutCascade(page, scenario, {
+        translate: mode => translateTab(sw, tabId, mode), pause: () => stopWatchTab(sw, tabId), restore: () => restoreTab(sw, tabId),
+      });
+    } finally { await mock.close(); }
+  });
+}
 
 for (const scenario of shadowSizingCases) {
   test(`shadow author sizing: ${scenario.scope} / ${scenario.change} / ${scenario.mode} / paused=${scenario.paused}`, async ({ extContext, extensionId, sw }) => {

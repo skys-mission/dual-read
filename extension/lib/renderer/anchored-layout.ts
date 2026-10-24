@@ -1,6 +1,6 @@
 import { P } from '../dom-const';
 import { watchLayoutUpdates } from './layout-updates';
-import { readSourceLayoutPolicyState, withSourceLayoutRead } from './source-layout-policy';
+import { readComputedSizing, readSourceLayoutPolicyState, withSourceLayoutRead } from './source-layout-policy';
 import { takeLayoutWork } from './layout-work';
 
 const ANCHOR = `data-${P}-layout-anchor`;
@@ -18,6 +18,7 @@ interface AnchorSnapshot {
   parentHeight: number;
   parentWidth: number;
   policy: string;
+  sizing: string | null;
 }
 interface AnchorChange { snapshot: AnchorSnapshot; owner: HTMLElement; top: number | null }
 interface AnchorRule { id: string; style: HTMLStyleElement; owners: Set<HTMLElement>; top: number; snapshot: AnchorSnapshot }
@@ -59,7 +60,8 @@ function captureAnchoredLayoutsInPass(elements: readonly HTMLElement[]): void {
           if (policy.limited) continue;
           anchors.push({ element: child, parent, top: offset, sourceTop: child.style.top, sourceHeight: child.style.height,
             sourceTopPriority: child.style.getPropertyPriority('top'), sourceHeightPriority: child.style.getPropertyPriority('height'),
-            parentHeight: parent.clientHeight, parentWidth: parent.clientWidth, policy: policy.signature });
+            parentHeight: parent.clientHeight, parentWidth: parent.clientWidth, policy: policy.signature,
+            sizing: policy.complete ? null : readComputedSizing(child, ANCHOR_POLICY) });
         }
         parents.set(parent, anchors);
       }
@@ -83,7 +85,12 @@ function sourceContractIntact(snapshot: AnchorSnapshot): boolean {
     && element.style.top === snapshot.sourceTop && element.style.height === snapshot.sourceHeight
     && element.style.getPropertyPriority('top') === snapshot.sourceTopPriority
     && element.style.getPropertyPriority('height') === snapshot.sourceHeightPriority
-    && !policy.animated && !policy.limited && policy.signature === snapshot.policy;
+    && !policy.animated && !policy.limited && policy.signature === snapshot.policy
+    // Conditional/opaque declarations can keep the same signature while the
+    // winning top/height changes. Compare computed inputs with our rule omitted;
+    // percentage/calc sizing stays stable as translated prose grows the parent.
+    && (snapshot.sizing === null ? policy.complete
+      : readComputedSizing(element, ANCHOR_POLICY, applied.get(element)?.style) === snapshot.sizing);
 }
 
 /** Read only: layout growth is measured in the containing block's CSS pixels. */

@@ -16,6 +16,33 @@ function fixture(css: string): {box: HTMLElement; sheet: HTMLStyleElement} {
 }
 
 describe('bounded source layout reads', () => {
+  it('does not claim shadow-local rules include external part styling', () => {
+    const {box} = fixture('section::part(copy){height:40px}');
+    const root = box.attachShadow({mode:'open'});
+    root.innerHTML = '<p part="copy">Source content.</p>';
+    const source = root.querySelector('p')!;
+    expect(source.shadowRoot).toBeNull(); expect(source.assignedSlot).toBeNull();
+    expect(readSourceLayoutPolicyState(source, ['height']).complete).toBe(false);
+  });
+
+  it.each(['host', 'slotted'] as const)('keeps a closed custom element %s cascade uncertain without privileged APIs', scope => {
+    const host = document.createElement('closed-widget'); document.body.append(host);
+    host.attachShadow({mode:'closed'}).innerHTML = '<slot></slot>';
+    const source = document.createElement('p'); host.append(source);
+    expect(host.shadowRoot).toBeNull(); expect(source.assignedSlot).toBeNull();
+    expect(readSourceLayoutPolicyState(scope === 'host' ? host : source, ['height']).complete).toBe(false);
+  });
+
+  it.each(['chromium', 'firefox'] as const)('recognizes a closed built-in host through the %s extension API', browser => {
+    const {box} = fixture('');
+    const root = box.attachShadow({mode:'closed'}); root.innerHTML = '<slot></slot>';
+    const source = document.createElement('p'); box.append(source);
+    if (browser === 'chromium') vi.stubGlobal('chrome', {dom:{openOrClosedShadowRoot:(node: Element) => node === box ? root : null}});
+    else Object.defineProperty(box, 'openOrClosedShadowRoot', {value:root});
+    expect(readSourceLayoutPolicyState(box, ['height']).complete).toBe(false);
+    expect(readSourceLayoutPolicyState(source, ['height']).complete).toBe(false);
+  });
+
   it.each(['host', 'slotted'] as const)('requires the computed fallback for %s rules from another root', scope => {
     const {box} = fixture('#box{height:80px}');
     const host = document.createElement('size-widget');

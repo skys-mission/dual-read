@@ -9,6 +9,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Respect conditional and opaque footer sizing, external shadow-part styles,
+  closed shadow roots, and hover/focus changes when releasing translation
+  layout overrides. Read closed roots through both Chromium and Firefox APIs.
 - Release translation layout overrides when `:host` or `::slotted` sizing
   changes, including CSSOM edits inside the source's shadow tree.
 - Honor the active session's target language for site and selection translation;

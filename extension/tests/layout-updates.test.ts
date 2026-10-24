@@ -112,6 +112,54 @@ it.each(['input', 'change'])('refreshes pseudo-class paint after a native %s eve
   expect(read).toHaveBeenCalledOnce(); expect(read.mock.calls[0][0]).toBeNull();
 });
 
+it.each(['focusin', 'focusout', 'pointerover', 'pointerout', 'pointerdown', 'pointerup', 'pointercancel'].flatMap(event =>
+  [false, true].map(shadow => ({event, shadow})),
+))('refreshes CSS state on $event, shadow=$shadow, and removes the listener on disposal', async ({event, shadow}) => {
+  const source = document.getElementById('source')!;
+  let root: ShadowRoot | undefined;
+  if (shadow) {
+    const host = document.createElement('state-widget'); document.body.append(host);
+    root = host.attachShadow({mode:'open'}); root.append(source);
+  }
+  const read = vi.fn(); const subscription = subscribe(read);
+  if (root) subscription.addRoot(root);
+  source.dispatchEvent(new Event(event, {bubbles:true, composed:true}));
+  await Promise.resolve(); flushFrame();
+  // A composed event reaches both listeners, but performs only one read.
+  expect(read).toHaveBeenCalledOnce(); expect(read.mock.calls[0][0]).toBeNull();
+  subscription.dispose();
+  source.dispatchEvent(new Event(event, {bubbles:true, composed:true})); flushFrame();
+  expect(read).toHaveBeenCalledOnce(); expect(frames.size).toBe(0);
+});
+
+it('keeps interactions on a companion that can change source ancestor pseudo-classes', async () => {
+  const companion = document.createElement('span'); companion.className = 'dual-read-target';
+  document.getElementById('source')!.append(companion);
+  const read = vi.fn(); subscribe(read);
+  companion.dispatchEvent(new Event('pointerover', {bubbles:true}));
+  companion.dispatchEvent(new Event('focusin', {bubbles:true}));
+  await Promise.resolve(); flushFrame(); expect(read).toHaveBeenCalledOnce();
+});
+
+it.each(['chromium', 'firefox'] as const)('watches closed-root CSSOM inputs using the %s extension API', async browser => {
+  vi.useFakeTimers();
+  const host = document.createElement('div'); document.body.append(host);
+  const source = document.getElementById('source')!; host.append(source);
+  const root = host.attachShadow({mode:'closed'}); root.innerHTML = '<slot></slot>';
+  if (browser === 'chromium') vi.stubGlobal('chrome', {dom:{openOrClosedShadowRoot:(node: Element) => node === host ? root : null}});
+  else Object.defineProperty(host, 'openOrClosedShadowRoot', {value:root});
+  const sheet = new CSSStyleSheet(); sheet.insertRule('::slotted(*){height:40px}');
+  Object.defineProperty(root, 'adoptedStyleSheets', {value:[sheet]});
+  const read = vi.fn(); const subscription = subscribe(read, true); subscription.addRoot(source);
+  await vi.advanceTimersByTimeAsync(1000); drainFrames(); read.mockClear();
+  (sheet.cssRules[0] as CSSStyleRule).style.height = '10px';
+  await vi.advanceTimersByTimeAsync(1000); drainFrames(); expect(read).toHaveBeenCalledWith([], true);
+  subscription.dispose(); read.mockClear();
+  root.querySelector('slot')!.dispatchEvent(new Event('focusin', {bubbles:true}));
+  (sheet.cssRules[0] as CSSStyleRule).style.height = '20px';
+  await vi.advanceTimersByTimeAsync(1000); drainFrames(); expect(read).not.toHaveBeenCalled();
+});
+
 it('cancels queued writes and form listeners when the last reader disposes', async () => {
   const read = vi.fn(() => vi.fn()); const subscription = subscribe(read);
   document.getElementById('source')!.className = 'changed';
