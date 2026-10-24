@@ -3,7 +3,9 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: './e2e',
   timeout: 60_000,
-  fullyParallel: false,
+  // CI shards the large regression files by test; each runner still uses one
+  // worker so layout and performance assertions do not compete for resources.
+  fullyParallel: !!process.env.CI,
   workers: 1,
   reporter: 'list',
   use: {
