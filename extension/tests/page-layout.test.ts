@@ -26,6 +26,35 @@ function mockSourceLines(read: (node: Node) => DOMRect[]): void {
 const sourceLine = (left: number): DOMRect => new DOMRect(left, 0, 160, 18);
 
 describe('generic page layout collection', () => {
+  it('honors the nearest screen-reader visibility class and refreshes between collections', () => {
+    document.body.innerHTML = '<section class="sr-only"><p id="hidden">Hidden documentation.</p><section class="not-sr-only"><p id="visible">Visible documentation.</p><p class="sr-only">Nested hidden documentation.</p></section></section>';
+    const visible = document.getElementById('visible')!;
+    const text = visible.firstChild;
+    expect(collectUnits().map(unit => unit.el.id)).toEqual(['visible']);
+    visible.parentElement!.className = 'sr-only';
+    expect(collectUnits()).toEqual([]);
+    visible.parentElement!.className = 'not-sr-only';
+    expect(collectUnits().map(unit => unit.el.id)).toEqual(['visible']);
+    expect(visible.firstChild).toBe(text);
+    expect(text?.textContent).toBe('Visible documentation.');
+  });
+
+  it('invalidates ancestor visibility when the page changes classes across a collection yield', async () => {
+    document.body.innerHTML = '<section id="region"><p id="first">First documentation.</p><p id="second">Second documentation.</p></section>';
+    const region = document.getElementById('region')!;
+    const nodes = Array.from(region.childNodes);
+    const result = await collectUnitsAsync(document.body, {
+      budgetMs: 0,
+      onCollected: unit => {
+        if (unit.el.id === 'first') region.className = 'sr-only';
+      },
+    });
+    expect(result.units.map(unit => unit.el.id)).toEqual(['first']);
+    expect(Array.from(region.childNodes)).toEqual(nodes);
+    region.className = 'not-sr-only';
+    expect(collectUnits().map(unit => unit.el.id)).toEqual(['first', 'second']);
+  });
+
   it.each(['absolute','fixed'])('retains a visible %s paragraph escaping a zero-sized clipping ancestor', position => {
     document.body.innerHTML = `<main style="position:relative"><section style="height:0;width:120px;overflow:hidden"><p id="visible" style="position:${position};left:300px">Visible zero-box documentation.</p><p id="clipped">Hidden zero-box documentation.</p></section></main>`;
     expect(collectUnits().map(unit => unit.text)).toEqual(['Visible zero-box documentation.']);

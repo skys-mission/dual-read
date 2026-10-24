@@ -36,6 +36,8 @@ interface SourceClipping {
  * stale style answers in the cache.
  */
 interface CollectCache {
+  /** Nearest screen-reader-only / opt-out class in the light-DOM ancestry. */
+  a11yHidden: WeakMap<Element, boolean>;
   /** Element is style-hidden on its own (display/visibility/opacity/hidden/aria). */
   selfHidden: WeakMap<Element, boolean>;
   visible: WeakMap<Element, boolean>;
@@ -59,6 +61,7 @@ let collectCache: CollectCache | null = null;
 
 function newCollectCache(): CollectCache {
   return {
+    a11yHidden: new WeakMap(),
     selfHidden: new WeakMap(),
     visible: new WeakMap(),
     layout: new WeakMap(),
@@ -415,11 +418,19 @@ function isPageNavRegion(el: Element | null): boolean {
 }
 
 function isA11y(el: Element): boolean {
+  const cached = collectCache?.a11yHidden.get(el);
+  if (cached !== undefined) return cached;
+  const path: Element[] | null = collectCache ? [] : null;
+  let hidden = false;
   for (let n: Element | null = el; n; n = n.parentElement) {
-    if (n.classList?.contains('not-sr-only')) return false;
-    if (A11Y.some((c) => n!.classList?.contains(c))) return true;
+    const cached = collectCache?.a11yHidden.get(n);
+    if (cached !== undefined) { hidden = cached; break; }
+    path?.push(n);
+    if (n.classList?.contains('not-sr-only')) break;
+    if (A11Y.some((c) => n!.classList?.contains(c))) { hidden = true; break; }
   }
-  return false;
+  if (path) for (const node of path) collectCache?.a11yHidden.set(node, hidden);
+  return hidden;
 }
 
 /** Source-side slot pruning shared with the rich skeleton builder (renderer/rich). */

@@ -64,6 +64,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Cache screen-reader-only ancestry during each collection slice, invalidating
+  it across yields to reduce repeated indexing work without hiding page edits.
 - Update the pinned Go linter to support the project's Go toolchain and newer
   developer installations.
 - Measure SPA retained heap after warm-up and explicit GC instead of optional

@@ -70,7 +70,8 @@ The initial full-document index is split across cooperative yields on large page
 
 Within one `collectUnits` / `collectUnitsAsync` pass:
 
-1. **Memoize** `getComputedStyle` self-hide, `isVisible`, and layout-box checks (`WeakMap`).
+1. **Memoize** screen-reader-only ancestry, `getComputedStyle` self-hide,
+   `isVisible`, and layout-box checks (`WeakMap`).
 2. **Invalidate** the memo across cooperative yields (avoid stale answers after mutations).
 3. **Leaf fast path** — blocks with only text nodes skip `TreeWalker`.
 4. **`hasChildBlock`** — cheap rejects before `extractText`.
