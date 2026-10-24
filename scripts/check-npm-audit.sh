@@ -5,7 +5,7 @@
 #   1. Runtime deps (--omit=dev) must have no moderate+ findings (blocks CI).
 #   2. Full tree is printed for visibility; critical/high in devDependencies
 #      are reported as warnings so build-tool churn does not block every PR.
-#      Track upgrades separately (Dependabot / scheduled chore).
+#      Track upgrades separately through manual maintenance.
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

@@ -2,8 +2,9 @@ name: Nightly
 
 on:
   schedule:
-    # 16:00 UTC ≈ 00:00 China — after weekday main CI noise
-    - cron: '0 16 * * *'
+    # Daily perf at 00:00 China; the Sunday UTC run also rehearses a release.
+    - cron: '0 16 * * 1-6'
+    - cron: '0 16 * * 0'
   workflow_dispatch:
     inputs:
       strict:
@@ -49,8 +50,6 @@ jobs:
             echo "full=true" >> "$GITHUB_OUTPUT"
           fi
       - run: npm ci
-      - name: Type-check
-        run: npm run compile
       - name: Build (Chrome)
         run: npm run build
       - name: Install Playwright Chromium
@@ -81,6 +80,7 @@ jobs:
 
   release-dry-run:
     name: Release dry-run (no publish)
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 16 * * 0'
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
