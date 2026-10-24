@@ -1,8 +1,8 @@
 import { P } from '../dom-const';
-import { composedContains } from '../dom-tree';
+import { composedContains, composedParent } from '../dom-tree';
 import { stylesheetChanged, watchLayoutUpdates } from './layout-updates';
 import { applyAnchoredLayouts, readAnchoredLayouts } from './anchored-layout';
-import { readComputedSizing, readSourceLayoutPolicyState, readUnmaskedLayoutProperty, setSourceExpansionStyle, withSourceLayoutRead, type SourceLayoutPolicy } from './source-layout-policy';
+import { readComputedSizing, readSourceLayoutPolicyState, readUnmaskedLayout, readUnmaskedLayoutProperty, setSourceExpansionStyle, withSourceLayoutRead, type SourceLayoutPolicy } from './source-layout-policy';
 import { takeLayoutWork } from './layout-work';
 
 const HEIGHT = `data-${P}-layout-height`;
@@ -132,13 +132,40 @@ function readBoundedLayoutsInPass(nodes: readonly HTMLElement[]): Expansion[] {
   const changes: Expansion[] = [];
   // Shared ancestors need one cascade read in this pass, never a persistent
   // cache: page CSSOM edits and inherited inputs must be seen on the next read.
-  const styles = new Map<HTMLElement, CSSStyleDeclaration>();
+  const styles = new Map<Element, CSSStyleDeclaration>();
   const sources = new Map<HTMLElement, SourceLayoutPolicy>();
   const sizes = new Map<HTMLElement, string>();
-  const style = (box: HTMLElement): CSSStyleDeclaration => {
+  const axes = new Map<Element, boolean>();
+  const style = (box: Element): CSSStyleDeclaration => {
     let value = styles.get(box);
     if (!value) { value = getComputedStyle(box); styles.set(box, value); }
     return value;
+  };
+  // Rectangles can be converted back to CSS lengths under positive axis-aligned
+  // scaling (including ancestor scale/zoom). Rotation, skew and perspective do
+  // not provide that mapping, so omit this optional correction for those trees.
+  const aligned = (element: Element): boolean => {
+    const cached = axes.get(element);
+    if (cached !== undefined) return cached;
+    const s = style(element), parent = composedParent(element);
+    let result = !parent || aligned(parent);
+    if (result) {
+      const rotate = s.getPropertyValue('rotate'), scale = s.getPropertyValue('scale');
+      result = (!s.perspective || s.perspective === 'none')
+        && (!rotate || rotate === 'none' || /^0(?:deg|rad|grad|turn)?$/.test(rotate))
+        && (!scale || scale === 'none' || scale.split(/\s+/).every(value => parseFloat(value) > 0));
+      if (result && s.transform && s.transform !== 'none') {
+        try {
+          const matrix = new DOMMatrixReadOnly(s.transform);
+          // GPU-promoted translate3d/scale3d can still preserve both screen axes.
+          result = matrix.m11 > 0 && matrix.m22 > 0 && Math.abs(matrix.m44 - 1) < 1e-8
+            && [matrix.m12, matrix.m13, matrix.m14, matrix.m21, matrix.m23, matrix.m24,
+              matrix.m31, matrix.m32, matrix.m34].every(value => Math.abs(value) < 1e-8);
+        } catch { result = false; }
+      }
+    }
+    axes.set(element, result);
+    return result;
   };
   const source = (box: HTMLElement): SourceLayoutPolicy => {
     let value = sources.get(box);
@@ -151,7 +178,7 @@ function readBoundedLayoutsInPass(nodes: readonly HTMLElement[]): Expansion[] {
     return value;
   };
   for (const owner of nodes) {
-    if (!owner.isConnected || owner.closest(CHROME)) continue;
+    if (!owner.isConnected || owner.closest(CHROME) || !aligned(owner)) continue;
     if (owner.matches('.dual-read-target--inner, .dual-read-target--inline, .dual-read-nav-sub, .dual-read-target--compact')) continue;
     const target = owner.getBoundingClientRect();
     if (!target.width || !target.height) continue;
@@ -165,12 +192,16 @@ function readBoundedLayoutsInPass(nodes: readonly HTMLElement[]): Expansion[] {
       const bounds = box.getBoundingClientRect();
       const state = applied.get(box);
       const eligible = expansionPolicy(box, s);
-      const spills = eligible && bounds.height >= 24 && target.bottom > bounds.bottom + 1
-        && target.left >= bounds.left - 1 && target.right <= bounds.right + 1;
       const borders = (parseFloat(s.borderTopWidth) || 0) + (parseFloat(s.borderBottomWidth) || 0);
       const padding = (parseFloat(s.paddingTop) || 0) + (parseFloat(s.paddingBottom) || 0);
-      const required = spills ? Math.max(box.scrollHeight + borders, bounds.height + target.bottom - bounds.bottom) : 0;
-      const expand = spills && required <= Math.max(bounds.height * 2, window.innerHeight);
+      const inset = s.boxSizing === 'border-box' ? 0 : padding + borders;
+      const layoutHeight = s.height.endsWith('px') ? parseFloat(s.height) + inset : box.offsetHeight || bounds.height;
+      const scaleY = layoutHeight > 0 ? bounds.height / layoutHeight : 0;
+      if (!(scaleY > 0)) continue;
+      const spills = eligible && layoutHeight >= 24 && target.bottom > bounds.bottom + scaleY
+        && target.left >= bounds.left - 1 && target.right <= bounds.right + 1;
+      const required = spills ? Math.max(box.scrollHeight + borders, layoutHeight + (target.bottom - bounds.bottom) / scaleY) : 0;
+      const expand = spills && required <= Math.max(layoutHeight * 2, window.innerHeight / scaleY);
       // Ordinary flow already contains its translation. Do not scan the whole
       // site's stylesheets for each of its ancestors. Only an expansion or an
       // existing owned rule needs a source contract and its inner dependencies.
@@ -189,9 +220,8 @@ function readBoundedLayoutsInPass(nodes: readonly HTMLElement[]): Expansion[] {
       const rows = s.gridTemplateRows;
       const gridRows = s.display === 'grid' && rows.length < 512 && !/subgrid|masonry/.test(rows)
         ? rows.replace(/(\d+(?:\.\d+)?)px/g, 'minmax($1px, auto)') : undefined;
-      const inset = s.boxSizing === 'border-box' ? 0 : padding + borders;
       changes.push({ box, owner, height: Math.ceil(required - inset),
-        sourceFloor: Math.max(0, bounds.height - inset), sizing: currentSizing, policy: policySignature(s), gridRows, context: inner });
+        sourceFloor: Math.max(0, layoutHeight - inset), sizing: currentSizing, policy: policySignature(s), gridRows, context: inner });
     }
   }
   return changes;
@@ -233,7 +263,10 @@ export function applyBoundedLayouts(changes: readonly Expansion[]): void {
 }
 
 function writeRule(state: AppliedExpansion): void {
-  state.style.textContent = `[${HEIGHT}="${state.id}"] { height: auto !important; min-height: ${state.height}px !important; ${state.gridRows ? `grid-template-rows: ${state.gridRows} !important;` : ''} }`;
+  // A minimum expands fixed-height boxes too. Preserve the authored height so
+  // percentages, viewport units and containing-block changes still resolve in
+  // the browser, including CSSOM updates while translation watching is paused.
+  state.style.textContent = `[${HEIGHT}="${state.id}"] { min-height: ${state.height}px !important; ${state.gridRows ? `grid-template-rows: ${state.gridRows} !important;` : ''} }`;
 }
 
 function clearRule(box: HTMLElement, keepOwners = false): void {
@@ -313,6 +346,12 @@ function readUpdates(mutations: readonly MutationRecord[] | null, checkSourcePol
     .flatMap(item => item.remaining)).filter(change => measured.has(change.box));
   const anchors = readAnchoredLayouts(states.filter(item => measured.has(item.box) && !item.detached && !item.invalidPolicy)
     .flatMap(item => item.remaining));
+  // Measure a smaller floor with our rule synchronously omitted. The source
+  // probe restores styles and scroll offsets before returning; committing a
+  // collapsed floor for a frame would clamp scrolling fixed-height panels.
+  const floors = new Map(states.filter(item => item.relax && !item.detached && !item.invalidPolicy && item.remaining.length)
+    .map(({ box, state, remaining }) => [box, readUnmaskedLayout(box, state.style, () =>
+      Math.max(state.sourceFloor, ...readBoundedLayouts(remaining).filter(change => change.box === box).map(change => change.height)))]));
   return () => {
     for (const { box, state, remaining, relax, detached, invalidPolicy, policy } of states) {
       if (applied.get(box) !== state) continue;
@@ -324,10 +363,8 @@ function readUpdates(mutations: readonly MutationRecord[] | null, checkSourcePol
         continue;
       }
       if (!relax) continue;
-      // Auto-sized flow shrinks naturally once the historical floor is relaxed.
-      // Keep the page's original measured floor and grid-track minimums. A
-      // subsequent read pass can expand again if content still spills outside.
-      if (state.height !== state.sourceFloor) { state.height = state.sourceFloor; writeRule(state); }
+      const height = floors.get(box)!;
+      if (state.height !== height) { state.height = height; writeRule(state); }
       pendingMeasure.add(box);
     }
     for (const { box, state, remaining, detached } of dormant) {

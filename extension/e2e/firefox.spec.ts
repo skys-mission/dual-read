@@ -49,6 +49,33 @@ import { shadowSizingCases, translateShadowSizingText, verifyShadowSizing } from
 import { layoutCascadeCases, translateLayoutCascadeText, verifyLayoutCascade } from './helpers/layout-cascade-regressions';
 import { layoutCollapseCases, controlCollapseFrames, translateCollapseSource, verifyLayoutCollapse } from './helpers/layout-collapse-regressions';
 import { scrollProbeCases, controlScrollProbe, translateScrollProbe, verifyScrollProbe } from './helpers/scroll-probe-regressions';
+import { boundedScaleCases, boundedPercentageCases, translateBoundedSizingText, verifyBoundedScale, verifyBoundedPercentage } from './helpers/bounded-sizing-regressions';
+
+for (const scenario of boundedScaleCases) {
+  test(`bounded scale: ${scenario.transform} / ${scenario.mode}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext();
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => texts.map(translateBoundedSizingText) });
+      await verifyBoundedScale(page, scenario, {
+        translate: mode => firefoxTranslatePage(page, mode), pause: () => firefoxStopWatch(page), restore: () => firefoxRestore(page),
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
+
+for (const scenario of boundedPercentageCases) {
+  test(`bounded percentage: ${scenario.change} / ${scenario.mode} / paused=${scenario.paused}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext();
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => texts.map(translateBoundedSizingText) });
+      await verifyBoundedPercentage(page, scenario, {
+        translate: mode => firefoxTranslatePage(page, mode), pause: () => firefoxStopWatch(page), restore: () => firefoxRestore(page),
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
 
 for (const scenario of scrollProbeCases) {
   test(`layout probe preserves scroll: ${scenario.scope} / ${scenario.mode} / paused=${scenario.paused}`, async () => {

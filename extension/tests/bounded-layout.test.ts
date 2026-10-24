@@ -32,14 +32,14 @@ describe('bounded prose layout', () => {
     const sheet = document.querySelector<HTMLStyleElement>('style[data-dual-read-layout-style]')!;
     const rule = sheet.sheet!.cssRules[0] as CSSStyleRule;
     const correction = rule.style.cssText;
-    // jsdom has no used geometry. Model the browser's important height/min-height
+    // jsdom has no used geometry. Model the browser's important min-height
     // correction while retaining the real CSSOM rule and page declarations.
     const computed = window.getComputedStyle.bind(window);
     vi.spyOn(window, 'getComputedStyle').mockImplementation(element => {
       const style = computed(element);
       if (element !== box) return style;
       return new Proxy(style, { get(style, key) {
-        if (key === 'height') return rule.style.height ? '170px' : box.style.height;
+        if (key === 'height') return rule.style.getPropertyValue('min-height') ? '170px' : box.style.height;
         return Reflect.get(style, key, style);
       } });
     });
@@ -332,7 +332,9 @@ describe('bounded prose layout', () => {
     const { box, target } = fixture('height:80px;overflow:visible');
     applyBoundedLayouts(readBoundedLayouts([target]));
     expect(box.style.height).toBe('80px');
-    expect(document.querySelector('style[data-dual-read-layout-style]')!.textContent).toContain('height: auto');
+    const rule = (document.querySelector<HTMLStyleElement>('style[data-dual-read-layout-style]')!.sheet!.cssRules[0] as CSSStyleRule).style;
+    expect(rule.getPropertyValue('height')).toBe('');
+    expect(rule.getPropertyValue('min-height')).toBe('170px');
   });
 
   it('keeps named grid lines and source track minimums when allowing translated row growth', () => {

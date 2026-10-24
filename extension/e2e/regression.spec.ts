@@ -11,6 +11,35 @@ import { shadowSizingCases, translateShadowSizingText, verifyShadowSizing } from
 import { layoutCascadeCases, translateLayoutCascadeText, verifyLayoutCascade } from './helpers/layout-cascade-regressions';
 import { layoutCollapseCases, controlCollapseFrames, translateCollapseSource, verifyLayoutCollapse } from './helpers/layout-collapse-regressions';
 import { scrollProbeCases, controlScrollProbe, translateScrollProbe, verifyScrollProbe } from './helpers/scroll-probe-regressions';
+import { boundedScaleCases, boundedPercentageCases, translateBoundedSizingText, verifyBoundedScale, verifyBoundedPercentage } from './helpers/bounded-sizing-regressions';
+
+for (const scenario of boundedScaleCases) {
+  test(`bounded scale: ${scenario.transform} / ${scenario.mode}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer(); mock.setTranslator(translateBoundedSizingText);
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyBoundedScale(page, scenario, {
+        translate: mode => translateTab(sw, tabId, mode), pause: () => stopWatchTab(sw, tabId), restore: () => restoreTab(sw, tabId),
+      });
+    } finally { await mock.close(); }
+  });
+}
+
+for (const scenario of boundedPercentageCases) {
+  test(`bounded percentage: ${scenario.change} / ${scenario.mode} / paused=${scenario.paused}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer(); mock.setTranslator(translateBoundedSizingText);
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyBoundedPercentage(page, scenario, {
+        translate: mode => translateTab(sw, tabId, mode), pause: () => stopWatchTab(sw, tabId), restore: () => restoreTab(sw, tabId),
+      });
+    } finally { await mock.close(); }
+  });
+}
 
 for (const scenario of scrollProbeCases) {
   test(`layout probe preserves scroll: ${scenario.scope} / ${scenario.mode} / paused=${scenario.paused}`, async ({ extContext, extensionId, sw }) => {
