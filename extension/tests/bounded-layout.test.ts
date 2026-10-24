@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { applyBoundedLayouts, readBoundedLayouts, releaseBoundedLayout, restoreBoundedLayouts } from '../lib/renderer/bounded-layout';
+import { readSourceVisibility } from '../lib/collector';
 
 afterEach(() => {
   restoreBoundedLayouts(document);
@@ -23,6 +24,35 @@ function fixture(containerStyle = 'height:80px;overflow:hidden'): { box: HTMLEle
 }
 
 describe('bounded prose layout', () => {
+  it.each(['open', 'collapsed', 'padded'] as const)('reads %s source visibility before the expansion frame runs', state => {
+    const { box, target } = fixture('height:80px;width:320px;overflow:hidden');
+    const source = box.querySelector('p')!;
+    const original = [...source.childNodes];
+    applyBoundedLayouts(readBoundedLayouts([target]));
+    const sheet = document.querySelector<HTMLStyleElement>('style[data-dual-read-layout-style]')!;
+    const rule = sheet.sheet!.cssRules[0] as CSSStyleRule;
+    const correction = rule.style.cssText;
+    // jsdom has no used geometry. Model the browser's important height/min-height
+    // correction while retaining the real CSSOM rule and page declarations.
+    const computed = window.getComputedStyle.bind(window);
+    vi.spyOn(window, 'getComputedStyle').mockImplementation(element => {
+      const style = computed(element);
+      if (element !== box) return style;
+      return new Proxy(style, { get(style, key) {
+        if (key === 'height') return rule.style.height ? '170px' : box.style.height;
+        return Reflect.get(style, key, style);
+      } });
+    });
+    if (state !== 'open') box.style.height = '0px';
+    if (state === 'padded') box.style.padding = '24px';
+    const authored = box.getAttribute('style');
+    expect(readSourceVisibility([source]).get(source)).toBe(state !== 'collapsed');
+    expect(rule.style.cssText).toBe(correction);
+    expect(box.getAttribute('style')).toBe(authored);
+    expect([...source.childNodes]).toEqual(original);
+    expect(box.hasAttribute('data-dual-read-layout-height')).toBe(true);
+  });
+
   it('revalidates a later box after a synchronous page callback changes its source', () => {
     const {box, target} = fixture();
     const other = document.createElement('section'); other.style.cssText = 'height:80px;overflow:hidden';

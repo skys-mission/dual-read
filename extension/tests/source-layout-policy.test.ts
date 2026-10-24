@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import {afterEach, describe, expect, it, vi} from 'vitest';
+import selectorParser from 'postcss-selector-parser';
 import {readComputedSizing, readSourceLayoutPolicy, readSourceLayoutPolicyState, readUnmaskedLayoutProperty, withSourceLayoutRead} from '../lib/renderer/source-layout-policy';
 
 afterEach(() => {
@@ -16,6 +17,24 @@ function fixture(css: string): {box: HTMLElement; sheet: HTMLStyleElement} {
 }
 
 describe('bounded source layout reads', () => {
+  it('keeps a cold utility stylesheet within the selector parsing budget', () => {
+    const {box} = fixture(Array.from({length:6000}, (_, index) => `.utility-${index}{height:50px}`).join('') + '#box{height:80px}');
+    const processor = selectorParser(), parse = processor.astSync;
+    let time = 0;
+    vi.spyOn(performance, 'now').mockImplementation(() => time);
+    // Model parser cost independently of machine speed. Unmatched native CSS
+    // rules need no root rewriting; only matching specificity needs an AST.
+    vi.spyOn(Object.getPrototypeOf(processor) as typeof processor, 'astSync').mockImplementation(function (this: typeof processor, ...args: Parameters<typeof parse>) {
+      time += 1;
+      return parse.apply(this, args);
+    });
+    const policy = readSourceLayoutPolicyState(box, ['height']);
+    expect(policy).toMatchObject({complete:true});
+    expect(policy.limited).toBeUndefined();
+    expect(policy.signature).toContain('80px');
+    expect(time).toBeLessThan(10);
+  });
+
   it('does not claim shadow-local rules include external part styling', () => {
     const {box} = fixture('section::part(copy){height:40px}');
     const root = box.attachShadow({mode:'open'});
@@ -664,5 +683,43 @@ describe('unmasked cascade read', () => {
     if (throws) expect(() => readUnmaskedLayoutProperty(box, 'height', sheet)).toThrow('cascade read failed');
     else expect(readUnmaskedLayoutProperty(box, 'height', sheet)).toBe('0px');
     expect(rules.map(rule => rule.style.cssText)).toEqual(original); expect(observer.takeRecords()).toEqual([]); observer.disconnect();
+  });
+
+  it.each([false, true])('preserves nested and document scroll positions when a probe throws=%s', throws => {
+    const {box, sheet} = fixture('#box{height:auto!important;min-height:365px!important}');
+    const shell = box.parentElement!, root = document.documentElement;
+    const nodes = [shell, root], originals = nodes.map(node => node.scrollTo);
+    const before = [{left:40, top:300}, {left:120, top:600}];
+    const css = (sheet.sheet!.cssRules[0] as CSSStyleRule).style.cssText;
+    const observer = new MutationObserver(() => {});
+    observer.observe(document.documentElement, {subtree:true, attributes:true, childList:true, characterData:true});
+    nodes.forEach((node, index) => {
+      node.scrollLeft = before[index].left; node.scrollTop = before[index].top;
+      node.scrollTo = vi.fn((options: ScrollToOptions) => {
+        expect(options.behavior).toBe('instant');
+        node.scrollLeft = options.left!; node.scrollTop = options.top!;
+      }) as typeof node.scrollTo;
+    });
+    vi.stubGlobal('getComputedStyle', () => {
+      // Native layout can clamp both scrolling boxes while our height rule
+      // is omitted. Restoring CSS alone does not restore those offsets.
+      for (const node of nodes) { node.scrollLeft = 0; node.scrollTop = 0; }
+      if (throws) throw new Error('probe failed');
+      return {getPropertyValue: () => '80px'};
+    });
+    try {
+      if (throws) expect(() => readUnmaskedLayoutProperty(box, 'height', sheet)).toThrow('probe failed');
+      else expect(readUnmaskedLayoutProperty(box, 'height', sheet)).toBe('80px');
+      expect(nodes.map(node => ({left:node.scrollLeft, top:node.scrollTop}))).toEqual(before);
+      expect((sheet.sheet!.cssRules[0] as CSSStyleRule).style.cssText).toBe(css);
+      expect(observer.takeRecords()).toEqual([]);
+    } finally {
+      observer.disconnect();
+      nodes.forEach((node, index) => {
+        node.scrollLeft = 0; node.scrollTop = 0;
+        if (originals[index]) node.scrollTo = originals[index];
+        else delete (node as Partial<Element>).scrollTo;
+      });
+    }
   });
 });

@@ -9,6 +9,69 @@ import { boundaryRegressions, setupBoundaryRegression, verifyBoundaryRegression,
 import { layoutWorkloadCases, verifyLayoutWorkload, verifySynchronousLayoutChange, stylesheetWorkloadModes, translateStylesheetWorkloadText, verifyStylesheetWorkload } from './helpers/stylesheet-workload-regressions';
 import { shadowSizingCases, translateShadowSizingText, verifyShadowSizing } from './helpers/shadow-sizing-regressions';
 import { layoutCascadeCases, translateLayoutCascadeText, verifyLayoutCascade } from './helpers/layout-cascade-regressions';
+import { layoutCollapseCases, controlCollapseFrames, translateCollapseSource, verifyLayoutCollapse } from './helpers/layout-collapse-regressions';
+import { scrollProbeCases, controlScrollProbe, translateScrollProbe, verifyScrollProbe } from './helpers/scroll-probe-regressions';
+
+for (const scenario of scrollProbeCases) {
+  test(`layout probe preserves scroll: ${scenario.scope} / ${scenario.mode} / paused=${scenario.paused}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer(); mock.setTranslator(translateScrollProbe);
+    try {
+      await seedSettings(extContext, extensionId, {apiBase:mock.apiBase});
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyScrollProbe(page, scenario, {
+        translate: mode => translateTab(sw, tabId, mode), pause: () => stopWatchTab(sw, tabId), restore: () => restoreTab(sw, tabId),
+        probe: action => sw.evaluate(`chrome.scripting.executeScript({target:{tabId:${tabId}},func:${controlScrollProbe.toString()},args:[${JSON.stringify(action)}]}).then(results => results[0].result)`),
+      });
+    } finally { await mock.close(); }
+  });
+}
+
+for (const scenario of layoutCollapseCases) {
+  test(`source collapse before layout frame: ${scenario.scope} / ${scenario.mode} / ${scenario.state}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer(); mock.setTranslator(translateCollapseSource);
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyLayoutCollapse(page, scenario, {
+        translate: mode => translateTab(sw, tabId, mode), pause: () => stopWatchTab(sw, tabId), restore: () => restoreTab(sw, tabId),
+        frames: action => sw.evaluate(`chrome.scripting.executeScript({target:{tabId:${tabId}},func:${controlCollapseFrames.toString()},args:[${JSON.stringify(action)}]}).then(results => results[0].result)`),
+        requests: () => mock.getRequestCount(),
+      });
+    } finally { await mock.close(); }
+  });
+}
+
+import { highlightCases, parentSizingCases, translateHighlightSource, verifyPartialHighlight, verifyParentSizing } from './helpers/highlight-parent-regressions';
+
+for (const scenario of highlightCases) {
+  test(`partial translated highlight: ${scenario.operation} / paused=${scenario.paused}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer(); mock.setTranslator(translateHighlightSource);
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyPartialHighlight(page, scenario, {
+        translate: mode => translateTab(sw, tabId, mode), pause: () => stopWatchTab(sw, tabId), restore: () => restoreTab(sw, tabId),
+      });
+    } finally { await mock.close(); }
+  });
+}
+
+for (const scenario of parentSizingCases) {
+  test(`anchored footer parent sizing: ${scenario}`, async ({ extContext, extensionId, sw }) => {
+    const mock = await startMockServer(); mock.setTranslator(translateHighlightSource);
+    try {
+      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
+      const page = await extContext.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      const tabId = await getTabId(page, sw);
+      await verifyParentSizing(page, scenario, {
+        translate: mode => translateTab(sw, tabId, mode), pause: () => stopWatchTab(sw, tabId), restore: () => restoreTab(sw, tabId),
+      });
+    } finally { await mock.close(); }
+  });
+}
 
 for (const scenario of layoutCascadeCases) {
   test(`layout cascade ownership: ${scenario.family} / ${scenario.mode} / paused=${scenario.paused}`, async ({ extContext, extensionId, sw }) => {

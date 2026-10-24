@@ -13,6 +13,15 @@ const rooted = new WeakMap<CSSRule, {source: string; selector: string | null; co
 export function resolveRootSelector(rule: CSSRule, source: string): {selector: string | null; contextual: boolean} {
   const cached = rooted.get(rule);
   if (cached?.source === source) return cached;
+  // CSSOM already validated ordinary selectors. Rebuilding thousands of ASTs
+  // before even checking a utility class can exhaust the first owner's read
+  // budget. Only nesting, escaped syntax and scope/host context need rewriting.
+  if (typeof CSSStyleRule !== 'undefined' && rule instanceof CSSStyleRule && rule.selectorText === source
+    && source.length <= 16384 && !/[&\\]|:(?:scope|host|:slotted)\b/i.test(source)) {
+    const result = {source, selector:source, contextual:false};
+    rooted.set(rule, result);
+    return result;
+  }
   let selector: string | null = null, contextual = false;
   try {
     if (source.length > 16384) throw new Error('Selector exceeds parsing budget');

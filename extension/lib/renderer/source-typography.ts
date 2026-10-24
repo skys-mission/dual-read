@@ -3,6 +3,7 @@ import { FLOW, STASH_ALL, STASH_TEXT } from '../dom-const';
 import { composedContains } from '../dom-tree';
 import type { TranslationUnit } from '../types';
 import { stylesheetChanged, watchLayoutUpdates } from './layout-updates';
+import { sourceLayoutReadSpent } from './source-layout-policy';
 
 const PROPERTIES = ['color', 'font-size', 'line-height', 'font-weight', 'font-style', 'letter-spacing'] as const;
 const RELOCATED_PROPERTIES = [...PROPERTIES, 'font-family', 'text-align', 'white-space', 'text-wrap', 'word-break', 'overflow-wrap'] as const;
@@ -17,6 +18,8 @@ interface TypographyState {
 }
 let prepared = new WeakMap<SourceTypography, SourceRun>();
 const active = new Map<HTMLElement, TypographyState>();
+const pendingUpdates = new Set<HTMLElement>();
+const TYPOGRAPHY_CHUNK_SIZE = 32;
 let watcher: ReturnType<typeof watchLayoutUpdates> | null = null;
 
 function textStyleHost(node: Text, host: HTMLElement): Element | null {
@@ -139,18 +142,19 @@ function readUpdates(mutations: readonly MutationRecord[] | null, checkSourcePol
   const changes: { node: HTMLElement; state: TypographyState; typography?: SourceTypography }[] = [];
   const styles = new Map<Element, CSSStyleDeclaration>();
   // CSS sibling selectors and :has() can change a source's paint without
-  // mutating any of its ancestors. Re-read retained runs once per frame;
+  // mutating any of its ancestors. Refresh retained runs in bounded batches;
   // writeTypography still skips unchanged values and respects page overrides.
   // Copied paint is an override too: CSSOM edits can change its source without
   // a DOM record or resize. Reuse the shared stylesheet-change notification.
   const global = checkSourcePolicies || !mutations || stylesheetChanged(mutations)
     || mutations.some(record => record.type === 'attributes' || record.type === 'childList');
-  for (const [node, state] of active) {
+  // A continuation only drains the queue; it need not scan every active owner.
+  if (global || mutations?.length) for (const [node, state] of active) {
     // Relocated layouts retain paused, detached cards for reuse. Their owner
     // releases this subscription on drop/full restore; do not lose its copied
     // style tracking just because both nodes temporarily leave the document.
     if (state.run.relocated && !node.isConnected && !state.run.host.isConnected) continue;
-    if (!node.isConnected && !state.run.host.isConnected) { changes.push({ node, state }); continue; }
+    if (!node.isConnected && !state.run.host.isConnected) { pendingUpdates.add(node); continue; }
     const affected = global || mutations?.some(record => {
       const target = record.target instanceof Element ? record.target : record.target.parentElement;
       return !!target && (state.run.nodes.some(source => composedContains(target, source))
@@ -158,9 +162,20 @@ function readUpdates(mutations: readonly MutationRecord[] | null, checkSourcePol
         || record.type === 'childList' && (target === state.run.host
           || [...record.removedNodes].some(removed => state.run.nodes.some(source => removed === source || removed.contains(source)))));
     });
-    if (affected) changes.push({ node, state, typography: readTypography(state.run, styles) });
+    if (affected) pendingUpdates.add(node);
   }
-  if (!changes.length) return;
+  // Keep unfinished owners at the front under repeated input. A new global
+  // refresh appends already-processed owners without starving the queue tail.
+  let processed = 0;
+  for (const node of pendingUpdates) {
+    if (processed >= TYPOGRAPHY_CHUNK_SIZE || processed && sourceLayoutReadSpent()) break;
+    processed++;
+    pendingUpdates.delete(node);
+    const state = active.get(node);
+    if (!state || state.run.relocated && !node.isConnected && !state.run.host.isConnected) continue;
+    changes.push({ node, state, typography: node.isConnected ? readTypography(state.run, styles) : undefined });
+  }
+  if (!changes.length && !pendingUpdates.size) return;
   return () => {
     for (const { node, state, typography } of changes) {
       if (active.get(node) !== state) continue;
@@ -171,11 +186,13 @@ function readUpdates(mutations: readonly MutationRecord[] | null, checkSourcePol
         watcher?.addRoot(state.run.host);
       }
     }
+    if (pendingUpdates.size) watcher?.refresh(false);
   };
 }
 
 export function releaseSourceTypography(node: Element): void {
   active.delete(node as HTMLElement);
+  pendingUpdates.delete(node as HTMLElement);
   if (active.size) return;
   watcher?.dispose();
   watcher = null;
@@ -183,6 +200,7 @@ export function releaseSourceTypography(node: Element): void {
 
 export function restoreSourceTypography(): void {
   active.clear();
+  pendingUpdates.clear();
   prepared = new WeakMap();
   watcher?.dispose();
   watcher = null;

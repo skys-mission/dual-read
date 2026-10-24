@@ -363,12 +363,40 @@ export function readUnmaskedLayoutProperty(element: Element, property: string, o
 export function readUnmaskedLayout<T>(element: Element, ownedStyle: HTMLStyleElement, read: (style: CSSStyleDeclaration) => T): T {
   const rules = Array.from(ownedStyle.sheet?.cssRules || []).filter((rule): rule is CSSStyleRule => 'style' in rule);
   const saved = rules.map(rule => rule.style.cssText);
+  // Resolving used dimensions can clamp a scrolling ancestor while its
+  // expanded content is temporarily smaller. Gecko retains that new offset
+  // after CSS is restored, moving controls between hit testing and a click.
+  const scrolling: {element: Element; left: number; top: number}[] = [];
+  for (let node: Element | null = element; node; node = composedParent(node)) {
+    scrolling.push({element:node, left:node.scrollLeft, top:node.scrollTop});
+  }
   try {
     for (const rule of rules) rule.style.cssText = '';
     return read(getComputedStyle(element));
   } finally {
     rules.forEach((rule, index) => {rule.style.cssText = saved[index];});
+    // Read after restoring all declarations so the original offsets are valid
+    // again. Explicit instant scrolling also honors pages using smooth scroll.
+    for (const {element:node, left, top} of scrolling) {
+      if (node.scrollLeft !== left || node.scrollTop !== top) node.scrollTo({left, top, behavior:'instant'});
+    }
   }
+}
+
+const sourceExpansionStyles = new WeakMap<Element, HTMLStyleElement>();
+
+/** Register the exact owned sheet, so collection never scans page stylesheets. */
+export function setSourceExpansionStyle(element: Element, style: HTMLStyleElement | null): void {
+  if (style) sourceExpansionStyles.set(element, style);
+  else sourceExpansionStyles.delete(element);
+}
+
+/** An expansion can still mask an authored collapse when the session's timer
+ * runs before the layout frame. Read the page's clipping size synchronously,
+ * restoring our declarations before returning; never depend on callback order. */
+export function readSourceClippingStyle<T>(element: Element, computed: CSSStyleDeclaration, read: (style: CSSStyleDeclaration) => T): T {
+  const style = sourceExpansionStyles.get(element);
+  return style?.isConnected ? readUnmaskedLayout(element, style, read) : read(computed);
 }
 
 let probeSequence = 0;

@@ -7,6 +7,7 @@ import {
 import { isCompactControlHost, isEllipsizedTextHost } from '../dom-role';
 import { composedContains, composedParent } from '../dom-tree';
 import { yieldToMain } from '../runtime/yield';
+import { readSourceClippingStyle } from '../renderer/source-layout-policy';
 import { hasCodeBlock, isNonProseElement } from './code-content';
 
 const P_NAV_SUB = `${P}-nav-sub`;
@@ -449,9 +450,8 @@ function isSelfStyleHidden(el: Element): boolean {
 function isZeroSizeClip(el: Element): boolean {
   const cached = collectCache?.zeroClipping.get(el);
   if (cached !== undefined) return cached;
-  const s = visibilityStyle(el);
-  let clipped = false;
-  if (s.display !== 'inline' && s.display !== 'contents' && (s.overflow === 'hidden' || s.overflow === 'clip')) {
+  const clipped = readSourceClippingStyle(el, visibilityStyle(el), s => {
+    if (s.display === 'inline' || s.display === 'contents' || s.overflow !== 'hidden' && s.overflow !== 'clip') return false;
     const width = parseFloat(s.width);
     const height = parseFloat(s.height);
     // Overflow clips at the padding box. A zero content height can still
@@ -461,8 +461,8 @@ function isZeroSizeClip(el: Element): boolean {
         : parseFloat(s.getPropertyValue(`padding-${edge}`)) || 0), 0);
     const clipWidth = clipSize(width, ['left', 'right']);
     const clipHeight = clipSize(height, ['top', 'bottom']);
-    clipped = (clipWidth >= 0 && clipWidth <= 2) || (clipHeight >= 0 && clipHeight <= 2);
-  }
+    return (clipWidth >= 0 && clipWidth <= 2) || (clipHeight >= 0 && clipHeight <= 2);
+  });
   collectCache?.zeroClipping.set(el, clipped);
   return clipped;
 }

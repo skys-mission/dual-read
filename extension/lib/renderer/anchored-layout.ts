@@ -7,6 +7,8 @@ const ANCHOR = `data-${P}-layout-anchor`;
 const STYLE = `data-${P}-anchor-style`;
 const CHROME = 'nav, aside, header, footer, [role="navigation"], [role="menu"], [role="complementary"]';
 const ANCHOR_POLICY = ['top', 'height', 'inset', 'inset-block-start', 'block-size', 'min-height', 'max-height'];
+const PARENT_POLICY = ['height', 'min-height', 'max-height', 'block-size', 'min-block-size', 'max-block-size',
+  'padding-top', 'padding-bottom', 'border-top-width', 'border-bottom-width', 'box-sizing'];
 interface AnchorSnapshot {
   element: HTMLElement;
   parent: HTMLElement;
@@ -19,6 +21,8 @@ interface AnchorSnapshot {
   parentWidth: number;
   policy: string;
   sizing: string | null;
+  parentPolicy: string;
+  parentSizing: string | null;
 }
 interface AnchorChange { snapshot: AnchorSnapshot; owner: HTMLElement; top: number | null }
 interface AnchorRule { id: string; style: HTMLStyleElement; owners: Set<HTMLElement>; top: number; snapshot: AnchorSnapshot }
@@ -57,11 +61,14 @@ function captureAnchoredLayoutsInPass(elements: readonly HTMLElement[]): void {
           const offset = Number(top[1]);
           if (offset < 24 || parent.clientHeight < offset + 20 || !parent.clientWidth) continue;
           const policy = readSourceLayoutPolicyState(child, ANCHOR_POLICY);
-          if (policy.limited) continue;
+          const parentPolicy = readSourceLayoutPolicyState(parent, PARENT_POLICY);
+          if (policy.limited || parentPolicy.limited) continue;
           anchors.push({ element: child, parent, top: offset, sourceTop: child.style.top, sourceHeight: child.style.height,
             sourceTopPriority: child.style.getPropertyPriority('top'), sourceHeightPriority: child.style.getPropertyPriority('height'),
             parentHeight: parent.clientHeight, parentWidth: parent.clientWidth, policy: policy.signature,
-            sizing: policy.complete ? null : readComputedSizing(child, ANCHOR_POLICY) });
+            sizing: policy.complete ? null : readComputedSizing(child, ANCHOR_POLICY),
+            parentPolicy: parentPolicy.signature,
+            parentSizing: parentPolicy.complete ? null : readComputedSizing(parent, PARENT_POLICY) });
         }
         parents.set(parent, anchors);
       }
@@ -81,11 +88,17 @@ export function attachAnchoredLayouts(host: HTMLElement, owner: HTMLElement): vo
 function sourceContractIntact(snapshot: AnchorSnapshot): boolean {
   const {element, parent} = snapshot;
   const policy = readSourceLayoutPolicyState(element, ANCHOR_POLICY);
+  const parentPolicy = readSourceLayoutPolicyState(parent, PARENT_POLICY);
   return element.isConnected && element.parentElement === parent
     && element.style.top === snapshot.sourceTop && element.style.height === snapshot.sourceHeight
     && element.style.getPropertyPriority('top') === snapshot.sourceTopPriority
     && element.style.getPropertyPriority('height') === snapshot.sourceHeightPriority
     && !policy.animated && !policy.limited && policy.signature === snapshot.policy
+    // Only translated flow may explain growth. An authored container size
+    // change retires the old baseline, even when the footer itself is untouched.
+    && !parentPolicy.animated && !parentPolicy.limited && parentPolicy.signature === snapshot.parentPolicy
+    && (snapshot.parentSizing === null ? parentPolicy.complete
+      : readComputedSizing(parent, PARENT_POLICY) === snapshot.parentSizing)
     // Conditional/opaque declarations can keep the same signature while the
     // winning top/height changes. Compare computed inputs with our rule omitted;
     // percentage/calc sizing stays stable as translated prose grows the parent.

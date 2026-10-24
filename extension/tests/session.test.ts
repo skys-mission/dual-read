@@ -599,6 +599,30 @@ describe('ContentSession scheduling state machine', () => {
     session.dispose('stop');
   });
 
+  it.each(['bilingual', 'replace'] as const)('drops a source collapsed while paused before resuming %s', async mode => {
+    vi.useFakeTimers();
+    document.body.innerHTML = '<main><section style="width:320px;height:80px;overflow:hidden"><p>Original collapsible documentation.</p></section></main>';
+    const box = document.querySelector('section')!, host = document.querySelector('p')!, original = host.firstChild!;
+    vi.mocked(translateBatchViaPort).mockImplementation(async texts => texts.map(text => `译:${text}`));
+    const session = new ContentSession(config({ mode, batchSize: 1 }));
+    const start = session.start();
+    try {
+      await vi.advanceTimersByTimeAsync(1600); await start;
+      expect(host.querySelector('.dual-read-target')).not.toBeNull();
+      session.pause(); box.style.height = '0px'; session.resumeWatch();
+      await vi.advanceTimersByTimeAsync(1600);
+      expect(session.status()).toMatchObject({ count: 0, total: 0, watching: true });
+      expect(host.textContent).toBe('Original collapsible documentation.');
+      expect(host.firstChild).toBe(original);
+      box.style.height = '80px';
+      await vi.advanceTimersByTimeAsync(1600);
+      expect(session.status()).toMatchObject({ count: 1, total: 1 });
+      session.restore();
+      expect(host.childNodes).toHaveLength(1);
+      expect(host.firstChild).toBe(original);
+    } finally { session.dispose(); }
+  });
+
   it.each(['bilingual', 'replace'] as const)('recollects source edited while paused before resuming %s', async (mode) => {
     vi.useFakeTimers();
     document.body.innerHTML = '<main><p id="stable">A stable translated paragraph.</p><p id="changing">The old pending paragraph.</p></main>';

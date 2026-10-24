@@ -47,6 +47,65 @@ const FIREFOX_EXT = path.resolve(dirname, '../output/firefox-mv3');
 
 import { shadowSizingCases, translateShadowSizingText, verifyShadowSizing } from './helpers/shadow-sizing-regressions';
 import { layoutCascadeCases, translateLayoutCascadeText, verifyLayoutCascade } from './helpers/layout-cascade-regressions';
+import { layoutCollapseCases, controlCollapseFrames, translateCollapseSource, verifyLayoutCollapse } from './helpers/layout-collapse-regressions';
+import { scrollProbeCases, controlScrollProbe, translateScrollProbe, verifyScrollProbe } from './helpers/scroll-probe-regressions';
+
+for (const scenario of scrollProbeCases) {
+  test(`layout probe preserves scroll: ${scenario.scope} / ${scenario.mode} / paused=${scenario.paused}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext();
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, {translate:async texts => texts.map(translateScrollProbe)});
+      await verifyScrollProbe(page, scenario, {
+        translate: mode => firefoxTranslatePage(page, mode), pause: () => firefoxStopWatch(page), restore: () => firefoxRestore(page),
+        probe: action => page.evaluate(controlScrollProbe, action),
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
+
+for (const scenario of layoutCollapseCases) {
+  test(`source collapse before layout frame: ${scenario.scope} / ${scenario.mode} / ${scenario.state}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext();
+    let requests = 0;
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => { requests++; return texts.map(translateCollapseSource); } });
+      await verifyLayoutCollapse(page, scenario, {
+        translate: mode => firefoxTranslatePage(page, mode), pause: () => firefoxStopWatch(page), restore: () => firefoxRestore(page),
+        frames: action => page.evaluate(controlCollapseFrames, action), requests: () => requests,
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
+
+import { highlightCases, parentSizingCases, translateHighlightSource, verifyPartialHighlight, verifyParentSizing } from './helpers/highlight-parent-regressions';
+
+for (const scenario of highlightCases) {
+  test(`partial translated highlight: ${scenario.operation} / paused=${scenario.paused}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext();
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => texts.map(translateHighlightSource) });
+      await verifyPartialHighlight(page, scenario, {
+        translate: mode => firefoxTranslatePage(page, mode), pause: () => firefoxStopWatch(page), restore: () => firefoxRestore(page),
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
+
+for (const scenario of parentSizingCases) {
+  test(`anchored footer parent sizing: ${scenario}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext();
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => texts.map(translateHighlightSource) });
+      await verifyParentSizing(page, scenario, {
+        translate: mode => firefoxTranslatePage(page, mode), pause: () => firefoxStopWatch(page), restore: () => firefoxRestore(page),
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
 
 for (const scenario of layoutCascadeCases) {
   test(`layout cascade ownership: ${scenario.family} / ${scenario.mode} / paused=${scenario.paused}`, async () => {

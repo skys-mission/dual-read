@@ -2,7 +2,7 @@ import { P } from '../dom-const';
 import { composedContains } from '../dom-tree';
 import { stylesheetChanged, watchLayoutUpdates } from './layout-updates';
 import { applyAnchoredLayouts, readAnchoredLayouts } from './anchored-layout';
-import { readComputedSizing, readSourceLayoutPolicyState, readUnmaskedLayoutProperty, withSourceLayoutRead, type SourceLayoutPolicy } from './source-layout-policy';
+import { readComputedSizing, readSourceLayoutPolicyState, readUnmaskedLayoutProperty, setSourceExpansionStyle, withSourceLayoutRead, type SourceLayoutPolicy } from './source-layout-policy';
 import { takeLayoutWork } from './layout-work';
 
 const HEIGHT = `data-${P}-layout-height`;
@@ -216,6 +216,7 @@ export function applyBoundedLayouts(changes: readonly Expansion[]): void {
       (root instanceof ShadowRoot ? root : document.head).appendChild(style);
       state = { id, style, owners: new Set(), height: 0, sourceFloor, sizing, policy, root, contexts: new Map() };
       applied.set(box, state);
+      setSourceExpansionStyle(box, style);
       box.setAttribute(HEIGHT, id);
       for (const node of previous?.owners || []) if (node.isConnected && box.contains(node)) rememberOwner(box, node, state, previous?.contexts.get(node));
     }
@@ -240,6 +241,7 @@ function clearRule(box: HTMLElement, keepOwners = false): void {
   if (!state) return;
   if (box.getAttribute(HEIGHT) === state.id) box.removeAttribute(HEIGHT);
   state.style.remove();
+  setSourceExpansionStyle(box, null);
   applied.delete(box);
   retained.delete(box);
   if (keepOwners) retained.set(box, state);

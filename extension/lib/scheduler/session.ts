@@ -1,5 +1,5 @@
 import type { PublicSessionConfig, TranslateStatus, TranslationPayload, TranslationUnit } from '../types';
-import { collectSlotTextNodes, collectUnits, collectUnitsAsync, isVisibilityMutation, mutationHasNewContent, mutationIndexDelta } from '../collector';
+import { collectSlotTextNodes, collectUnits, collectUnitsAsync, isVisibilityMutation, mutationHasNewContent, mutationIndexDelta, readSourceVisibility } from '../collector';
 import { composedContains } from '../dom-tree';
 import { yieldToMain } from '../runtime/yield';
 import { sourceLayoutReadSpent, withSourceLayoutRead } from '../renderer/source-layout-policy';
@@ -312,7 +312,9 @@ export class ContentSession {
       const originalChanged = entry.originalSource.some(({ node, ancestors, value }) =>
         !ancestors.some(element => this.entries.has(element as HTMLElement))
         && (!entry.unit.el.contains(node) || node.nodeValue !== value));
-      if (originalChanged || this.sourceChanged(entry)) {
+      // Replacement hides its source nodes, so an unchanged empty text
+      // snapshot cannot tell us whether the page collapsed the whole host.
+      if (!readSourceVisibility([entry.unit.el]).get(entry.unit.el) || originalChanged || this.sourceChanged(entry)) {
         restoreUnit(entry.unit.el);
         this.dropEntry(entry.unit.el);
         continue;

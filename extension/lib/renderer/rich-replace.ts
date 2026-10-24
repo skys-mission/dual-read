@@ -252,13 +252,41 @@ function recordTextMerges(records: MutationRecord[]): void {
     editTextMerge(node, update.before, update.after);
     updates.delete(node);
   };
-  for (const record of records) {
+  for (let index = 0; index < records.length; index++) {
+    const record = records[index];
     if (record.type === 'characterData') {
       commit(record.target);
       // Native observers report edits to removed subtrees until delivery.
       // Editing a discarded Text must not edit the slots now carried by its
       // normalized survivor, or erase their last known source value.
       if (removedNodes.has(record.target) && !record.target.isConnected) continue;
+      // Range.surroundContents extracts a *new* Text, then splits the survivor
+      // and inserts an empty wrapper between its halves. Require that complete
+      // native mutation sequence and exact character conservation; a matching
+      // string elsewhere is not evidence of a retained source slot.
+      const split = records.slice(index + 1, index + 3);
+      const cut = split.find(next => next.type === 'characterData' && next.target === record.target);
+      const tailRecord = split.find(next => next.type === 'childList' && next.previousSibling === record.target
+        && next.addedNodes.length === 1 && !next.removedNodes.length);
+      const splitTail = tailRecord && added.get(tailRecord)?.[0];
+      const insertion = records[index + 3];
+      const content = records[index + 4];
+      const wrapper = insertion?.addedNodes[0];
+      const selected = content && added.get(content)?.[0];
+      if ((copies.has(record.target) || mergedTexts.has(record.target)) && cut && splitTail && selected
+        && insertion.type === 'childList' && insertion.target === tailRecord!.target
+        && insertion.previousSibling === record.target && insertion.nextSibling === splitTail.node
+        && insertion.addedNodes.length === 1 && !insertion.removedNodes.length
+        && wrapper instanceof Element && !copies.has(wrapper)
+        && content.target === wrapper && content.addedNodes.length === 1 && !content.removedNodes.length
+        && !content.previousSibling && !content.nextSibling && !copies.has(selected.node)
+        && cut.oldValue === after.get(record) && after.get(record) === after.get(cut)! + splitTail.value
+        && record.oldValue === after.get(cut)! + selected.value + splitTail.value) {
+        splitTextMerge(record.target, { node: selected.node, value: selected.value! + splitTail.value! }, record.oldValue!, after.get(cut)!);
+        splitTextMerge(selected.node, splitTail, selected.value! + splitTail.value!, selected.value!);
+        index += 4;
+        continue;
+      }
       const tail = splits.get(record.target);
       splits.delete(record.target);
       if (tail && record.oldValue === after.get(record)! + tail.value) {
@@ -618,6 +646,69 @@ function partitionTextMerge(merge: TextMerge, joining?: { parent: Node; parts: T
   return parts;
 }
 
+/** A highlighter can wrap only part of a split translated slot. Its physical
+ * fragments still prove the complete slot, but cannot describe source character
+ * offsets. Reassemble at each slot's first fragment, retaining page wrappers
+ * and unrelated page nodes where they are (a partial highlight may be empty). */
+function recoverWrappedTextMerge(merge: TextMerge): boolean {
+  const { fragments, items, parent } = merge;
+  if (fragments.length < 2 || !parent.isConnected) return false;
+  const physical = new Set(fragments.map(fragment => fragment.node));
+  // normalize() can discard a logical Text which the page later reinserts.
+  // Its live identity takes precedence over the old concatenation history.
+  if (items.some(item => item.node.parentNode && !physical.has(item.node))) return false;
+  if (fragments.every((fragment, index) => !index || fragments[index - 1].node.nextSibling === fragment.node)) return false;
+  if (fragments.some((fragment, index) => !parent.contains(fragment.node)
+    || fragment.node.nodeValue !== fragment.value
+    || index > 0 && !(fragments[index - 1].node.compareDocumentPosition(fragment.node) & Node.DOCUMENT_POSITION_FOLLOWING))) return false;
+  if (fragments.map(fragment => fragment.value ?? '').join('') !== merge.filled
+    || items.map(item => item.value ?? '').join('') !== merge.filled) return false;
+
+  const history = documentHistories.get(parent.ownerDocument!);
+  if (history) {
+    consumeTextRecords(history, history.observer.takeRecords());
+    history.observer.disconnect();
+  }
+  try {
+    let offset = 0;
+    const ranges = fragments.map(fragment => {
+      const start = offset; offset += fragment.value?.length ?? 0;
+      return { node: fragment.node, start, end: offset };
+    });
+    offset = 0;
+    const anchors = items.map(item => {
+      const at = ranges.find(range => range.start <= offset && (range.end > offset || range.start === offset)) ?? ranges.at(-1)!;
+      const anchor = parent.ownerDocument!.createComment('dual-read-slot');
+      at.node.parentNode!.insertBefore(anchor, at.node);
+      offset += item.value?.length ?? 0;
+      return { item, anchor };
+    });
+    for (const { node } of fragments) node.parentNode?.removeChild(node);
+    for (const { item, anchor } of anchors) {
+      item.node.nodeValue = item.value;
+      anchor.parentNode!.replaceChild(item.node, anchor);
+    }
+  } finally {
+    if (history?.hosts.size) observeTextHistory(history);
+  }
+  return true;
+}
+
+/** An internal character cut transferred/reordered outside its source cannot
+ * establish an equivalent source offset. Keep the last known source and the
+ * page's current fragments independently, as for other ambiguous transfers. */
+function preserveSplitSource(merge: TextMerge): void {
+  if (merge.fragments.length < 2 || !merge.fragments.some(fragment => fragment.node.isConnected)) return;
+  for (const item of merge.items) {
+    const copy = copies.get(item.node);
+    if (!copy) continue;
+    if (item.node.isConnected && !merge.fragments.some(fragment => fragment.node === item.node)) continue;
+    copy.saved.unresolvedValue = copy.saved.value;
+    copies.delete(item.node);
+  }
+  forgetTextMerge(merge);
+}
+
 function recoverTextRuns(parent: Node, incoming?: TextRun, moved?: TextMerge[]): void {
   readTextHistory(parent);
   const registered = textRuns.get(parent);
@@ -633,9 +724,10 @@ function recoverTextRuns(parent: Node, incoming?: TextRun, moved?: TextMerge[]):
   for (const merge of [...merges].reverse()) {
     for (const part of partitionTextMerge(merge)) {
       const destination = part.fragments[0]?.node.parentNode ?? parent;
-      if (part.items.some((item) => copies.has(item.node)) && recoverTextSequence(destination, part.items, part.filled, part.fragments)) {
+      if (part.items.some((item) => copies.has(item.node))
+        && (recoverWrappedTextMerge(part) || recoverTextSequence(destination, part.items, part.filled, part.fragments))) {
         forgetTextMerge(part);
-      }
+      } else preserveSplitSource(part);
     }
   }
   const candidates = new Set(registered);

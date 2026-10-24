@@ -17,6 +17,26 @@ function fixture() {
 }
 
 describe('absolute footers tied to prose height', () => {
+  it.each(['inline', 'class', 'variable', 'stylesheet'] as const)('releases anchoring when parent sizing changes through %s', async operation => {
+    const { frame, footer, owner, resize } = fixture();
+    const sheet = document.createElement('style');
+    sheet.textContent = '#frame.changed {height:700px}'; document.head.append(sheet);
+    try {
+      resize(550); applyAnchoredLayouts(readAnchoredLayouts([owner]));
+      expect(footer.hasAttribute('data-dual-read-layout-anchor')).toBe(true);
+      if (operation === 'inline') frame.style.height = '700px';
+      if (operation === 'class') frame.className = 'changed';
+      if (operation === 'variable') { frame.style.setProperty('--panel-height', '700px'); frame.style.height = 'var(--panel-height)'; }
+      if (operation === 'stylesheet') sheet.textContent += '#frame {height:700px}';
+      resize(700);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      expect(footer.hasAttribute('data-dual-read-layout-anchor')).toBe(false);
+      applyAnchoredLayouts(readAnchoredLayouts([owner]));
+      expect(footer.hasAttribute('data-dual-read-layout-anchor')).toBe(false);
+      expect(footer.style.top).toBe('300px');
+    } finally { sheet.remove(); }
+  });
+
   it.each(['top', 'height'] as const)('releases paired anchoring after a stylesheet overrides only %s', async property => {
     const {frame, footer, owner, resize} = fixture();
     const sheet = document.createElement('style');
