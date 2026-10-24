@@ -9,6 +9,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Release translation layout overrides when `:host` or `::slotted` sizing
+  changes, including CSSOM edits inside the source's shadow tree.
 - Honor the active session's target language for site and selection translation;
   reject batches whose provider changed, and invalidate old language cache entries.
 - Retranslate source text replaced by dynamic pages, discard obsolete requests

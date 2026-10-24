@@ -62,6 +62,46 @@ it('preserves undelivered shadow records while unsubscribing a different shadow'
   expect(surviving.mock.calls[0][0]).toEqual(expect.arrayContaining([expect.objectContaining({target:source,attributeName:'class'})]));
 });
 
+it.each(['host', 'slotted', 'descendant'] as const)('observes author shadow styles for a %s source', async scope => {
+  const host = document.createElement('size-widget');
+  const source = document.getElementById('source')!;
+  document.body.append(host);
+  const root = host.attachShadow({mode:'open'});
+  root.innerHTML = '<style>:host{height:80px}::slotted(*){height:80px}</style><slot></slot>';
+  host.append(source);
+  const read = vi.fn();
+  const subscription = subscribe(read);
+  subscription.addRoot(scope === 'host' ? host : scope === 'slotted' ? source : source.firstChild!);
+  root.querySelector('style')!.textContent = ':host{height:20px}::slotted(*){height:20px}';
+  await Promise.resolve(); flushFrame();
+  expect(read).toHaveBeenCalledOnce();
+  expect(read.mock.calls[0][0]).toEqual(expect.arrayContaining([expect.objectContaining({target:root.querySelector('style')})]));
+});
+
+it.each(['host', 'slotted'] as const)('detects CSSOM-only edits to the %s source shadow sheet', async scope => {
+  vi.useFakeTimers();
+  const host = document.createElement('size-widget');
+  const source = document.getElementById('source')!;
+  document.body.append(host); host.append(source);
+  const root = host.attachShadow({mode:'open'});
+  root.innerHTML = '<slot></slot>';
+  const sheet = new CSSStyleSheet();
+  sheet.insertRule(':host{height:80px}');
+  // jsdom does not expose native ShadowRoot stylesheet lists.
+  Object.defineProperty(root, 'adoptedStyleSheets', {value:[sheet]});
+  const read = vi.fn();
+  const subscription = subscribe(read, true);
+  subscription.addRoot(scope === 'host' ? host : source);
+  await vi.advanceTimersByTimeAsync(1000); drainFrames(); read.mockClear();
+  (sheet.cssRules[0] as CSSStyleRule).style.setProperty('height', '20px');
+  await vi.advanceTimersByTimeAsync(1000); drainFrames();
+  expect(read).toHaveBeenCalledWith([], true);
+  read.mockClear(); subscription.dispose();
+  (sheet.cssRules[0] as CSSStyleRule).style.setProperty('height', '30px');
+  await vi.advanceTimersByTimeAsync(1000); drainFrames();
+  expect(read).not.toHaveBeenCalled();
+});
+
 it.each(['input', 'change'])('refreshes pseudo-class paint after a native %s event in a shadow root', async event => {
   const host = document.createElement('state-widget'); document.body.appendChild(host);
   const root = host.attachShadow({mode:'open'}); root.innerHTML = '<input type="checkbox">';

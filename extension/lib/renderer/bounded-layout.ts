@@ -226,7 +226,7 @@ export function applyBoundedLayouts(changes: readonly Expansion[]): void {
       writeRule(state);
     }
     watcher ??= watchLayoutUpdates(readUpdates, { checkSourcePolicies: true });
-    watcher.addRoot(box.getRootNode());
+    watcher.addRoot(box);
     observeSize(box);
   }
 }

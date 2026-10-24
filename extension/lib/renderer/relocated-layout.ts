@@ -46,8 +46,8 @@ export function relocateCompanion(host: HTMLElement, node: HTMLElement, nest: ()
   }
   if (after.nextElementSibling !== node) after.after(node);
   watcher ??= watchLayoutUpdates(readUpdates, { checkSourcePolicies: true });
-  watcher.addRoot(host.getRootNode());
-  watcher.addRoot(node.getRootNode());
+  watcher.addRoot(host);
+  watcher.addRoot(node);
   return true;
 }
 
@@ -101,8 +101,8 @@ function readUpdates(): (() => void) | undefined {
       setVisible(node, state, !!visible.get(state.host));
       if (node.isConnected) {
         ensureTranslationStyles(node.getRootNode());
-        watcher?.addRoot(node.getRootNode());
-        watcher?.addRoot(state.host.getRootNode());
+        watcher?.addRoot(node);
+        watcher?.addRoot(state.host);
       }
     }
   };

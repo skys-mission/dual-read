@@ -210,7 +210,7 @@ export function applyMediaLayouts(changes: readonly MediaChange[]): void {
     }
     rule.owners.add(owner);
     watcher ??= watchLayoutUpdates(readUpdates, { checkSourcePolicies: true });
-    watcher.addRoot(image.getRootNode());
+    watcher.addRoot(image);
   }
 }
 

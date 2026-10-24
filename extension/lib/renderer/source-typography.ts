@@ -102,9 +102,9 @@ export function applySourceTypography(node: HTMLElement, typography: SourceTypog
   } else state.run = run;
   writeTypography(node, state, typography);
   watcher ??= watchLayoutUpdates(readUpdates, { checkSourcePolicies: true });
-  watcher.addRoot(node.getRootNode());
-  watcher.addRoot(run.host.getRootNode());
-  for (const source of run.nodes) watcher.addRoot(source.getRootNode());
+  watcher.addRoot(node);
+  watcher.addRoot(run.host);
+  for (const source of run.nodes) watcher.addRoot(source);
 }
 
 function writeTypography(node: HTMLElement, state: TypographyState, typography: SourceTypography | undefined): void {
@@ -167,8 +167,8 @@ function readUpdates(mutations: readonly MutationRecord[] | null, checkSourcePol
       if (!node.isConnected) releaseSourceTypography(node);
       else {
         writeTypography(node, state, typography);
-        watcher?.addRoot(node.getRootNode());
-        watcher?.addRoot(state.run.host.getRootNode());
+        watcher?.addRoot(node);
+        watcher?.addRoot(state.run.host);
       }
     }
   };

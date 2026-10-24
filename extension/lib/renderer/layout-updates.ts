@@ -1,4 +1,5 @@
 import { HIDE, OURS_SEL, P } from '../dom-const';
+import { composedParent } from '../dom-tree';
 import { sourceLayoutReadSpent, withSourceLayoutRead } from './source-layout-policy';
 import { watchStylesheetChanges } from './stylesheet-updates';
 
@@ -183,10 +184,20 @@ export function watchLayoutUpdates(read: LayoutRead, options: { checkSourcePolic
         queueUpdate();
       }
     },
-    addRoot(root) {
-      if (!(root instanceof ShadowRoot)) return;
-      roots.add(root);
-      observeShadow(root);
+    addRoot(node) {
+      const add = (root: Node): void => {
+        if (!(root instanceof ShadowRoot)) return;
+        roots.add(root);
+        observeShadow(root);
+      };
+      add(node);
+      // Keep the source, not only its DOM root: :host and ::slotted styles
+      // can live across that boundary. Include composed ancestors for inherited
+      // inputs, so CSSOM edits reach the same readers as ordinary DOM changes.
+      for (let element = node instanceof Element ? node : composedParent(node); element; element = composedParent(element)) {
+        add(element.getRootNode());
+        if (element.shadowRoot) add(element.shadowRoot);
+      }
     },
     dispose() {
       readers.delete(read);

@@ -16,6 +16,23 @@ function fixture(css: string): {box: HTMLElement; sheet: HTMLStyleElement} {
 }
 
 describe('bounded source layout reads', () => {
+  it.each(['host', 'slotted'] as const)('requires the computed fallback for %s rules from another root', scope => {
+    const {box} = fixture('#box{height:80px}');
+    const host = document.createElement('size-widget');
+    document.body.append(host);
+    const root = host.attachShadow({mode:'open'});
+    root.innerHTML = '<style>:host{height:40px}::slotted(*){height:30px}</style><slot></slot>';
+    if (scope === 'slotted') host.append(box);
+    const source = scope === 'host' ? host : box;
+    expect(source.getRootNode()).toBe(document);
+    expect(readSourceLayoutPolicyState(source, ['height']).complete).toBe(false);
+    // Leaving the slot restores the ordinary document-only cascade.
+    if (scope === 'slotted') {
+      document.body.append(box);
+      expect(readSourceLayoutPolicyState(box, ['height']).complete).toBe(true);
+    }
+  });
+
   it('reuses one synchronous read but observes CSSOM and source changes on the next pass', () => {
     const {box, sheet} = fixture('#box{height:80px}');
     const matches = vi.spyOn(box, 'matches');

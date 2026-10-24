@@ -45,6 +45,21 @@ import {
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIREFOX_EXT = path.resolve(dirname, '../output/firefox-mv3');
 
+import { shadowSizingCases, translateShadowSizingText, verifyShadowSizing } from './helpers/shadow-sizing-regressions';
+
+for (const scenario of shadowSizingCases) {
+  test(`shadow author sizing: ${scenario.scope} / ${scenario.change} / ${scenario.mode} / paused=${scenario.paused}`, async () => {
+    const mock = await startMockServer(), fx = await launchFirefoxGeckoContext();
+    try {
+      const page = await fx.context.newPage(); await page.goto(mock.fixtureUrl('article.html'));
+      await installFirefoxDualRead(page, { translate: async texts => texts.map(translateShadowSizingText) });
+      await verifyShadowSizing(page, scenario, {
+        translate: mode => firefoxTranslatePage(page, mode), pause: () => firefoxStopWatch(page), restore: () => firefoxRestore(page),
+      });
+    } finally { await fx.close(); await mock.close(); }
+  });
+}
+
 for (const mode of stylesheetWorkloadModes) {
   test(`large stylesheet workload: ${mode}`, async () => {
     const mock = await startMockServer(), fx = await launchFirefoxGeckoContext(), requests: string[] = [];

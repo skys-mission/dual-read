@@ -106,7 +106,10 @@ export function readSourceLayoutPolicyState(element: HTMLElement, properties: re
 
 function readPolicy(element: HTMLElement, properties: readonly string[], computed: CSSStyleDeclaration | undefined, depth: number): SourceLayoutPolicy {
   const inputs: string[][][] = [];
-  let complete = true;
+  // A host's :host rules and an assigned element's ::slotted rules live in
+  // another root. A scan of getRootNode() cannot prove their cascade complete;
+  // let the browser resolve these inputs through the unmasked sizing fallback.
+  let complete = !element.shadowRoot && !element.assignedSlot;
   const variables = new Set<string>();
   const inherited = new Set<string>();
   const layerOrder = new Map<string, LayerPart[]>();
