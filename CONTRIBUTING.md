@@ -53,8 +53,28 @@ npx playwright test --project=firefox-ext
 CI runs each browser project in eight test-level shards with one worker per
 runner. To reproduce one shard locally, use
 `CI=1 npx playwright test --project=chromium-ext --shard=1/8` (or `firefox-ext`).
-The `Extension (WXT / TypeScript)` check requires the build and all sixteen shards
-to pass; failed shards upload their Playwright traces.
+For extension changes, the `Extension (WXT / TypeScript)` check requires the build
+and all sixteen shards to pass; failed shards upload their Playwright traces.
+Server-only changes run the Chromium real-proxy integration spec instead of the
+full browser suite. Documentation-only changes skip unrelated builds and tests;
+store/privacy changes still run listing consistency checks. CI configuration and
+unknown code/config paths run all checks, as does a manual CI dispatch. The
+extension summary check always runs and rejects failed or unexpectedly skipped
+work. Routing and coverage-gate regressions can be checked with
+`python3 scripts/test-ci-config.py`.
+
+Go CI runs race detection and coverage in one test invocation, then checks the
+shared coverage profile. `golangci-lint` includes `govet`. SBOMs are produced by
+the weekly release rehearsal and tag releases, rather than every PR. The Nightly
+workflow keeps daily performance checks; its release rehearsal runs on Monday
+at 00:00 China time (Sunday 16:00 UTC), or on manual dispatch.
+
+Dependency upgrades are maintained manually. Dependabot version-update PRs are
+disabled by removing `.github/dependabot.yml`; keep **Dependabot security updates**
+disabled in repository settings as well to prevent automatic security-fix PRs.
+Dependency review, runtime npm audit, and `govulncheck` continue to identify
+vulnerabilities. Dependabot alerts can be enabled separately without creating
+update PRs.
 
 ### Server
 

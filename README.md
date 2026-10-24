@@ -146,16 +146,18 @@ Copy `extension/dev-settings.json.example` for local imports if you like—**nev
 
 ## CI & quality gates
 
-Every PR / push to `main` runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml):
+Every PR / push to `main` runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml),
+selecting checks for the changed paths. Documentation-only changes skip unrelated
+tests; CI configuration changes and manual dispatches run the full suite.
 
 | Job | Checks |
 |-----|--------|
 | **Extension** | `tsc`, ESLint, runtime `npm audit`, Vitest, Chrome + Firefox builds, artifact secret scan, Playwright E2E |
-| **Server** | `go vet`, golangci-lint, race tests, coverage floor, `govulncheck` |
+| **Server** | golangci-lint (including `govet`), combined race/coverage tests, coverage floor, `govulncheck`, Docker smoke |
+| **Server-only integration** | Chromium extension against the real proxy, without the full layout suite |
 | **Store** | Listing / privacy / permission consistency |
-| **SBOM** | CycloneDX (extension) + Go module SBOM |
 
-Nightly adds `PERF_STRICT` + `PERF_FULL` performance budgets and a release dry-run ([`nightly.yml`](.github/workflows/nightly.yml)).  
+Nightly adds daily `PERF_STRICT` + `PERF_FULL` performance budgets and a weekly release dry-run with SBOMs ([`nightly.yml`](.github/workflows/nightly.yml)). Manual dispatch runs both.
 Tagged `vX.Y.Z` releases build zips, multi-arch binaries, GHCR image, checksums, and attestations ([`release.yml`](.github/workflows/release.yml)).
 
 ---

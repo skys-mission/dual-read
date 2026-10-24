@@ -14,6 +14,38 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Select affected checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      extension: ${{ steps.paths.outputs.extension }}
+      server: ${{ steps.paths.outputs.server }}
+      docker: ${{ steps.paths.outputs.docker }}
+      store: ${{ steps.paths.outputs.store }}
+      dependencies: ${{ steps.paths.outputs.dependencies }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Check CI routing and coverage gate
+        run: python3 scripts/test-ci-config.py
+      - id: paths
+        name: Classify changed files
+        shell: bash
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if [[ "$EVENT" == workflow_dispatch || -z "$BASE" || "$BASE" =~ ^0+$ ]] || ! git cat-file -e "$BASE^{commit}"; then
+            bash scripts/ci-changes.sh --all >> "$GITHUB_OUTPUT"
+          elif [[ "$EVENT" == pull_request ]]; then
+            git diff --name-only --no-renames -z "$BASE...$HEAD" | bash scripts/ci-changes.sh >> "$GITHUB_OUTPUT"
+          else
+            git diff --name-only --no-renames -z "$BASE" "$HEAD" | bash scripts/ci-changes.sh >> "$GITHUB_OUTPUT"
+          fi
+
   pr-title:
     name: PR title (conventional commit)
     if: github.event_name == 'pull_request'
@@ -33,21 +65,23 @@ jobs:
 
   dependency-review:
     name: Dependency review
-    if: github.event_name == 'pull_request'
+    needs: changes
+    if: github.event_name == 'pull_request' && needs.changes.outputs.dependencies == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
       contents: read
-      pull-requests: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v4.7.0
         with:
-          comment-summary-in-pr: always
+          comment-summary-in-pr: never
           fail-on-severity: high
 
   extension-build:
     name: Extension build and unit tests
+    needs: changes
+    if: needs.changes.outputs.extension == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 35
     defaults:
@@ -60,10 +94,6 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: extension/package-lock.json
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
-        with:
-          go-version: '1.26.10'
-          cache-dependency-path: server/go.sum
       - run: npm ci
       - name: Type-check
         run: npm run compile
@@ -113,6 +143,7 @@ jobs:
           cache: npm
           cache-dependency-path: extension/package-lock.json
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        if: matrix.browser == 'chromium'
         with:
           go-version: '1.26.10'
           cache-dependency-path: server/go.sum
@@ -134,21 +165,68 @@ jobs:
           path: extension/test-results/
           if-no-files-found: ignore
 
+  server-proxy:
+    name: Extension with real server
+    needs: changes
+    # Extension changes already exercise this spec in the Chromium shards.
+    if: needs.changes.outputs.server == 'true' && needs.changes.outputs.extension != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: extension
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.10'
+          cache-dependency-path: server/go.sum
+      - run: npm ci
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --project=chromium-ext e2e/real-proxy.spec.ts
+      - name: Upload failure traces
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: server-proxy-traces
+          path: extension/test-results/
+          if-no-files-found: ignore
+
   extension:
     name: Extension (WXT / TypeScript)
     if: always()
-    needs: [extension-build, extension-e2e]
+    needs: [changes, extension-build, extension-e2e, server-proxy]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Require build and every browser shard
+      - name: Require all selected extension checks
         env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+          EXTENSION_CHANGED: ${{ needs.changes.outputs.extension }}
+          SERVER_CHANGED: ${{ needs.changes.outputs.server }}
           BUILD_RESULT: ${{ needs.extension-build.result }}
           E2E_RESULT: ${{ needs.extension-e2e.result }}
-        run: test "$BUILD_RESULT" = success && test "$E2E_RESULT" = success
+          PROXY_RESULT: ${{ needs.server-proxy.result }}
+        run: |
+          test "$CHANGES_RESULT" = success
+          if [[ "$EXTENSION_CHANGED" == true ]]; then
+            test "$BUILD_RESULT" = success && test "$E2E_RESULT" = success
+          elif [[ "$SERVER_CHANGED" == true ]]; then
+            test "$PROXY_RESULT" = success
+          else
+            echo 'No extension or server changes.'
+          fi
 
   server:
     name: Server (Go)
+    needs: changes
+    if: needs.changes.outputs.server == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     services:
@@ -172,25 +250,25 @@ jobs:
         with:
           go-version: '1.26.10'
           cache-dependency-path: server/go.sum
-      - name: Vet
-        run: go vet ./...
       - name: golangci-lint
         working-directory: .
         run: |
           chmod +x ./scripts/check-golangci.sh
           ./scripts/check-golangci.sh
-      - name: Test (race)
-        run: go test -race ./...
+      - name: Test (race + coverage)
+        run: go test -race -coverprofile="$RUNNER_TEMP/server-coverage.out" ./...
       - name: Coverage floor (server/runtime/metrics ≠ 0%)
         working-directory: .
         run: |
           chmod +x ./scripts/check-server-coverage.sh
-          ./scripts/check-server-coverage.sh
+          ./scripts/check-server-coverage.sh "$RUNNER_TEMP/server-coverage.out"
       - name: govulncheck
         run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
 
   store:
     name: Store listing consistency
+    needs: changes
+    if: needs.changes.outputs.store == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -203,37 +281,10 @@ jobs:
           chmod +x ./scripts/check-store-consistency.sh
           ./scripts/check-store-consistency.sh
 
-  sbom:
-    name: SBOM (extension + server)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: extension/package-lock.json
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
-        with:
-          go-version: '1.26.10'
-          cache-dependency-path: server/go.sum
-      - name: Install extension deps (for npm sbom)
-        working-directory: extension
-        run: npm ci
-      - name: Generate SBOM + checksums
-        run: |
-          chmod +x ./scripts/generate-sbom.sh
-          ./scripts/generate-sbom.sh
-      - name: Upload SBOM artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: sbom
-          path: dist/sbom/
-          if-no-files-found: error
-
   server-docker:
     name: Server Docker smoke
+    needs: changes
+    if: needs.changes.outputs.docker == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:

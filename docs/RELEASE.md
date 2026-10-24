@@ -13,7 +13,8 @@ make release-dry-run
 VERSION=0.1.0 ./scripts/release-dry-run.sh
 ```
 
-Nightly CI also runs this: [`.github/workflows/nightly.yml`](../.github/workflows/nightly.yml) (`workflow_dispatch` or cron).
+Nightly CI also runs this weekly, on Sunday at 16:00 UTC (Monday 00:00 China time),
+or on `workflow_dispatch`: [`.github/workflows/nightly.yml`](../.github/workflows/nightly.yml).
 
 ## Before you tag
 
