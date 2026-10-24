@@ -4,6 +4,7 @@ import {
   assertSecureApiBase, normalizeSiteHost, normalizeUiLocale, providerFingerprint, resolveUiLocale,
   SETTINGS_SCHEMA_VERSION,
   SettingsValidationError,
+  settingsSchema,
 } from '../lib/settings/schema';
 
 describe('resolveTargetLang', () => {
@@ -56,6 +57,65 @@ describe('normalizeCustomHeaders', () => {
 });
 
 describe('parseSettings', () => {
+  it('normalizes stored headers and site rules while preserving user settings', () => {
+    const s = parseSettings({
+      apiBase: 'https://api.example.com/v1/',
+      apiKey: 'test-key',
+      model: 'test-model',
+      targetLang: 'fr',
+      uiLocale: 'es',
+      mode: 'replace',
+      revision: '7',
+      customHeaders: { ' X-Trace ': 42, Empty: '', Missing: null },
+      siteRules: [
+        { host: 'https://Example.com/', mode: 'replace', targetLang: 'fr', auto: true },
+        { host: 'example.com', disabled: true },
+        { host: '*.invalid.example' },
+        null,
+      ],
+      unknownField: 'discard',
+    });
+    expect(s).toMatchObject({
+      apiBase: 'https://api.example.com/v1',
+      apiKey: 'test-key',
+      model: 'test-model',
+      targetLang: 'fr',
+      uiLocale: 'es',
+      mode: 'replace',
+      revision: 7,
+      customHeaders: { 'X-Trace': '42' },
+      siteRules: [{ host: 'example.com', mode: 'replace', targetLang: 'fr', auto: true }],
+    });
+    expect(s).not.toHaveProperty('unknownField');
+  });
+  it('keeps schema defaults and invalid-field fallbacks without resetting valid fields', () => {
+    expect(settingsSchema.parse({})).toMatchObject({
+      apiBase: 'https://api.deepseek.com',
+      targetLang: 'en',
+      uiLocale: normalizeUiLocale(undefined),
+      customHeaders: {},
+      siteRules: [],
+      maxConcurrent: 3,
+      batchSize: 6,
+    });
+    expect(parseSettings({
+      model: 'keep-model',
+      mode: 'unsupported',
+      maxConcurrent: Infinity,
+      batchSize: 'invalid',
+      revision: -1,
+      customHeaders: ['invalid'],
+      siteRules: 'invalid',
+    })).toMatchObject({
+      model: 'keep-model',
+      mode: 'bilingual',
+      maxConcurrent: 3,
+      batchSize: 6,
+      revision: 0,
+      customHeaders: {},
+      siteRules: [],
+    });
+  });
   it('fills defaults and coerces numbers', () => {
     const s = parseSettings({ maxConcurrent: '5', batchSize: 0 });
     expect(s.maxConcurrent).toBe(5);

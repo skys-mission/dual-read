@@ -193,8 +193,10 @@ export function assertSecureApiBase(raw: string): string {
   throw new SettingsValidationError('API_BASE_INSECURE');
 }
 
-const targetLangSchema = z.unknown().transform((v) => normalizeTargetLang(v));
-const uiLocaleSchema = z.unknown().transform((v) => normalizeUiLocale(v));
+// Zod 4 requires unknown object fields unless explicitly marked optional.
+// Keep missing language fields flowing through their existing normalizers.
+const targetLangSchema = z.unknown().optional().transform((v) => normalizeTargetLang(v));
+const uiLocaleSchema = z.unknown().optional().transform((v) => normalizeUiLocale(v));
 const connectionModeSchema = z.enum(['direct', 'proxy']).catch('direct').default('direct');
 
 export const settingsSchema = z.object({

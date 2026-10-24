@@ -44,6 +44,6 @@
   "dependencies": {
     "@csstools/selector-specificity": "6.0.1",
     "postcss-selector-parser": "7.1.6",
-    "zod": "^3.23.8"
+    "zod": "^4.6.7"
   }
 }

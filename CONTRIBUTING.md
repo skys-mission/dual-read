@@ -17,7 +17,7 @@ Thanks for helping improve Dual Read—an open-source, self-hostable bilingual w
 ### Prerequisites
 
 - Node.js **22+** (CI uses 22)
-- Go **1.25.12+** (see `server/go.mod` toolchain)
+- Go **1.26.10+** (see `server/go.mod` toolchain)
 - Make (optional but convenient)
 
 ### Extension

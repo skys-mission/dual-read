@@ -1,4 +1,4 @@
-FROM golang:1.25-alpine AS builder
+FROM golang:1.26.10-alpine AS builder
 WORKDIR /src
 COPY main.go .
 RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /mock-upstream ./main.go
