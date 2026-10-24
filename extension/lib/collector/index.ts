@@ -4,8 +4,11 @@ import {
   HIDE, INLINE_HOST, INLINE_MAX, INTERACTIVE, NAV, NAV_CHROME, NO_TEXT, OURS_SEL, P,
   PAGE_NAV, PAGE_NAV_EL, SKIP,
 } from '../dom-const';
-import { isCompactControlHost } from '../dom-role';
+import { isCompactControlHost, isEllipsizedTextHost } from '../dom-role';
+import { composedContains, composedParent } from '../dom-tree';
 import { yieldToMain } from '../runtime/yield';
+import { readSourceClippingStyle } from '../renderer/source-layout-policy';
+import { hasCodeBlock, isNonProseElement } from './code-content';
 
 const P_NAV_SUB = `${P}-nav-sub`;
 const P_INLINE = `${P}-target--inline`;
@@ -18,6 +21,11 @@ interface Segment {
   text: string;
   key: Text;
 }
+interface SourceClipping {
+  negative: boolean;
+  boxes: Element[];
+  escapedZero: Element | null;
+}
 
 /**
  * Per-collection memo for visibility / layout checks. A single index walk asks
@@ -28,6 +36,8 @@ interface Segment {
  * stale style answers in the cache.
  */
 interface CollectCache {
+  /** Nearest screen-reader-only / opt-out class in the light-DOM ancestry. */
+  a11yHidden: WeakMap<Element, boolean>;
   /** Element is style-hidden on its own (display/visibility/opacity/hidden/aria). */
   selfHidden: WeakMap<Element, boolean>;
   visible: WeakMap<Element, boolean>;
@@ -35,16 +45,36 @@ interface CollectCache {
   layout: WeakMap<Element, boolean>;
   /** aside / complementary regions classified as supplementary prose (not chrome). */
   suppProse: WeakMap<Element, boolean>;
+  /** Hosts/slots whose composed subtree must remain independently rendered. */
+  composedBoundary: WeakMap<Element, boolean>;
+  nonProse: WeakMap<Element, boolean>;
+  codeBoundary: WeakMap<Element, boolean>;
+  textColumns: WeakMap<Element, boolean>;
+  translatedBoundary: WeakMap<Element, boolean>;
+  visibilityStyles: WeakMap<Element, CSSStyleDeclaration>;
+  clipping: WeakMap<Element, SourceClipping>;
+  zeroClipping: WeakMap<Element, boolean>;
+  positionedBoundary: WeakMap<Element, boolean>;
 }
 
 let collectCache: CollectCache | null = null;
 
 function newCollectCache(): CollectCache {
   return {
+    a11yHidden: new WeakMap(),
     selfHidden: new WeakMap(),
     visible: new WeakMap(),
     layout: new WeakMap(),
     suppProse: new WeakMap(),
+    composedBoundary: new WeakMap(),
+    nonProse: new WeakMap(),
+    codeBoundary: new WeakMap(),
+    textColumns: new WeakMap(),
+    translatedBoundary: new WeakMap(),
+    visibilityStyles: new WeakMap(),
+    clipping: new WeakMap(),
+    zeroClipping: new WeakMap(),
+    positionedBoundary: new WeakMap(),
   };
 }
 
@@ -89,9 +119,9 @@ export function isOursElement(el: Element | null): boolean {
 
 export function mutationHasNewContent(mutations: MutationRecord[]): boolean {
   for (const m of mutations) {
+    if (isVisibilityMutation(m)) return true;
     if (m.type === 'characterData') {
       const text = m.target as Text;
-      if (!text.nodeValue?.trim()) continue;
       const p = text.parentElement;
       // Ignore edits inside our chrome / editable fields. DONE hosts still
       // need invalidation when their *source* text nodes change (SPA updates).
@@ -119,6 +149,38 @@ export function mutationHasNewContent(mutations: MutationRecord[]): boolean {
   return false;
 }
 
+/** Ignore animation transforms and our own chrome while watching CSS reveals. */
+export function isVisibilityMutation(mutation: MutationRecord): boolean {
+  if (mutation.type !== 'attributes' || !(mutation.target instanceof Element)) return false;
+  const target = mutation.target;
+  // A page can hydrate its original nodes inside a replace-mode stash. Those
+  // nodes remain page-owned; only the stash itself and translated chrome are ours.
+  const chrome = target.closest(OURS_SEL);
+  if (isOursElement(target) || chrome && !chrome.classList.contains(HIDE)
+    || target.closest(EDITABLE) && !inNonProse(target)) return false;
+  const name = mutation.attributeName;
+  if (name === 'hidden' || name === 'aria-hidden' || name === 'open') return true;
+  if (name === 'class') return mutation.oldValue !== target.getAttribute('class');
+  if (name !== 'style') return false;
+  const visibilityDeclarations = (value: string | null): string =>
+    Array.from((value || '').matchAll(/(?:^|;)\s*(display|visibility|opacity|(?:min-|max-)?(?:width|height|inline-size|block-size)|overflow(?:-x|-y)?|text-indent|padding(?:-[a-z-]+)?|border(?:-[a-z-]+)?|box-sizing)\s*:\s*([^;]*)/gi))
+      .map(match => `${match[1].toLowerCase()}:${match[2].trim()}`)
+      .sort().join(';');
+  const current = target.getAttribute('style');
+  if (visibilityDeclarations(mutation.oldValue) !== visibilityDeclarations(current)) return true;
+  // Variables can feed descendant/shadow visibility through stylesheets and
+  // aliases. Their names and values are case-sensitive; ordinary transform
+  // declarations still take the cheap filtered path above.
+  const customProperties = (value: string | null): string => {
+    if (!value?.includes('--')) return '';
+    const style = document.createElement('span').style;
+    style.cssText = value || '';
+    const names = Array.from(style).filter(name => name.startsWith('--')).sort();
+    return names.length ? JSON.stringify(names.map(name => [name, style.getPropertyValue(name), style.getPropertyPriority(name)])) : '';
+  };
+  return customProperties(mutation.oldValue) !== customProperties(current);
+}
+
 /** Collapse nested roots so a parent subtree is indexed once. */
 export function dedupeNestedRoots(roots: Element[]): Element[] {
   const unique = Array.from(new Set(roots.filter(Boolean)));
@@ -138,6 +200,10 @@ export function collectMutationRoots(mutations: MutationRecord[]): Element[] {
   const roots = new Set<Element>();
 
   for (const m of mutations) {
+    if (isVisibilityMutation(m)) {
+      roots.add(m.target as Element);
+      continue;
+    }
     if (m.type === 'characterData') {
       const p = (m.target as Text).parentElement;
       if (!p || p.closest(OURS_SEL) || p.closest(EDITABLE)) continue;
@@ -168,7 +234,7 @@ export interface MutationIndexDelta {
   added: TranslationUnit[];
   /** Previously indexed hosts that left the document. */
   removed: HTMLElement[];
-  /** Indexed hosts whose source text nodes changed (need clear + re-index). */
+  /** Indexed hosts whose source text or children changed (need clear + re-index). */
   invalidated: HTMLElement[];
 }
 
@@ -179,33 +245,88 @@ export interface MutationIndexDelta {
 export function mutationIndexDelta(
   mutations: MutationRecord[],
   knownHosts: Iterable<HTMLElement>,
+  sourceChanged?: (host: HTMLElement) => boolean,
+  containsSource?: (host: HTMLElement, box: Element) => boolean,
+): MutationIndexDelta {
+  // Visibility and source comparisons share ancestor styles only for this
+  // synchronous read pass. Restoration/recollection happens after it ends.
+  return withCollectCache(() => readMutationIndexDelta(mutations, knownHosts, sourceChanged, containsSource));
+}
+
+function readMutationIndexDelta(
+  mutations: MutationRecord[],
+  knownHosts: Iterable<HTMLElement>,
+  sourceChanged?: (host: HTMLElement) => boolean,
+  containsSource?: (host: HTMLElement, box: Element) => boolean,
 ): MutationIndexDelta {
   const known = new Set<HTMLElement>();
   for (const h of knownHosts) known.add(h);
 
   const removed = new Set<HTMLElement>();
   const invalidated = new Set<HTMLElement>();
+  const sourceChanges = new Map<HTMLElement, boolean>();
+  const visibilityRoots = new Set<Element>();
+
+  // All records describe the same live tree in this synchronous read pass.
+  // Renderer moves and page edits can produce many records for one source;
+  // inspect it once, without retaining the result for a later mutation batch.
+  const changedSource = (host: HTMLElement): boolean => {
+    if (!sourceChanged) return true;
+    let changed = sourceChanges.get(host);
+    if (changed === undefined) {
+      changed = sourceChanged(host);
+      sourceChanges.set(host, changed);
+    }
+    return changed;
+  };
+
+  const invalidateAncestors = (node: Node): void => {
+    let el = node.nodeType === Node.ELEMENT_NODE ? node as Element : node.parentElement;
+    if (!el || el.closest(OURS_SEL) || el.closest(EDITABLE)) return;
+    while (el) {
+      const host = el as HTMLElement;
+      if (known.has(host) && changedSource(host)) invalidated.add(host);
+      el = el.parentElement;
+    }
+  };
 
   for (const m of mutations) {
     for (const n of Array.from(m.removedNodes)) {
       if (n.nodeType !== 1) continue;
       const el = n as HTMLElement;
       for (const host of known) {
-        if (host === el || (typeof el.contains === 'function' && el.contains(host))) {
+        if (!host.isConnected && (host === el || el.contains(host))) {
           removed.add(host);
         }
       }
-      if (known.has(el)) removed.add(el);
     }
 
     if (m.type === 'characterData') {
-      const text = m.target as Text;
+      invalidateAncestors(m.target);
+    } else if (isVisibilityMutation(m)) {
+      const box = m.target as Element;
+      visibilityRoots.add(box);
       for (const host of known) {
-        if (removed.has(host)) continue;
-        if (host === text.parentElement || host.contains(text)) {
-          invalidated.add(host);
+        if (composedContains(box, host) && (isA11yHidden(host) || inNonProse(host))) invalidated.add(host);
+        // An editor can appear inside a previously aggregated prose unit.
+        // Source ownership prevents existing editor animations from invalidating
+        // an adjacent prose segment that merely shares the same container.
+        else if (composedContains(host, box) && inNonProse(box) && (!containsSource || containsSource(host, box))) invalidated.add(host);
+        // A still-visible paragraph can lose/gain only part of its source.
+        // The response guard rejects that old snapshot, so it must also be
+        // restored/recollected here. Cosmetic changes keep the same snapshot.
+        else if (sourceChanged && (composedContains(host, box) || composedContains(box, host))) {
+          if (changedSource(host)) invalidated.add(host);
         }
       }
+    } else if (m.type === 'childList') {
+      // A textContent/replaceChildren update replaces text nodes rather than
+      // emitting characterData. Ignore pure companion writes; the session's
+      // source snapshot also filters renderer moves and rich replacements.
+      const changed = [...m.addedNodes, ...m.removedNodes].some((n) =>
+        n.nodeType === Node.TEXT_NODE || (n instanceof Element && !isOursElement(n)),
+      );
+      if (changed) invalidateAncestors(m.target);
     }
   }
 
@@ -221,6 +342,11 @@ export function mutationIndexDelta(
     // restoreUnit + collectUnits(host) after clearing DONE.
     for (const host of invalidated) {
       if (host.contains(r) || host === r) return false;
+    }
+    // A cosmetic attribute on an owned source span must not create a second
+    // entry while its enclosing paragraph is still waiting for a response.
+    if (visibilityRoots.has(r)) for (let parent = composedParent(r); parent; parent = composedParent(parent)) {
+      if (known.has(parent as HTMLElement) && containsSource?.(parent as HTMLElement, r)) return false;
     }
     return r.isConnected;
   });
@@ -281,6 +407,9 @@ function isSupplementaryProseRegion(region: Element): boolean {
 function inSkip(el: Element): boolean {
   return !!el.closest(SKIP) || !!el.closest(CHROME);
 }
+function inNonProse(el: Element): boolean {
+  return isNonProseElement(el, collectCache?.nonProse);
+}
 function inAuxNav(el: Element): boolean {
   return !!el.closest(AUX_NAV);
 }
@@ -289,16 +418,26 @@ function isPageNavRegion(el: Element | null): boolean {
 }
 
 function isA11y(el: Element): boolean {
+  const cached = collectCache?.a11yHidden.get(el);
+  if (cached !== undefined) return cached;
+  const path: Element[] | null = collectCache ? [] : null;
+  let hidden = false;
   for (let n: Element | null = el; n; n = n.parentElement) {
-    if (n.classList?.contains('not-sr-only')) return false;
-    if (A11Y.some((c) => n!.classList?.contains(c))) return true;
+    const cached = collectCache?.a11yHidden.get(n);
+    if (cached !== undefined) { hidden = cached; break; }
+    path?.push(n);
+    if (n.classList?.contains('not-sr-only')) break;
+    if (A11Y.some((c) => n!.classList?.contains(c))) { hidden = true; break; }
   }
-  return false;
+  if (path) for (const node of path) collectCache?.a11yHidden.set(node, hidden);
+  return hidden;
 }
 
 /** Source-side slot pruning shared with the rich skeleton builder (renderer/rich). */
 export function isA11yHidden(el: Element): boolean {
-  return isA11y(el);
+  // Disconnected skeletons no longer carry the page's classes/styles. Evaluate
+  // CSS on connected source nodes, before the safe builder strips those attrs.
+  return isA11y(el) || (el.isConnected && !isVisible(el));
 }
 
 /** True when this element alone would hide itself (ancestors not considered). */
@@ -310,26 +449,114 @@ function isSelfStyleHidden(el: Element): boolean {
   if ((el as HTMLElement).hidden || el.getAttribute('aria-hidden') === 'true') {
     hidden = true;
   } else {
-    const s = getComputedStyle(el);
-    const width = parseFloat(s.width);
-    const height = parseFloat(s.height);
-    const clippedAssistiveText =
-      s.position === 'absolute'
-      && s.overflow === 'hidden'
-      && width <= 2
-      && height <= 2
-      && (
-        (s.clip !== 'auto' && s.clip !== '')
-        || (s.clipPath !== 'none' && s.clipPath !== '')
-      );
-    hidden =
-      s.display === 'none'
-      || s.visibility === 'hidden'
-      || parseFloat(s.opacity) === 0
-      || clippedAssistiveText;
+    const s = visibilityStyle(el);
+    hidden = s.display === 'none' || s.visibility === 'hidden' || parseFloat(s.opacity) === 0;
   }
   collectCache?.selfHidden.set(el, hidden);
   return hidden;
+}
+
+/** Zero padding-box size clips only descendants in this box's clipping chain.
+ * Keep that condition separate from semantic/paint hiding of the whole tree. */
+function isZeroSizeClip(el: Element): boolean {
+  const cached = collectCache?.zeroClipping.get(el);
+  if (cached !== undefined) return cached;
+  const clipped = readSourceClippingStyle(el, visibilityStyle(el), s => {
+    if (s.display === 'inline' || s.display === 'contents' || s.overflow !== 'hidden' && s.overflow !== 'clip') return false;
+    const width = parseFloat(s.width);
+    const height = parseFloat(s.height);
+    // Overflow clips at the padding box. A zero content height can still
+    // leave an entire visible text line inside substantial padding.
+    const clipSize = (size: number, edges: readonly string[]): number => size + edges.reduce((sum, edge) => sum
+      + (s.boxSizing === 'border-box' ? -(parseFloat(s.getPropertyValue(`border-${edge}-width`)) || 0)
+        : parseFloat(s.getPropertyValue(`padding-${edge}`)) || 0), 0);
+    const clipWidth = clipSize(width, ['left', 'right']);
+    const clipHeight = clipSize(height, ['top', 'bottom']);
+    return (clipWidth >= 0 && clipWidth <= 2) || (clipHeight >= 0 && clipHeight <= 2);
+  });
+  collectCache?.zeroClipping.set(el, clipped);
+  return clipped;
+}
+
+function visibilityStyle(el: Element): CSSStyleDeclaration {
+  const cached = collectCache?.visibilityStyles.get(el);
+  if (cached) return cached;
+  const style = getComputedStyle(el);
+  collectCache?.visibilityStyles.set(el, style);
+  return style;
+}
+
+/** Overflow between a positioned box and its containing block does not clip
+ * that box. Fixed positioning ignores ordinary positioned ancestors, while
+ * transforms, filters and layout/paint containment establish both kinds. */
+function positionedContainer(element: Element, fixed: boolean): Element | null {
+  for (let parent = composedParent(element); parent; parent = composedParent(parent)) {
+    const style = visibilityStyle(parent);
+    if (style.display === 'contents' || style.display === 'none') continue;
+    if (!fixed && style.position && style.position !== 'static') return parent;
+    const transformable = style.display !== 'inline' && !/^table-(column|column-group)$/.test(style.display);
+    const set = (property: string): boolean => {
+      const value = style.getPropertyValue(property);
+      return !!value && value !== 'none';
+    };
+    const transforms = ['transform', 'translate', 'rotate', 'scale', 'perspective'];
+    const filters = ['filter', 'backdrop-filter'];
+    const filtered = parent !== document.documentElement;
+    const hints = style.willChange.split(',').map(value => value.trim());
+    if (transformable && (transforms.some(set) || hints.some(name => transforms.includes(name))
+      || /\b(layout|paint|strict|content)\b/.test(style.contain) || style.contentVisibility === 'auto')
+      || filtered && (filters.some(set) || hints.some(name => filters.includes(name)))) return parent;
+  }
+  return null;
+}
+
+/** Negative indent affects text runs, not every descendant. A child can reset
+ * it, and subsequent lines can remain visible. Inspect actual source lines
+ * only when a boxed ancestor combines negative indent and horizontal clipping. */
+function sourceClipping(parent: Element): SourceClipping {
+  const path: Element[] = [];
+  let state: SourceClipping = {negative: false, boxes: [], escapedZero:null};
+  for (let element: Element | null = parent; element; element = composedParent(element)) {
+    const cached = collectCache?.clipping.get(element);
+    if (cached) { state = cached; break; }
+    path.push(element);
+  }
+  for (const element of path.reverse()) {
+    const style = visibilityStyle(element);
+    const boxed = style.display !== 'inline' && style.display !== 'contents';
+    if (style.display !== 'contents' && /^(absolute|fixed)$/.test(style.position) && state.boxes.length) {
+      const container = positionedContainer(element, style.position === 'fixed');
+      const boxes = container ? state.boxes.filter(box => composedContains(box, container)) : [];
+      state = {negative:state.negative, boxes, escapedZero:
+        state.boxes.some(box => !boxes.includes(box) && isZeroSizeClip(box)) ? element : state.escapedZero};
+    }
+    state = {negative: state.negative || boxed && parseFloat(style.textIndent) <= -1000,
+      boxes: boxed && /^(hidden|clip)$/.test(style.overflowX || style.overflow) ? [...state.boxes, element] : state.boxes,
+      escapedZero:state.escapedZero};
+    collectCache?.clipping.set(element, state);
+  }
+  return state;
+}
+
+function isIndentedTextClipped(node: Text): boolean {
+  const parent = node.parentElement;
+  if (!parent) return false;
+  const state = sourceClipping(parent);
+  if (!state.negative || !state.boxes.length) return false;
+  const range = document.createRange();
+  // Incomplete DOM implementations cannot establish a clipped text run.
+  if (typeof range.getClientRects !== 'function') return false;
+  range.selectNodeContents(node);
+  const lines = Array.from(range.getClientRects()).filter(rect => rect.width > 0 && rect.height > 0);
+  if (!lines.length) return false;
+  const clips = state.boxes.map(box => {
+    const rect = box.getBoundingClientRect(), style = visibilityStyle(box);
+    const scale = box instanceof HTMLElement && box.offsetWidth ? rect.width / box.offsetWidth : 1;
+    return {left: rect.left + (parseFloat(style.borderLeftWidth) || 0) * scale,
+      right: rect.right - (parseFloat(style.borderRightWidth) || 0) * scale};
+  });
+  const left = Math.max(...clips.map(clip => clip.left)), right = Math.min(...clips.map(clip => clip.right));
+  return !lines.some(rect => rect.right > left && rect.left < right);
 }
 
 function isVisible(el: Element | null): boolean {
@@ -338,20 +565,54 @@ function isVisible(el: Element | null): boolean {
   const cached = collectCache?.visible.get(el);
   if (cached !== undefined) return cached;
 
-  for (let n: Element | null = el; n && n !== document.documentElement; n = n.parentElement) {
+  for (let n: Element | null = el; n && n !== document.documentElement;) {
     if (n.nodeType !== 1) break;
     if (isSelfStyleHidden(n)) {
       collectCache?.visible.set(el, false);
       return false;
     }
+    const parent: Element | null = n.parentElement;
+    // Light DOM without a matching slot is fallback data, not rendered text.
+    // Walk the composed ancestry so hidden hosts/slots also hide shadow prose.
+    if (parent?.shadowRoot && !(n as HTMLElement).assignedSlot) {
+      collectCache?.visible.set(el, false);
+      return false;
+    }
+    if (parent instanceof HTMLSlotElement && parent.assignedNodes().length) {
+      collectCache?.visible.set(el, false);
+      return false;
+    }
+    const root = n.getRootNode();
+    n = (n as HTMLElement).assignedSlot || parent || (root instanceof ShadowRoot ? root.host : null);
   }
   const d = el.closest('details') as HTMLDetailsElement | null;
   if (d && !d.open && !el.closest('summary')) {
     collectCache?.visible.set(el, false);
     return false;
   }
+  if (sourceClipping(el).boxes.some(isZeroSizeClip)) {
+    collectCache?.visible.set(el, false);
+    return false;
+  }
   collectCache?.visible.set(el, true);
   return true;
+}
+
+/** Live companions share the collector's visibility policy. Use a fresh batch
+ * cache, independent of any cooperative collection currently suspended. */
+export function readSourceVisibility(elements: Iterable<Element>): Map<Element, boolean> {
+  const previous = collectCache;
+  collectCache = newCollectCache();
+  try { return new Map(Array.from(elements, element => [element, isVisible(element)])); }
+  finally { collectCache = previous; }
+}
+
+/** A shadow host's unassigned direct text is not part of its rendered tree. */
+export function isRenderedTextNode(node: Text): boolean {
+  if (!node.isConnected) return true;
+  const parent = node.parentElement;
+  if (parent instanceof HTMLSlotElement && parent.assignedNodes().length) return false;
+  return (!parent?.shadowRoot || node.assignedSlot !== null) && !isIndentedTextClipped(node);
 }
 
 function inViewport(el: Element | null): boolean {
@@ -383,7 +644,18 @@ function underDone(el: Element | null): boolean {
 function leafTextContent(el: Element): string {
   let raw = '';
   for (let n = el.firstChild; n; n = n.nextSibling) {
-    if (n.nodeType === 3) raw += (n as Text).nodeValue ?? '';
+    if (n.nodeType === 3 && isRenderedTextNode(n as Text)) raw += (n as Text).nodeValue ?? '';
+  }
+  return normalizeRenderedText(el, raw);
+}
+
+/** Keep paragraph breaks when CSS makes source newlines visible. */
+function normalizeRenderedText(el: Element, raw: string): string {
+  if (/[\r\n]/.test(raw)) {
+    const whiteSpace = getComputedStyle(el).whiteSpace;
+    if (/^(pre|pre-wrap|pre-line|break-spaces)$/.test(whiteSpace)) {
+      return raw.replace(/\r\n?/g, '\n').replace(/[^\S\n]+/g, ' ').trim();
+    }
   }
   return raw.replace(/\s+/g, ' ').trim();
 }
@@ -392,7 +664,7 @@ function extractText(el: Element, nav = false): string {
   const vis = nav ? isVisible : inViewport;
   // Common case on article / perf pages: a block with only text nodes.
   if (!el.firstElementChild) {
-    if (underDone(el) || el.closest(OURS_SEL) || el.closest(EDITABLE)) return '';
+    if (inNonProse(el) || underDone(el) || el.closest(OURS_SEL) || el.closest(EDITABLE)) return '';
     if (!vis(el)) return '';
     return leafTextContent(el);
   }
@@ -401,7 +673,8 @@ function extractText(el: Element, nav = false): string {
   const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
     acceptNode(n) {
       const p = (n as Text).parentElement;
-      if (!p || !el.contains(p) || NO_TEXT.has(p.tagName)) return NodeFilter.FILTER_REJECT;
+      if (!p || !el.contains(p) || NO_TEXT.has(p.tagName) || inNonProse(p)) return NodeFilter.FILTER_REJECT;
+      if (!isRenderedTextNode(n as Text)) return NodeFilter.FILTER_REJECT;
       // DONE hosts keep their original text nodes; rejecting them stops a parent
       // (e.g. <li>) from being re-collected after a child <a> was translated.
       if (underDone(p) || p.closest(OURS_SEL) || p.closest(EDITABLE)) return NodeFilter.FILTER_REJECT;
@@ -410,12 +683,12 @@ function extractText(el: Element, nav = false): string {
     },
   });
   for (let n = w.nextNode(); n; n = w.nextNode()) out.push((n as Text).nodeValue ?? '');
-  return out.join('').replace(/\s+/g, ' ').trim();
+  return normalizeRenderedText(el, out.join(''));
 }
 
-function skip(el: Element | null, nav = false): boolean {
-  if (!el || NO_TEXT.has(el.tagName)) return true;
-  if (!(nav ? isVisible(el) : inViewport(el)) || inSkip(el)) return true;
+function skip(el: Element | null, nav = false, allowEscaped = false): boolean {
+  if (!el || NO_TEXT.has(el.tagName) || inNonProse(el)) return true;
+  if (!(nav ? isVisible(el) : inViewport(el)) && !(allowEscaped && hasEscapedPositionedText(el)) || inSkip(el)) return true;
   if (el.closest(EDITABLE)) return true;
   if (el.closest(`[${DONE}], .${CLS_BLOCK}, .${CLS_ERR}`)) return true;
   return false;
@@ -501,15 +774,77 @@ function isBlockLink(el: Element): boolean {
 
 function hasInteractiveDescendant(el: Element, nav = false): boolean {
   if (!el?.querySelectorAll) return false;
+  if (hasTranslatedBoundary(el) || hasComposedBoundary(el) || hasCodeBlock(el, collectCache?.codeBoundary)
+    || hasIndependentTextColumns(el) || hasEscapedPositionedText(el)) return true;
   for (const c of Array.from(el.querySelectorAll(INTERACTIVE))) {
     if (c === el || !isVisible(c)) continue;
     // A DONE interactive still owns its text — treat it as covering the host so
     // parents are not re-collected after the child was translated.
     if (c.hasAttribute(DONE) || underDone(c)) return true;
-    if (skip(c, nav) || c.closest(OURS_SEL)) continue;
+    if (c.closest(OURS_SEL)) continue;
+    // Buttons/inputs are excluded as translation hosts, but still own their
+    // nested labels. A parent must not combine several controls into one unit.
+    if (NO_TEXT.has(c.tagName)) return true;
+    if (skip(c, nav)) continue;
     return true;
   }
   return false;
+}
+
+/** An escaped text box owns its painted position. A zero-sized wrapper must
+ * not consume it into a companion that would be mounted inside that wrapper. */
+function hasEscapedPositionedText(el: Element): boolean {
+  const cached = collectCache?.positionedBoundary.get(el);
+  if (cached !== undefined) return cached;
+  const parentEscape = sourceClipping(el).escapedZero;
+  const result = Array.from(el.children).some(child => !isOursElement(child) && !NO_TEXT.has(child.tagName)
+    && !inNonProse(child) && (sourceClipping(child).escapedZero && sourceClipping(child).escapedZero !== parentEscape
+      && isVisible(child) && !!child.textContent?.trim()
+      || hasEscapedPositionedText(child)));
+  collectCache?.positionedBoundary.set(el, result);
+  return result;
+}
+
+/** Incremental parent scans must not consume already processed source slots,
+ * including visible rich replacements that no longer have a companion class. */
+function hasTranslatedBoundary(el: Element): boolean {
+  const cached = collectCache?.translatedBoundary.get(el);
+  if (cached !== undefined) return cached;
+  const boundary = !!el.firstElementChild && !!el.querySelector(`[${DONE}]`);
+  collectCache?.translatedBoundary.set(el, boundary);
+  return boundary;
+}
+
+/** Multiple textual flex items already own independent layout columns. Keep
+ * their parents and direct-child selectors by collecting each column in place. */
+function hasIndependentTextColumns(el: Element): boolean {
+  const cached = collectCache?.textColumns.get(el);
+  if (cached !== undefined) return cached;
+  let result = false;
+  if (el.children.length >= 2 && !Array.from(el.childNodes).some(node =>
+    node.nodeType === Node.TEXT_NODE && !!node.nodeValue?.trim(),
+  )) {
+    const style = getComputedStyle(el);
+    if ((style.display === 'flex' || style.display === 'inline-flex')
+      && !style.flexDirection.startsWith('column') && !isCompactControlHost(el)) {
+      result = Array.from(el.children).filter(child => !isOursElement(child)
+        && !NO_TEXT.has(child.tagName) && !inNonProse(child)
+        && !!child.textContent?.trim() && isVisible(child)).length >= 2;
+    }
+  }
+  collectCache?.textColumns.set(el, result);
+  return result;
+}
+
+/** Light-DOM text does not describe a custom element's shadow contents. Never
+ * combine that independent subtree into a plain/rich replacement container. */
+export function hasComposedBoundary(el: Element): boolean {
+  const cached = collectCache?.composedBoundary.get(el);
+  if (cached !== undefined) return cached;
+  const boundary = !!el.shadowRoot || el instanceof HTMLSlotElement
+    || Array.from(el.children).some(child => !isOursElement(child) && hasComposedBoundary(child));
+  collectCache?.composedBoundary.set(el, boundary);
+  return boundary;
 }
 
 function isInlineLink(el: Element): boolean {
@@ -522,11 +857,11 @@ export function collectVisibleTextNodes(root: Element, nav = false): Text[] {
   const vis = nav ? isVisible : inViewport;
   // Leaf hosts: avoid TreeWalker setup for the common single-text-node case.
   if (!root.firstElementChild) {
-    if (underDone(root) || root.closest(OURS_SEL) || root.closest(EDITABLE)) return [];
+    if (inNonProse(root) || underDone(root) || root.closest(OURS_SEL) || root.closest(EDITABLE)) return [];
     if (!vis(root)) return [];
     const nodes: Text[] = [];
     for (let n = root.firstChild; n; n = n.nextSibling) {
-      if (n.nodeType === 3 && (n as Text).nodeValue?.trim()) nodes.push(n as Text);
+      if (n.nodeType === 3 && isRenderedTextNode(n as Text) && (n as Text).nodeValue?.trim()) nodes.push(n as Text);
     }
     return nodes;
   }
@@ -534,7 +869,8 @@ export function collectVisibleTextNodes(root: Element, nav = false): Text[] {
   const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
     acceptNode(n) {
       const p = (n as Text).parentElement;
-      if (!p || !root.contains(p) || NO_TEXT.has(p.tagName)) return NodeFilter.FILTER_REJECT;
+      if (!p || !root.contains(p) || NO_TEXT.has(p.tagName) || inNonProse(p)) return NodeFilter.FILTER_REJECT;
+      if (!isRenderedTextNode(n as Text)) return NodeFilter.FILTER_REJECT;
       if (underDone(p) || p.closest(OURS_SEL) || p.closest(EDITABLE)) return NodeFilter.FILTER_REJECT;
       if (!vis(p) || !(n as Text).nodeValue?.trim()) return NodeFilter.FILTER_REJECT;
       return NodeFilter.FILTER_ACCEPT;
@@ -554,9 +890,10 @@ export function collectSlotTextNodes(root: Element): Text[] {
   const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
     acceptNode(n) {
       const p = (n as Text).parentElement;
-      if (!p || !root.contains(p) || NO_TEXT.has(p.tagName)) return NodeFilter.FILTER_REJECT;
+      if (!p || !root.contains(p) || NO_TEXT.has(p.tagName) || inNonProse(p)) return NodeFilter.FILTER_REJECT;
+      if (!isRenderedTextNode(n as Text)) return NodeFilter.FILTER_REJECT;
       if (p.closest(OURS_SEL) || p.closest(EDITABLE)) return NodeFilter.FILTER_REJECT;
-      if (isA11y(p)) return NodeFilter.FILTER_REJECT;
+      if (isA11yHidden(p)) return NodeFilter.FILTER_REJECT;
       if (!(n as Text).nodeValue?.trim()) return NodeFilter.FILTER_REJECT;
       return NodeFilter.FILTER_ACCEPT;
     },
@@ -567,7 +904,7 @@ export function collectSlotTextNodes(root: Element): Text[] {
 
 /** Text-node slots under a host, in document order (NO_TEXT parents skipped). */
 export function extractRichSlots(el: Element): string[] {
-  return collectSlotTextNodes(el).map((n) => (n.nodeValue ?? '').replace(/\s+/g, ' ').trim()).filter(Boolean);
+  return collectSlotTextNodes(el).map(n => normalizeRenderedText(n.parentElement || el, n.nodeValue ?? '')).filter(Boolean);
 }
 
 // Text-node level dedup: an element overlaps an existing unit when ANY of the
@@ -593,7 +930,8 @@ function collectTextSegments(root: Element, nav = false): Segment[] {
   const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
     acceptNode(n) {
       const p = (n as Text).parentElement;
-      if (!p || !root.contains(p) || NO_TEXT.has(p.tagName)) return NodeFilter.FILTER_REJECT;
+      if (!p || !root.contains(p) || NO_TEXT.has(p.tagName) || inNonProse(p)) return NodeFilter.FILTER_REJECT;
+      if (!isRenderedTextNode(n as Text)) return NodeFilter.FILTER_REJECT;
       if (p.closest(INTERACTIVE)) return NodeFilter.FILTER_REJECT;
       if (underDone(p) || p.closest(OURS_SEL) || p.closest(EDITABLE)) return NodeFilter.FILTER_REJECT;
       if (!vis(p) || !(n as Text).nodeValue?.trim()) return NodeFilter.FILTER_REJECT;
@@ -629,7 +967,7 @@ function collectTextSegments(root: Element, nav = false): Segment[] {
   }
 
   return Array.from(byAnchor.values())
-    .map((s) => ({ anchor: s.anchor, nodes: s.nodes, text: s.text.replace(/\s+/g, ' ').trim(), key: s.nodes[0] as Text }))
+    .map((s) => ({ anchor: s.anchor, nodes: s.nodes, text: normalizeRenderedText(s.anchor, s.text), key: s.nodes[0] as Text }))
     .filter((s) => okText(s.text));
 }
 
@@ -640,7 +978,7 @@ function collectTextSegments(root: Element, nav = false): Segment[] {
 const RICH_MARKUP =
   'a[href], code, kbd, var, samp, strong, b, em, i, mark, sup, sub, abbr, cite, q';
 const RICH_BLOCKING =
-  'button, label, summary, input, select, textarea, img, video, audio, iframe';
+  'button, label, summary, input, select, textarea, img, video, audio, iframe, [role="button"], [role="menuitem"], [role="tab"], [role="switch"], [role="option"]';
 
 function hasRichMarkup(el: Element): boolean {
   return !!el.querySelector(RICH_MARKUP);
@@ -660,9 +998,12 @@ function tryCollectRichUnit(
   seen: Set<Node>,
   units: TranslationUnit[],
   nav = false,
+  kindOverride?: UnitKind,
 ): boolean {
   if (nav || inNav(host)) return false;
-  if (hasRichBlocking(host) || !hasRichMarkup(host)) return false;
+  if (hasRichBlocking(host) || !hasRichMarkup(host) || hasComposedBoundary(host)
+    || hasCodeBlock(host, collectCache?.codeBoundary) || hasIndependentTextColumns(host) || hasTranslatedBoundary(host)
+    || hasEscapedPositionedText(host)) return false;
   if (seen.has(host) || textCovered(host, seen, nav)) return false;
 
   const slots = extractRichSlots(host);
@@ -681,7 +1022,7 @@ function tryCollectRichUnit(
   units.push({
     el: host as HTMLElement,
     text,
-    kind: classifyKind(host, text),
+    kind: kindOverride ?? classifyKind(host, text),
     rich: { slots },
   });
   return true;
@@ -695,15 +1036,19 @@ function collectMixedContentUnits(
 ): void {
   for (const seg of collectTextSegments(host, nav)) {
     if (seen.has(seg.key)) continue;
+    // A media/control sibling can disqualify the outer block while a nested
+    // caption remains ordinary rich prose. Keep that caption and its links
+    // together rather than merging only its non-link text runs.
+    if (seg.anchor !== host && tryCollectRichUnit(seg.anchor, seen, units, nav, 'block')) continue;
     for (const n of seg.nodes) seen.add(n);
-    // Immersive-style: mount as an inline suffix inside the text host.
-    // `segment` still steers replace-mode to stashAndReplaceText; bilingual
-    // uses `inner` so we never insert a block afterend sibling of a <span>.
+    // Segment ownership affects replacement, not visual layout. A short block
+    // caption next to media still needs a separate, wrapping translation row;
+    // controls and inline credit labels retain their compact classification.
     units.push({
       el: seg.anchor,
       nodes: seg.nodes,
       text: seg.text,
-      kind: nav || seg.text.length <= INLINE_MAX ? 'inner' : 'block',
+      kind: nav ? 'inner' : classifyKind(seg.anchor, seg.text),
       segment: true,
     });
   }
@@ -732,6 +1077,10 @@ function classifyKind(el: Element, text: string): UnitKind {
   // Compact nav CTAs still receive nowrap protection in the renderer.
   if (inNav(el) || isPageNavRegion(el)) return 'nav';
 
+  // Ellipsis is a source truncation policy, rather than evidence of a compact
+  // control. Keep that source line intact and let translated prose wrap below.
+  if (isEllipsizedTextHost(el)) return 'block';
+
   // Semantic controls take precedence over layout. Painted links and prose
   // cards both commonly use display:flex/grid; a block companion inside the
   // former takes a full flex row and can squeeze its label into a glyph stack.
@@ -752,9 +1101,16 @@ function classifyKind(el: Element, text: string): UnitKind {
   // returned 'nav' above.
   if (el.matches('li, [role="listitem"]')) return 'block';
 
-  // Definition descriptions are prose; short terms/cells/captions stay compact.
+  // Descriptions and captions are prose; short terms/data cells stay compact.
   if (el.matches('dd')) return 'block';
-  if (el.matches('dt, th, td, figcaption, caption') && len <= INLINE_MAX) return 'inline';
+  if (el.matches('figcaption, caption')) return 'block';
+  // Structured cells already put their source in a block (often clipped or
+  // ellipsized). Give the companion its own row inside the cell, outside that
+  // source-only clipping box. Plain short data/header cells stay inline.
+  if (el.matches('td, th') && Array.from(el.children).some(child => isBlockLikeLayout(child))) {
+    return 'block';
+  }
+  if (el.matches('dt, th, td') && len <= INLINE_MAX) return 'inline';
 
   // Block-layout hosts (including short card titles) prefer an aligned newline.
   if (isBlockLikeLayout(el) && !el.matches('dt, th, td, figcaption, caption')) {
@@ -811,7 +1167,7 @@ function collectPasses(
   seen: Set<Node>,
 ): void {
   for (const el of matchAll(scope, BLOCKS)) {
-    if (inNav(el) || skip(el) || hasChildBlock(el)) continue;
+    if (inNav(el) || skip(el, false, true) || hasChildBlock(el)) continue;
     if (tryCollectRichUnit(el, seen, units, false)) continue;
     if (hasInteractiveDescendant(el, false)) {
       collectMixedContentUnits(el, seen, units);
@@ -841,7 +1197,7 @@ function collectPasses(
   }
 
   for (const el of matchAll(scope, 'span, div')) {
-    if (inNav(el) || inSkip(el) || skip(el) || hasChildBlock(el) || seen.has(el)) continue;
+    if (inNav(el) || inSkip(el) || skip(el, false, true) || hasChildBlock(el) || seen.has(el)) continue;
     if (el.matches(BLOCKS)) continue;
     if (tryCollectRichUnit(el, seen, units, false)) continue;
     if (hasInteractiveDescendant(el, false)) {
@@ -923,6 +1279,9 @@ export interface CollectUnitsAsyncOptions {
   /** Soft CPU budget per turn before yielding (ms). Default 12. */
   budgetMs?: number;
   signal?: AbortSignal;
+  /** Called for each new unit before any yield can separate its request text
+   * from the source identities/values used by the caller's stale-work guard. */
+  onCollected?: (unit: TranslationUnit) => void;
 }
 
 export interface CollectUnitsAsyncResult {
@@ -951,8 +1310,13 @@ export async function collectUnitsAsync(
   let cpuMs = 0;
   let sliceCpu = 0;
   let sliceMark = performance.now();
+  let captured = 0;
 
   const bump = async (): Promise<void> => {
+    while (captured < units.length) {
+      const unit = units[captured++];
+      options.onCollected?.(unit);
+    }
     if (signal?.aborted) {
       throw new DOMException('collectUnitsAsync aborted', 'AbortError');
     }
@@ -981,7 +1345,7 @@ export async function collectUnitsAsync(
   };
 
   await runPass([...matchAll(scope, BLOCKS)], (el) => {
-    if (inNav(el) || skip(el) || hasChildBlock(el)) return;
+    if (inNav(el) || skip(el, false, true) || hasChildBlock(el)) return;
     if (tryCollectRichUnit(el, seen, units, false)) return;
     if (hasInteractiveDescendant(el, false)) {
       collectMixedContentUnits(el, seen, units);
@@ -1011,7 +1375,7 @@ export async function collectUnitsAsync(
   });
 
   await runPass([...matchAll(scope, 'span, div')], (el) => {
-    if (inNav(el) || inSkip(el) || skip(el) || hasChildBlock(el) || seen.has(el)) return;
+    if (inNav(el) || inSkip(el) || skip(el, false, true) || hasChildBlock(el) || seen.has(el)) return;
     if (el.matches(BLOCKS)) return;
     if (tryCollectRichUnit(el, seen, units, false)) return;
     if (hasInteractiveDescendant(el, false)) {

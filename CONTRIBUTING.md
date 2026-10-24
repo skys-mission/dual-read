@@ -17,7 +17,7 @@ Thanks for helping improve Dual Read—an open-source, self-hostable bilingual w
 ### Prerequisites
 
 - Node.js **22+** (CI uses 22)
-- Go **1.25.12+** (see `server/go.mod` toolchain)
+- Go **1.26.10+** (see `server/go.mod` toolchain)
 - Make (optional but convenient)
 
 ### Extension
@@ -49,6 +49,12 @@ npx playwright install --with-deps chromium firefox
 npx playwright test --project=chromium-ext
 npx playwright test --project=firefox-ext
 ```
+
+CI runs each browser project in eight test-level shards with one worker per
+runner. To reproduce one shard locally, use
+`CI=1 npx playwright test --project=chromium-ext --shard=1/8` (or `firefox-ext`).
+The `Extension (WXT / TypeScript)` check requires the build and all sixteen shards
+to pass; failed shards upload their Playwright traces.
 
 ### Server
 
@@ -88,6 +94,29 @@ Prefer short imperative subjects focused on **why**:
 - `fix(extension): avoid reinject tearing down retry sessions`
 - `feat(server): expose shadowRoots on PageResult`
 - `docs: add privacy and security policies`
+
+### DOM restoration changes
+
+For a collector/renderer/session fix, establish the restoration contract before
+editing production code: which node owns each source, which wrappers are omitted,
+which page edits must survive, and what the available mutation records cannot
+prove. Keep ambiguous ownership fallbacks separate from complete recovery claims.
+
+- Reproduce on the pre-fix source and record the expected text, original/new node
+  identities, order, attributes and removals. Derive expectations from page
+  operations, independently of renderer matching and restoration helpers.
+- Cross the affected structure with neighboring operations. For ordering, include
+  ordinary, omitted, nested and multiple containers; permutations followed by
+  insertion, replacement, deletion, wrapping and transfer. For text provenance,
+  include split/normalize, edits on either side, empty and equal-valued slots.
+- Exercise deferred and delivered mutation records, watching and paused sessions,
+  repeated restoration and a mode switch. Run representative cases through normal
+  collection on freshly built Chromium and Firefox artifacts; direct renderer
+  tests alone do not establish session behavior.
+- When another review finds an issue, compare against a saved pre-fix version or
+  HEAD to distinguish a new regression from an uncovered boundary. Report the
+  tested contract and remaining limits alongside suite results; a larger passing
+  test count does not establish coverage of a different structure/operation pair.
 
 ## Code layout
 

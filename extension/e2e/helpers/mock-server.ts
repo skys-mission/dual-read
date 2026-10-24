@@ -49,6 +49,7 @@ export interface MockServer {
   setTranslator(fn: TranslateFn): void;
   setResponseDelay(ms: number): void;
   getRequestCount(): number;
+  getSystemPrompts(): string[];
   close(): Promise<void>;
 }
 
@@ -65,6 +66,7 @@ export async function startMockServer(): Promise<MockServer> {
   let translate: TranslateFn = (source) => `译:${source}`;
   let responseDelayMs = 0;
   let requestCount = 0;
+  const systemPrompts: string[] = [];
 
   const server = http.createServer((req, res) => {
     const url = new URL(req.url || '/', 'http://127.0.0.1');
@@ -111,6 +113,7 @@ export async function startMockServer(): Promise<MockServer> {
               messages?: { role?: string; content?: string }[];
             };
             const user = body.messages?.find((m) => m.role === 'user')?.content ?? '{}';
+            systemPrompts.push(body.messages?.find((m) => m.role === 'system')?.content ?? '');
             indexed = JSON.parse(user) as Record<string, string>;
           } catch {
             indexed = {};
@@ -191,6 +194,9 @@ export async function startMockServer(): Promise<MockServer> {
     },
     getRequestCount() {
       return requestCount;
+    },
+    getSystemPrompts() {
+      return [...systemPrompts];
     },
     async close() {
       await Promise.all([forceClose(server), forceClose(barrier)]);

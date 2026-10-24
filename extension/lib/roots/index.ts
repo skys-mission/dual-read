@@ -7,6 +7,10 @@
  * - Cross-origin / opaque frames are reported honestly as unsupported barriers.
  */
 
+import { ensureTranslationStyles } from '../renderer/styles';
+import { composedContains, getShadowRoot } from '../dom-tree';
+export { getShadowRoot } from '../dom-tree';
+
 export type WatchRoot = Document | ShadowRoot | Element;
 
 export interface FrameBarrier {
@@ -21,20 +25,6 @@ export interface RootDiagnostics {
     crossOrigin: number;
     opaque: number;
   };
-}
-
-/** Prefer open shadowRoot; fall back to chrome.dom.openOrClosedShadowRoot when present. */
-export function getShadowRoot(el: Element): ShadowRoot | null {
-  if (el.shadowRoot) return el.shadowRoot;
-  try {
-    const openOrClosed = chrome?.dom?.openOrClosedShadowRoot;
-    if (typeof openOrClosed === 'function' && el instanceof HTMLElement) {
-      return openOrClosed(el) ?? null;
-    }
-  } catch {
-    /* API absent or denied */
-  }
-  return null;
 }
 
 /** Depth-first walk of open (or feature-detected) shadow roots under `scope`. */
@@ -137,13 +127,25 @@ export class RootRegistry {
   /** Watch a root if not already watched. Returns true when newly added. */
   watch(root: WatchRoot): boolean {
     if (this.disposed || this.watchers.has(root)) return false;
+    ensureTranslationStyles(root);
     const mo = new MutationObserver((mutations) => {
       if (this.disposed) return;
       const newly = this.discoverFromMutations(mutations);
       if (newly.length) this.onRootsChanged?.(newly);
       this.onMutations(mutations, root);
     });
-    mo.observe(root, { childList: true, subtree: true, characterData: true });
+    const attributes: MutationObserverInit = {
+      attributes: true, attributeOldValue: true,
+      attributeFilter: ['hidden', 'aria-hidden', 'open', 'class', 'style'],
+    };
+    mo.observe(root, {
+      childList: true, subtree: true, characterData: true, ...attributes,
+    });
+    // Inherited visibility variables/themes often live on <html>. Observe
+    // only its own attributes, retaining body as the indexed content scope.
+    if (root instanceof Element && root === root.ownerDocument.body && root.ownerDocument.documentElement) {
+      mo.observe(root.ownerDocument.documentElement, attributes);
+    }
     this.watchers.set(root, mo);
     return true;
   }
@@ -173,6 +175,26 @@ export class RootRegistry {
       if (this.watch(sr)) added.push(sr);
     }
     return added;
+  }
+
+  /** Visibility attributes outside a shadow tree do not mutate that tree.
+   * Revisit only affected existing roots and slot assignments, including nested
+   * shadows and assigned light DOM that ordinary subtree collection cannot see. */
+  affectedComposedScopes(mutations: MutationRecord[]): WatchRoot[] {
+    const boxes = mutations.flatMap(mutation => mutation.type === 'attributes' && mutation.target instanceof Element ? [mutation.target] : []);
+    const scopes = new Set<WatchRoot>();
+    for (const root of this.watchers.keys()) {
+      if (!(root instanceof ShadowRoot) || !root.host.isConnected) continue;
+      if (boxes.some(box => composedContains(box, root.host))) scopes.add(root);
+      for (const slot of root.querySelectorAll('slot')) {
+        if (!boxes.some(box => composedContains(box, slot))) continue;
+        for (const node of slot.assignedNodes({ flatten: true })) {
+          const scope = node instanceof Element ? node : node.parentElement;
+          if (scope?.isConnected) scopes.add(scope);
+        }
+      }
+    }
+    return [...scopes];
   }
 
   /** Drop watchers whose root left the document. */

@@ -1,5 +1,6 @@
 import type { PublicSessionConfig, Settings, SiteRule, TranslationMode, TargetLang } from '../types';
-import { providerFingerprint } from './schema';
+import { providerFingerprint, SUPPORTED_TARGET_LANGS } from './schema';
+import { DualReadError } from '../errors';
 import { normalizeTargetLang } from './schema';
 import { effectiveForHost } from './storage';
 
@@ -31,3 +32,17 @@ export async function buildPublicSessionConfig(
 }
 
 export type { SiteRule, TargetLang };
+
+/** Resolve a public batch identity against trusted, device-local credentials. */
+export async function settingsForBatch(
+  settings: Settings,
+  identity: Pick<PublicSessionConfig, 'targetLang' | 'providerFingerprint'>,
+): Promise<Settings> {
+  if (!(SUPPORTED_TARGET_LANGS as readonly unknown[]).includes(identity.targetLang)) {
+    throw new DualReadError('CONFIG_REQUIRED', { detail: 'unsupported translation target' });
+  }
+  if (identity.providerFingerprint !== await providerFingerprint(settings)) {
+    throw new DualReadError('SESSION_CANCELLED', { detail: 'translation provider changed; start a new session' });
+  }
+  return { ...settings, targetLang: identity.targetLang };
+}

@@ -46,8 +46,8 @@ jobs:
           comment-summary-in-pr: always
           fail-on-severity: high
 
-  extension:
-    name: Extension (WXT / TypeScript)
+  extension-build:
+    name: Extension build and unit tests
     runs-on: ubuntu-latest
     timeout-minutes: 35
     defaults:
@@ -62,7 +62,7 @@ jobs:
           cache-dependency-path: extension/package-lock.json
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: '1.25.14'
+          go-version: '1.26.10'
           cache-dependency-path: server/go.sum
       - run: npm ci
       - name: Type-check
@@ -85,12 +85,67 @@ jobs:
         run: |
           chmod +x ./scripts/check-extension-artifacts.sh
           ./scripts/check-extension-artifacts.sh
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium firefox
-      - name: E2E Chromium (popup + translate + DOM lab + perf)
-        run: npx playwright test --project=chromium-ext
-      - name: E2E Firefox (addon load + translate main path)
-        run: npx playwright test --project=firefox-ext
+      - name: Upload browser builds
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: extension-builds
+          path: extension/output/
+          if-no-files-found: error
+
+  extension-e2e:
+    name: E2E ${{ matrix.browser }} (${{ matrix.shard }}/8)
+    needs: extension-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox]
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+    defaults:
+      run:
+        working-directory: extension
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.10'
+          cache-dependency-path: server/go.sum
+      - run: npm ci
+      - name: Download browser builds
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: extension-builds
+          path: extension/output/
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+      - name: E2E
+        run: npx playwright test --project=${{ matrix.browser }}-ext --shard=${{ matrix.shard }}/8
+      - name: Upload failure traces
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: e2e-${{ matrix.browser }}-${{ matrix.shard }}
+          path: extension/test-results/
+          if-no-files-found: ignore
+
+  extension:
+    name: Extension (WXT / TypeScript)
+    if: always()
+    needs: [extension-build, extension-e2e]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require build and every browser shard
+        env:
+          BUILD_RESULT: ${{ needs.extension-build.result }}
+          E2E_RESULT: ${{ needs.extension-e2e.result }}
+        run: test "$BUILD_RESULT" = success && test "$E2E_RESULT" = success
 
   server:
     name: Server (Go)
@@ -115,7 +170,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: '1.25.14'
+          go-version: '1.26.10'
           cache-dependency-path: server/go.sum
       - name: Vet
         run: go vet ./...
@@ -161,7 +216,7 @@ jobs:
           cache-dependency-path: extension/package-lock.json
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: '1.25.14'
+          go-version: '1.26.10'
           cache-dependency-path: server/go.sum
       - name: Install extension deps (for npm sbom)
         working-directory: extension

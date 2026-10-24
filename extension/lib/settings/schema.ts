@@ -4,6 +4,10 @@ import type {
 } from '../types';
 import { PROMPT_VERSION } from '../provider/version';
 
+// Extension CSP forbids dynamic code generation, including Zod's JIT parser.
+// Configure this before constructing schemas, also in the DevTools probe bundle.
+z.config({ jitless: true });
+
 export const SUPPORTED_TARGET_LANGS = ['zh-CN', 'en', 'ru', 'es', 'fr'] as const;
 export const SUPPORTED_UI_LOCALES = ['en', 'zh-CN', 'zh-TW', 'ru', 'es', 'fr'] as const;
 export const SETTINGS_SCHEMA_VERSION = 4 as const;
@@ -193,8 +197,10 @@ export function assertSecureApiBase(raw: string): string {
   throw new SettingsValidationError('API_BASE_INSECURE');
 }
 
-const targetLangSchema = z.unknown().transform((v) => normalizeTargetLang(v));
-const uiLocaleSchema = z.unknown().transform((v) => normalizeUiLocale(v));
+// Zod 4 requires unknown object fields unless explicitly marked optional.
+// Keep missing language fields flowing through their existing normalizers.
+const targetLangSchema = z.unknown().optional().transform((v) => normalizeTargetLang(v));
+const uiLocaleSchema = z.unknown().optional().transform((v) => normalizeUiLocale(v));
 const connectionModeSchema = z.enum(['direct', 'proxy']).catch('direct').default('direct');
 
 export const settingsSchema = z.object({

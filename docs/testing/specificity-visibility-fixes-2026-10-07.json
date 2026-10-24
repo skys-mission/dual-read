@@ -1,0 +1,501 @@
+{
+  "date": "2026-10-07",
+  "scope": {
+    "baselineHead": "995498672da7fdbddf4e00f21224ba6cfabf0163",
+    "baseline": "Frozen uncommitted source from review-2026-10-07-cascade-specificity",
+    "beforeFiles": 70,
+    "afterFiles": 71,
+    "productionInputs": [
+      "extension/lib/collector/index.ts",
+      "extension/lib/renderer/source-layout-policy.ts",
+      "extension/package.json",
+      "extension/package-lock.json",
+      "extension/lib/renderer/selector-specificity.ts"
+    ],
+    "productionModules": 3,
+    "domainRulesAdded": false,
+    "packagedCssChanged": false,
+    "permissionsChanged": false,
+    "stagedOrCommitted": false
+  },
+  "fixes": [
+    {
+      "issue": "Identical declarations hid changes in the effective specificity of matching rules and selector-list arms.",
+      "solution": "Parse selector syntax with cached standard libraries; re-evaluate matching arms against current DOM and fingerprint relative specificity among declarations competing within the same property, importance and layer.",
+      "checks": [
+        "State change and ID/list-arm changes retire 50px panel / 220px image corrections.",
+        "Equal-specificity state rules, reordered lists and increased scores with unchanged precedence retain stable corrections.",
+        "Functional pseudo-classes, escaped identifiers, attribute commas and namespaces are checked against native browser cascades."
+      ],
+      "parsingBudget": {
+        "maxSelectorLength": 16384,
+        "maxNestingDepth": 64
+      }
+    },
+    {
+      "issue": "Zero-sized overflow ancestors unconditionally pruned visibly positioned descendants.",
+      "solution": "Separate semantic hiding from clipping, share the composed containing-block chain with negative-indent filtering, and keep escaped source hosts independent of zero-sized wrappers in both synchronous and cooperative collection.",
+      "checks": [
+        "Visible absolute/fixed descendants remain eligible.",
+        "True clipping, padding/border cases, display/visibility/opacity hiding and containing blocks retain their policies.",
+        "Rich markup, links, inline code, shadow sources and assigned slots preserve source ownership."
+      ]
+    }
+  ],
+  "dependencies": {
+    "added": {
+      "@csstools/selector-specificity": "6.0.1",
+      "postcss-selector-parser": "7.1.6"
+    },
+    "runtimeAuditVulnerabilities": 0,
+    "bundleGrowth": {
+      "rawBytes": 66797,
+      "gzipBytes": 16130
+    }
+  },
+  "builds": {
+    "before": {
+      "javascript": "08d9df8d88d207543d4db58ecead6595d7fc3ab96aeb8df7d76121d9e72eec18",
+      "css": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d",
+      "javascriptBytes": 196871,
+      "gzipBytes": 56476
+    },
+    "after": {
+      "javascript": "1597f85bacddc07d31b19a4ea1f5c96cb0cef8515dc1602bc42f528ba0dd5116",
+      "css": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d",
+      "javascriptBytes": 263668,
+      "gzipBytes": 72606
+    }
+  },
+  "validation": {
+    "units": {
+      "passed": 1481,
+      "files": 43,
+      "added": 31
+    },
+    "compile": "passed",
+    "eslint": "passed",
+    "diffCheck": "passed",
+    "browsers": {
+      "chromium": "153.0.8010.12",
+      "firefox": "155.0"
+    },
+    "native": {
+      "passed": 560,
+      "newCases": 96,
+      "existingCases": 464,
+      "projects": {
+        "chromium-ext": 280,
+        "firefox-ext": 280
+      },
+      "stats": {
+        "startTime": "2026-10-07T16:34:10.068Z",
+        "duration": 1571706.875,
+        "expected": 560,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "retries": 0
+    },
+    "performance": {
+      "passed": 8,
+      "full": true,
+      "strict": false,
+      "budgets": "unchanged defaults",
+      "ranAfterAllOtherAutomatedBrowserJobs": true,
+      "stats": {
+        "startTime": "2026-10-07T17:02:45.445Z",
+        "duration": 115126.458,
+        "expected": 8,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      }
+    },
+    "preFixNativeSessions": 40,
+    "sourceComparison": {
+      "sessions": 80,
+      "beforeFailures": 40,
+      "afterCorrect": 40
+    },
+    "selectorMatrix": {
+      "cases": 28,
+      "matchedActualCascade": true
+    }
+  },
+  "restorationContract": {
+    "expectations": "Original identities and child order are captured before rendering; expected edits/removals/transfers derive from explicit page operations.",
+    "operations": [
+      "Text and code edit",
+      "Element insertion",
+      "Paragraph/formatting-host transfer, including shadow-to-document",
+      "Source removal",
+      "Link href edit"
+    ],
+    "crossed": [
+      "Bilingual/replace modes",
+      "Watching/paused sessions",
+      "Deferred/delivered mutation records",
+      "Repeated restoration",
+      "Mode switch"
+    ],
+    "asserted": [
+      "Source identities and current values",
+      "Current child order and transfer parent",
+      "Authored source/image attributes",
+      "Current link href and page removals",
+      "No remaining translation/layout/probe markers"
+    ]
+  },
+  "sampledWebsites": [
+    {
+      "id": "popular-1-2",
+      "site": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Internet",
+      "snapshotHash": "3fd2c78d640b46793422ca3fe5414591093b2c6f6fcd51c8cc18a385e9b39a01",
+      "sourceUnits": 681,
+      "processed": 145,
+      "codeNodes": 0,
+      "views": [
+        {
+          "view": "source-top",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        },
+        {
+          "view": "bilingual-top",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        },
+        {
+          "view": "bilingual-scroll",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        },
+        {
+          "view": "replace-top",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        }
+      ]
+    },
+    {
+      "id": "popular-2-2",
+      "site": "GitHub",
+      "url": "https://github.com/golang/go",
+      "snapshotHash": "ba2bfa899f4e2622fc99840a530f93574537ae6f411853d6c483c3cb7332ec80",
+      "sourceUnits": 118,
+      "processed": 118,
+      "codeNodes": 0,
+      "views": [
+        {
+          "view": "source-top",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        },
+        {
+          "view": "bilingual-top",
+          "overflow": 0,
+          "clips": 2,
+          "squeezed": 1
+        },
+        {
+          "view": "bilingual-scroll",
+          "overflow": 0,
+          "clips": 2,
+          "squeezed": 0
+        },
+        {
+          "view": "replace-top",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        }
+      ]
+    },
+    {
+      "id": "commercial-1-2",
+      "site": "Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/",
+      "snapshotHash": "d3d4c337abec8784d4ae90cfe9302460d23f1a5b6344eca72c5ce62730acea02",
+      "sourceUnits": 65,
+      "processed": 65,
+      "codeNodes": 0,
+      "views": [
+        {
+          "view": "source-top",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        },
+        {
+          "view": "bilingual-top",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        },
+        {
+          "view": "bilingual-scroll",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        },
+        {
+          "view": "replace-top",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        }
+      ]
+    },
+    {
+      "id": "commercial-7-2",
+      "site": "Shopify Developer",
+      "url": "https://shopify.dev/docs/apps/build",
+      "snapshotHash": "51e93ebea106242ace97ae534bc5f55ec41caa667858185226a7e7f8a3c81860",
+      "sourceUnits": 102,
+      "processed": 47,
+      "codeNodes": 0,
+      "views": [
+        {
+          "view": "source-top",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        },
+        {
+          "view": "bilingual-top",
+          "overflow": 0,
+          "clips": 1,
+          "squeezed": 0
+        },
+        {
+          "view": "bilingual-scroll",
+          "overflow": 0,
+          "clips": 1,
+          "squeezed": 0
+        },
+        {
+          "view": "replace-top",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        }
+      ]
+    },
+    {
+      "id": "open_source-1-1",
+      "site": "React",
+      "url": "https://react.dev/",
+      "snapshotHash": "41e0d2a45f86d6dcf4d7b468e661140f08b159d01f8148304482f46db406c9e7",
+      "sourceUnits": 120,
+      "processed": 19,
+      "codeNodes": 500,
+      "views": [
+        {
+          "view": "source-top",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        },
+        {
+          "view": "bilingual-top",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        },
+        {
+          "view": "bilingual-scroll",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        },
+        {
+          "view": "replace-top",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        }
+      ]
+    },
+    {
+      "id": "commercial-8-2",
+      "site": "Stripe Docs",
+      "url": "https://docs.stripe.com/payments/accept-a-payment",
+      "snapshotHash": "5aae0479423333cb7251f5d3aad50f71f51adf2f2c4a4c988d2813ebfef7e7d6",
+      "sourceUnits": 174,
+      "processed": 74,
+      "codeNodes": 257,
+      "views": [
+        {
+          "view": "source-top",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        },
+        {
+          "view": "bilingual-top",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        },
+        {
+          "view": "bilingual-scroll",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        },
+        {
+          "view": "replace-top",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        }
+      ]
+    },
+    {
+      "id": "open_source-2-2",
+      "site": "Vue",
+      "url": "https://vuejs.org/guide/introduction.html",
+      "snapshotHash": "960566fddc87f374d8f41b26d7829e8741b0390c7a87c2fe4c4ae1e174babcc4",
+      "sourceUnits": 149,
+      "processed": 80,
+      "codeNodes": 369,
+      "views": [
+        {
+          "view": "source-top",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        },
+        {
+          "view": "bilingual-top",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        },
+        {
+          "view": "bilingual-scroll",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        },
+        {
+          "view": "replace-top",
+          "overflow": 0,
+          "clips": 0,
+          "squeezed": 0
+        }
+      ]
+    }
+  ],
+  "sampling": {
+    "method": "Live-loaded public page snapshots replayed at original URLs with site scripts disabled; paired inputs verified by HTML hash.",
+    "sites": 7,
+    "pairedScreenshots": 56,
+    "translatedPairsVisuallyInspected": 21,
+    "resolution": {
+      "width": 1920,
+      "height": 1080
+    },
+    "layoutCandidateCountsUnchanged": true,
+    "stripeInnerWheel": {
+      "beforePixels": 900,
+      "afterPixels": 900,
+      "codeNodes": 257
+    }
+  },
+  "iab": {
+    "status": {
+      "count": 19,
+      "failed": 0,
+      "frames": {
+        "crossOrigin": 0,
+        "opaque": 0,
+        "sameOrigin": 0
+      },
+      "perf": {
+        "lastIndexMs": 49.200000166893005,
+        "lastMutationIndexMs": 1.199999988079071
+      },
+      "revision": 1,
+      "sessionId": "iab-0eac4dd7-01bc-4601-a3ef-089dbbab9e36",
+      "shadowRoots": 0,
+      "total": 119,
+      "translating": false,
+      "watching": false
+    },
+    "viewport": {
+      "height": 1080,
+      "scrollY": 900,
+      "width": 1920
+    },
+    "code": {
+      "codeBlocks": 4,
+      "codeTranslationSamples": [],
+      "codeTranslationTargets": 0,
+      "hiddenCodeBlocks": 0,
+      "liveCodeBlocks": 8,
+      "originalCodeNodes": 500,
+      "overwrittenCodeValues": 0,
+      "proseTranslationTargets": 15,
+      "retainedCodeNodes": 500
+    },
+    "restore": {
+      "changedLinks": 0,
+      "changedValues": 1,
+      "orderDifferences": [],
+      "originalNodes": 710,
+      "overwrittenCurrentLinks": 0,
+      "overwrittenCurrentValues": 0,
+      "remainingTargets": 0,
+      "removedByPage": 0,
+      "removedSinceRestoreSnapshot": [],
+      "retainedCurrentOrder": true,
+      "retainedNodes": 710,
+      "sourceOrder": true
+    },
+    "restoreReplace": {
+      "changedLinks": 0,
+      "changedValues": 1,
+      "orderDifferences": [],
+      "originalNodes": 710,
+      "overwrittenCurrentLinks": 0,
+      "overwrittenCurrentValues": 0,
+      "remainingTargets": 0,
+      "removedByPage": 0,
+      "removedSinceRestoreSnapshot": [],
+      "retainedCurrentOrder": true,
+      "retainedNodes": 710,
+      "sourceOrder": true
+    }
+  },
+  "observations": [
+    "All seven snapshot pairs use the same captured HTML input and equal source/processed counts.",
+    "React 500, Vue 369 and Stripe 257 code text nodes remain intact, with zero code translation targets.",
+    "The actual live React page changed one text value during testing; restoration preserved its latest value and all 710 retained source nodes.",
+    "No increased measured document overflow, clipping or squeezing; existing GitHub/Shopify candidates remain."
+  ],
+  "limits": [
+    "Seven page snapshots were sampled; the earlier 70-page audit was not rerun.",
+    "Site scripts were disabled during snapshot replay to avoid upstream hydration/time differences; dynamic behavior is covered by native fixtures and actual in-app React testing.",
+    "Firefox native cases run fresh packaged content through the repository Gecko shim.",
+    "The in-app browser uses temporary production-script injection and retains a paused bilingual preview.",
+    "Existing CSSOM-only event observation and rectangular-geometry limits remain outside this change."
+  ],
+  "sources": [
+    "https://github.com/postcss/postcss-selector-parser",
+    "https://raw.githubusercontent.com/csstools/postcss-plugins/main/packages/selector-specificity/README.md"
+  ],
+  "privateEvidenceDirectory": ".codex/specificity-visibility-fixes-2026-10-07",
+  "security": {
+    "knownCredentialMatches": 0,
+    "privateConfigModes": "0600"
+  }
+}

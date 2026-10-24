@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Stylesheet layout ownership regression</title>
+  <style>
+    body {margin:8px;font:16px/24px sans-serif}
+    .prose-row {display:flex;align-items:center;width:900px;gap:16px}
+    .prose-row > strong {color:rgb(200,0,0);font-size:24px;font-weight:700}
+    .prose-row > a {color:rgb(9,105,218);text-decoration:underline}
+    .panels {display:flex;align-items:flex-start;gap:32px}
+    .panel {width:260px;overflow:hidden}
+    .panel p,#media-copy {margin:0;font:16px/20px sans-serif}
+    .footer-box {position:relative;height:80px;padding-bottom:40px;box-sizing:border-box}
+    .footer {display:flex;align-items:center}
+    #footer-height-box.compact #footer-height {height:calc(100% - 48px)!important}
+    #footer-top-box.compact #footer-top {top:0px!important}
+    #media-row {display:grid;grid-template-columns:260px 260px;width:520px;margin-left:1000px}
+    #photo {display:block;width:auto;height:100%;max-width:none}
+    #media-row.vertical {grid-template-columns:260px;grid-template-rows:auto 220px}
+    #media-row.vertical #photo {height:220px;width:260px;object-fit:cover}
+  </style>
+  <style id="panel-sheet">#variable-panel {height:var(--panel-height,80px)} #variable-panel.closed {height:0px}</style>
+  <style id="media-sheet"></style>
+</head>
+<body>
+  <main>
+    <ul>
+      <li id="prose-rich" class="prose-row">Read the <strong id="strong-rich">important documentation</strong> and <a id="link-rich" href="/guide">the guide</a> carefully.</li>
+      <li id="prose-mixed" class="prose-row">Read the <strong id="strong-mixed">important documentation</strong> and <a id="link-mixed" href="/guide">the guide</a> carefully.<button id="close">Close</button></li>
+    </ul>
+    <div class="panels">
+      <section id="variable-panel" class="panel"><p id="variable-copy">Expansion stylesheet-sized source documentation.</p></section>
+      <section id="footer-height-box" class="panel footer-box"><p>Expansion absolute footer height documentation.</p><div id="footer-height" class="footer" style="position:absolute;top:48px;height:calc(100% - 48px)"><button id="height-action">Read more</button></div></section>
+      <section id="footer-top-box" class="panel footer-box"><p>Expansion absolute footer top documentation.</p><div id="footer-top" class="footer" style="position:absolute;top:48px;height:calc(100% - 48px)"><button id="top-action">Read more</button></div></section>
+    </div>
+    <section id="media-row"><div><p id="media-copy">Expansion responsive media source documentation.</p></div><div id="media"><img id="photo" alt="" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='400'%20height='100'%3E%3Crect%20width='400'%20height='100'%20fill='steelblue'/%3E%3C/svg%3E"></div></section>
+    <section id="receiver"></section>
+    <p id="removed">Page source removed before restoration.</p>
+    <pre id="code"><code>function ProtectedExample() { return 'Do not translate code'; }</code></pre>
+  </main>
+  <script>
+    document.documentElement.style.setProperty('--panel-height','80px');
+    for (const id of ['link-rich','link-mixed','close','height-action','top-action']) {
+      const element = document.getElementById(id);
+      element.addEventListener('click', event => {event.preventDefault();element.dataset.clicked='yes';});
+    }
+  </script>
+</body>
+</html>

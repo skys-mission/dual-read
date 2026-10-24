@@ -1,0 +1,5205 @@
+{
+  "date": "2026-10-07",
+  "preview": false,
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "sourceBefore": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01",
+  "sourceAfter": "df3aaa30a5369fbc33b7f6ec4f216e4e8a69efdc7cbccbb3377dcb2b5a251ddc",
+  "cssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1",
+  "domainRulesAdded": 0,
+  "tests": {
+    "unit": 1305,
+    "browser": 456,
+    "performance": 5
+  },
+  "newRegressionTests": {
+    "unit": 29,
+    "preFixFailures": 27,
+    "preFixPositiveControls": 2,
+    "browser": 32
+  },
+  "sample": {
+    "pages": 8,
+    "restores": 16,
+    "codeBlocks": 48,
+    "codeNodes": 2014,
+    "buildHash": "df3aaa30a5369fbc33b7f6ec4f216e4e8a69efdc7cbccbb3377dcb2b5a251ddc",
+    "passed": true,
+    "noAddedOverflowClippingOrSqueeze": true,
+    "baselineFollowup": {
+      "site": "GitHub",
+      "reason": "Live navigation DOM variant changed; reran frozen pre-fix build to compare the same hidden label structure.",
+      "initialBaseline": {
+        "clips": 0,
+        "squeezed": 0
+      },
+      "repeatedBaseline": {
+        "clips": 2,
+        "squeezed": 1
+      },
+      "sameAsCurrent": true,
+      "beforeHash": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01"
+    }
+  },
+  "repairScope": {
+    "productionFiles": [
+      "extension/lib/renderer/index.ts",
+      "extension/lib/renderer/layout-updates.ts",
+      "extension/lib/renderer/media-layout.ts",
+      "extension/lib/renderer/source-typography.ts",
+      "extension/lib/roots/index.ts",
+      "extension/lib/scheduler/session.ts"
+    ],
+    "packagedCssUnchanged": true,
+    "domainRulesAdded": false,
+    "serverFilesChanged": false,
+    "beforeHash": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01",
+    "afterHash": "df3aaa30a5369fbc33b7f6ec4f216e4e8a69efdc7cbccbb3377dcb2b5a251ddc",
+    "firefoxHash": "df3aaa30a5369fbc33b7f6ec4f216e4e8a69efdc7cbccbb3377dcb2b5a251ddc",
+    "cssHash": "9ca48e02d9c847da6de93fcbf6cc1ea428e85c861eb6adcd3be049d9b6d8a7a1"
+  },
+  "repairs": [
+    {
+      "issue": "替换模式高度清理",
+      "change": "按实际替换节点释放高度规则；共享容器保留其他译文的有效约束。"
+    },
+    {
+      "issue": "组件显示与插槽",
+      "change": "只重新索引显示变化影响的已有 ShadowRoot 与插槽正文，相邻组件保持原有译文。"
+    },
+    {
+      "issue": "动态文字样式",
+      "change": "跟随源样式、data 属性主题和样式表变化；仅写入确实改变的自有属性，保留页面覆盖。"
+    },
+    {
+      "issue": "图片上下文变化",
+      "change": "换源、转移、定位或原始尺寸样式变化后，撤销失效的自有约束，保留页面当前设置。"
+    }
+  ],
+  "verifiedFixes": [
+    {
+      "engine": "chromium",
+      "checks": {
+        "shadowBothModes": true,
+        "boundedReplacement": true,
+        "themeColor": true,
+        "mediaContract": true,
+        "pageErrorsZero": true,
+        "viewport16by9": true
+      }
+    },
+    {
+      "engine": "firefox",
+      "checks": {
+        "shadowBothModes": true,
+        "boundedReplacement": true,
+        "themeColor": true,
+        "mediaContract": true,
+        "pageErrorsZero": true,
+        "viewport16by9": true
+      }
+    }
+  ],
+  "reproductions": {
+    "chromium": {
+      "before": {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "shadowHideReveal": {
+          "bilingual": {
+            "initial": {
+              "status": {
+                "translating": false,
+                "count": 2,
+                "failed": 0,
+                "total": 2,
+                "watching": true,
+                "sessionId": "followup-chromium-before-bilingual-0.13157072232485212",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1.7999999523162842,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "shadowTargets": 1,
+              "controlTargets": 1,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation.译:Visible component documentation."
+            },
+            "hidden": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-chromium-before-bilingual-0.13157072232485212",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1.7999999523162842,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "shadowTargets": 0,
+              "controlTargets": 0,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation."
+            },
+            "revealed": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-chromium-before-bilingual-0.13157072232485212",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1.7999999523162842,
+                  "lastMutationIndexMs": 0.20000004768371582
+                }
+              },
+              "shadowTargets": 0,
+              "controlTargets": 1,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation."
+            },
+            "freshUnits": [
+              "Visible component documentation."
+            ]
+          },
+          "replace": {
+            "initial": {
+              "status": {
+                "translating": false,
+                "count": 2,
+                "failed": 0,
+                "total": 2,
+                "watching": true,
+                "sessionId": "followup-chromium-before-replace-0.19952226155880637",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.699999988079071,
+                  "lastMutationIndexMs": 0.19999998807907104
+                }
+              },
+              "shadowTargets": 1,
+              "controlTargets": 1,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation.译:Visible component documentation."
+            },
+            "hidden": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-chromium-before-replace-0.19952226155880637",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.699999988079071,
+                  "lastMutationIndexMs": 0.40000003576278687
+                }
+              },
+              "shadowTargets": 0,
+              "controlTargets": 0,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation."
+            },
+            "revealed": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-chromium-before-replace-0.19952226155880637",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.699999988079071,
+                  "lastMutationIndexMs": 0.19999998807907104
+                }
+              },
+              "shadowTargets": 0,
+              "controlTargets": 1,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation."
+            },
+            "freshUnits": [
+              "Visible component documentation."
+            ]
+          }
+        },
+        "boundedRestore": {
+          "rich": {
+            "translated": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-chromium-before-replace-0.784752117162709",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1.600000023841858,
+                  "lastMutationIndexMs": 1
+                }
+              },
+              "markers": [
+                {
+                  "id": "",
+                  "height": 441,
+                  "minHeight": "440px"
+                },
+                {
+                  "id": "bounded",
+                  "height": 441,
+                  "minHeight": "441px"
+                }
+              ],
+              "targets": 0,
+              "hidden": 1,
+              "originalsUnchanged": true
+            },
+            "hydrated": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-chromium-before-replace-0.784752117162709",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1.600000023841858,
+                  "lastMutationIndexMs": 0.10000002384185791
+                }
+              },
+              "markers": [
+                {
+                  "id": "",
+                  "height": 441,
+                  "minHeight": "440px"
+                },
+                {
+                  "id": "bounded",
+                  "height": 441,
+                  "minHeight": "441px"
+                }
+              ],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            },
+            "current": {
+              "boxHeight": 441,
+              "sourceHeight": 40,
+              "layoutStyles": 2,
+              "sourceText": "Expansion documentation example."
+            },
+            "restored": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": false,
+                "sessionId": "followup-chromium-before-replace-0.784752117162709",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1.600000023841858,
+                  "lastMutationIndexMs": 0.10000002384185791
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            }
+          },
+          "segment": {
+            "translated": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-chromium-before-replace-0.7569499286789949",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 2.600000023841858,
+                  "lastMutationIndexMs": 0.19999998807907104
+                }
+              },
+              "markers": [
+                {
+                  "id": "",
+                  "height": 440,
+                  "minHeight": "421px"
+                },
+                {
+                  "id": "bounded",
+                  "height": 440,
+                  "minHeight": "440px"
+                }
+              ],
+              "targets": 1,
+              "hidden": 1,
+              "originalsUnchanged": true
+            },
+            "hydrated": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-chromium-before-replace-0.7569499286789949",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 2.600000023841858,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [
+                {
+                  "id": "",
+                  "height": 440,
+                  "minHeight": "421px"
+                },
+                {
+                  "id": "bounded",
+                  "height": 440,
+                  "minHeight": "440px"
+                }
+              ],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            },
+            "current": {
+              "boxHeight": 440,
+              "sourceHeight": 40,
+              "layoutStyles": 2,
+              "sourceText": "Expansion documentation.\nconst example = 1;"
+            },
+            "restored": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": false,
+                "sessionId": "followup-chromium-before-replace-0.7569499286789949",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 2.600000023841858,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            }
+          },
+          "plain": {
+            "translated": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-chromium-before-replace-0.6661974953769083",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.30000001192092896,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [
+                {
+                  "id": "",
+                  "height": 425,
+                  "minHeight": "422px"
+                },
+                {
+                  "id": "bounded",
+                  "height": 425,
+                  "minHeight": "425px"
+                }
+              ],
+              "targets": 1,
+              "hidden": 1,
+              "originalsUnchanged": true
+            },
+            "hydrated": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-chromium-before-replace-0.6661974953769083",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.30000001192092896,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            },
+            "current": {
+              "boxHeight": 80,
+              "sourceHeight": 20,
+              "layoutStyles": 0,
+              "sourceText": "Expansion documentation example."
+            },
+            "restored": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": false,
+                "sessionId": "followup-chromium-before-replace-0.6661974953769083",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.30000001192092896,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            }
+          },
+          "bilingual": {
+            "translated": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-chromium-before-bilingual-0.3958741492035971",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.19999998807907104,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [
+                {
+                  "id": "",
+                  "height": 445,
+                  "minHeight": "442px"
+                },
+                {
+                  "id": "bounded",
+                  "height": 445,
+                  "minHeight": "445px"
+                }
+              ],
+              "targets": 1,
+              "hidden": 0,
+              "originalsUnchanged": true
+            },
+            "hydrated": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-chromium-before-bilingual-0.3958741492035971",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.19999998807907104,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            },
+            "current": {
+              "boxHeight": 80,
+              "sourceHeight": 20,
+              "layoutStyles": 0,
+              "sourceText": "Expansion documentation example."
+            },
+            "restored": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": false,
+                "sessionId": "followup-chromium-before-bilingual-0.3958741492035971",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.19999998807907104,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            }
+          }
+        },
+        "mediaRuleInvalidation": {
+          "source": {
+            "constrained": {
+              "width": 1210.1875,
+              "height": 605.09375,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "fill",
+              "ruleStyles": 0
+            },
+            "afterPageChange": {
+              "width": 200,
+              "height": 80,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            },
+            "afterLayoutCheck": {
+              "width": 200,
+              "height": 80,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            },
+            "afterRestore": {
+              "width": 200,
+              "height": 80,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            }
+          },
+          "transfer": {
+            "constrained": {
+              "width": 1210.1875,
+              "height": 605.09375,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "fill",
+              "ruleStyles": 0
+            },
+            "afterPageChange": {
+              "width": 200,
+              "height": 80,
+              "parent": "receiver",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            },
+            "afterLayoutCheck": {
+              "width": 200,
+              "height": 80,
+              "parent": "receiver",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            },
+            "afterRestore": {
+              "width": 200,
+              "height": 80,
+              "parent": "receiver",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            }
+          }
+        },
+        "richCodeInsertion": {
+          "wrap-original": {
+            "initial": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-chromium-before-replace-0.9126862863103107",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.5,
+                  "lastMutationIndexMs": 0.5
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 1,
+              "originalsUnchanged": true
+            },
+            "result": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-chromium-before-replace-0.9126862863103107",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.5,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "hiddenEditor": true,
+              "targetCount": 0,
+              "text": "译:Read the example: 译:function Example() {} 译:and continue reading."
+            }
+          },
+          "insert-original": {
+            "initial": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-chromium-before-replace-0.820907960011086",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.30000001192092896,
+                  "lastMutationIndexMs": 0.3999999761581421
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 1,
+              "originalsUnchanged": true
+            },
+            "result": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-chromium-before-replace-0.820907960011086",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.30000001192092896,
+                  "lastMutationIndexMs": 0.3999999761581421
+                }
+              },
+              "hiddenEditor": true,
+              "targetCount": 0,
+              "text": "译:Read the example: 译:function Example() {} 译:and continue reading."
+            }
+          }
+        },
+        "errors": [],
+        "requestCount": 11
+      },
+      "after": {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "shadowHideReveal": {
+          "bilingual": {
+            "initial": {
+              "status": {
+                "translating": false,
+                "count": 2,
+                "failed": 0,
+                "total": 2,
+                "watching": true,
+                "sessionId": "followup-chromium-after-bilingual-0.2007966115942843",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.3999999761581421,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "shadowTargets": 1,
+              "controlTargets": 1,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation.译:Visible component documentation."
+            },
+            "hidden": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-chromium-after-bilingual-0.2007966115942843",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.3999999761581421,
+                  "lastMutationIndexMs": 0.10000002384185791
+                }
+              },
+              "shadowTargets": 0,
+              "controlTargets": 0,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation."
+            },
+            "revealed": {
+              "status": {
+                "translating": false,
+                "count": 2,
+                "failed": 0,
+                "total": 2,
+                "watching": true,
+                "sessionId": "followup-chromium-after-bilingual-0.2007966115942843",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.3999999761581421,
+                  "lastMutationIndexMs": 0.9000000357627869
+                }
+              },
+              "shadowTargets": 1,
+              "controlTargets": 1,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation.译:Visible component documentation."
+            },
+            "freshUnits": []
+          },
+          "replace": {
+            "initial": {
+              "status": {
+                "translating": false,
+                "count": 2,
+                "failed": 0,
+                "total": 2,
+                "watching": true,
+                "sessionId": "followup-chromium-after-replace-0.12654978189712685",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.30000001192092896,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "shadowTargets": 1,
+              "controlTargets": 1,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation.译:Visible component documentation."
+            },
+            "hidden": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-chromium-after-replace-0.12654978189712685",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.30000001192092896,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "shadowTargets": 0,
+              "controlTargets": 0,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation."
+            },
+            "revealed": {
+              "status": {
+                "translating": false,
+                "count": 2,
+                "failed": 0,
+                "total": 2,
+                "watching": true,
+                "sessionId": "followup-chromium-after-replace-0.12654978189712685",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.30000001192092896,
+                  "lastMutationIndexMs": 0.40000003576278687
+                }
+              },
+              "shadowTargets": 1,
+              "controlTargets": 1,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation.译:Visible component documentation."
+            },
+            "freshUnits": []
+          }
+        },
+        "boundedRestore": {
+          "rich": {
+            "translated": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-chromium-after-replace-0.8706464091337363",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 3.200000047683716,
+                  "lastMutationIndexMs": 0.8999999761581421
+                }
+              },
+              "markers": [
+                {
+                  "id": "",
+                  "height": 441,
+                  "minHeight": "440px"
+                },
+                {
+                  "id": "bounded",
+                  "height": 441,
+                  "minHeight": "441px"
+                }
+              ],
+              "targets": 0,
+              "hidden": 1,
+              "originalsUnchanged": true
+            },
+            "hydrated": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-chromium-after-replace-0.8706464091337363",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 3.200000047683716,
+                  "lastMutationIndexMs": 0.10000002384185791
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            },
+            "current": {
+              "boxHeight": 80,
+              "sourceHeight": 40,
+              "layoutStyles": 0,
+              "sourceText": "Expansion documentation example."
+            },
+            "restored": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": false,
+                "sessionId": "followup-chromium-after-replace-0.8706464091337363",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 3.200000047683716,
+                  "lastMutationIndexMs": 0.10000002384185791
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            }
+          },
+          "segment": {
+            "translated": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-chromium-after-replace-0.06725990012763416",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1.300000011920929,
+                  "lastMutationIndexMs": 0.09999996423721313
+                }
+              },
+              "markers": [
+                {
+                  "id": "",
+                  "height": 440,
+                  "minHeight": "421px"
+                },
+                {
+                  "id": "bounded",
+                  "height": 440,
+                  "minHeight": "440px"
+                }
+              ],
+              "targets": 1,
+              "hidden": 1,
+              "originalsUnchanged": true
+            },
+            "hydrated": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-chromium-after-replace-0.06725990012763416",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1.300000011920929,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            },
+            "current": {
+              "boxHeight": 80,
+              "sourceHeight": 40,
+              "layoutStyles": 0,
+              "sourceText": "Expansion documentation.\nconst example = 1;"
+            },
+            "restored": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": false,
+                "sessionId": "followup-chromium-after-replace-0.06725990012763416",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1.300000011920929,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            }
+          },
+          "plain": {
+            "translated": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-chromium-after-replace-0.21346234969734534",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.30000001192092896,
+                  "lastMutationIndexMs": 0.09999996423721313
+                }
+              },
+              "markers": [
+                {
+                  "id": "",
+                  "height": 425,
+                  "minHeight": "422px"
+                },
+                {
+                  "id": "bounded",
+                  "height": 425,
+                  "minHeight": "425px"
+                }
+              ],
+              "targets": 1,
+              "hidden": 1,
+              "originalsUnchanged": true
+            },
+            "hydrated": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-chromium-after-replace-0.21346234969734534",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.30000001192092896,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            },
+            "current": {
+              "boxHeight": 80,
+              "sourceHeight": 20,
+              "layoutStyles": 0,
+              "sourceText": "Expansion documentation example."
+            },
+            "restored": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": false,
+                "sessionId": "followup-chromium-after-replace-0.21346234969734534",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.30000001192092896,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            }
+          },
+          "bilingual": {
+            "translated": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-chromium-after-bilingual-0.7152709441896461",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.19999998807907104,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [
+                {
+                  "id": "",
+                  "height": 445,
+                  "minHeight": "442px"
+                },
+                {
+                  "id": "bounded",
+                  "height": 445,
+                  "minHeight": "445px"
+                }
+              ],
+              "targets": 1,
+              "hidden": 0,
+              "originalsUnchanged": true
+            },
+            "hydrated": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-chromium-after-bilingual-0.7152709441896461",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.19999998807907104,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            },
+            "current": {
+              "boxHeight": 80,
+              "sourceHeight": 20,
+              "layoutStyles": 0,
+              "sourceText": "Expansion documentation example."
+            },
+            "restored": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": false,
+                "sessionId": "followup-chromium-after-bilingual-0.7152709441896461",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.19999998807907104,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            }
+          }
+        },
+        "mediaRuleInvalidation": {
+          "source": {
+            "constrained": {
+              "width": 1210.1875,
+              "height": 605.09375,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "fill",
+              "ruleStyles": 0
+            },
+            "afterPageChange": {
+              "width": 200,
+              "height": 80,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            },
+            "afterLayoutCheck": {
+              "width": 200,
+              "height": 80,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            },
+            "afterRestore": {
+              "width": 200,
+              "height": 80,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            }
+          },
+          "transfer": {
+            "constrained": {
+              "width": 1210.1875,
+              "height": 605.09375,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "fill",
+              "ruleStyles": 0
+            },
+            "afterPageChange": {
+              "width": 200,
+              "height": 80,
+              "parent": "receiver",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            },
+            "afterLayoutCheck": {
+              "width": 200,
+              "height": 80,
+              "parent": "receiver",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            },
+            "afterRestore": {
+              "width": 200,
+              "height": 80,
+              "parent": "receiver",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            }
+          }
+        },
+        "richCodeInsertion": {
+          "wrap-original": {
+            "initial": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-chromium-after-replace-0.8832115897386543",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1.9000000357627869,
+                  "lastMutationIndexMs": 0.5
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 1,
+              "originalsUnchanged": true
+            },
+            "result": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-chromium-after-replace-0.8832115897386543",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1.9000000357627869,
+                  "lastMutationIndexMs": 0.19999998807907104
+                }
+              },
+              "hiddenEditor": true,
+              "targetCount": 0,
+              "text": "译:Read the example: 译:function Example() {} 译:and continue reading."
+            }
+          },
+          "insert-original": {
+            "initial": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-chromium-after-replace-0.9915213068797739",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.6000000238418579,
+                  "lastMutationIndexMs": 0.30000001192092896
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 1,
+              "originalsUnchanged": true
+            },
+            "result": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-chromium-after-replace-0.9915213068797739",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0.6000000238418579,
+                  "lastMutationIndexMs": 0.30000001192092896
+                }
+              },
+              "hiddenEditor": true,
+              "targetCount": 0,
+              "text": "译:Read the example: 译:function Example() {} 译:and continue reading."
+            }
+          }
+        },
+        "errors": [],
+        "requestCount": 11
+      }
+    },
+    "firefox": {
+      "before": {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "shadowHideReveal": {
+          "bilingual": {
+            "initial": {
+              "status": {
+                "translating": false,
+                "count": 2,
+                "failed": 0,
+                "total": 2,
+                "watching": true,
+                "sessionId": "followup-firefox-before-bilingual-0.39065563774675405",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "shadowTargets": 1,
+              "controlTargets": 1,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation.译:Visible component documentation."
+            },
+            "hidden": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-firefox-before-bilingual-0.39065563774675405",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "shadowTargets": 0,
+              "controlTargets": 0,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation."
+            },
+            "revealed": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-firefox-before-bilingual-0.39065563774675405",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "shadowTargets": 0,
+              "controlTargets": 1,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation."
+            },
+            "freshUnits": [
+              "Visible component documentation."
+            ]
+          },
+          "replace": {
+            "initial": {
+              "status": {
+                "translating": false,
+                "count": 2,
+                "failed": 0,
+                "total": 2,
+                "watching": true,
+                "sessionId": "followup-firefox-before-replace-0.6518522204744608",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "shadowTargets": 1,
+              "controlTargets": 1,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation.译:Visible component documentation."
+            },
+            "hidden": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-firefox-before-replace-0.6518522204744608",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "shadowTargets": 0,
+              "controlTargets": 0,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation."
+            },
+            "revealed": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-firefox-before-replace-0.6518522204744608",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 1
+                }
+              },
+              "shadowTargets": 0,
+              "controlTargets": 1,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation."
+            },
+            "freshUnits": [
+              "Visible component documentation."
+            ]
+          }
+        },
+        "boundedRestore": {
+          "rich": {
+            "translated": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-firefox-before-replace-0.34374081511604615",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0,
+                  "lastMutationIndexMs": 1
+                }
+              },
+              "markers": [
+                {
+                  "id": "",
+                  "height": 442,
+                  "minHeight": "440px"
+                },
+                {
+                  "id": "bounded",
+                  "height": 442,
+                  "minHeight": "442px"
+                }
+              ],
+              "targets": 0,
+              "hidden": 1,
+              "originalsUnchanged": true
+            },
+            "hydrated": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-firefox-before-replace-0.34374081511604615",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [
+                {
+                  "id": "",
+                  "height": 442,
+                  "minHeight": "440px"
+                },
+                {
+                  "id": "bounded",
+                  "height": 442,
+                  "minHeight": "442px"
+                }
+              ],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            },
+            "current": {
+              "boxHeight": 442,
+              "sourceHeight": 40,
+              "layoutStyles": 2,
+              "sourceText": "Expansion documentation example."
+            },
+            "restored": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": false,
+                "sessionId": "followup-firefox-before-replace-0.34374081511604615",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            }
+          },
+          "segment": {
+            "translated": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-firefox-before-replace-0.7574008930347595",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [
+                {
+                  "id": "",
+                  "height": 440,
+                  "minHeight": "420px"
+                },
+                {
+                  "id": "bounded",
+                  "height": 440,
+                  "minHeight": "440px"
+                }
+              ],
+              "targets": 1,
+              "hidden": 1,
+              "originalsUnchanged": true
+            },
+            "hydrated": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-firefox-before-replace-0.7574008930347595",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [
+                {
+                  "id": "",
+                  "height": 440,
+                  "minHeight": "420px"
+                },
+                {
+                  "id": "bounded",
+                  "height": 440,
+                  "minHeight": "440px"
+                }
+              ],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            },
+            "current": {
+              "boxHeight": 440,
+              "sourceHeight": 40,
+              "layoutStyles": 2,
+              "sourceText": "Expansion documentation.\nconst example = 1;"
+            },
+            "restored": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": false,
+                "sessionId": "followup-firefox-before-replace-0.7574008930347595",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            }
+          },
+          "plain": {
+            "translated": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-firefox-before-replace-0.33326444183144033",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [
+                {
+                  "id": "",
+                  "height": 425,
+                  "minHeight": "422px"
+                },
+                {
+                  "id": "bounded",
+                  "height": 425,
+                  "minHeight": "425px"
+                }
+              ],
+              "targets": 1,
+              "hidden": 1,
+              "originalsUnchanged": true
+            },
+            "hydrated": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-firefox-before-replace-0.33326444183144033",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            },
+            "current": {
+              "boxHeight": 80,
+              "sourceHeight": 20,
+              "layoutStyles": 0,
+              "sourceText": "Expansion documentation example."
+            },
+            "restored": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": false,
+                "sessionId": "followup-firefox-before-replace-0.33326444183144033",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            }
+          },
+          "bilingual": {
+            "translated": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-firefox-before-bilingual-0.5912975091102599",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [
+                {
+                  "id": "",
+                  "height": 445,
+                  "minHeight": "442px"
+                },
+                {
+                  "id": "bounded",
+                  "height": 445,
+                  "minHeight": "445px"
+                }
+              ],
+              "targets": 1,
+              "hidden": 0,
+              "originalsUnchanged": true
+            },
+            "hydrated": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-firefox-before-bilingual-0.5912975091102599",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            },
+            "current": {
+              "boxHeight": 80,
+              "sourceHeight": 20,
+              "layoutStyles": 0,
+              "sourceText": "Expansion documentation example."
+            },
+            "restored": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": false,
+                "sessionId": "followup-firefox-before-bilingual-0.5912975091102599",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            }
+          }
+        },
+        "mediaRuleInvalidation": {
+          "source": {
+            "constrained": {
+              "width": 1210.2333984375,
+              "height": 605.11669921875,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "fill",
+              "ruleStyles": 0
+            },
+            "afterPageChange": {
+              "width": 200,
+              "height": 80,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            },
+            "afterLayoutCheck": {
+              "width": 200,
+              "height": 80,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            },
+            "afterRestore": {
+              "width": 200,
+              "height": 80,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            }
+          },
+          "transfer": {
+            "constrained": {
+              "width": 1210.2333984375,
+              "height": 605.11669921875,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "fill",
+              "ruleStyles": 0
+            },
+            "afterPageChange": {
+              "width": 200,
+              "height": 80,
+              "parent": "receiver",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            },
+            "afterLayoutCheck": {
+              "width": 200,
+              "height": 80,
+              "parent": "receiver",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            },
+            "afterRestore": {
+              "width": 200,
+              "height": 80,
+              "parent": "receiver",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            }
+          }
+        },
+        "richCodeInsertion": {
+          "wrap-original": {
+            "initial": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-firefox-before-replace-0.3766388696315004",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0,
+                  "lastMutationIndexMs": 1
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 1,
+              "originalsUnchanged": true
+            },
+            "result": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-firefox-before-replace-0.3766388696315004",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "hiddenEditor": true,
+              "targetCount": 0,
+              "text": "译:Read the example: 译:function Example() {} 译:and continue reading."
+            }
+          },
+          "insert-original": {
+            "initial": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-firefox-before-replace-0.6010174281870468",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0,
+                  "lastMutationIndexMs": 1
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 1,
+              "originalsUnchanged": true
+            },
+            "result": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-firefox-before-replace-0.6010174281870468",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0,
+                  "lastMutationIndexMs": 1
+                }
+              },
+              "hiddenEditor": true,
+              "targetCount": 0,
+              "text": "译:Read the example: 译:function Example() {} 译:and continue reading."
+            }
+          }
+        },
+        "errors": [],
+        "requestCount": 11
+      },
+      "after": {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "shadowHideReveal": {
+          "bilingual": {
+            "initial": {
+              "status": {
+                "translating": false,
+                "count": 2,
+                "failed": 0,
+                "total": 2,
+                "watching": true,
+                "sessionId": "followup-firefox-after-bilingual-0.6976433737054282",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "shadowTargets": 1,
+              "controlTargets": 1,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation.译:Visible component documentation."
+            },
+            "hidden": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-firefox-after-bilingual-0.6976433737054282",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "shadowTargets": 0,
+              "controlTargets": 0,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation."
+            },
+            "revealed": {
+              "status": {
+                "translating": false,
+                "count": 2,
+                "failed": 0,
+                "total": 2,
+                "watching": true,
+                "sessionId": "followup-firefox-after-bilingual-0.6976433737054282",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0,
+                  "lastMutationIndexMs": 1
+                }
+              },
+              "shadowTargets": 1,
+              "controlTargets": 1,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation.译:Visible component documentation."
+            },
+            "freshUnits": []
+          },
+          "replace": {
+            "initial": {
+              "status": {
+                "translating": false,
+                "count": 2,
+                "failed": 0,
+                "total": 2,
+                "watching": true,
+                "sessionId": "followup-firefox-after-replace-0.8923696532916703",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 1
+                }
+              },
+              "shadowTargets": 1,
+              "controlTargets": 1,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation.译:Visible component documentation."
+            },
+            "hidden": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-firefox-after-replace-0.8923696532916703",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 1
+                }
+              },
+              "shadowTargets": 0,
+              "controlTargets": 0,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation."
+            },
+            "revealed": {
+              "status": {
+                "translating": false,
+                "count": 2,
+                "failed": 0,
+                "total": 2,
+                "watching": true,
+                "sessionId": "followup-firefox-after-replace-0.8923696532916703",
+                "revision": 1,
+                "shadowRoots": 1,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "shadowTargets": 1,
+              "controlTargets": 1,
+              "sourceIdentity": true,
+              "shadowText": "Visible component documentation.译:Visible component documentation."
+            },
+            "freshUnits": []
+          }
+        },
+        "boundedRestore": {
+          "rich": {
+            "translated": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-firefox-after-replace-0.779227288224851",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0,
+                  "lastMutationIndexMs": 1
+                }
+              },
+              "markers": [
+                {
+                  "id": "",
+                  "height": 442,
+                  "minHeight": "440px"
+                },
+                {
+                  "id": "bounded",
+                  "height": 442,
+                  "minHeight": "442px"
+                }
+              ],
+              "targets": 0,
+              "hidden": 1,
+              "originalsUnchanged": true
+            },
+            "hydrated": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-firefox-after-replace-0.779227288224851",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            },
+            "current": {
+              "boxHeight": 80,
+              "sourceHeight": 40,
+              "layoutStyles": 0,
+              "sourceText": "Expansion documentation example."
+            },
+            "restored": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": false,
+                "sessionId": "followup-firefox-after-replace-0.779227288224851",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            }
+          },
+          "segment": {
+            "translated": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-firefox-after-replace-0.4565976075439546",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [
+                {
+                  "id": "",
+                  "height": 440,
+                  "minHeight": "420px"
+                },
+                {
+                  "id": "bounded",
+                  "height": 440,
+                  "minHeight": "440px"
+                }
+              ],
+              "targets": 1,
+              "hidden": 1,
+              "originalsUnchanged": true
+            },
+            "hydrated": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-firefox-after-replace-0.4565976075439546",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            },
+            "current": {
+              "boxHeight": 80,
+              "sourceHeight": 40,
+              "layoutStyles": 0,
+              "sourceText": "Expansion documentation.\nconst example = 1;"
+            },
+            "restored": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": false,
+                "sessionId": "followup-firefox-after-replace-0.4565976075439546",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            }
+          },
+          "plain": {
+            "translated": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-firefox-after-replace-0.6745925094776748",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [
+                {
+                  "id": "",
+                  "height": 425,
+                  "minHeight": "422px"
+                },
+                {
+                  "id": "bounded",
+                  "height": 425,
+                  "minHeight": "425px"
+                }
+              ],
+              "targets": 1,
+              "hidden": 1,
+              "originalsUnchanged": true
+            },
+            "hydrated": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-firefox-after-replace-0.6745925094776748",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            },
+            "current": {
+              "boxHeight": 80,
+              "sourceHeight": 20,
+              "layoutStyles": 0,
+              "sourceText": "Expansion documentation example."
+            },
+            "restored": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": false,
+                "sessionId": "followup-firefox-after-replace-0.6745925094776748",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 0,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            }
+          },
+          "bilingual": {
+            "translated": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-firefox-after-bilingual-0.2590904952996995",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [
+                {
+                  "id": "",
+                  "height": 445,
+                  "minHeight": "442px"
+                },
+                {
+                  "id": "bounded",
+                  "height": 445,
+                  "minHeight": "445px"
+                }
+              ],
+              "targets": 1,
+              "hidden": 0,
+              "originalsUnchanged": true
+            },
+            "hydrated": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": true,
+                "sessionId": "followup-firefox-after-bilingual-0.2590904952996995",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            },
+            "current": {
+              "boxHeight": 80,
+              "sourceHeight": 20,
+              "layoutStyles": 0,
+              "sourceText": "Expansion documentation example."
+            },
+            "restored": {
+              "status": {
+                "translating": false,
+                "count": 0,
+                "failed": 0,
+                "total": 0,
+                "watching": false,
+                "sessionId": "followup-firefox-after-bilingual-0.2590904952996995",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 0,
+              "originalsUnchanged": true
+            }
+          }
+        },
+        "mediaRuleInvalidation": {
+          "source": {
+            "constrained": {
+              "width": 1210.2333984375,
+              "height": 605.11669921875,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "fill",
+              "ruleStyles": 0
+            },
+            "afterPageChange": {
+              "width": 200,
+              "height": 80,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            },
+            "afterLayoutCheck": {
+              "width": 200,
+              "height": 80,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            },
+            "afterRestore": {
+              "width": 200,
+              "height": 80,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            }
+          },
+          "transfer": {
+            "constrained": {
+              "width": 1210.2333984375,
+              "height": 605.11669921875,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "fill",
+              "ruleStyles": 0
+            },
+            "afterPageChange": {
+              "width": 200,
+              "height": 80,
+              "parent": "receiver",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            },
+            "afterLayoutCheck": {
+              "width": 200,
+              "height": 80,
+              "parent": "receiver",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            },
+            "afterRestore": {
+              "width": 200,
+              "height": 80,
+              "parent": "receiver",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "ruleStyles": 0
+            }
+          }
+        },
+        "richCodeInsertion": {
+          "wrap-original": {
+            "initial": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-firefox-after-replace-0.8885998123948937",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 2,
+                  "lastMutationIndexMs": 1
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 1,
+              "originalsUnchanged": true
+            },
+            "result": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-firefox-after-replace-0.8885998123948937",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 2,
+                  "lastMutationIndexMs": 0
+                }
+              },
+              "hiddenEditor": true,
+              "targetCount": 0,
+              "text": "译:Read the example: 译:function Example() {} 译:and continue reading."
+            }
+          },
+          "insert-original": {
+            "initial": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-firefox-after-replace-0.24458062369479272",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 1
+                }
+              },
+              "markers": [],
+              "targets": 0,
+              "hidden": 1,
+              "originalsUnchanged": true
+            },
+            "result": {
+              "status": {
+                "translating": false,
+                "count": 1,
+                "failed": 0,
+                "total": 1,
+                "watching": true,
+                "sessionId": "followup-firefox-after-replace-0.24458062369479272",
+                "revision": 1,
+                "shadowRoots": 0,
+                "frames": {
+                  "sameOrigin": 0,
+                  "crossOrigin": 0,
+                  "opaque": 0
+                },
+                "perf": {
+                  "lastIndexMs": 1,
+                  "lastMutationIndexMs": 1
+                }
+              },
+              "hiddenEditor": true,
+              "targetCount": 0,
+              "text": "译:Read the example: 译:function Example() {} 译:and continue reading."
+            }
+          }
+        },
+        "errors": [],
+        "requestCount": 11
+      }
+    }
+  },
+  "visualReproductions": {
+    "chromium": {
+      "before": {
+        "typography": {
+          "dark": {
+            "background": "rgb(0, 0, 0)",
+            "source": "rgb(255, 255, 255)",
+            "translation": "color(srgb 1 1 1 / 0.84)",
+            "inlineTranslationColor": "color-mix(in srgb, rgb(255, 255, 255) 84%, transparent 16%)",
+            "status": {
+              "translating": false,
+              "count": 1,
+              "failed": 0,
+              "total": 1,
+              "watching": true,
+              "sessionId": "visual-chromium-before",
+              "revision": 1,
+              "shadowRoots": 0,
+              "frames": {
+                "sameOrigin": 0,
+                "crossOrigin": 0,
+                "opaque": 0
+              },
+              "perf": {
+                "lastIndexMs": 3.300000011920929,
+                "lastMutationIndexMs": 0
+              }
+            }
+          },
+          "light": {
+            "background": "rgb(255, 255, 255)",
+            "source": "rgb(0, 0, 0)",
+            "translation": "color(srgb 1 1 1 / 0.84)",
+            "inlineTranslationColor": "color-mix(in srgb, rgb(255, 255, 255) 84%, transparent 16%)",
+            "status": {
+              "translating": false,
+              "count": 1,
+              "failed": 0,
+              "total": 1,
+              "watching": true,
+              "sessionId": "visual-chromium-before",
+              "revision": 1,
+              "shadowRoots": 0,
+              "frames": {
+                "sameOrigin": 0,
+                "crossOrigin": 0,
+                "opaque": 0
+              },
+              "perf": {
+                "lastIndexMs": 3.300000011920929,
+                "lastMutationIndexMs": 0.800000011920929
+              }
+            }
+          },
+          "restored": {
+            "targets": 0,
+            "source": "rgb(0, 0, 0)",
+            "theme": "light"
+          }
+        },
+        "media": {
+          "source": {
+            "constrained": {
+              "width": 400,
+              "height": 200,
+              "left": 1508,
+              "right": 1908,
+              "parent": "",
+              "rule": true,
+              "maxWidth": "100%",
+              "objectFit": "contain",
+              "inline": null,
+              "ruleStyles": 1
+            },
+            "afterPageChange": {
+              "width": 200,
+              "height": 100,
+              "left": 1508,
+              "right": 1708,
+              "parent": "",
+              "rule": true,
+              "maxWidth": "100%",
+              "objectFit": "contain",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 1
+            },
+            "afterCheck": {
+              "width": 200,
+              "height": 100,
+              "left": 1508,
+              "right": 1708,
+              "parent": "",
+              "rule": true,
+              "maxWidth": "100%",
+              "objectFit": "contain",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 1
+            },
+            "afterRestore": {
+              "width": 200,
+              "height": 80,
+              "left": 1508,
+              "right": 1708,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 0
+            }
+          },
+          "transfer": {
+            "constrained": {
+              "width": 400,
+              "height": 200,
+              "left": 1508,
+              "right": 1908,
+              "parent": "",
+              "rule": true,
+              "maxWidth": "100%",
+              "objectFit": "contain",
+              "inline": null,
+              "ruleStyles": 1
+            },
+            "afterPageChange": {
+              "width": 200,
+              "height": 100,
+              "left": 8,
+              "right": 208,
+              "parent": "receiver",
+              "rule": true,
+              "maxWidth": "100%",
+              "objectFit": "contain",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 1
+            },
+            "afterCheck": {
+              "width": 200,
+              "height": 100,
+              "left": 8,
+              "right": 208,
+              "parent": "receiver",
+              "rule": true,
+              "maxWidth": "100%",
+              "objectFit": "contain",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 1
+            },
+            "afterRestore": {
+              "width": 200,
+              "height": 80,
+              "left": 8,
+              "right": 208,
+              "parent": "receiver",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 0
+            }
+          }
+        },
+        "errors": []
+      },
+      "after": {
+        "typography": {
+          "dark": {
+            "background": "rgb(0, 0, 0)",
+            "source": "rgb(255, 255, 255)",
+            "translation": "color(srgb 1 1 1 / 0.84)",
+            "inlineTranslationColor": "color-mix(in srgb, rgb(255, 255, 255) 84%, transparent 16%)",
+            "status": {
+              "translating": false,
+              "count": 1,
+              "failed": 0,
+              "total": 1,
+              "watching": true,
+              "sessionId": "visual-chromium-after",
+              "revision": 1,
+              "shadowRoots": 0,
+              "frames": {
+                "sameOrigin": 0,
+                "crossOrigin": 0,
+                "opaque": 0
+              },
+              "perf": {
+                "lastIndexMs": 3.700000047683716,
+                "lastMutationIndexMs": 0
+              }
+            }
+          },
+          "light": {
+            "background": "rgb(255, 255, 255)",
+            "source": "rgb(0, 0, 0)",
+            "translation": "color(srgb 0 0 0 / 0.84)",
+            "inlineTranslationColor": "",
+            "status": {
+              "translating": false,
+              "count": 1,
+              "failed": 0,
+              "total": 1,
+              "watching": true,
+              "sessionId": "visual-chromium-after",
+              "revision": 1,
+              "shadowRoots": 0,
+              "frames": {
+                "sameOrigin": 0,
+                "crossOrigin": 0,
+                "opaque": 0
+              },
+              "perf": {
+                "lastIndexMs": 3.700000047683716,
+                "lastMutationIndexMs": 1.5
+              }
+            }
+          },
+          "restored": {
+            "targets": 0,
+            "source": "rgb(0, 0, 0)",
+            "theme": "light"
+          }
+        },
+        "media": {
+          "source": {
+            "constrained": {
+              "width": 400,
+              "height": 200,
+              "left": 1508,
+              "right": 1908,
+              "parent": "",
+              "rule": true,
+              "maxWidth": "100%",
+              "objectFit": "contain",
+              "inline": null,
+              "ruleStyles": 1
+            },
+            "afterPageChange": {
+              "width": 200,
+              "height": 80,
+              "left": 1508,
+              "right": 1708,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 0
+            },
+            "afterCheck": {
+              "width": 200,
+              "height": 80,
+              "left": 1508,
+              "right": 1708,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 0
+            },
+            "afterRestore": {
+              "width": 200,
+              "height": 80,
+              "left": 1508,
+              "right": 1708,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 0
+            }
+          },
+          "transfer": {
+            "constrained": {
+              "width": 400,
+              "height": 200,
+              "left": 1508,
+              "right": 1908,
+              "parent": "",
+              "rule": true,
+              "maxWidth": "100%",
+              "objectFit": "contain",
+              "inline": null,
+              "ruleStyles": 1
+            },
+            "afterPageChange": {
+              "width": 200,
+              "height": 80,
+              "left": 8,
+              "right": 208,
+              "parent": "receiver",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 0
+            },
+            "afterCheck": {
+              "width": 200,
+              "height": 80,
+              "left": 8,
+              "right": 208,
+              "parent": "receiver",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 0
+            },
+            "afterRestore": {
+              "width": 200,
+              "height": 80,
+              "left": 8,
+              "right": 208,
+              "parent": "receiver",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 0
+            }
+          }
+        },
+        "errors": []
+      }
+    },
+    "firefox": {
+      "before": {
+        "typography": {
+          "dark": {
+            "background": "rgb(0, 0, 0)",
+            "source": "rgb(255, 255, 255)",
+            "translation": "color(srgb 1 1 1 / 0.84)",
+            "inlineTranslationColor": "color-mix(in srgb, rgb(255, 255, 255) 84%, transparent 16%)",
+            "status": {
+              "translating": false,
+              "count": 1,
+              "failed": 0,
+              "total": 1,
+              "watching": true,
+              "sessionId": "visual-firefox-before",
+              "revision": 1,
+              "shadowRoots": 0,
+              "frames": {
+                "sameOrigin": 0,
+                "crossOrigin": 0,
+                "opaque": 0
+              },
+              "perf": {
+                "lastIndexMs": 3,
+                "lastMutationIndexMs": 0
+              }
+            }
+          },
+          "light": {
+            "background": "rgb(255, 255, 255)",
+            "source": "rgb(0, 0, 0)",
+            "translation": "color(srgb 1 1 1 / 0.84)",
+            "inlineTranslationColor": "color-mix(in srgb, rgb(255, 255, 255) 84%, transparent 16%)",
+            "status": {
+              "translating": false,
+              "count": 1,
+              "failed": 0,
+              "total": 1,
+              "watching": true,
+              "sessionId": "visual-firefox-before",
+              "revision": 1,
+              "shadowRoots": 0,
+              "frames": {
+                "sameOrigin": 0,
+                "crossOrigin": 0,
+                "opaque": 0
+              },
+              "perf": {
+                "lastIndexMs": 3,
+                "lastMutationIndexMs": 0
+              }
+            }
+          },
+          "restored": {
+            "targets": 0,
+            "source": "rgb(0, 0, 0)",
+            "theme": "light"
+          }
+        },
+        "media": {
+          "source": {
+            "constrained": {
+              "width": 400,
+              "height": 200,
+              "left": 1508,
+              "right": 1908,
+              "parent": "",
+              "rule": true,
+              "maxWidth": "100%",
+              "objectFit": "contain",
+              "inline": null,
+              "ruleStyles": 1
+            },
+            "afterPageChange": {
+              "width": 200,
+              "height": 100,
+              "left": 1508,
+              "right": 1708,
+              "parent": "",
+              "rule": true,
+              "maxWidth": "100%",
+              "objectFit": "contain",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 1
+            },
+            "afterCheck": {
+              "width": 200,
+              "height": 100,
+              "left": 1508,
+              "right": 1708,
+              "parent": "",
+              "rule": true,
+              "maxWidth": "100%",
+              "objectFit": "contain",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 1
+            },
+            "afterRestore": {
+              "width": 200,
+              "height": 80,
+              "left": 1508,
+              "right": 1708,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 0
+            }
+          },
+          "transfer": {
+            "constrained": {
+              "width": 400,
+              "height": 200,
+              "left": 1508,
+              "right": 1908,
+              "parent": "",
+              "rule": true,
+              "maxWidth": "100%",
+              "objectFit": "contain",
+              "inline": null,
+              "ruleStyles": 1
+            },
+            "afterPageChange": {
+              "width": 200,
+              "height": 100,
+              "left": 8,
+              "right": 208,
+              "parent": "receiver",
+              "rule": true,
+              "maxWidth": "100%",
+              "objectFit": "contain",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 1
+            },
+            "afterCheck": {
+              "width": 200,
+              "height": 100,
+              "left": 8,
+              "right": 208,
+              "parent": "receiver",
+              "rule": true,
+              "maxWidth": "100%",
+              "objectFit": "contain",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 1
+            },
+            "afterRestore": {
+              "width": 200,
+              "height": 80,
+              "left": 8,
+              "right": 208,
+              "parent": "receiver",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 0
+            }
+          }
+        },
+        "errors": []
+      },
+      "after": {
+        "typography": {
+          "dark": {
+            "background": "rgb(0, 0, 0)",
+            "source": "rgb(255, 255, 255)",
+            "translation": "color(srgb 1 1 1 / 0.84)",
+            "inlineTranslationColor": "color-mix(in srgb, rgb(255, 255, 255) 84%, transparent 16%)",
+            "status": {
+              "translating": false,
+              "count": 1,
+              "failed": 0,
+              "total": 1,
+              "watching": true,
+              "sessionId": "visual-firefox-after",
+              "revision": 1,
+              "shadowRoots": 0,
+              "frames": {
+                "sameOrigin": 0,
+                "crossOrigin": 0,
+                "opaque": 0
+              },
+              "perf": {
+                "lastIndexMs": 3,
+                "lastMutationIndexMs": 0
+              }
+            }
+          },
+          "light": {
+            "background": "rgb(255, 255, 255)",
+            "source": "rgb(0, 0, 0)",
+            "translation": "color(srgb 0 0 0 / 0.84)",
+            "inlineTranslationColor": "",
+            "status": {
+              "translating": false,
+              "count": 1,
+              "failed": 0,
+              "total": 1,
+              "watching": true,
+              "sessionId": "visual-firefox-after",
+              "revision": 1,
+              "shadowRoots": 0,
+              "frames": {
+                "sameOrigin": 0,
+                "crossOrigin": 0,
+                "opaque": 0
+              },
+              "perf": {
+                "lastIndexMs": 3,
+                "lastMutationIndexMs": 0
+              }
+            }
+          },
+          "restored": {
+            "targets": 0,
+            "source": "rgb(0, 0, 0)",
+            "theme": "light"
+          }
+        },
+        "media": {
+          "source": {
+            "constrained": {
+              "width": 400,
+              "height": 200,
+              "left": 1508,
+              "right": 1908,
+              "parent": "",
+              "rule": true,
+              "maxWidth": "100%",
+              "objectFit": "contain",
+              "inline": null,
+              "ruleStyles": 1
+            },
+            "afterPageChange": {
+              "width": 200,
+              "height": 80,
+              "left": 1508,
+              "right": 1708,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 0
+            },
+            "afterCheck": {
+              "width": 200,
+              "height": 80,
+              "left": 1508,
+              "right": 1708,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 0
+            },
+            "afterRestore": {
+              "width": 200,
+              "height": 80,
+              "left": 1508,
+              "right": 1708,
+              "parent": "",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 0
+            }
+          },
+          "transfer": {
+            "constrained": {
+              "width": 400,
+              "height": 200,
+              "left": 1508,
+              "right": 1908,
+              "parent": "",
+              "rule": true,
+              "maxWidth": "100%",
+              "objectFit": "contain",
+              "inline": null,
+              "ruleStyles": 1
+            },
+            "afterPageChange": {
+              "width": 200,
+              "height": 80,
+              "left": 8,
+              "right": 208,
+              "parent": "receiver",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 0
+            },
+            "afterCheck": {
+              "width": 200,
+              "height": 80,
+              "left": 8,
+              "right": 208,
+              "parent": "receiver",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 0
+            },
+            "afterRestore": {
+              "width": 200,
+              "height": 80,
+              "left": 8,
+              "right": 208,
+              "parent": "receiver",
+              "rule": false,
+              "maxWidth": "none",
+              "objectFit": "cover",
+              "inline": "width: 200px; height: 80px; object-fit: cover;",
+              "ruleStyles": 0
+            }
+          }
+        },
+        "errors": []
+      }
+    }
+  },
+  "restorationContract": {
+    "baseline": "Frozen uncommitted f5ab49fe source; review against HEAD 9954986 retained separately",
+    "scope": [
+      "renderer/index.ts",
+      "renderer/source-typography.ts",
+      "renderer/media-layout.ts",
+      "renderer/layout-updates.ts",
+      "roots/index.ts",
+      "scheduler/session.ts"
+    ],
+    "bounded": "Release actual replacement owners before deleting identity maps; preserve shared owners and all page style changes.",
+    "composedScopes": "Incrementally revisit existing connected shadow roots and assigned slot content affected by visibility attributes; keep unrelated components unchanged.",
+    "typography": "Refresh only copied uniform source typography; retain Text references across owned stashes, omit owned wrappers, clear stale copied properties, preserve page overrides on translation chrome and source.",
+    "media": "Remove installed owned CSS when source attributes, rendered source, parent, root, transform/position or owning row contract no longer apply; preserve original nodes and inline edits.",
+    "lifecycle": "Coalesce owned layout updates per frame, ignore own style mutations, refresh while translations are paused, cancel all work on restore, issue no translation requests for presentation changes.",
+    "restore": "Keep original/current node identities, values, order, links and page edits; do not revive sources deleted by the page; repeated restore and mode switches are required.",
+    "validation": "Pre-fix failing tests, positive/shared-owner controls, fresh Chromium and Firefox artifacts, full functional tests and performance budgets, 16:9 live website samples."
+  },
+  "baselineFollowup": {
+    "site": "GitHub",
+    "reason": "Live navigation DOM variant changed; reran frozen pre-fix build to compare the same hidden label structure.",
+    "initialBaseline": {
+      "clips": 0,
+      "squeezed": 0
+    },
+    "repeatedBaseline": {
+      "clips": 2,
+      "squeezed": 1
+    },
+    "sameAsCurrent": true,
+    "beforeHash": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01"
+  },
+  "pages": [
+    {
+      "id": "popular-2-2",
+      "site": "GitHub",
+      "url": "https://github.com/golang/go",
+      "category": "popular",
+      "beforeHash": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01",
+      "afterHash": "df3aaa30a5369fbc33b7f6ec4f216e4e8a69efdc7cbccbb3377dcb2b5a251ddc",
+      "before": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 115,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 115,
+          "translationTargets": 79,
+          "documentOverflow": 0,
+          "clippingCandidates": 2,
+          "squeezedCandidates": 1
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 115,
+          "translationTargets": 81,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 115,
+          "translationTargets": 131,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "after": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 115,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 115,
+          "translationTargets": 79,
+          "documentOverflow": 0,
+          "clippingCandidates": 2,
+          "squeezedCandidates": 1
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 115,
+          "translationTargets": 81,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 115,
+          "translationTargets": 131,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "restoreBilingual": {
+        "originalNodes": 545,
+        "retainedNodes": 545,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 545,
+        "retainedNodes": 545,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "codeAudit": {
+        "source-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 0
+        },
+        "bilingual-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 79
+        },
+        "bilingual-scroll": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 81
+        },
+        "replace-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 47
+        }
+      }
+    },
+    {
+      "id": "popular-7-2",
+      "site": "Apple",
+      "url": "https://www.apple.com/mac/",
+      "category": "popular",
+      "beforeHash": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01",
+      "afterHash": "df3aaa30a5369fbc33b7f6ec4f216e4e8a69efdc7cbccbb3377dcb2b5a251ddc",
+      "before": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 162,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 162,
+          "translationTargets": 45,
+          "documentOverflow": 0,
+          "clippingCandidates": 1,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 162,
+          "translationTargets": 59,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 162,
+          "translationTargets": 98,
+          "documentOverflow": 0,
+          "clippingCandidates": 1,
+          "squeezedCandidates": 0
+        }
+      },
+      "after": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 162,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 162,
+          "translationTargets": 45,
+          "documentOverflow": 0,
+          "clippingCandidates": 1,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 162,
+          "translationTargets": 59,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 162,
+          "translationTargets": 98,
+          "documentOverflow": 0,
+          "clippingCandidates": 1,
+          "squeezedCandidates": 0
+        }
+      },
+      "restoreBilingual": {
+        "originalNodes": 1202,
+        "retainedNodes": 1201,
+        "removedByPage": 1,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 1202,
+        "retainedNodes": 1201,
+        "removedByPage": 1,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "codeAudit": {
+        "source-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 0
+        },
+        "bilingual-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 45
+        },
+        "bilingual-scroll": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 59
+        },
+        "replace-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 44
+        }
+      }
+    },
+    {
+      "id": "commercial-2-1",
+      "site": "Adobe Developer",
+      "url": "https://developer.adobe.com/developer-console/docs/guides/",
+      "category": "commercial",
+      "beforeHash": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01",
+      "afterHash": "df3aaa30a5369fbc33b7f6ec4f216e4e8a69efdc7cbccbb3377dcb2b5a251ddc",
+      "before": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 34,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 34,
+          "translationTargets": 33,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 34,
+          "translationTargets": 33,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 34,
+          "translationTargets": 51,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "after": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 34,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 34,
+          "translationTargets": 33,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 34,
+          "translationTargets": 33,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 34,
+          "translationTargets": 51,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "restoreBilingual": {
+        "originalNodes": 473,
+        "retainedNodes": 473,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 473,
+        "retainedNodes": 473,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "codeAudit": {
+        "source-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 0
+        },
+        "bilingual-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 33
+        },
+        "bilingual-scroll": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 33
+        },
+        "replace-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 19
+        }
+      }
+    },
+    {
+      "id": "commercial-3-1",
+      "site": "Salesforce Developers",
+      "url": "https://developer.salesforce.com/docs",
+      "category": "commercial",
+      "beforeHash": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01",
+      "afterHash": "df3aaa30a5369fbc33b7f6ec4f216e4e8a69efdc7cbccbb3377dcb2b5a251ddc",
+      "before": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 119,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 119,
+          "translationTargets": 42,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 119,
+          "translationTargets": 51,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 119,
+          "translationTargets": 121,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "after": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 119,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 119,
+          "translationTargets": 42,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 119,
+          "translationTargets": 51,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 119,
+          "translationTargets": 121,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "restoreBilingual": {
+        "originalNodes": 1180,
+        "retainedNodes": 1180,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 1180,
+        "retainedNodes": 1180,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "codeAudit": {
+        "source-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 0
+        },
+        "bilingual-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 42
+        },
+        "bilingual-scroll": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 51
+        },
+        "replace-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 60
+        }
+      }
+    },
+    {
+      "id": "commercial-4-1",
+      "site": "Atlassian Developer",
+      "url": "https://developer.atlassian.com/",
+      "category": "commercial",
+      "beforeHash": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01",
+      "afterHash": "df3aaa30a5369fbc33b7f6ec4f216e4e8a69efdc7cbccbb3377dcb2b5a251ddc",
+      "before": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 32,
+          "translationTargets": 0,
+          "documentOverflow": 37,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 32,
+          "translationTargets": 27,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 32,
+          "translationTargets": 29,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 32,
+          "translationTargets": 50,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "after": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 32,
+          "translationTargets": 0,
+          "documentOverflow": 37,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 32,
+          "translationTargets": 24,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 32,
+          "translationTargets": 26,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 32,
+          "translationTargets": 50,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "restoreBilingual": {
+        "originalNodes": 160,
+        "retainedNodes": 157,
+        "removedByPage": 3,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 160,
+        "retainedNodes": 157,
+        "removedByPage": 3,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "codeAudit": {
+        "source-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 0
+        },
+        "bilingual-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 24
+        },
+        "bilingual-scroll": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 26
+        },
+        "replace-top": {
+          "codeBlocks": 0,
+          "liveCodeBlocks": 0,
+          "originalCodeNodes": 0,
+          "retainedCodeNodes": 0,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 25
+        }
+      }
+    },
+    {
+      "id": "open_source-1-1",
+      "site": "React",
+      "url": "https://react.dev/",
+      "category": "open_source",
+      "beforeHash": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01",
+      "afterHash": "df3aaa30a5369fbc33b7f6ec4f216e4e8a69efdc7cbccbb3377dcb2b5a251ddc",
+      "before": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 120,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 120,
+          "translationTargets": 12,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 120,
+          "translationTargets": 15,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 120,
+          "translationTargets": 32,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "after": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 120,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 120,
+          "translationTargets": 12,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 120,
+          "translationTargets": 15,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 120,
+          "translationTargets": 30,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "restoreBilingual": {
+        "originalNodes": 710,
+        "retainedNodes": 710,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 1,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 710,
+        "retainedNodes": 710,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 1,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "codeAudit": {
+        "source-top": {
+          "codeBlocks": 4,
+          "liveCodeBlocks": 8,
+          "originalCodeNodes": 500,
+          "retainedCodeNodes": 500,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 0
+        },
+        "bilingual-top": {
+          "codeBlocks": 4,
+          "liveCodeBlocks": 8,
+          "originalCodeNodes": 500,
+          "retainedCodeNodes": 500,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 12
+        },
+        "bilingual-scroll": {
+          "codeBlocks": 4,
+          "liveCodeBlocks": 8,
+          "originalCodeNodes": 500,
+          "retainedCodeNodes": 500,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 15
+        },
+        "replace-top": {
+          "codeBlocks": 4,
+          "liveCodeBlocks": 8,
+          "originalCodeNodes": 500,
+          "retainedCodeNodes": 500,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 14
+        }
+      }
+    },
+    {
+      "id": "open_source-4-2",
+      "site": "Svelte",
+      "url": "https://svelte.dev/docs/svelte/overview",
+      "category": "open_source",
+      "beforeHash": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01",
+      "afterHash": "df3aaa30a5369fbc33b7f6ec4f216e4e8a69efdc7cbccbb3377dcb2b5a251ddc",
+      "before": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 117,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 117,
+          "translationTargets": 27,
+          "documentOverflow": 0,
+          "clippingCandidates": 2,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 117,
+          "translationTargets": 27,
+          "documentOverflow": 0,
+          "clippingCandidates": 2,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 117,
+          "translationTargets": 50,
+          "documentOverflow": 0,
+          "clippingCandidates": 1,
+          "squeezedCandidates": 0
+        }
+      },
+      "after": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 117,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 117,
+          "translationTargets": 27,
+          "documentOverflow": 0,
+          "clippingCandidates": 2,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 117,
+          "translationTargets": 27,
+          "documentOverflow": 0,
+          "clippingCandidates": 2,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 117,
+          "translationTargets": 50,
+          "documentOverflow": 0,
+          "clippingCandidates": 1,
+          "squeezedCandidates": 0
+        }
+      },
+      "restoreBilingual": {
+        "originalNodes": 319,
+        "retainedNodes": 319,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 319,
+        "retainedNodes": 319,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "codeAudit": {
+        "source-top": {
+          "codeBlocks": 2,
+          "liveCodeBlocks": 2,
+          "originalCodeNodes": 120,
+          "retainedCodeNodes": 120,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 1,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 0
+        },
+        "bilingual-top": {
+          "codeBlocks": 2,
+          "liveCodeBlocks": 2,
+          "originalCodeNodes": 120,
+          "retainedCodeNodes": 120,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 1,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 27
+        },
+        "bilingual-scroll": {
+          "codeBlocks": 2,
+          "liveCodeBlocks": 2,
+          "originalCodeNodes": 120,
+          "retainedCodeNodes": 120,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 1,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 27
+        },
+        "replace-top": {
+          "codeBlocks": 2,
+          "liveCodeBlocks": 2,
+          "originalCodeNodes": 120,
+          "retainedCodeNodes": 120,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 1,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 24
+        }
+      }
+    },
+    {
+      "id": "open_source-9-2",
+      "site": "Python",
+      "url": "https://docs.python.org/3/tutorial/introduction.html",
+      "category": "open_source",
+      "beforeHash": "f5ab49febc284131b4d4dee571afe373271221beeb4f6500ebe468abab07ad01",
+      "afterHash": "df3aaa30a5369fbc33b7f6ec4f216e4e8a69efdc7cbccbb3377dcb2b5a251ddc",
+      "before": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 109,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 109,
+          "translationTargets": 36,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 109,
+          "translationTargets": 40,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 109,
+          "translationTargets": 66,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "after": {
+        "source-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 109,
+          "translationTargets": 0,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 109,
+          "translationTargets": 36,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "bilingual-scroll": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 109,
+          "translationTargets": 40,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        },
+        "replace-top": {
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "sourceUnits": 109,
+          "translationTargets": 66,
+          "documentOverflow": 0,
+          "clippingCandidates": 0,
+          "squeezedCandidates": 0
+        }
+      },
+      "restoreBilingual": {
+        "originalNodes": 2364,
+        "retainedNodes": 2364,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "restoreReplace": {
+        "originalNodes": 2364,
+        "retainedNodes": 2364,
+        "removedByPage": 0,
+        "sourceOrder": true,
+        "orderDifferences": [],
+        "changedValues": 0,
+        "changedLinks": 0,
+        "overwrittenCurrentValues": 0,
+        "overwrittenCurrentLinks": 0,
+        "retainedCurrentOrder": true,
+        "removedSinceRestoreSnapshot": [],
+        "remainingTargets": 0
+      },
+      "codeAudit": {
+        "source-top": {
+          "codeBlocks": 42,
+          "liveCodeBlocks": 42,
+          "originalCodeNodes": 1394,
+          "retainedCodeNodes": 1394,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 0
+        },
+        "bilingual-top": {
+          "codeBlocks": 42,
+          "liveCodeBlocks": 42,
+          "originalCodeNodes": 1394,
+          "retainedCodeNodes": 1394,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 36
+        },
+        "bilingual-scroll": {
+          "codeBlocks": 42,
+          "liveCodeBlocks": 42,
+          "originalCodeNodes": 1394,
+          "retainedCodeNodes": 1394,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 40
+        },
+        "replace-top": {
+          "codeBlocks": 42,
+          "liveCodeBlocks": 42,
+          "originalCodeNodes": 1394,
+          "retainedCodeNodes": 1394,
+          "overwrittenCodeValues": 0,
+          "hiddenCodeBlocks": 0,
+          "codeTranslationTargets": 0,
+          "codeTranslationSamples": [],
+          "proseTranslationTargets": 25
+        }
+      }
+    }
+  ],
+  "inApp": {
+    "bilingualCode": {
+      "codeBlocks": 4,
+      "codeTranslationSamples": [],
+      "codeTranslationTargets": 0,
+      "hiddenCodeBlocks": 0,
+      "liveCodeBlocks": 8,
+      "originalCodeNodes": 500,
+      "overwrittenCodeValues": 0,
+      "proseTranslationTargets": 15,
+      "retainedCodeNodes": 500
+    },
+    "replaceCode": {
+      "codeBlocks": 4,
+      "codeTranslationSamples": [],
+      "codeTranslationTargets": 0,
+      "hiddenCodeBlocks": 0,
+      "liveCodeBlocks": 8,
+      "originalCodeNodes": 500,
+      "overwrittenCodeValues": 0,
+      "proseTranslationTargets": 12,
+      "retainedCodeNodes": 500
+    },
+    "restoreBilingual": {
+      "changedLinks": 0,
+      "changedValues": 0,
+      "orderDifferences": [],
+      "originalNodes": 710,
+      "overwrittenCurrentLinks": 0,
+      "overwrittenCurrentValues": 0,
+      "remainingTargets": 0,
+      "removedByPage": 0,
+      "removedSinceRestoreSnapshot": [],
+      "retainedCurrentOrder": true,
+      "retainedNodes": 710,
+      "sourceOrder": true
+    },
+    "restoreReplace": {
+      "changedLinks": 0,
+      "changedValues": 1,
+      "orderDifferences": [],
+      "originalNodes": 710,
+      "overwrittenCurrentLinks": 0,
+      "overwrittenCurrentValues": 0,
+      "remainingTargets": 0,
+      "removedByPage": 0,
+      "removedSinceRestoreSnapshot": [],
+      "retainedCurrentOrder": true,
+      "retainedNodes": 710,
+      "sourceOrder": true
+    }
+  },
+  "limits": [
+    "GitHub 的提交信息及计数、网页轮播和动画会使前后截图不同；恢复按操作前的当前页面状态校验。",
+    "Svelte 和 Apple 原有裁剪候选保持不变；GitHub 导航结构发生变化后，冻结基准复查也出现相同的 2 个隐藏标签裁剪候选和 1 个挤压候选。",
+    "Firefox 的页面行为通过 Gecko 内容脚本测试验证，原生扩展加载另有套件覆盖。",
+    "纯 CSSOM 或 adoptedStyleSheets 修改、且没有 DOM/视口/系统配色事件的样式变化未新增拦截。"
+  ]
+}

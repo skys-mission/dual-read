@@ -1,0 +1,261 @@
+{
+  "date": "2026-10-09",
+  "issueUrl": "https://github.com/skys-mission/dual-read",
+  "baseCommit": "a4b97669964d7f7a08698825b860d23f67a51b71",
+  "productionChange": [
+    "extension/lib/renderer/bounded-layout.ts"
+  ],
+  "beforeContentScriptSha256": "17e88ebfe83aa3bc6a1e548e8c5f16c38a3ae04289f5414695acd853da019c5a",
+  "afterContentScriptSha256": "a2c6220392245eb8cec5e2f8b8f779415457a1876fa7682a46c8d1c8d7a98daa",
+  "cssSha256": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "cause": "Post-render bounded layout checks scanned all author stylesheets for ordinary already-fitting ancestors. Large GitHub sheets made one frame block the main thread.",
+  "fix": [
+    "Use geometry to select actual expansion candidates before reading source cascade policies.",
+    "Retain author policy checks and inner inheritance/animation dependencies for candidates and existing corrections.",
+    "Reuse ancestor reads only within one synchronous pass, so later page/CSSOM edits are re-read."
+  ],
+  "beforeReproduction": {
+    "nativeChromiumExtension": true,
+    "translateRequestInitiallySucceeded": true,
+    "pageEvaluationTimedOutAfterMs": 5000,
+    "statusTimedOutAfterMs": 8000,
+    "interruptedForCpuProfile": true,
+    "cssVisitorSelfTimeInProfileMs": 8222
+  },
+  "regression": {
+    "stylesheetRules": 6000,
+    "beforeFrameGapMs": 8266.3,
+    "frameGapGuardMs": 1200,
+    "beforeExpectedFailure": true,
+    "afterModes": [
+      "bilingual",
+      "replace"
+    ],
+    "afterEngines": [
+      "Chromium extension",
+      "Firefox Gecko built content-script harness"
+    ],
+    "afterPassed": 4
+  },
+  "verification": {
+    "typeCheck": "passed",
+    "eslint": "passed",
+    "unitTests": 1762,
+    "unitFiles": 44,
+    "relatedNativeTests": {
+      "startTime": "2026-10-09T08:28:39.487Z",
+      "duration": 423025.502,
+      "expected": 68,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "fullDefaultPerformanceTests": {
+      "startTime": "2026-10-09T08:41:47.476Z",
+      "duration": 115568.28300000001,
+      "expected": 8,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    }
+  },
+  "liveReportedPage": {
+    "providerModel": "mimo-v2.6-flash",
+    "testMethod": "Isolated Chromium profile loading the packaged extension. The private test manifest grants only test website/provider origins to replace a missing toolbar activeTab gesture. Shipped permissions are unchanged.",
+    "coverage": "Current viewport and prefetch region; normal lazy translation, not all indexed below-fold units.",
+    "runs": [
+      {
+        "phase": "live-bilingual-final",
+        "translated": 143,
+        "failed": 0,
+        "stillTranslating": false,
+        "heartbeat": 561,
+        "longestTaskMs": 0,
+        "codeUnchanged": true,
+        "restore": {
+          "texts": true,
+          "code": true,
+          "residual": 0
+        },
+        "errors": []
+      },
+      {
+        "phase": "live-replace-final",
+        "translated": 145,
+        "failed": 0,
+        "stillTranslating": false,
+        "heartbeat": 441,
+        "longestTaskMs": 0,
+        "codeUnchanged": true,
+        "restore": {
+          "texts": true,
+          "code": true,
+          "residual": 0
+        },
+        "errors": []
+      }
+    ]
+  },
+  "sampledPages": {
+    "urls": [
+      "https://github.com/golang/go",
+      "https://react.dev/",
+      "https://vuejs.org/guide/introduction.html",
+      "https://docs.stripe.com/payments"
+    ],
+    "provider": "Deterministic local mock for both modes",
+    "runs": [
+      {
+        "phase": "sample-go-bilingual",
+        "translated": 114,
+        "failed": 0,
+        "stillTranslating": false,
+        "heartbeat": 39,
+        "longestTaskMs": 61,
+        "codeUnchanged": true,
+        "restore": {
+          "texts": true,
+          "code": true,
+          "residual": 0
+        },
+        "errors": []
+      },
+      {
+        "phase": "sample-go-replace",
+        "translated": 117,
+        "failed": 0,
+        "stillTranslating": false,
+        "heartbeat": 39,
+        "longestTaskMs": 72,
+        "codeUnchanged": true,
+        "restore": {
+          "texts": true,
+          "code": true,
+          "residual": 0
+        },
+        "errors": []
+      },
+      {
+        "phase": "sample-react-bilingual",
+        "translated": 16,
+        "failed": 0,
+        "stillTranslating": false,
+        "heartbeat": 40,
+        "longestTaskMs": 0,
+        "codeUnchanged": true,
+        "restore": {
+          "texts": true,
+          "code": true,
+          "residual": 0
+        },
+        "errors": []
+      },
+      {
+        "phase": "sample-react-replace",
+        "translated": 16,
+        "failed": 0,
+        "stillTranslating": false,
+        "heartbeat": 40,
+        "longestTaskMs": 0,
+        "codeUnchanged": true,
+        "restore": {
+          "texts": true,
+          "code": true,
+          "residual": 0
+        },
+        "errors": []
+      },
+      {
+        "phase": "sample-vue-bilingual",
+        "translated": 76,
+        "failed": 0,
+        "stillTranslating": false,
+        "heartbeat": 36,
+        "longestTaskMs": 0,
+        "codeUnchanged": true,
+        "restore": {
+          "texts": true,
+          "code": true,
+          "residual": 0
+        },
+        "errors": []
+      },
+      {
+        "phase": "sample-vue-replace",
+        "translated": 76,
+        "failed": 0,
+        "stillTranslating": false,
+        "heartbeat": 39,
+        "longestTaskMs": 0,
+        "codeUnchanged": true,
+        "restore": {
+          "texts": true,
+          "code": true,
+          "residual": 0
+        },
+        "errors": []
+      },
+      {
+        "phase": "sample-stripe-bilingual",
+        "translated": 67,
+        "failed": 0,
+        "stillTranslating": false,
+        "heartbeat": 39,
+        "longestTaskMs": 0,
+        "codeUnchanged": true,
+        "restore": {
+          "texts": true,
+          "code": true,
+          "residual": 0
+        },
+        "errors": []
+      },
+      {
+        "phase": "sample-stripe-replace",
+        "translated": 67,
+        "failed": 0,
+        "stillTranslating": false,
+        "heartbeat": 39,
+        "longestTaskMs": 210,
+        "codeUnchanged": true,
+        "restore": {
+          "texts": true,
+          "code": true,
+          "residual": 0
+        },
+        "errors": []
+      }
+    ],
+    "visualInspection": "React/Vue/Stripe samples preserve usable layout. The long English mock on Go exposes cramped branch/commit labels; the additional real Chinese Go sample has normal commit-row layout. This visual stress boundary is recorded rather than claimed fixed."
+  },
+  "limits": [
+    "This reproduces and fixes prolonged main-thread blocking; a browser-process or GPU crash was not reproduced.",
+    "Firefox verification uses the built Gecko content path, not installed Firefox background/popup integration.",
+    "Temporary IAB CDP/translation bridge run was incomplete (24 processed, 25 failed when paused); it is excluded from pass counts and the page was restored.",
+    "The real-provider Go sample was responsive with zero failures but still translating at its observation deadline; it is excluded from completed live acceptance counts.",
+    "Go long-English mock layout remains a visual stress boundary. The pre-fix Go observation was interrupted during a large CSS scan and cannot prove full visual equivalence."
+  ],
+  "artifacts": [
+    {
+      "file": "dual-read-extension-0.1.1-chrome-github-crash-fix.zip",
+      "sha256": "fd862ccfe87b5061882100a70f68fb8e8f3b4d85c3599d5bede8d4a6c8113cbf",
+      "bytes": 200212
+    },
+    {
+      "file": "dual-read-extension-0.1.1-firefox-github-crash-fix.zip",
+      "sha256": "205b9a8d8feae70f255e623fa64dfc340cb0e5303fbab1ddba619c8baea795b4",
+      "bytes": 200205
+    },
+    {
+      "file": "dual-read-extension-0.1.1-sources-github-crash-fix.zip",
+      "sha256": "f4f0c6e66dc76a02e77bc9091105738d838a320e82099787423c1fcfa89778f5",
+      "bytes": 447458
+    }
+  ],
+  "credentialsInArtifacts": false,
+  "changesCommitted": false
+}

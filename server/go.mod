@@ -1,8 +1,8 @@
 module github.com/skys-mission/dual-read/server
 
-go 1.25.0
+go 1.26.0
 
-toolchain go1.25.14
+toolchain go1.26.10
 
 require (
 	github.com/allegro/bigcache/v3 v3.2.0
@@ -13,5 +13,5 @@ require (
 require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/sys v0.44.0 // indirect
 )

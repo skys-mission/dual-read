@@ -1,0 +1,431 @@
+{
+  "date": "2026-10-09",
+  "timezone": "Asia/Shanghai",
+  "task": "Inherited sizing and page motion policy fixes",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "scope": {
+    "changedProductionFiles": [
+      "extension/lib/renderer/anchored-layout.ts",
+      "extension/lib/renderer/bounded-layout.ts",
+      "extension/lib/renderer/layout-updates.ts",
+      "extension/lib/renderer/media-layout.ts",
+      "extension/lib/renderer/source-layout-policy.ts"
+    ],
+    "productionInputsChecked": 72,
+    "dependencyVersionsChanged": false,
+    "packagedCssChanged": false,
+    "domainRulesAdded": false
+  },
+  "fixes": [
+    {
+      "id": "inherited-sizing",
+      "behavior": "Fingerprint the authored parent dependency through rendered ancestry, mapping logical inheritance to physical properties in the child writing mode. Keep dependency data structured and bound ancestry work to 32 levels."
+    },
+    {
+      "id": "animated-sizing",
+      "behavior": "Recognize selected keyframe properties on live/filling effects; release sizing overrides and refuse initial overrides while these effects own the selected dimension. Ignore unrelated paint, dimensions and pseudo effects."
+    },
+    {
+      "id": "outer-inherit-feedback",
+      "behavior": "Capture the inner sizing source chain per owner. Outer corrections retire with changed inner author policies and resume only when the original chain returns; detached context and owner maps are released."
+    }
+  ],
+  "baseline": {
+    "sourceSessions": 80,
+    "versions": [
+      "frozen pre-fix",
+      "final current"
+    ],
+    "beforeConfirmedBugCases": 16,
+    "beforeRelatedInheritanceCases": 8,
+    "beforeControls": 16,
+    "afterCorrect": 40,
+    "previousReview": "Both confirmed bugs existed in the preceding uncommitted version; HEAD respected the author sizing."
+  },
+  "validation": {
+    "unit": {
+      "files": 44,
+      "tests": 1762,
+      "added": 23
+    },
+    "compile": true,
+    "lint": true,
+    "diffCheck": true,
+    "freshBuilds": [
+      "Chrome MV3",
+      "Firefox MV3"
+    ],
+    "native": {
+      "cases": 216,
+      "newGroupedTests": 16,
+      "newBehaviorCombinations": 160,
+      "existingTests": 200,
+      "chromium": 108,
+      "firefox": 108,
+      "failures": 0,
+      "retries": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "workers": 2,
+      "durationMs": 517995.966
+    },
+    "policyMatrix": {
+      "cases": 1430,
+      "added": 136,
+      "engines": 2,
+      "writingModes": [
+        "horizontal-tb",
+        "vertical-rl",
+        "vertical-lr",
+        "sideways-rl",
+        "sideways-lr"
+      ],
+      "directions": [
+        "ltr",
+        "rtl"
+      ],
+      "newFamilies": [
+        "inherited physical/logical sizing",
+        "selected motion and filled/canceled effects"
+      ]
+    },
+    "performance": {
+      "cases": 8,
+      "full": 1,
+      "strict": 0,
+      "defaultBudgets": true,
+      "ranAfterOtherAutomatedBrowserJobs": true
+    },
+    "restoration": "Fresh packaged sessions cover watching/paused, deferred/delivered edits, text and code edits, added elements, source transfer/removal, href changes, repeated restoration and opposite translation mode."
+  },
+  "sampling": {
+    "method": "Freshly live-loaded public page snapshots replayed at original URLs with site scripts disabled; paired inputs verified by HTML hash.",
+    "sites": [
+      {
+        "id": "popular-1-2",
+        "site": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Internet",
+        "snapshotHash": "679e3497ae6651cfabcc864d690d53d3afb10bd890195f532112194ff9cad0b0",
+        "sourceUnits": 680,
+        "processed": 145,
+        "codeNodes": 0,
+        "views": [
+          {
+            "view": "source-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-scroll",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "replace-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          }
+        ]
+      },
+      {
+        "id": "commercial-1-2",
+        "site": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/azure/architecture/",
+        "snapshotHash": "d3d4c337abec8784d4ae90cfe9302460d23f1a5b6344eca72c5ce62730acea02",
+        "sourceUnits": 65,
+        "processed": 65,
+        "codeNodes": 0,
+        "views": [
+          {
+            "view": "source-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-scroll",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "replace-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          }
+        ]
+      },
+      {
+        "id": "commercial-7-2",
+        "site": "Shopify Developer",
+        "url": "https://shopify.dev/docs/apps/build",
+        "snapshotHash": "e2a54ff4a79b844e69023054cb90fcf6c869729280774d9e5297221975f007d2",
+        "sourceUnits": 102,
+        "processed": 47,
+        "codeNodes": 0,
+        "views": [
+          {
+            "view": "source-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-top",
+            "overflow": 0,
+            "clips": 1,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-scroll",
+            "overflow": 0,
+            "clips": 1,
+            "squeezed": 0
+          },
+          {
+            "view": "replace-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          }
+        ]
+      },
+      {
+        "id": "commercial-8-2",
+        "site": "Stripe Docs",
+        "url": "https://docs.stripe.com/payments/accept-a-payment",
+        "snapshotHash": "2caebb0c3a30811df452d770f1f6db6a56ca3757968b091d3ad2726c816f2eeb",
+        "sourceUnits": 174,
+        "processed": 74,
+        "codeNodes": 257,
+        "views": [
+          {
+            "view": "source-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-scroll",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "replace-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          }
+        ]
+      },
+      {
+        "id": "open_source-1-1",
+        "site": "React",
+        "url": "https://react.dev/",
+        "snapshotHash": "58fb7c24dff4d7015d9e427a5cef46c4224ed16c07b9f5eafde16c6ff6d2e396",
+        "sourceUnits": 120,
+        "processed": 19,
+        "codeNodes": 500,
+        "views": [
+          {
+            "view": "source-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-scroll",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "replace-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          }
+        ]
+      },
+      {
+        "id": "popular-2-2",
+        "site": "GitHub",
+        "url": "https://github.com/golang/go",
+        "snapshotHash": "56625aaea792cb4a55ea0979c27549ad1e8d76bfcc166323952d61f655cd35f7",
+        "sourceUnits": 118,
+        "processed": 118,
+        "codeNodes": 0,
+        "views": [
+          {
+            "view": "source-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-top",
+            "overflow": 0,
+            "clips": 2,
+            "squeezed": 1
+          },
+          {
+            "view": "bilingual-scroll",
+            "overflow": 0,
+            "clips": 2,
+            "squeezed": 0
+          },
+          {
+            "view": "replace-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          }
+        ]
+      },
+      {
+        "id": "open_source-2-2",
+        "site": "Vue",
+        "url": "https://vuejs.org/guide/introduction.html",
+        "snapshotHash": "3de2b0d9bf6851edd1c18ef51bd0ff64415cda3616f24e6b5c5828096265f3c2",
+        "sourceUnits": 151,
+        "processed": 82,
+        "codeNodes": 369,
+        "views": [
+          {
+            "view": "source-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "bilingual-scroll",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          },
+          {
+            "view": "replace-top",
+            "overflow": 0,
+            "clips": 0,
+            "squeezed": 0
+          }
+        ]
+      }
+    ],
+    "primaryScreenshots": 56,
+    "translatedPairsVisuallyInspected": 21,
+    "stripeWheel": {
+      "delta": 900,
+      "codeNodes": 257,
+      "sourceUnits": 174,
+      "processed": 81,
+      "clipCandidatesBefore": 1,
+      "clipCandidatesAfter": 1
+    },
+    "iab": {
+      "url": "https://react.dev/",
+      "method": "Temporary injection of fresh production content through an isolated developer world; no installed extension.",
+      "originalTextNodes": 710,
+      "codeTextNodes": 500,
+      "failed": 0,
+      "watching": false,
+      "preservedLivePageEdit": {
+        "kind": "React example clock",
+        "before": [
+          "13:25"
+        ],
+        "after": [
+          "13:26"
+        ],
+        "overwrittenCurrentValues": 0
+      },
+      "screenshot": ".codex/inheritance-motion-fixes-2026-10-09/iab-after/react-delivery.jpg"
+    }
+  },
+  "engineering": {
+    "problem": "Repeated broad reviews uncovered previously untested structure/operation boundaries while the passing suite mostly covered other CSS declarations. The current uncommitted scope combines many layout features.",
+    "stopCriteria": [
+      "Close the reproduced bugs accepted in this change scope.",
+      "Freeze and verify the production input and fresh artifact hashes.",
+      "Pass full unit, real-browser policy combinations and selected packaged browser restoration cases.",
+      "Pass paired page sampling without new layout loss and the independent performance gate.",
+      "End this iteration when these gates pass; expand scope only for a reproducible regression, failed gate or a new user-prioritized issue."
+    ],
+    "nonBlockingFollowup": "Record out-of-scope or low-impact compatibility findings with a reproduction and impact instead of reopening the whole batch.",
+    "fullSuiteTriggers": [
+      "Source ownership, collector or restoration core changes",
+      "Observer subscription lifecycle changes",
+      "Cross-family failures or material risks discovered by targeted checks"
+    ],
+    "nativeDurationMs": 517995.966,
+    "automaticBroadReviewAdded": false
+  },
+  "assets": {
+    "before": {
+      "jsSha256": "1075f1cfeeb591f1ad6d07d051d0a126361d593abf67c4de0cf1f1b23495c13d",
+      "jsBytes": 268301,
+      "jsGzipBytes": 73722,
+      "cssSha256": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d"
+    },
+    "after": {
+      "jsSha256": "17e88ebfe83aa3bc6a1e548e8c5f16c38a3ae04289f5414695acd853da019c5a",
+      "jsBytes": 269969,
+      "jsGzipBytes": 74362,
+      "cssSha256": "7951ebc5e2198cf4063c6714f2683152503e4067e98cd2b85e39c876fedc1b6d"
+    }
+  },
+  "limits": [
+    "This is a bounded compatibility fix, not a complete CSS cascade/animation interpreter. Motion is inspected during capture and existing page/browser refresh events; a pure programmatic animation started later without a DOM or subscribed browser event is not guaranteed to be detected immediately.",
+    "Inherited dependency tracing is bounded to 32 rendered ancestors; deeper or opaque inputs retain the existing incomplete-policy fallback.",
+    "Website pairs use freshly live-loaded snapshots replayed at the original URLs with site scripts disabled; dynamic behavior is covered by native fixtures and the actual in-app browser.",
+    "Seven public pages were sampled; the earlier 70-page audit and complete native matrix were not rerun. Firefox uses the repository Gecko runtime shim with fresh packaged content."
+  ],
+  "security": {
+    "knownCredentialMatchesInGitVisibleFiles": 0,
+    "privateConfigMode": "0600"
+  },
+  "git": {
+    "staged": false,
+    "committed": false,
+    "head": "995498672da7fdbddf4e00f21224ba6cfabf0163"
+  },
+  "evidenceDirectory": ".codex/inheritance-motion-fixes-2026-10-09"
+}

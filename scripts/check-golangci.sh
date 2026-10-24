@@ -5,7 +5,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${ROOT_DIR}/server"
 
-GOLANGCI_VERSION="${GOLANGCI_VERSION:-v2.1.6}"
+GOLANGCI_VERSION="${GOLANGCI_VERSION:-v2.14.0}"
 
 echo "[check-golangci] golangci-lint ${GOLANGCI_VERSION}"
 # go run pins the exact module; CI uses the same command (no floating "latest").

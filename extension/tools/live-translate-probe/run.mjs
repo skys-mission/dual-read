@@ -17,6 +17,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium, firefox } from '@playwright/test';
+import { chromeTranslate } from './chrome-control.mjs';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const EXT_ROOT = path.resolve(dirname, '../..');
@@ -204,48 +205,6 @@ async function ensureChromeSettings(context, extensionId, settings) {
   } finally {
     await page.close();
   }
-}
-
-async function chromeTranslate(sw, tabId) {
-  return sw.evaluate(async (id) => {
-    const sync = await chrome.storage.sync.get(null);
-    const ping = () =>
-      new Promise((resolve) => {
-        chrome.tabs.sendMessage(id, { action: 'ping' }, (response) => {
-          if (chrome.runtime.lastError) resolve(null);
-          else resolve(response?.pong ? response : null);
-        });
-      });
-    let existing = await ping();
-    if (!existing) {
-      await chrome.scripting.executeScript({ target: { tabId: id }, files: ['dual-read.js'] });
-      await chrome.scripting.insertCSS({ target: { tabId: id }, files: ['dual-read.css'] });
-      existing = await ping();
-      if (!existing) return { ok: false, error: 'content script did not respond' };
-    }
-    const config = {
-      sessionId: `live-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      revision: Number(sync.revision) || 1,
-      targetLang: sync.targetLang || 'zh-CN',
-      uiLocale: sync.uiLocale || 'zh-CN',
-      mode: sync.mode || 'bilingual',
-      maxConcurrent: Number(sync.maxConcurrent) || 3,
-      batchSize: Number(sync.batchSize) || 6,
-      providerFingerprint: [
-        sync.apiBase || '',
-        sync.model || '',
-        sync.targetLang || 'zh-CN',
-      ].join('|'),
-      disabled: false,
-    };
-    const result = await new Promise((resolve) => {
-      chrome.tabs.sendMessage(id, { action: 'translatePage', config }, (response) => {
-        if (chrome.runtime.lastError) resolve({ success: false, error: chrome.runtime.lastError.message });
-        else resolve(response ?? { success: false, error: 'no response' });
-      });
-    });
-    return { ok: Boolean(result?.success), result };
-  }, tabId);
 }
 
 async function chromePoll(sw, tabId, timeoutMs) {

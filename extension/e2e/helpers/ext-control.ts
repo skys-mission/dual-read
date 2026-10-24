@@ -1,4 +1,7 @@
 import type { BrowserContext, Page, Worker } from '@playwright/test';
+import { buildPublicSessionConfig } from '../../lib/settings/session-config';
+import { parseSettings } from '../../lib/settings/schema';
+import { hostOf } from '../../lib/settings/storage';
 
 export interface E2ESettings {
   apiBase: string;
@@ -91,18 +94,20 @@ export async function seedSettings(
   }
 }
 
-function sessionConfig(mode: 'bilingual' | 'replace', targetLang = 'zh-CN'): PublicSessionConfigLite {
-  return {
-    sessionId: `e2e-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    revision: 1,
-    targetLang,
-    uiLocale: 'en',
+async function sessionConfig(sw: Worker, tabId: number, mode: 'bilingual' | 'replace', targetLang?: string): Promise<PublicSessionConfigLite> {
+  const { raw, url } = await sw.evaluate(async (id) => {
+    const [sync, local, tab] = await Promise.all([
+      chrome.storage.sync.get(null),
+      chrome.storage.local.get(['apiKey', 'customHeaders', 'dualReadSettingsMeta']),
+      chrome.tabs.get(id),
+    ]);
+    return { raw: { ...sync, ...local, revision: local.dualReadSettingsMeta?.revision || 0 }, url: tab.url };
+  }, tabId);
+  const settings = parseSettings(raw);
+  return buildPublicSessionConfig(settings, hostOf(url), {
     mode,
-    maxConcurrent: 3,
-    batchSize: 6,
-    providerFingerprint: 'e2e-mock-fp',
-    disabled: false,
-  };
+    ...(targetLang ? { targetLang: parseSettings({ ...settings, targetLang }).targetLang } : {}),
+  });
 }
 
 type ContentAction =
@@ -250,12 +255,12 @@ export async function translateTab(
   sw: Worker,
   tabId: number,
   mode: 'bilingual' | 'replace' = 'bilingual',
-  opts?: { timeoutMs?: number },
+  opts?: { timeoutMs?: number; targetLang?: string },
 ): Promise<Record<string, unknown>> {
   return relayToFrames(
     sw,
     tabId,
-    { action: 'translatePage', config: sessionConfig(mode) },
+    { action: 'translatePage', config: await sessionConfig(sw, tabId, mode, opts?.targetLang) },
     'translateTab',
     opts?.timeoutMs ?? 25_000,
   );
@@ -281,9 +286,11 @@ export async function translateSelectionInTab(
   opts?: { frameId?: number; timeoutMs?: number; disabled?: boolean },
 ): Promise<Record<string, unknown>> {
   const frameId = opts?.frameId ?? 0;
+  const config = await sessionConfig(sw, tabId, 'bilingual');
+  if (opts?.disabled !== undefined) config.disabled = opts.disabled;
   return withTimeout(
     sw.evaluate(
-      async ({ id, frame, selected, disabled }) => {
+      async ({ id, frame, selected, config }) => {
         const ping = (): Promise<{ pong?: boolean; version?: string; runtimeId?: string | null } | null> =>
           new Promise((resolve) => {
             chrome.tabs.sendMessage(id, { action: 'ping' }, { frameId: frame }, (response) => {
@@ -312,18 +319,6 @@ export async function translateSelectionInTab(
             return { success: false, error: 'content script did not bind' };
           }
         }
-
-        const config = {
-          sessionId: `e2e-sel-${Date.now()}`,
-          revision: 1,
-          targetLang: 'zh-CN',
-          uiLocale: 'en',
-          mode: 'bilingual' as const,
-          maxConcurrent: 3,
-          batchSize: 6,
-          providerFingerprint: 'e2e-mock-fp',
-          disabled,
-        };
 
         type FrameReply = { ok: boolean; payload: unknown };
         const results = await chrome.scripting.executeScript({
@@ -369,7 +364,7 @@ export async function translateSelectionInTab(
         const result = results[0]?.result as FrameReply | undefined;
         return (result?.payload as Record<string, unknown>) || { success: false, error: 'no reply' };
       },
-      { id: tabId, frame: frameId, selected: text, disabled: opts?.disabled ?? false },
+      { id: tabId, frame: frameId, selected: text, config },
     ),
     opts?.timeoutMs ?? 25_000,
     'translateSelectionInTab',

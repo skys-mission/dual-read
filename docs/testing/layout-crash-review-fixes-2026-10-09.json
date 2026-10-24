@@ -1,0 +1,414 @@
+{
+  "date": "2026-10-09",
+  "baseCommit": "a4b97669964d7f7a08698825b860d23f67a51b71",
+  "scope": "Fix the three verified review findings R1/R2/R3 and regressions found while implementing their bounded-work design.",
+  "decision": "The final package passes the targeted browser, performance, ownership and sampled-page acceptance gates and is ready for user retesting.",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "contentScriptSha256": "30262ebb775a9f155c81fe8cccc9982e5bd21e869890fd767fe8987d7a7a07fa",
+  "beforeScopeValidation": {
+    "reviewReport": "docs/testing/crash-review-2026-10-09.json",
+    "findingsConfirmedBeforeRepair": [
+      "R1: seconds-long initial and paused bounded-layout policy scans on multiple real candidates.",
+      "R2: repeated media source capture/validation scans before the render slice, including fitting media with no installed correction.",
+      "R3: source text edited while paused leaves a stale unschedulable entry after resume in both display modes."
+    ],
+    "scope": "Extension source-layout policy reads, bounded/media/anchor layout scheduling, and content-session resume reconciliation. The provider, cache proxy, collector rules and product settings are unchanged."
+  },
+  "fixes": [
+    {
+      "findings": [
+        "R1",
+        "R2"
+      ],
+      "change": "Share author stylesheet metadata and policy results only within a synchronous read pass; avoid serializing native grouping rule descendants; include source capture, contract validation and geometry in cooperative scheduling.",
+      "bounds": {
+        "renderChunkOwners": 8,
+        "layoutUpdateChunkContracts": 2,
+        "softPolicyReadMs": 24,
+        "hardPolicyReadMs": 96,
+        "maxPolicyRules": 25000
+      },
+      "ownership": "Validate each source contract afresh immediately before its write. Never reuse policy caches across writes, asynchronous yields, CSSOM changes or later passes.",
+      "limitBehavior": "A limited read is explicitly incomplete and is not treated as an opaque stylesheet fallback. Optional geometry corrections are omitted or released without modifying author source styles."
+    },
+    {
+      "findings": [
+        "R3"
+      ],
+      "change": "Reconcile connected current/original source nodes before resumed observation and dispatch; restore/drop/recollect changed owners; preserve generation checks so old responses cannot overwrite new source.",
+      "coverage": "Plain/rich text, link changes, node replacement/removal and already delivered hidden originals in both display modes; preserve page edits and source identities."
+    }
+  ],
+  "regressionsDetectedDuringRepair": [
+    {
+      "problem": "Bulk prevalidation would accept a later box after a synchronous custom-element callback changed its source during the first owned write.",
+      "resolution": "Keep fresh per-item validation immediately before each mutation.",
+      "regression": "A source callback collapses the next box; assert the extension never installs an owned correction on it."
+    },
+    {
+      "problem": "The first per-owner capture/render slicing design measured some inner-row images after a sibling translation stretched the outer grid row. Only 12–16 of 24 needed constraints were installed.",
+      "beforeRepairControl": "The previous unbounded implementation installed all 24 media constraints but blocked a frame for 12150.6ms in the same native Chromium fixture.",
+      "resolution": "Capture a fixed cohort cooperatively before any of that cohort's text or layout writes. New responses join the next cohort. Keep fresh source checks for rendering and owned writes.",
+      "regression": "6000-rule shared grid with 24 actual installed media constraints, paused sibling/author sizing changes and restoration; Chromium/Firefox and bilingual/replace all pass on the final artifact."
+    }
+  ],
+  "acceptance": {
+    "typeScript": "passed",
+    "eslint": "passed",
+    "unitTests": {
+      "passed": 1776,
+      "filesPassed": 44
+    },
+    "browserTests": {
+      "passed": 116,
+      "mainSuite": 108,
+      "additionalSharedMotionSample": 8,
+      "mainSuiteCommand": "PERF_FULL=1 npx playwright test e2e/regression.spec.ts e2e/lab.spec.ts e2e/firefox.spec.ts e2e/perf.spec.ts -g 'large stylesheet workload|layout stylesheet workload|layout write source guard|paused source resume|stylesheet layout regression|media policy regression|generic page layout|perf budget lab' --reporter=line",
+      "additionalCommand": "npx playwright test e2e/lab.spec.ts e2e/firefox.spec.ts -g '(motion|shared) policy regression: (bilingual|replace), paused=true, delivered=true' --reporter=line",
+      "includes": [
+        "20 paused-source resume browser/mode combinations",
+        "24-card bounded, flex media, shared grid media and anchor stress fixtures",
+        "4 synchronous source callback guards",
+        "author stylesheet/container/scope/opaque-sheet and generic layout regression",
+        "sampled source inheritance, animations and shared ownership",
+        "all 8 existing performance gates, including 20k-node long tasks and both 30-navigation memory workloads"
+      ]
+    },
+    "build": "Fresh Chromium and Firefox extension packages built; packaged script hashes match each other, tested output and all final private native probes.",
+    "artifactChecks": "Passed forbidden secret/development-file checks. Shipped permissions remain storage/contextMenus/activeTab/scripting with loopback required origins and optional HTTPS permission.",
+    "finalCodeInspection": "Checked final diff for read-cache lifetime, queue completion, pending-record preservation, per-write validation, generation checks and restoration. The two concrete implementation regressions above were corrected before final acceptance.",
+    "gitDiffCheck": "passed",
+    "goTests": "not run; server code is unchanged"
+  },
+  "serialWorkloadMeasurements": {
+    "method": "Native Chromium MV3 extension with production background/relay, deterministic long Chinese translations, no CPU profiler and one browser workload at a time. Observe subsequent animation frames with performance.now after the action; exclude initial stylesheet parsing.",
+    "beforeBilingual": {
+      "boundedInitialMs": 4654.2,
+      "boundedPausedBodyAttributeMs": 5007.4,
+      "flexMediaInitialMs": 4919.8
+    },
+    "after": [
+      {
+        "scenario": "bounds",
+        "mode": "bilingual",
+        "cssRules": 6000,
+        "cards": 24,
+        "translatedUnits": 48,
+        "maxFrameGapMs": 87.8,
+        "maxLongTaskMs": 87,
+        "pausedBodyAttributeGapMs": 105.5,
+        "installedBoundedRules": 25,
+        "installedMediaRules": 0,
+        "installedAnchorRules": 0,
+        "restoredSourceTextIdentitiesAndValues": true,
+        "privateEvidence": ".codex/github-crash-2026-10-09/final-fix/bounds-6000-24-bilingual-no-profile"
+      },
+      {
+        "scenario": "bounds",
+        "mode": "replace",
+        "cssRules": 6000,
+        "cards": 24,
+        "translatedUnits": 48,
+        "maxFrameGapMs": 102.7,
+        "maxLongTaskMs": 102,
+        "pausedBodyAttributeGapMs": 105.2,
+        "installedBoundedRules": 25,
+        "installedMediaRules": 0,
+        "installedAnchorRules": 0,
+        "restoredSourceTextIdentitiesAndValues": true,
+        "privateEvidence": ".codex/github-crash-2026-10-09/final-fix/bounds-6000-24-replace-no-profile"
+      },
+      {
+        "scenario": "media",
+        "mode": "bilingual",
+        "cssRules": 6000,
+        "cards": 24,
+        "translatedUnits": 48,
+        "maxFrameGapMs": 53.1,
+        "maxLongTaskMs": 0,
+        "pausedBodyAttributeGapMs": 18.5,
+        "installedBoundedRules": 0,
+        "installedMediaRules": 0,
+        "installedAnchorRules": 0,
+        "restoredSourceTextIdentitiesAndValues": true,
+        "privateEvidence": ".codex/github-crash-2026-10-09/final-fix/media-6000-24-bilingual-no-profile"
+      },
+      {
+        "scenario": "media",
+        "mode": "replace",
+        "cssRules": 6000,
+        "cards": 24,
+        "translatedUnits": 48,
+        "maxFrameGapMs": 54.9,
+        "maxLongTaskMs": 0,
+        "pausedBodyAttributeGapMs": 18.5,
+        "installedBoundedRules": 0,
+        "installedMediaRules": 0,
+        "installedAnchorRules": 0,
+        "restoredSourceTextIdentitiesAndValues": true,
+        "privateEvidence": ".codex/github-crash-2026-10-09/final-fix/media-6000-24-replace-no-profile"
+      },
+      {
+        "scenario": "anchors",
+        "mode": "bilingual",
+        "cssRules": 6000,
+        "cards": 24,
+        "translatedUnits": 48,
+        "maxFrameGapMs": 80.7,
+        "maxLongTaskMs": 80,
+        "pausedBodyAttributeGapMs": 19.7,
+        "installedBoundedRules": 0,
+        "installedMediaRules": 0,
+        "installedAnchorRules": 24,
+        "restoredSourceTextIdentitiesAndValues": true,
+        "privateEvidence": ".codex/github-crash-2026-10-09/final-fix/anchors-6000-24-bilingual-no-profile"
+      },
+      {
+        "scenario": "anchors",
+        "mode": "replace",
+        "cssRules": 6000,
+        "cards": 24,
+        "translatedUnits": 48,
+        "maxFrameGapMs": 19.9,
+        "maxLongTaskMs": 0,
+        "pausedBodyAttributeGapMs": 16.8,
+        "installedBoundedRules": 0,
+        "installedMediaRules": 0,
+        "installedAnchorRules": 0,
+        "restoredSourceTextIdentitiesAndValues": true,
+        "privateEvidence": ".codex/github-crash-2026-10-09/final-fix/anchors-6000-24-replace-no-profile"
+      }
+    ],
+    "mediaScope": "The original flex workload exercises source capture/validation but does not require installed media corrections. The separate shared-grid public regressions assert all 24 real corrections and paused invalidation."
+  },
+  "realPageSamples": [
+    {
+      "page": "live-github",
+      "mode": "bilingual",
+      "provider": "MiMo mimo-v2.6-flash",
+      "translatedUnits": 143,
+      "indexedUnits": 249,
+      "failedUnits": 0,
+      "inFlightAtCapture": false,
+      "maxFrameGapMs": 120.1,
+      "maxObservedLongTaskMs": 0,
+      "sourceCodeUnchanged": true,
+      "restoredSampledTextIdentitiesAndValues": true,
+      "residualOwnedNodes": 0,
+      "privateEvidence": ".codex/github-crash-2026-10-09/final-fix-live-github-bilingual"
+    },
+    {
+      "page": "live-github",
+      "mode": "replace",
+      "provider": "MiMo mimo-v2.6-flash",
+      "translatedUnits": 149,
+      "indexedUnits": 251,
+      "failedUnits": 0,
+      "inFlightAtCapture": false,
+      "maxFrameGapMs": 132.8,
+      "maxObservedLongTaskMs": 0,
+      "sourceCodeUnchanged": true,
+      "restoredSampledTextIdentitiesAndValues": true,
+      "residualOwnedNodes": 0,
+      "privateEvidence": ".codex/github-crash-2026-10-09/final-fix-live-github-replace"
+    },
+    {
+      "page": "sample-go",
+      "mode": "bilingual",
+      "provider": "deterministic Chinese mock",
+      "translatedUnits": 115,
+      "indexedUnits": 118,
+      "failedUnits": 0,
+      "inFlightAtCapture": false,
+      "maxFrameGapMs": 119.1,
+      "maxObservedLongTaskMs": 0,
+      "sourceCodeUnchanged": true,
+      "restoredSampledTextIdentitiesAndValues": true,
+      "residualOwnedNodes": 0,
+      "privateEvidence": ".codex/github-crash-2026-10-09/final-fix-sample-go-bilingual"
+    },
+    {
+      "page": "sample-go",
+      "mode": "replace",
+      "provider": "deterministic Chinese mock",
+      "translatedUnits": 117,
+      "indexedUnits": 120,
+      "failedUnits": 0,
+      "inFlightAtCapture": false,
+      "maxFrameGapMs": 119.2,
+      "maxObservedLongTaskMs": 72,
+      "sourceCodeUnchanged": true,
+      "restoredSampledTextIdentitiesAndValues": true,
+      "residualOwnedNodes": 0,
+      "privateEvidence": ".codex/github-crash-2026-10-09/final-fix-sample-go-replace"
+    },
+    {
+      "page": "sample-react",
+      "mode": "bilingual",
+      "provider": "deterministic Chinese mock",
+      "translatedUnits": 16,
+      "indexedUnits": 120,
+      "failedUnits": 0,
+      "inFlightAtCapture": false,
+      "maxFrameGapMs": 54.8,
+      "maxObservedLongTaskMs": 0,
+      "sourceCodeUnchanged": true,
+      "restoredSampledTextIdentitiesAndValues": true,
+      "residualOwnedNodes": 0,
+      "privateEvidence": ".codex/github-crash-2026-10-09/final-fix-sample-react-bilingual"
+    },
+    {
+      "page": "sample-react",
+      "mode": "replace",
+      "provider": "deterministic Chinese mock",
+      "translatedUnits": 16,
+      "indexedUnits": 120,
+      "failedUnits": 0,
+      "inFlightAtCapture": false,
+      "maxFrameGapMs": 54.1,
+      "maxObservedLongTaskMs": 0,
+      "sourceCodeUnchanged": true,
+      "restoredSampledTextIdentitiesAndValues": true,
+      "residualOwnedNodes": 0,
+      "privateEvidence": ".codex/github-crash-2026-10-09/final-fix-sample-react-replace"
+    },
+    {
+      "page": "sample-vue",
+      "mode": "bilingual",
+      "provider": "deterministic Chinese mock",
+      "translatedUnits": 76,
+      "indexedUnits": 151,
+      "failedUnits": 0,
+      "inFlightAtCapture": false,
+      "maxFrameGapMs": 72.3,
+      "maxObservedLongTaskMs": 0,
+      "sourceCodeUnchanged": true,
+      "restoredSampledTextIdentitiesAndValues": true,
+      "residualOwnedNodes": 0,
+      "privateEvidence": ".codex/github-crash-2026-10-09/final-fix-sample-vue-bilingual"
+    },
+    {
+      "page": "sample-vue",
+      "mode": "replace",
+      "provider": "deterministic Chinese mock",
+      "translatedUnits": 79,
+      "indexedUnits": 151,
+      "failedUnits": 0,
+      "inFlightAtCapture": false,
+      "maxFrameGapMs": 56.3,
+      "maxObservedLongTaskMs": 0,
+      "sourceCodeUnchanged": true,
+      "restoredSampledTextIdentitiesAndValues": true,
+      "residualOwnedNodes": 0,
+      "privateEvidence": ".codex/github-crash-2026-10-09/final-fix-sample-vue-replace"
+    },
+    {
+      "page": "sample-stripe",
+      "mode": "bilingual",
+      "provider": "deterministic Chinese mock",
+      "translatedUnits": 67,
+      "indexedUnits": 124,
+      "failedUnits": 0,
+      "inFlightAtCapture": false,
+      "maxFrameGapMs": 314.2,
+      "maxObservedLongTaskMs": 103,
+      "sourceCodeUnchanged": true,
+      "restoredSampledTextIdentitiesAndValues": true,
+      "residualOwnedNodes": 0,
+      "privateEvidence": ".codex/github-crash-2026-10-09/final-fix-sample-stripe-bilingual"
+    },
+    {
+      "page": "sample-stripe",
+      "mode": "replace",
+      "provider": "deterministic Chinese mock",
+      "translatedUnits": 67,
+      "indexedUnits": 124,
+      "failedUnits": 0,
+      "inFlightAtCapture": false,
+      "maxFrameGapMs": 311.9,
+      "maxObservedLongTaskMs": 105,
+      "sourceCodeUnchanged": true,
+      "restoredSampledTextIdentitiesAndValues": true,
+      "residualOwnedNodes": 0,
+      "privateEvidence": ".codex/github-crash-2026-10-09/final-fix-sample-stripe-replace"
+    }
+  ],
+  "sampleUrls": {
+    "live-github": "https://github.com/skys-mission/dual-read",
+    "sample-go": "https://github.com/golang/go",
+    "sample-react": "https://react.dev/",
+    "sample-vue": "https://vuejs.org/guide/introduction.html",
+    "sample-stripe": "https://docs.stripe.com/payments?locale=en-US"
+  },
+  "artifacts": [
+    {
+      "browser": "chrome",
+      "path": "dist/dual-read-extension-0.1.1-chrome-layout-crash-review-fix.zip",
+      "sha256": "fbaee7f36a39dd852eefba686e5136b37f1e75dc4086583d018b1b0a8d5fb34e",
+      "contentScriptSha256": "30262ebb775a9f155c81fe8cccc9982e5bd21e869890fd767fe8987d7a7a07fa",
+      "version": "0.1.1",
+      "permissions": [
+        "storage",
+        "contextMenus",
+        "activeTab",
+        "scripting"
+      ],
+      "hostPermissions": [
+        "http://localhost/*",
+        "http://127.0.0.1/*",
+        "http://[::1]/*"
+      ],
+      "optionalHostPermissions": [
+        "https://*/"
+      ]
+    },
+    {
+      "browser": "firefox",
+      "path": "dist/dual-read-extension-0.1.1-firefox-layout-crash-review-fix.zip",
+      "sha256": "35820632b252daffdfba335c42c71d4f8c277004e09e83ee7db6101b6b3e7a38",
+      "contentScriptSha256": "30262ebb775a9f155c81fe8cccc9982e5bd21e869890fd767fe8987d7a7a07fa",
+      "version": "0.1.1",
+      "permissions": [
+        "storage",
+        "contextMenus",
+        "activeTab",
+        "scripting"
+      ],
+      "hostPermissions": [
+        "http://localhost/*",
+        "http://127.0.0.1/*",
+        "http://[::1]/*"
+      ],
+      "optionalHostPermissions": [
+        "https://*/"
+      ]
+    }
+  ],
+  "limits": [
+    "Final Chromium acceptance loads the actual production MV3 extension. Firefox acceptance runs the built production content script on native Gecko through the repository harness; it does not establish full installed Firefox toolbar/background behavior.",
+    "Private native page probes grant only the selected site/provider origins in an isolated test copy to replace a missing activeTab toolbar gesture; shipped manifest permissions are unchanged.",
+    "Real-page samples cover the current viewport and nearby prefetch window. Indexed below-fold units are not equivalent to current in-flight requests or full-page visual coverage.",
+    "The reported GitHub page uses the authorized live MiMo provider. The other four page samples use deliberately length-varied Chinese mock translations to check rendering rather than model quality.",
+    "Restoration proofs for live samples cover the README or main subtree and its code nodes, with owned-node residue checked document-wide. The synthetic regressions check complete source fixtures, node order and page edits.",
+    "Live-page timing includes page work and CPU-profile overhead, so it is descriptive and is not mixed into the no-profiler stress comparison.",
+    "Extreme or unfinished cascade reads omit optional geometry corrections. They do not use a partial policy as proof that an important rule can mask author sizing.",
+    "The existing narrow Go commit-summary column can still wrap awkwardly with deliberately long mock translations; this lower-priority visual boundary is outside the three verified crash/resume fixes.",
+    "Earlier intermediate acceptance reports/packages are historical evidence. Only the final content-script hash and artifacts in this report are the delivery for this repair.",
+    "No browser-process or GPU crash was reproduced. The reproduced failure and before/after comparison are seconds-long main-thread blocking, alongside the independently verified paused-source scheduling defect."
+  ],
+  "git": "Acceptance on 2026-10-09 used uncommitted sources based on a4b97669964d7f7a08698825b860d23f67a51b71. No push, branch rewrite or shipped permission expansion was part of the repair.",
+  "visualInspection": {
+    "translatedScreenshotsInspected": 10,
+    "scope": "Reported GitHub repository, golang/go, React homepage, Vue introduction and English Stripe payments, both display modes at 1920x1080; source screenshots and saved HTML used for comparison.",
+    "observations": [
+      "Reported GitHub file rows, sidebar and navigation remain usable with live translated text in both display modes.",
+      "Vue code examples remain source code; translated documentation, image cards and tooltip content fit their columns.",
+      "English Stripe main content, image illustration, payment cards and fixed cookie bar remain present in both modes.",
+      "The Go commit summary retains its pre-existing narrow-column wrapping with length-varied mock translations; it is recorded as a remaining visual boundary."
+    ],
+    "evidenceDirectory": ".codex/github-crash-2026-10-09/final-fix-*"
+  }
+}

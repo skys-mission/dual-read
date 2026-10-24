@@ -5,7 +5,7 @@
 [![Release](https://github.com/skys-mission/dual-read/actions/workflows/release.yml/badge.svg)](https://github.com/skys-mission/dual-read/actions/workflows/release.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/skys-mission/dual-read?logo=github&label=Release)](https://github.com/skys-mission/dual-read/releases/latest)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Go](https://img.shields.io/badge/Go-1.25+-00ADD8?logo=go&logoColor=white)](server/go.mod)
+[![Go](https://img.shields.io/badge/Go-1.26+-00ADD8?logo=go&logoColor=white)](server/go.mod)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](extension/tsconfig.json)
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-4285F4?logo=googlechrome&logoColor=white)](extension/wxt.config.ts)
 [![Zero telemetry](https://img.shields.io/badge/Telemetry-none-success)](PRIVACY.md)
