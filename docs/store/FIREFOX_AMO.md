@@ -14,27 +14,26 @@ Manifest declares:
 "data_collection_permissions": { "required": ["websiteContent"] }
 ```
 
-This is required because translating a page or selection sends website text to the
+This is required because translating a page, selection, or enabled YouTube captions
+with adjacent context sends website text to the
 **user-configured** LLM endpoint. Dual Read does not send that text to project-operated
 telemetry. Keep AMO questionnaire answers identical to [`PRIVACY.md`](../../PRIVACY.md).
 
 ## Packages to upload
 
-### 1. Built extension (XPI / zip)
+### 1. Built extension (unsigned ZIP)
 
-```bash
-make build-extension
-# Firefox package: extension/output/*.firefox.zip (copied under dist/)
-```
+Download `dual-read-extension-0.2.0-firefox.zip` from the published GitHub Release
+and [verify it](../RELEASE.md#verify-a-download). Submit that CI-built package
+for review and signing. The GitHub ZIP is not already signed and is not a
+permanent-install XPI for Firefox release builds. See Mozilla's
+[signing and distribution guide](https://extensionworkshop.com/documentation/publish/signing-and-distribution-overview/).
 
 ### 2. Source code package (reproducible)
 
-AMO requires sources for listed add-ons. Generate with:
-
-```bash
-./scripts/package-amo-sources.sh
-# → dist/store/dual-read-<version>-amo-sources.zip
-```
+Upload `dual-read-0.2.0-amo-sources.zip` from the **same** GitHub Release so
+reviewers can reproduce the bundled/minified extension. Local source packaging
+commands are in the [store overview](README.md) for preparation only.
 
 The archive includes `AMO_BUILD.md` with exact rebuild steps. It **excludes**
 `node_modules/`, `output/`, secrets, and local data dirs.
@@ -58,10 +57,19 @@ Permission justifications: [`PERMISSIONS.md`](PERMISSIONS.md).
 - [ ] No `dev-settings.json` in sources or binary package  
 - [ ] Firefox E2E smoke green: `npx playwright test --project=firefox-ext`  
 - [ ] Manual smoke in Firefox 140+: temporary add-on or signed build → translate → restore  
+- [ ] YouTube idle controls, start/stop, captions, seek, and default-off automation checked
+- [ ] YouTube host access and caption transmission disclosed in questionnaire/review notes
+- [ ] Signed installation/update consent and 0.1.x upgrade verified separately from temporary loading
+- [ ] Outstanding real YouTube source checks reviewed in the [release checklist](../RELEASE.md#020-checks-and-known-limits)
 
 ## Notes for reviewers
 
-> Dual Read is a bilingual page reader. Translation runs only after user action
-> (toolbar, shortcut, or context menu). Remote APIs must be HTTPS; localhost HTTP
-> is for an optional self-hosted cache proxy. Build from the attached sources using
-> the included AMO_BUILD.md (Node 22, `npm ci`, `npm run build:firefox`).
+> Dual Read is a bilingual reader for webpage text and YouTube captions.
+> Translation starts on user action or explicitly enabled automation. YouTube
+> site access is declared to show idle player controls; displaying them does not
+> read captions or call the translation API. Subtitle automation is off by
+> default and stored only on this device. Website text and adjacent caption
+> context go only to the user's configured endpoint; YouTube cookies and signed
+> caption URLs are not sent there. Remote APIs require HTTPS; loopback HTTP is
+> supported for local services. Build the attached matching sources using
+> AMO_BUILD.md (Node 22.12+ on 22.x, `npm ci`, `npm run build:firefox`).

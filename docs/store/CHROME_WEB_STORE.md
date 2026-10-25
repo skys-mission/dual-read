@@ -2,6 +2,8 @@
 
 Use this checklist when submitting or updating the extension on the
 [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole).
+See Google's [publishing guide](https://developer.chrome.com/docs/webstore/publish)
+for the current dashboard flow.
 
 Canonical privacy policy URL (public HTTPS):
 
@@ -11,21 +13,21 @@ https://github.com/skys-mission/dual-read/blob/main/PRIVACY.md
 
 ## Single purpose
 
-**One purpose only:** help the user read web pages bilingually (or with replaced text) using an API they configure.
+**One purpose only:** bilingual reading of user-selected web content using an
+API they configure: webpage translation and YouTube caption translation.
 
-Do **not** advertise unrelated features (PDF, subtitles, shopping, VPN, ads) in the listing.
+0.2.0 includes YouTube bilingual subtitles. Keep the listing within the shipped
+scope; PDF translation, audio transcription, shopping, VPN, and ad blocking
+are not included.
 
 ## Package to upload
 
-1. From a clean tree:
-
-   ```bash
-   make build-extension
-   ./scripts/check-store-consistency.sh
-   ```
-
-2. Upload the Chrome zip from `dist/` or `extension/output/*.chrome.zip` (exact name from WXT).
-3. Confirm `./scripts/check-extension-artifacts.sh` passed (no `dev-settings.json`, no WXT reload CSP).
+1. Download `dual-read-extension-0.2.0-chrome.zip` and `SHA256SUMS` from the
+   published GitHub Release. [Verify the asset](../RELEASE.md#verify-a-download).
+2. Upload that CI-built Chrome ZIP. Local builds are for validation; see the
+   [store overview](README.md) for the common package policy.
+3. Confirm the release's artifact policy and store consistency checks passed
+   (no `dev-settings.json`, no WXT reload CSP).
 
 ## Listing copy
 
@@ -45,7 +47,7 @@ Answer consistently with [`PRIVACY.md`](../../PRIVACY.md) and [`PERMISSIONS.md`]
 
 | Question | Answer |
 |----------|--------|
-| Does the extension collect user data? | **Yes** — website content (page/selection text) is processed for translation. |
+| Does the extension collect user data? | **Yes** — website content (page/selection text and enabled YouTube captions with adjacent context) is processed for translation. |
 | Who receives it? | **Only the endpoint the user configures** (BYOK LLM or self-hosted server). Dual Read maintainers do not operate a default cloud that receives page text. |
 | Is data sold? | **No.** |
 | Is data used for purposes unrelated to the extension’s single purpose? | **No.** |
@@ -65,8 +67,14 @@ Store policy requires realistic UI screenshots. Capture from a production build:
 3. Options — API / provider setup (no real API keys visible)  
 4. Onboarding — first-run connection path  
 5. (Optional) Replace mode  
+6. YouTube bilingual captions and the idle control, with default-off automation
 
-Recommended size: **1280×800** or **640×400**. Use icons from `extension/public/icons/`.
+Use the version being submitted and remove real API keys. Existing synthetic
+player fixtures in test reports must not be presented as live YouTube captures.
+
+Screenshot sizes: **1280×800** or **640×400**; see the current
+[image requirements](https://developer.chrome.com/docs/webstore/images).
+Use icons from `extension/public/icons/`.
 
 ## Pre-submit checklist
 
@@ -78,9 +86,21 @@ Recommended size: **1280×800** or **640×400**. Use icons from `extension/publi
 - [ ] Artifact policy clean (`check-extension-artifacts.sh`)  
 - [ ] Store consistency script green (`check-store-consistency.sh`)  
 - [ ] Manual smoke: install zip → Options → translate example.com → restore  
+- [ ] YouTube smoke: idle button without translation traffic → enable → seek → stop/restore CC
+- [ ] New YouTube access and default-off automation are explained in review notes
+- [ ] Upgrade from 0.1.x: permission acceptance and refresh behavior checked
 
 ## Reviewer notes (optional field)
 
 Suggested text:
 
-> Dual Read translates the active tab on user action using an OpenAI-compatible API configured by the user (or a local dual-read-server). Content scripts are injected on demand via `activeTab` + `scripting`; we do not request host access to all websites at install time. Optional `https://*/` is requested only to reach the user’s API. Source and privacy policy: https://github.com/skys-mission/dual-read
+> Dual Read provides bilingual reading of webpages and YouTube captions through
+> the user's configured OpenAI-compatible API or self-hosted server. Manual page
+> translation uses `activeTab` + `scripting`; optional origin access supports the
+> configured HTTPS API and explicitly enabled site rules. YouTube-only host
+> access displays idle player controls without reading captions or sending
+> translation requests. Subtitle translation starts on user action or separately
+> enabled device-local automation, which is off by default. Caption text and
+> adjacent context go to the configured API; YouTube cookies and signed caption
+> URLs do not. No all-site host grant is requested at install. Source and privacy
+> policy: https://github.com/skys-mission/dual-read

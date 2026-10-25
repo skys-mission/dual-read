@@ -12,18 +12,23 @@
 
 [English](README.md) | **中文**
 
-开源、自托管的**网页双语阅读**工具：浏览器插件 + 可选 Go 缓存代理（`dual-read-server`）。支持 Chrome、Edge、Firefox，通过任意 OpenAI 兼容 API（DeepSeek、OpenAI、Ollama 等）实现 AI 驱动的双语对照翻译，无厂商锁定。
+开源、自托管的**网页双语阅读**工具：浏览器插件 + 可选 Go 缓存代理（`dual-read-server`）。支持 Chrome、Edge、Firefox，通过 OpenAI 兼容 API（如 DeepSeek、OpenAI 或本地 Ollama）翻译网页和 YouTube 字幕。
 
-插件通过任意 OpenAI 兼容 API 翻译网页；服务端提供本地 / Valkey 缓存，未命中时才转发上游 LLM，重复内容最多可降低 90% 延迟与费用。
+插件通过你配置的 API 翻译文本；服务端提供本地 / Valkey 缓存，减少重复的上游请求，实际节省取决于缓存命中情况与所用服务。
 
-**隐私一句话：** Dual Read **默认零遥测**；页面文字只发往**你配置的** LLM / 自建服务端；项目方不收集浏览内容或 API Key。详见 [PRIVACY.md](PRIVACY.md)。
+**隐私一句话：** Dual Read **默认零遥测**；页面、选区及启用翻译后的字幕文字只发往**你配置的** LLM / 自建服务端；项目方不收集浏览内容或 API Key。详见 [PRIVACY.md](PRIVACY.md)。
+
+本文介绍正在准备发布的 **0.2.0**，新增 YouTube 双语字幕，并改进网页排版、原文恢复和缓存处理。完整变更与升级提示见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 浏览器商店
 
-| 浏览器 | 状态 |
+GitHub Releases 与插件商店分阶段发布。下方已有商店入口可能仍提供旧版本；需要 0.2.0 功能时，请先核对商店页面版本。**v0.2.0** 发布后，可从 [GitHub Releases](https://github.com/skys-mission/dual-read/releases) 获取对应安装包。
+
+| 浏览器 | 安装渠道 |
 |---|---|
-| Firefox | 已上架：[从 Firefox 浏览器附加组件安装 Dual Read](https://addons.mozilla.org/zh-CN/firefox/addon/dual-read-translator/) |
-| Microsoft Edge | 已上架：[从 Microsoft Edge 加载项安装 Dual Read](https://microsoftedge.microsoft.com/addons/detail/hpkdnnlmodeggabfieondnamlmamibik) |
+| Chrome | 加载 GitHub Release ZIP 或本地构建；此处暂未提供 Chrome Web Store 链接 |
+| Firefox | [Firefox 浏览器附加组件](https://addons.mozilla.org/zh-CN/firefox/addon/dual-read-translator/)（Firefox **140+**） |
+| Microsoft Edge | [Microsoft Edge 加载项](https://microsoftedge.microsoft.com/addons/detail/hpkdnnlmodeggabfieondnamlmamibik) |
 
 ---
 
@@ -45,19 +50,11 @@
 
 ## 为什么选择 Dual Read？
 
-| | Dual Read | 沉浸式翻译 | Readwise Reader |
-|---|---|---|---|
-| 开源 | Apache 2.0 | 部分 | 否 |
-| 自托管缓存代理 | 支持 | 否 | 否 |
-| LLM 提供商 | 任意 OpenAI 兼容 | 有限 | 仅内置 |
-| 遥测 | 零 | 有 | 有 |
-| Manifest V3 | 是 | 是 | N/A |
-| 成本控制 | 缓存 + singleflight | 无 | 订阅制 |
-
 - **阅读外文文档、论文、新闻**，双语对照一目了然
 - **语言学习**，保留原文对照翻译，边读边学
 - **降低 LLM 费用**，缓存代理让重复段落命中缓存而非 API
-- **隐私自主**，阅读数据不离开你的基础设施
+- **自主选择数据去向**，使用自建服务或你信任其数据政策的提供商
+- **可审查、可自托管**，Apache 2.0 开源，无需使用项目方运营的翻译服务
 
 ---
 
@@ -72,7 +69,7 @@
 | [CHANGELOG.md](CHANGELOG.md) | 变更记录 |
 | [server/README.md](server/README.md) | 服务端配置 |
 | [server/docs/DEPLOY.md](server/docs/DEPLOY.md) | 容器与生产部署 |
-| [docs/store/](docs/store/) | Chrome / Firefox 商店上架清单与文案 |
+| [docs/store/](docs/store/) | Chrome / Edge / Firefox 商店上架清单与文案 |
 | [docs/RELEASE.md](docs/RELEASE.md) | Tag 发布、校验与 attestation |
 | [docs/PERF_LAB.md](docs/PERF_LAB.md) | 性能预算 lab |
 | [docs/FIREFOX_E2E.md](docs/FIREFOX_E2E.md) | Firefox E2E（Gecko harness 说明） |
@@ -84,12 +81,12 @@
 ### 浏览器插件（Chrome / Edge / Firefox，Manifest V3）
 
 - **双语对照** 或 **直接替换**，Options 默认 + Popup 临时切换
-- **YouTube 双语字幕（开发版）**：打开桌面视频观看页后，原生 CC 旁会自动显示双语快捷按钮，点击后才开始翻译，复用现有 API 和默认目标语言。低频选项仅译成、字号、位置、自动开启；自动翻译默认关闭。安装包声明仅限 `www.youtube.com` 的站点访问，无需每次先点插件图标；浏览器可能在安装或更新时要求确认这项访问权限。支持已有的人工/自动字幕，首版不支持直播和 Shorts。
-- **按需注入**：点击翻译时注入 content script，兼容更多站点
+- **YouTube 双语字幕（0.2.0 新增）**：打开桌面视频观看页后，原生 CC 旁会自动显示双语快捷按钮，点击后才开始翻译，复用现有 API 和默认目标语言。可调整目标语言、字号、位置与自动开启；自动翻译默认关闭。安装包声明仅限 `www.youtube.com` 的站点访问；浏览器可能在安装或更新时要求确认这项访问权限。支持已有的人工/自动字幕；暂不支持直播、Shorts、移动站、嵌入播放器、音频转录及画中画字幕。
+- **按需翻译网页**：通过 `activeTab` + `scripting` 注入网页翻译；仅 YouTube 自动加载待机字幕控件
 - **视口懒翻译**：IntersectionObserver 仅翻译进入视口（含预取一屏）的内容，滚动时按需补齐，省 token
 - **增量翻译**：MutationObserver 持续监听动态内容，只索引新增节点
 - **失败自动重试**：指数退避（1s/4s/16s，3 次），仍失败则译文区显示可点击「↻」手动重试
-- **本地翻译缓存**：内存 + `chrome.storage.local` LRU 两级缓存，重复内容零请求
+- **本地翻译缓存**：内存 + `chrome.storage.local` LRU 两级缓存，命中有效缓存时无需重复请求
 - **浮层选词翻译**：Shadow DOM 隔离的悬浮结果（替代弹窗），支持右键菜单触发
 - **键盘快捷键**：`Alt+T` 翻译 / 还原页面，`Alt+M` 切换双语 / 替换模式（快捷键可在浏览器设置中自定义）
 - **站点规则**：在设置中逐站配置模式、目标语言、自动翻译或永不翻译；自动翻译会明确请求该站权限
@@ -148,11 +145,13 @@ dual-read/
 | API key | 必填 |
 | Model | `deepseek-flash` |
 
+选择「**直连 API**」连接需要 Key 的提供商。远程端点必须使用 HTTPS，HTTP 仅限环回地址。使用无需 Key 的本地端点（如 Ollama）时，选择「**Dual Read 代理**」，并填写对应的 API 地址和模型。
+
 ### 方案 B：本地服务端 + 插件（推荐，可缓存）
 
 #### 1. 启动 dual-read-server（最少一步）
 
-需要 Go 1.22+：
+从源码运行需要 Go **1.26.10+**，以 [`server/go.mod`](server/go.mod) 为准。以下从仓库根目录执行；也可从 [GitHub Releases](https://github.com/skys-mission/dual-read/releases) 下载已发布的对应平台二进制。
 
 ```bash
 cd server
@@ -185,25 +184,23 @@ cp config.example.toml config.toml
 go run ./cmd/dual-read-server -config config.toml
 ```
 
-安装到 PATH：
+从本地源码安装到 PATH（从仓库根目录执行）：
 
 ```bash
-# 从远程安装（发布后）
-go install github.com/skys-mission/dual-read/server/cmd/dual-read-server@latest
-
-# 或本地 clone
 cd server
 go install ./cmd/dual-read-server
 
 dual-read-server   # 需 OPENAI_API_KEY
 ```
 
+需要固定发布版本时，优先使用该 Release 的二进制；`go install ...@latest` 不保证对应仓库根目录的 `v0.2.0` 标签，详见[服务端安装说明](server/README.md#install)。
+
 Docker：
 
 ```bash
 cd server
 docker build -t dual-read-server .
-docker run --rm -p 8080:8080 --read-only --tmpfs /tmp:size=64m \
+docker run --rm -p 127.0.0.1:8080:8080 --read-only --tmpfs /tmp:size=64m \
   -v dual-read-data:/app/data \
   -e OPENAI_API_KEY=sk-your-key \
   -e DUAL_READ_ADMIN_TOKEN="$(openssl rand -hex 16)" \
@@ -214,7 +211,19 @@ docker run --rm -p 8080:8080 --read-only --tmpfs /tmp:size=64m \
 Compose / Valkey / TLS 见 [`server/docs/DEPLOY.md`](server/docs/DEPLOY.md)。公网 / `0.0.0.0` 务必开启 `auth.enabled` 并设置 `admin.token`（可用 `DUAL_READ_ALLOW_INSECURE_PUBLIC=true` 仅作本地演示）。
 #### 2. 加载浏览器插件
 
-插件基于 **TypeScript + [WXT](https://wxt.dev)**，首次需要 `cd extension && npm ci`（Node 22.12+ 的 22.x，或受支持的 24.x / 26+）。
+**使用 GitHub Release 安装包：**选择对应版本，下载浏览器 ZIP 与 `SHA256SUMS`，按[发布指南](docs/RELEASE.md#verify-a-download)校验。0.2.0 发布后，Chrome/Edge 使用 `dual-read-extension-0.2.0-chrome.zip`，Firefox 使用 `dual-read-extension-0.2.0-firefox.zip`。
+
+- Chrome/Edge：解压 Chrome ZIP，打开 `chrome://extensions` / `edge://extensions`，开启「开发者模式」，点击「加载已解压的扩展程序」，选择包含 `manifest.json` 的目录。
+- Firefox **140+**：GitHub ZIP **未经 Mozilla 签名**。解压后打开 `about:debugging#/runtime/this-firefox`，点击「临时载入附加组件」，选择 `manifest.json`。临时安装在重启 Firefox 后失效；正常安装与自动更新请使用商店签名版本。详见 Mozilla 的[临时安装说明](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/)。
+
+**从源码构建：**插件基于 **TypeScript + [WXT](https://wxt.dev)**，需要 Node 22.12+ 的 22.x，或受支持的 24.x / 26+。以下构建与开发命令均从仓库根目录执行：
+
+```bash
+npm --prefix extension ci
+make build-extension
+```
+
+Chrome/Edge 按上述方式加载 `extension/output/chrome-mv3/`；Firefox 临时加载 `extension/output/firefox-mv3/manifest.json`。
 
 **日常开发（HMR 热更新）：**
 
@@ -223,7 +232,7 @@ make dev-extension          # 等价于 cd extension && npm run dev
 ```
 
 在 Chrome / Edge：`chrome://extensions` → **Load unpacked** → 选择 **`extension/output/chrome-mv3-dev`**。
-Firefox：`npm run dev:firefox`，通过 `about:debugging` 临时加载 `extension/output/firefox-mv3-dev/manifest.json`。
+Firefox：`make dev-extension-firefox`，通过 `about:debugging` 临时加载 `extension/output/firefox-mv3-dev/manifest.json`。
 开发模式需要手动加载一次，之后由 WXT 热更新；为避开尚无补丁的依赖，未安装可选的浏览器自动启动工具。
 
 可选：复制 `extension/dev-settings.json.example` → 本地 JSON，填入 Key 后在扩展 Options 页导入。
@@ -238,19 +247,20 @@ make build-extension        # 类型检查 + 构建 + 打包 chrome/firefox
 产物：
 
 - `extension/output/chrome-mv3/` · `extension/output/firefox-mv3/`（unpacked）
-- `extension/output/*.zip`（并复制到 `dist/`，用于商店上架 / 侧载）
+- `extension/output/*.zip`（并复制到 `dist/`，用于本地验证；正式发布与商店提交使用 [Release CI 产物](docs/RELEASE.md)）
 
-内容脚本以 WXT **unlisted script**（`dual-read.js`）形式产出，点击翻译时通过 `chrome.scripting.executeScript` **按需注入**，不会自动注入所有页面。
+网页翻译脚本以 WXT **unlisted script**（`dual-read.js`）形式产出，按需注入。YouTube 使用单独的站点启动脚本自动显示待机字幕控件，不会自动注入所有页面，也不会仅因显示按钮就发送翻译请求。
 
 #### 3. 配置插件（走服务端时）
 
 | 设置 | 使用服务端 | 直连上游 |
 |------|------------|----------|
+| 连接方式 | Dual Read 代理 | 直连 API |
 | API base URL | `http://127.0.0.1:8080/v1` | `https://api.deepseek.com` 等 |
 | API key | 本地默认可留空；若开启 `auth.enabled` 则填服务端 Key | 必填 |
 | Model | 可用映射别名，如 `flash`，或上游真实 id | 与上游一致 |
 
-首次访问非 localhost 站点时，浏览器可能要求授权 `optional_host_permissions`，按提示允许即可。
+连接远程 HTTPS API 或开启某站点的自动翻译时，浏览器可能请求对应来源的权限。普通网页手动翻译使用当前标签页临时授权；YouTube 另有安装时声明的站点访问。
 
 #### 4. 使用
 
@@ -258,6 +268,10 @@ make build-extension        # 类型检查 + 构建 + 打包 chrome/firefox
 - Popup 切换目标语言与模式（双语对照 / 直接替换）
 - 选中文字 → 右键 → **翻译选中文本**
 - Options 可调并发、每批片段数、自定义请求头，并支持导入 / 导出 JSON
+
+**YouTube 双语字幕：**配置好 API 后，打开带字幕的桌面 YouTube 视频，点击原生 **CC** 旁的双语按钮，或使用插件弹窗的「字幕 → 开启双语字幕」。弹窗「网页」页签单独控制网页翻译。字幕目标语言、字号、位置及自动开启可在 Options 中调整；自动翻译默认关闭，仅保存在当前设备。
+
+从 0.1.x 升级后，如浏览器提示，请接受 YouTube 站点访问并刷新已打开的视频页。未打包安装需先从实际安装目录重新加载扩展，再刷新页面。完整字幕轨道不可用时，插件可能降级为翻译当前可见的原生字幕；它不会从音频生成字幕。字幕源可用性与翻译延迟取决于 YouTube 和所配置的服务。
 
 ---
 
@@ -333,14 +347,14 @@ level = "info"
 ## Make 命令
 
 ```bash
-make dev-extension          # 插件开发(Chrome)：WXT dev/HMR，自动打开或 Load unpacked output/chrome-mv3
-make dev-extension-firefox  # 插件开发(Firefox)：WXT dev/HMR，自动打开或 output/firefox-mv3
+make dev-extension          # Chrome HMR：手动加载 extension/output/chrome-mv3-dev
+make dev-extension-firefox  # Firefox HMR：临时加载 extension/output/firefox-mv3-dev/manifest.json
 make build            # 服务端多平台二进制 + 插件打包 → dist/
 make build-server     # 仅服务端 → dist/server/
 make docker-build     # 构建 dual-read-server 容器镜像
 make docker-smoke     # 容器冒烟：non-root + read-only + /livez
 make build-extension  # 仅插件：类型检查 + 构建 + zip（chrome/firefox）
-make test             # 服务端 go test + 插件 tsc/vitest
+make test             # 服务端 go test + 插件 compile/lint/vitest
 make test-server      # 仅服务端 go test ./...
 make test-extension   # 仅插件 compile + lint + vitest
 make test-e2e         # 插件 E2E：真实 Chromium/Firefox 加载构建产物跑 Playwright
@@ -349,10 +363,10 @@ make check-golangci   # 服务端 golangci-lint v2
 make check-npm-audit  # 插件运行时 npm audit 门禁
 make sbom             # 生成 CycloneDX / Go modules SBOM → dist/sbom/
 make check-store      # 商店文案 / 隐私 / 权限一致性检查
-make check-release    # 发布门禁：VERSION/CHANGELOG/package.json（例：VERSION=0.1.0）
+VERSION=0.2.0 REQUIRE_PACKAGE_MATCH=1 make check-release  # 版本与变更记录门禁
 make package-amo-sources  # Firefox AMO sources zip → dist/store/
 make assemble-release # 汇总 dist/release/ + SHA256SUMS（需先构建产物）
-make release-dry-run  # 无 tag 发布干跑：构建 + 校验 SHA256SUMS（不发布）
+VERSION=0.2.0 make release-dry-run  # 构建 + 校验 SHA256SUMS（不发布）
 make run-server       # 运行服务端（需 OPENAI_API_KEY）
 make install-server   # go install 到 $GOBIN
 make clean            # 删除 dist/ 与 extension/output/

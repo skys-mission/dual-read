@@ -2,7 +2,8 @@
 
 Single purpose: **bilingual reading of web content** the user chooses to translate, including webpage text and YouTube captions.
 
-These texts are meant to be pasted into Chrome Web Store and Firefox AMO review forms.
+These texts are meant to be pasted into Chrome Web Store, Microsoft Edge Add-ons,
+and Firefox AMO review forms for 0.2.0.
 Keep them aligned with [`PRIVACY.md`](../../PRIVACY.md) and `extension/wxt.config.ts`.
 
 ## Manifest permissions

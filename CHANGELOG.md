@@ -7,7 +7,38 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-## [0.2.0] - 2026-10-25
+## [0.2.0] - Unreleased
+
+YouTube bilingual subtitles join webpage translation in this release, alongside
+improvements to page layout, source restoration, and translation caching.
+GitHub packages and browser store updates are published separately; check the
+store's version before installing for a 0.2.0 feature.
+
+### Upgrade notes
+
+- The extension now declares `https://www.youtube.com/*` access to display idle
+  player controls. Browsers may ask for permission acceptance on upgrade from
+  0.1.x. Reload an unpacked installation and refresh existing YouTube pages.
+  Subtitle translation remains off until enabled; automatic translation is
+  off by default and local to the device.
+- Existing API settings and configured model names are preserved. New
+  configurations default to `deepseek-flash`; choose a model your provider offers.
+- Source builds require Node.js 22.12+ on 22.x, or supported 24.x / 26+, and
+  Go 1.26.10+ for the server. GitHub Firefox ZIPs are unsigned and support
+  temporary loading; normal installation requires a Mozilla-signed version.
+
+### Known limitations
+
+- Subtitles require available captions on desktop YouTube watch pages. Live
+  streams, Shorts, mobile pages, embedded players, audio transcription, and
+  picture-in-picture subtitles are outside the current scope.
+- Full-track availability depends on YouTube; visible native captions can be
+  used as a fallback. Translation latency depends on the configured provider.
+- The recorded Firefox logged-in YouTube source check is still incomplete;
+  controlled-source tests with a real provider passed but do not establish that
+  live path. Long-video readiness and per-minute costs remain unmeasured. See
+  the [acceptance record](https://github.com/skys-mission/dual-read/blob/main/docs/testing/youtube-subtitles-v1.md)
+  and [later package checks](https://github.com/skys-mission/dual-read/blob/main/docs/testing/youtube-idle-controls.md).
 
 ### Added
 

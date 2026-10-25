@@ -16,18 +16,28 @@
 
 **English** | [中文](README.zh-CN.md)
 
-Open-source, self-hostable **bilingual web reading**: a browser extension plus an optional Go caching proxy (`dual-read-server`). Translate any webpage in Chrome, Edge, or Firefox with AI-powered parallel bilingual display — no vendor lock-in, works with DeepSeek, OpenAI, Ollama, or any OpenAI-compatible LLM API.
+Open-source, self-hostable **bilingual web reading**: a browser extension plus an optional Go caching proxy (`dual-read-server`). Translate web pages and YouTube captions in Chrome, Edge, or Firefox using an OpenAI-compatible LLM API, such as DeepSeek, OpenAI, or a local Ollama endpoint.
 
-The extension translates pages through any OpenAI-compatible API. The server adds local / Valkey caching and only calls the upstream LLM on cache misses—cutting latency and cost by up to 90% on repeat content.
+The extension translates text through the API you configure. The server adds local / Valkey caching to reduce repeated upstream requests; savings depend on cache hits and the provider you use.
 
-**Privacy in one line:** Dual Read has **zero telemetry by default**. Page text goes only to **the LLM / server you configure**. See [PRIVACY.md](PRIVACY.md).
+**Privacy in one line:** Dual Read has **zero telemetry by default**. Page, selection, and enabled subtitle text goes only to **the LLM / server you configure**. See [PRIVACY.md](PRIVACY.md).
+
+This guide describes **0.2.0**, currently being prepared for release. It adds
+YouTube bilingual subtitles and improves page layout, restoration, and cache
+handling. See the [changelog](CHANGELOG.md) for changes and upgrade notes.
 
 ## Browser stores
 
-| Browser | Status |
+GitHub Releases and browser stores are published separately. Existing store
+listings below may still provide an earlier version; check the version on the
+listing before installing for a 0.2.0 feature. Once published, the **v0.2.0**
+assets will be available on [GitHub Releases](https://github.com/skys-mission/dual-read/releases).
+
+| Browser | Installation channel |
 |---|---|
-| Firefox | Available: [Install Dual Read from Firefox Add-ons](https://addons.mozilla.org/zh-CN/firefox/addon/dual-read-translator/) |
-| Microsoft Edge | Available: [Install Dual Read from Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/hpkdnnlmodeggabfieondnamlmamibik) |
+| Chrome | Load a GitHub Release ZIP or a local build; no Chrome Web Store link is published here yet |
+| Firefox | [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/dual-read-translator/) (Firefox **140+**) |
+| Microsoft Edge | [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/hpkdnnlmodeggabfieondnamlmamibik) |
 
 <!-- TODO: add a screenshot or GIF here -->
 <!-- ![Dual Read demo](docs/assets/demo.gif) -->
@@ -51,19 +61,11 @@ The extension translates pages through any OpenAI-compatible API. The server add
 
 ## Why Dual Read?
 
-| | Dual Read | Immersive Translate | Readwise Reader |
-|---|---|---|---|
-| Open source | Apache 2.0 | Partial | No |
-| Self-hostable caching proxy | Yes | No | No |
-| LLM provider | Any OpenAI-compatible | Limited | Built-in only |
-| Telemetry | Zero | Yes | Yes |
-| Manifest V3 | Yes | Yes | N/A |
-| Cost control | Cache + singleflight | No | Subscription |
-
 - **Read foreign-language docs, papers, and news** with side-by-side bilingual display
 - **Learn a language** by keeping the original text alongside the translation
 - **Cut LLM costs** with the caching proxy — repeated paragraphs hit cache, not the API
-- **Stay private** — your reading never leaves your infrastructure
+- **Choose where text goes** — use your own server or a provider whose data policy you trust
+- **Inspect and self-host** — Apache 2.0 source, with no project-operated translation service required
 
 ---
 
@@ -72,14 +74,16 @@ The extension translates pages through any OpenAI-compatible API. The server add
 ### Browser extension (Chrome / Edge / Firefox, Manifest V3)
 
 - Bilingual overlay or replace mode
-- YouTube bilingual subtitles (development build): open a desktop watch page
+- YouTube bilingual subtitles (new in 0.2.0): open a desktop watch page
   and click the bilingual button beside CC to enable translation. Uses your
   existing API and target language. Optional subtitle settings are language,
   size, position, and automatic translation on YouTube; automatic translation is off by default.
   Idle player controls appear automatically using the manifest's YouTube-only
   host access, without a toolbar click or translation request. Browsers may ask
   for this site permission when installing or updating the extension.
-  Supports available manual/automatic captions, not live streams or Shorts.
+  Supports available manual/automatic captions. Live streams, Shorts, mobile
+  pages, embedded players, audio transcription, and picture-in-picture subtitles
+  are outside the current scope.
 - On-demand page translation (`activeTab` + `scripting`); idle controls load automatically only on YouTube
 - Viewport-first lazy translation + MutationObserver incremental indexing
 - Automatic retry with backoff; click-to-retry on persistent failures
@@ -106,7 +110,15 @@ The extension translates pages through any OpenAI-compatible API. The server add
 2. Load the extension (below).
 3. In Options set API base, key, and model (e.g. `https://api.deepseek.com`).
 
+Use **Direct API** mode for a provider that requires an API key. Remote endpoints
+must use HTTPS; HTTP is supported only on loopback. For a keyless local endpoint
+such as Ollama, choose **Dual Read Proxy** mode and set its API base and model.
+
 ### B — Local server + extension (recommended)
+
+For a source run, use Go **1.26.10+** (see [`server/go.mod`](server/go.mod))
+and run the following from the repository root. Published server binaries are
+also available through [GitHub Releases](https://github.com/skys-mission/dual-read/releases).
 
 ```bash
 cd server
@@ -119,17 +131,52 @@ Production deploy: [`server/docs/DEPLOY.md`](server/docs/DEPLOY.md).
 
 ### Load the extension
 
+**From a published GitHub Release:** select the intended release version and
+download its browser ZIP plus `SHA256SUMS` (verification:
+[`docs/RELEASE.md`](docs/RELEASE.md#verify-a-download)). For 0.2.0, use
+`dual-read-extension-0.2.0-chrome.zip` for Chrome/Edge or
+`dual-read-extension-0.2.0-firefox.zip` for Firefox, once available.
+
+- Chrome/Edge: extract the Chrome ZIP, open `chrome://extensions` or
+  `edge://extensions`, enable **Developer mode**, and choose **Load unpacked**.
+  Select the extracted directory containing `manifest.json`.
+- Firefox **140+**: the GitHub ZIP is **unsigned**. Extract it, open
+  `about:debugging#/runtime/this-firefox`, choose **Load Temporary Add-on**,
+  and select `manifest.json`. This lasts until Firefox restarts; normal
+  installation and automatic updates require the signed store version.
+  See Mozilla's [temporary installation guide](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/).
+
+**Build from source:** use Node.js **22.12+** on the 22.x line, or supported
+24.x / 26+. Run from the repository root:
+
 ```bash
-cd extension && npm ci
-make dev-extension          # or: npm run build && load output/chrome-mv3
+npm --prefix extension ci
+make build-extension
 ```
 
-Chrome/Edge: `chrome://extensions` → Load unpacked → `extension/output/chrome-mv3`.  
-Firefox: `npm run build:firefox` → load `extension/output/firefox-mv3` (min Firefox **140**).
+Load `extension/output/chrome-mv3` in Chrome/Edge, or temporarily load
+`extension/output/firefox-mv3/manifest.json` in Firefox as above.
+For development with HMR, see [`CONTRIBUTING.md`](CONTRIBUTING.md#extension).
 
-Point the extension at `http://127.0.0.1:8080/v1` when using the server (API key optional until server auth is enabled).
+When using the server, choose **Dual Read Proxy** mode and point the extension at
+`http://127.0.0.1:8080/v1` (API key optional until server auth is enabled).
 
 Copy `extension/dev-settings.json.example` for local imports if you like—**never** put secrets under `extension/public/` (that directory is packaged).
+
+### Use YouTube bilingual subtitles
+
+After configuring the API, open a desktop YouTube video with captions. Click the
+bilingual button beside **CC**, or open the extension popup and use its
+**Subtitles** tab. The **Page** tab controls webpage translation separately.
+Subtitle language, size, position, and optional automatic translation are in
+Options. Automatic translation is off by default and stays local to this device.
+
+After upgrading from 0.1.x, accept YouTube site access if the browser prompts,
+then refresh already-open YouTube pages. Reload an unpacked extension from its
+installed directory before refreshing. If YouTube does not provide a usable
+caption track, Dual Read may fall back to visible native captions; it cannot
+create subtitles from audio. Source availability and translation latency depend
+on YouTube and your configured provider.
 
 ---
 
@@ -145,7 +192,7 @@ Copy `extension/dev-settings.json.example` for local imports if you like—**nev
 | [CHANGELOG.md](CHANGELOG.md) | Notable changes |
 | [server/README.md](server/README.md) | Server configuration |
 | [server/docs/DEPLOY.md](server/docs/DEPLOY.md) | Containers & production deploy |
-| [docs/store/](docs/store/) | Chrome / Firefox store checklists & listing copy |
+| [docs/store/](docs/store/) | Chrome / Edge / Firefox store checklists & listing copy |
 | [docs/RELEASE.md](docs/RELEASE.md) | Tag release, verify, attestations |
 | [docs/PERF_LAB.md](docs/PERF_LAB.md) | Performance budget lab |
 | [docs/FIREFOX_E2E.md](docs/FIREFOX_E2E.md) | Firefox E2E (Gecko harness notes) |
@@ -180,10 +227,10 @@ make check-golangci       # Go lint
 make check-npm-audit      # runtime npm audit gate
 make sbom                 # CycloneDX + module SBOM → dist/sbom/
 make check-store          # store listing / privacy / permission consistency
-make check-release        # VERSION + CHANGELOG + package.json gate (e.g. VERSION=0.1.0)
+VERSION=0.2.0 REQUIRE_PACKAGE_MATCH=1 make check-release  # version + changelog gate
 make package-amo-sources  # Firefox AMO sources zip → dist/store/
 make assemble-release     # flatten dist/release/ + SHA256SUMS
-make release-dry-run      # build + verify release bundle (no publish)
+VERSION=0.2.0 make release-dry-run  # build + verify release bundle (no publish)
 make docker-smoke         # non-root read-only container + /livez
 ```
 

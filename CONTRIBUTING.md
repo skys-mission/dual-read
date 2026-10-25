@@ -39,7 +39,10 @@ make dev-extension           # Chrome
 make dev-extension-firefox   # Firefox
 ```
 
-Load unpacked from `extension/output/chrome-mv3` or `firefox-mv3`.
+Chrome/Edge: load unpacked from `extension/output/chrome-mv3`.
+Firefox 140+: use `about:debugging#/runtime/this-firefox` → **Load Temporary
+Add-on** → `extension/output/firefox-mv3/manifest.json`. Temporary installation
+lasts until Firefox restarts; signed store installation is a separate check.
 Development/HMR builds use `chrome-mv3-dev` and `firefox-mv3-dev`. Load those
 directories manually; the optional `web-ext` launcher is not installed because
 its Android dependency chain includes an unpatched `node-forge` advisory.
@@ -155,6 +158,8 @@ prove. Keep ambiguous ownership fallbacks separate from complete recovery claims
 - Product / privacy: [`PRIVACY.md`](PRIVACY.md)
 - Security reports: [`SECURITY.md`](SECURITY.md)
 - Server deploy: [`server/docs/DEPLOY.md`](server/docs/DEPLOY.md)
+- Release stages and post-store updates: [`docs/RELEASE.md`](docs/RELEASE.md)
+- Store submission copy and packages: [`docs/store/README.md`](docs/store/README.md)
 
 ## Code of Conduct
 
