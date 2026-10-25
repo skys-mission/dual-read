@@ -8,6 +8,11 @@ export default defineConfig({
   // Both Chrome and Firefox (109+) run MV3; this keeps a single background +
   // scripting API surface and matches the pre-migration baseline.
   manifestVersion: 3,
+  // The entrypoint importer also loads inline CSS used by shadow roots.
+  // Initialize Vite's CSS cache for that server environment (vitejs/vite#19606).
+  vite: () => ({
+    server: { perEnvironmentStartEndDuringDev: true },
+  }),
   manifest: {
     name: '__MSG_extName__',
     description: '__MSG_extDescription__',
@@ -28,7 +33,14 @@ export default defineConfig({
       },
     },
     permissions: ['storage', 'contextMenus', 'activeTab', 'scripting'],
-    host_permissions: ['http://localhost/*', 'http://127.0.0.1/*', 'http://[::1]/*'],
+    // YouTube's idle player button must work before any toolbar click. Keep
+    // this grant site-specific; displaying the button never starts translation.
+    host_permissions: [
+      'http://localhost/*',
+      'http://127.0.0.1/*',
+      'http://[::1]/*',
+      'https://www.youtube.com/*',
+    ],
     // Remote hosts must be HTTPS. Loopback HTTP is covered by host_permissions.
     optional_host_permissions: ['https://*/'],
     commands: {
@@ -57,10 +69,19 @@ export default defineConfig({
       } as Record<string, unknown>,
     },
   },
-  // The content logic is an unlisted script injected on demand via
-  // browser.scripting.executeScript so we never auto-inject into every page
-  // (preserves site compatibility and the activeTab permission model).
+  // Page translation stays on demand with activeTab. YouTube alone registers
+  // an idle-control bootstrap; subtitle translation still needs its own opt-in.
   zip: {
+    // WXT 0.21 uses an allowlist; only include reproducible build inputs.
+    includeSources: [
+      'entrypoints/**',
+      'lib/**',
+      'public/**',
+      'package.json',
+      'package-lock.json',
+      'tsconfig.json',
+      'wxt.config.ts',
+    ],
     // Never ship local developer secrets in Firefox AMO sources packages.
     excludeSources: [
       'dev-settings.json',

@@ -4,8 +4,8 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
-/** Fresh production bundles with a test-only host grant and control relay. */
-export async function launchSubtitleExtension(name: 'chromium' | 'firefox') {
+/** Fresh production bundles with a test-only control relay. */
+export async function launchSubtitleExtension(name: 'chromium' | 'firefox', options: { subtitleStateBarrier?: boolean } = {}) {
   const temporary = await fs.mkdtemp(path.join(os.tmpdir(), 'dual-read-subtitle-e2e-'));
   const addon = path.join(temporary, 'addon');
   const profile = path.join(temporary, 'profile');
@@ -14,7 +14,9 @@ export async function launchSubtitleExtension(name: 'chromium' | 'firefox') {
   await fs.mkdir(profile);
   const manifestPath = path.join(addon, 'manifest.json');
   const manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8'));
-  manifest.host_permissions.push('https://www.youtube.com/*');
+  if (!manifest.host_permissions.includes('https://www.youtube.com/*')) {
+    throw new Error('The production bundle must provide YouTube access without a test-only grant');
+  }
   // playwright-webextext reads the first content_scripts.matches when granting
   // test host permissions; a no-op entry avoids its empty-array bug.
   manifest.content_scripts = [{ matches: ['https://www.youtube.com/*'], js: ['test-idle.js'] }];
@@ -32,15 +34,66 @@ document.documentElement.dataset.testAddonReady='true';
   // The real onboarding document opens after onInstalled saves its defaults.
   // Firefox does not expose extension documents as ordinary Playwright Pages.
   await fs.writeFile(path.join(addon, 'test-ready.js'), "chrome.runtime.sendMessage({action:'test:installed'});");
+  await fs.writeFile(path.join(addon, 'test-popup.html'), '<!doctype html><script src="test-popup.js"></script>');
+  await fs.writeFile(path.join(addon, 'test-popup.js'), `
+const params=new URL(location.href).searchParams;
+chrome.runtime.sendMessage(JSON.parse(params.get('command'))).then(result=>
+  chrome.runtime.sendMessage({action:'test:popupResult',id:params.get('id'),result}));
+`);
   const onboardingPath = path.join(addon, 'onboarding.html');
   await fs.writeFile(onboardingPath, (await fs.readFile(onboardingPath, 'utf8')).replace('</body>', '<script src="test-ready.js"></script></body>'));
   const background = manifest.background.service_worker ?? manifest.background.scripts[0];
+  if (options.subtitleStateBarrier) {
+    // Delay one actual state handler before its authorization check. This lets
+    // the old request return SESSION_CANCELLED after a new session is running,
+    // without injecting a fake result or changing the production handler.
+    await fs.writeFile(path.join(addon, background), `
+const testAddMessageListener = chrome.runtime.onMessage.addListener.bind(chrome.runtime.onMessage);
+let testHoldState = false;
+let testReleaseState;
+let testStateResult;
+testAddMessageListener((m, s, reply) => {
+  if (!s.tab?.id || s.frameId !== 0) return;
+  if (m.action === 'test:holdSubtitleState') { testHoldState = true; testStateResult = undefined; reply({success:true}); }
+  if (m.action === 'test:subtitleStateBarrier') reply({held: Boolean(testReleaseState), result: testStateResult});
+  if (m.action === 'test:releaseSubtitleState') {
+    const release = testReleaseState; testReleaseState = undefined;
+    release(); reply({success:true});
+  }
+});
+chrome.runtime.onMessage.addListener = listener => testAddMessageListener((m, s, reply) => {
+  if (m?.action === 'subtitles:state' && testHoldState) {
+    testHoldState = false;
+    testReleaseState = () => listener(m, s, result => { testStateResult = result; reply(result); });
+    return true;
+  }
+  return listener(m, s, reply);
+});
+` + await fs.readFile(path.join(addon, background), 'utf8'));
+  }
   await fs.appendFile(path.join(addon, background), `
 let testInstalled;
 const testInstallationReady=new Promise(resolve=>{testInstalled=resolve;});
+const testPopupReplies=new Map();
 chrome.runtime.onMessage.addListener((m,s,reply) => {
   if(m.action==='test:installed'){testInstalled();return;}
+  if(m.action==='test:popupResult') {
+    testPopupReplies.get(m.id)?.(m.result);testPopupReplies.delete(m.id);
+    if(s.tab?.id)void chrome.tabs.remove(s.tab.id);
+    return;
+  }
   if(!s.tab?.id || s.frameId!==0)return;
+  if(m.action==='test:sender') {
+    chrome.tabs.get(s.tab.id).then(tab=>reply({url:s.url,origin:s.origin,frameId:s.frameId,tabUrl:tab.url}));return true;
+  }
+  if(m.action==='test:popupCommand') {
+    // A background cannot send a runtime message to itself. Use an actual
+    // extension page so the popup path has a browser-created MessageSender.
+    const id=crypto.randomUUID();testPopupReplies.set(id,reply);
+    const params=new URLSearchParams({id,command:JSON.stringify({...m.message,tabId:s.tab.id})});
+    void chrome.tabs.create({url:chrome.runtime.getURL('test-popup.html')+'?'+params,active:false});
+    return true;
+  }
   if(m.action==='test:seed') {
     (async()=>{
       await testInstallationReady;

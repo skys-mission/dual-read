@@ -19,7 +19,8 @@ Keep them aligned with [`PRIVACY.md`](../../PRIVACY.md) and `extension/wxt.confi
 | Permission | Justification |
 |------------|---------------|
 | `http://localhost/*`, `http://127.0.0.1/*`, `http://[::1]/*` | Allow the optional self-hosted `dual-read-server` on loopback over HTTP. |
-| `optional_host_permissions: https://*/` | Call the **user-configured** remote HTTPS API or enable explicitly chosen site automation. YouTube controls and optional subtitle automation request only `https://www.youtube.com/*`; automatic translation remains off by default and is stored only on this device. No all-site grant at install. |
+| `https://www.youtube.com/*` | Display idle bilingual controls automatically on desktop YouTube video pages, including homepage-to-video navigation. Opening the toolbar popup is not required. This access does not enable subtitle translation. |
+| `optional_host_permissions: https://*/` | Call the **user-configured** remote HTTPS API or enable explicitly chosen site automation. No all-site grant at install. |
 
 **Not requested at install:** broad `http://*/*` or “read and change all your data on all websites”.
 
@@ -34,13 +35,16 @@ Keep them aligned with [`PRIVACY.md`](../../PRIVACY.md) and `extension/wxt.confi
 
 Remote endpoints must be **HTTPS**. HTTP is allowed only for loopback.
 
-Manual subtitles use `activeTab` and top-frame on-demand scripts. With optional
-YouTube host access, a startup script displays idle player controls without
+The manifest declares YouTube host access so a top-frame startup script displays
+idle player controls on video pages without a toolbar click. It does so without
 reading captions, changing CC or contacting the translation service. Turning
-automatic translation off retains these controls; revoking host access removes
+automatic translation off retains these controls; withholding host access removes
 future injection and idle controls. Subtitle requests use the existing
 YouTube page session; cookies and signed caption URLs are never sent to the
 translation API. There is no audio recording or transcription permission.
+Automatic translation remains an off-by-default, device-local preference.
+Browsers may require consent to the YouTube permission during installation or
+an upgrade from versions that declared it only as optional.
 
 ## Firefox AMO data collection
 

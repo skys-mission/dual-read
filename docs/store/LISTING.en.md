@@ -19,7 +19,7 @@ What it does
 • Viewport-first translation to save tokens; incremental updates for dynamic pages
 • Optional per-site auto-translate rules
 • YouTube bilingual subtitles with your existing API, a separate language preference, and simple size/position presets
-• Optional YouTube access shows idle player controls; automatic subtitle translation stays off by default. Live streams and Shorts are not supported
+• Bilingual controls appear automatically on YouTube video pages; click to start translation. YouTube-specific access is declared at install, and automatic translation stays off by default. Live streams and Shorts are not supported
 • Works with any OpenAI-compatible endpoint, or a local dual-read-server cache proxy
 
 What it does NOT do

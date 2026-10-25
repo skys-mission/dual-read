@@ -1,6 +1,6 @@
 {
   "subtitleYouTubeAccessHint": {
-    "message": "The first activation asks for YouTube access so video controls can appear automatically. Translation stays manual."
+    "message": "YouTube site access is blocked. Enabling subtitles will ask to restore it so video controls can appear automatically. Translation stays manual."
   },
   "subtitleBilingual": {
     "message": "Bilingual"
@@ -138,13 +138,13 @@
     "message": "Dual Read Settings"
   },
   "apiBaseUrl": {
-    "message": "API base URL"
+    "message": "API base URL (automatically appends /chat/completions)"
   },
   "connectionMode": {
     "message": "Connection route"
   },
   "connectionModeDirect": {
-    "message": "Direct API (DeepSeek default)"
+    "message": "Direct API"
   },
   "connectionModeProxy": {
     "message": "Dual Read Proxy"
@@ -276,7 +276,7 @@
     "message": "API connection"
   },
   "apiBaseHint": {
-    "message": "Both connection routes use the OpenAI V1 protocol."
+    "message": "Both connection routes are compatible with the OpenAI Chat Completions API (v1)."
   },
   "apiKeyHint": {
     "message": "Required by your API provider."
@@ -516,7 +516,7 @@
     "message": "Choose a connection route"
   },
   "onboardStep1Hint": {
-    "message": "Direct API and Dual Read Proxy use the same OpenAI V1 protocol. Page text is sent only to the endpoint you configure."
+    "message": "Direct API and Dual Read Proxy are both compatible with the OpenAI Chat Completions API (v1). Page text is sent only to the endpoint you configure."
   },
   "onboardPathServer": {
     "message": "Local Dual Read Server"
@@ -663,7 +663,7 @@
     "message": "sk-..."
   },
   "modelPlaceholder": {
-    "message": "deepseek-v4-flash"
+    "message": "deepseek-flash"
   },
   "connectionNotConfigured": {
     "message": "Connection required"

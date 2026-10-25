@@ -21,6 +21,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Declare YouTube-only host access in the installation manifest so idle bilingual
+  controls appear on video pages without opening the toolbar popup or granting
+  optional access first. Subtitle translation remains off by default. Add a
+  Chromium/Firefox regression using unmodified bundles and fresh browser profiles.
 - Show idle YouTube player controls before translation starts when site access
   is granted, and when the toolbar popup opens for the current tab. Keep
   automatic translation separate from button visibility, preserve native CC,

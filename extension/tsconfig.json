@@ -3,6 +3,8 @@
   "compilerOptions": {
     "strict": true,
     "noImplicitOverride": true,
-    "types": ["chrome"]
+    // Keep the pre-WXT 0.21 indexed-access policy for this dependency migration.
+    "noUncheckedIndexedAccess": false,
+    "types": ["chrome", "node"]
   }
 }

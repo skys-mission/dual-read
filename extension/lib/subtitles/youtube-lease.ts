@@ -5,6 +5,7 @@
  * No credentials or caption payloads are retained in the page.
  */
 export function manageYouTubeCaptionLease(options: { action: 'acquire' | 'release'; token: string; videoId: string; deferActivation?: boolean }): boolean {
+  type Track = { vssId?: string; vss_id?: string; languageCode?: string; kind?: string; translationLanguage?: { languageCode?: string } };
   const page = window as Window & { __dualReadSubtitleCCLease?: { token: string; activate: () => boolean; refresh: () => boolean; dispose: () => void } };
   if (options.action === 'release') {
     if (page.__dualReadSubtitleCCLease?.token === options.token) page.__dualReadSubtitleCCLease.dispose();
@@ -13,9 +14,9 @@ export function manageYouTubeCaptionLease(options: { action: 'acquire' | 'releas
   if (page.__dualReadSubtitleCCLease?.token === options.token) return true;
   page.__dualReadSubtitleCCLease?.dispose();
   const player = document.querySelector('#movie_player') as HTMLElement & {
-    getPlayerResponse?: () => { videoDetails?: { videoId?: string } };
+    getPlayerResponse?: () => { videoDetails?: { videoId?: string }; captions?: { playerCaptionsTracklistRenderer?: { captionTracks?: Track[] } } };
     getVideoData?: () => { video_id?: string };
-    getOption?: (module: string, name: string) => { vssId?: string; vss_id?: string; translationLanguage?: { languageCode?: string } };
+    getOption?: (module: string, name: string) => Track;
   } | null;
   const cc = player?.querySelector<HTMLButtonElement>('.ytp-subtitles-button');
   const sameVideo = () => {
@@ -27,7 +28,15 @@ export function manageYouTubeCaptionLease(options: { action: 'acquire' | 'releas
   if (!player || !cc || !sameVideo()) return false;
   const trackId = () => {
     const t = player.getOption?.('captions', 'track');
-    const id = t?.vssId ?? t?.vss_id;
+    let id = t?.vssId ?? t?.vss_id;
+    // Like the source probe, resolve language-only selections only when the
+    // current metadata identifies one track. Keep this inside the MAIN function.
+    if (!id && t?.languageCode) {
+      const tracks = player.getPlayerResponse?.()?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+      const matches = Array.isArray(tracks) ? tracks.filter(track => track && track.languageCode === t.languageCode
+        && (track.kind ?? '') === (t.kind ?? '')) : [];
+      if (matches.length === 1) id = matches[0].vssId ?? matches[0].vss_id;
+    }
     return id ? JSON.stringify([id, t?.translationLanguage?.languageCode ?? Boolean(t?.translationLanguage)]) : undefined;
   };
   const initial = cc.getAttribute('aria-pressed');

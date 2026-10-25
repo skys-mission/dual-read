@@ -141,28 +141,32 @@ export class SubtitleSession {
     this.stop(); void this.message('setEnabled', { enabled: false }).catch(() => {});
   }
 
+  private ensureRenderer(player: HTMLElement): void {
+    if (this.renderer?.player === player && this.renderer.connected) return;
+    // Mount before disposing the old UI so a failed remount can be retried.
+    // The media listeners, native CC lease and in-flight work stay untouched.
+    const renderer = new SubtitleRenderer(player, this.config!, {
+      toggle: () => { void this.message('setEnabled', { enabled: !this.status.enabled }).catch(error => {
+        if (error instanceof DualReadError && error.code === 'CONFIG_REQUIRED') void this.message('openOptions').catch(() => {});
+        else this.setState('source-error');
+      }); },
+      preferences: async preferences => {
+        await this.message('preferences', { preferences });
+        if (!this.status.enabled && this.config) this.showControls({ ...this.config, preferences });
+        await this.poll();
+      },
+      options: () => { void this.message('openOptions').catch(() => {}); },
+    });
+    this.renderer?.dispose(); this.renderer = renderer;
+    renderer.updateStatus(this.status);
+  }
+
   private bind(player: HTMLElement, video: HTMLVideoElement): void {
     this.binding.abort(); this.binding = new AbortController();
-    const playerChanged = this.player !== player;
     // Remember the attempted binding even if UI setup fails. Otherwise every
     // poll sees a "new" player, retries setup, and postpones Retry indefinitely.
     this.player = player; this.video = video;
-    if (playerChanged || !this.renderer?.connected) {
-      this.renderer?.dispose();
-      this.renderer = undefined;
-      this.renderer = new SubtitleRenderer(player, this.config!, {
-        toggle: () => { void this.message('setEnabled', { enabled: !this.status.enabled }).catch(error => {
-          if (error instanceof DualReadError && error.code === 'CONFIG_REQUIRED') void this.message('openOptions').catch(() => {});
-          else this.setState('source-error');
-        }); },
-        preferences: async preferences => {
-          await this.message('preferences', { preferences });
-          if (!this.status.enabled && this.config) this.showControls({ ...this.config, preferences });
-          await this.poll();
-        },
-        options: () => { void this.message('openOptions').catch(() => {}); },
-      });
-    }
+    this.ensureRenderer(player);
     const signal = this.binding.signal;
     for (const type of ['timeupdate', 'pause', 'play', 'ratechange', 'seeked', 'loadedmetadata']) {
       video.addEventListener(type, () => this.draw(), { signal });
@@ -326,6 +330,12 @@ export class SubtitleSession {
         || this.status.state === 'original-required' && !native.autoTranslated) {
         void this.begin(); return;
       }
+      // YouTube can rebuild the controls without replacing the player/video.
+      // Wait for a native insertion point and repair only previously mounted UI;
+      // initial setup failures retain their explicit Retry and fixed cooldown.
+      if (this.renderer && !this.renderer.connected && this.player?.querySelector('.ytp-right-controls .ytp-subtitles-button')) {
+        this.ensureRenderer(this.player);
+      }
       if (this.realtime && this.video?.seeking) {
         this.checkingTrack = true; this.renderer?.show('', '', ''); return;
       }
@@ -340,6 +350,7 @@ export class SubtitleSession {
       this.draw();
       if (this.realtime) void this.recoverSource();
     } catch (error) {
+      if (!this.status.enabled || generation !== this.generation || epoch !== this.epoch) return;
       if (error instanceof DualReadError && error.code === 'SESSION_CANCELLED') this.stop();
       else { this.checkingTrack = true; this.renderer?.show('', '', ''); }
     } finally { this.polling = false; }

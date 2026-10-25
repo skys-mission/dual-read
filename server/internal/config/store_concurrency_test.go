@@ -55,7 +55,7 @@ func TestConcurrentViewAndUpdate(t *testing.T) {
 	update := []byte(`{
   "llm": { "base_url": "https://api.example.com", "api_key": "__KEEP__", "timeout": "60s", "passthrough_headers": [], "extra_headers": {} },
   "clients": { "enabled": false, "items": [] },
-  "models": { "default": "deepseek-v4-flash", "map": { "flash": "deepseek-v4-flash" } },
+  "models": { "default": "deepseek-flash", "map": { "flash": "deepseek-flash" } },
   "cache": {
     "local": { "enabled": true, "ttl": "10m", "max_mb": 256 },
     "valkey": { "enabled": false, "addr": "127.0.0.1:6379", "password": "", "db": 0, "key_prefix": "dual_read:", "ttl": "24h" }

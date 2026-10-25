@@ -104,7 +104,7 @@ export async function initSubtitlePopup(tabId: number, settings: Settings, selec
   const toggle = async (enabled: boolean) => {
     busy = true; render();
     try {
-      // Start the explicit current-tab action independently of optional access.
+      // Start the explicit current-tab action even if site access was withheld.
       // Native permission prompts can close the popup; onAdded registers the
       // idle entry point even then. Firefox needs request() in this click stack.
       const pending = chrome.runtime.sendMessage({ action: 'subtitles:setEnabled', tabId, enabled });

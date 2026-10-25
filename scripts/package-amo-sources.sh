@@ -46,7 +46,7 @@ cat > "${DEST}/AMO_BUILD.md" << EOF
 
 ## Requirements
 
-- Node.js 22.x
+- Node.js 22.12+ (22.x), or supported 24.x / 26+
 - npm 10+
 
 ## Reproduce the Firefox MV3 build

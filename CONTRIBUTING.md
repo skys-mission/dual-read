@@ -16,7 +16,7 @@ Thanks for helping improve Dual Read—an open-source, self-hostable bilingual w
 
 ### Prerequisites
 
-- Node.js **22+** (CI uses 22)
+- Node.js **22.12+** on the 22.x line, or supported 24.x / 26+ (CI uses 22)
 - Go **1.26.10+** (see `server/go.mod` toolchain)
 - Make (optional but convenient)
 
@@ -40,6 +40,9 @@ make dev-extension-firefox   # Firefox
 ```
 
 Load unpacked from `extension/output/chrome-mv3` or `firefox-mv3`.
+Development/HMR builds use `chrome-mv3-dev` and `firefox-mv3-dev`. Load those
+directories manually; the optional `web-ext` launcher is not installed because
+its Android dependency chain includes an unpatched `node-forge` advisory.
 
 E2E (needs a prior build):
 

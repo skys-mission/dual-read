@@ -1,7 +1,7 @@
 {
   "apiBase": "https://api.deepseek.com",
   "apiKey": "",
-  "model": "deepseek-v4-flash",
+  "model": "deepseek-flash",
   "targetLang": "zh-CN",
   "mode": "bilingual",
   "maxConcurrent": 3,

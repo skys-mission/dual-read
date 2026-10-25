@@ -30,7 +30,7 @@ export async function requestCompletion(
 ): Promise<string> {
   const body = withThinkingDisabled(
     {
-      model: settings.model || 'deepseek-v4-flash',
+      model: settings.model || 'deepseek-flash',
       messages: [
         { role: 'system', content: system },
         { role: 'user', content: user },

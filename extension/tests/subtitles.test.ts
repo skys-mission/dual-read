@@ -60,7 +60,7 @@ describe('native CC ownership after permission revocation', () => {
   });
 });
 
-it('requests optional permission before yielding the original click stack', async () => {
+it('requests YouTube access before yielding the original click stack when enabling automation', async () => {
   let persist!: () => void;
   const write = new Promise<void>(resolve => { persist = resolve; });
   const request = vi.fn(async () => true);

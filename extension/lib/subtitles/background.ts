@@ -61,7 +61,15 @@ function trustedUI(sender: chrome.runtime.MessageSender): boolean {
   return sender.id === chrome.runtime.id && Boolean(sender.url?.startsWith(chrome.runtime.getURL('')));
 }
 function contentSender(sender: chrome.runtime.MessageSender): boolean {
-  return sender.id === chrome.runtime.id && sender.frameId === 0 && Boolean(sender.tab?.id) && Boolean(youtubeVideoId(sender.url));
+  if (sender.id !== chrome.runtime.id || sender.frameId !== 0 || !sender.tab?.id) return false;
+  // MessageSender.url retains the document's initial URL across YouTube SPA
+  // navigation, including for scripts injected after entering /watch. Trust
+  // the document's origin here; resolveTab and batch authorization separately
+  // validate the live watch URL and current video/session identity.
+  try {
+    return new URL(sender.url ?? '').origin === YOUTUBE_ORIGIN
+      && (sender.origin === undefined || sender.origin === YOUTUBE_ORIGIN);
+  } catch { return false; }
 }
 async function resolveTab(message: Record<string, unknown>, sender: chrome.runtime.MessageSender): Promise<chrome.tabs.Tab> {
   const tabId = trustedUI(sender) ? message.tabId : contentSender(sender) ? sender.tab?.id : undefined;
@@ -254,7 +262,7 @@ export function installSubtitleBackground(): void {
         return { success: true };
       }
       if (message.action === 'subtitles:preferences') {
-        if (!trustedUI(sender) && !contentSender(sender)) throw new DualReadError('PAGE_UNSUPPORTED');
+        if (!trustedUI(sender)) await resolveTab(message, sender);
         await saveSettings({ subtitles: subtitlePreferencesSchema.parse(message.preferences) });
         return { success: true };
       }
@@ -267,6 +275,7 @@ export function installSubtitleBackground(): void {
       }
       if (message.action === 'subtitles:openOptions') {
         if (!contentSender(sender)) throw new DualReadError('PAGE_UNSUPPORTED');
+        await resolveTab(message, sender);
         await chrome.tabs.create({ url: chrome.runtime.getURL('options.html#subtitleSettings') });
         return { success: true };
       }

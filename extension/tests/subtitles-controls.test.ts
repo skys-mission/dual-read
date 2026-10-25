@@ -58,7 +58,7 @@ it('removes idle UI outside watch pages and when the site policy is disabled', a
   expect(sendMessage).not.toHaveBeenCalled();
 });
 
-it.each([true, false])('requests only optional YouTube access in the click stack; consent=%s does not gate the manual action', async granted => {
+it.each([true, false])('requests withheld YouTube access in the click stack; consent=%s does not gate the manual action', async granted => {
   vi.useFakeTimers();
   document.body.innerHTML = '<main class="popup-body"><div class="link-row"></div></main>';
   const request = vi.fn(async () => granted);

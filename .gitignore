@@ -8,6 +8,7 @@
 /extension/output/
 /extension/.output/
 /extension/.wxt/
+/extension/.vitest/
 /extension/test-results/
 /extension/playwright-report/
 /extension/blob-report/

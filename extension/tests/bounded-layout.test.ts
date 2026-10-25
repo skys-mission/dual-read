@@ -337,11 +337,13 @@ describe('bounded prose layout', () => {
     const second = document.createElement('span'); second.className='dual-read-target'; second.textContent='Remaining translation.'; box.appendChild(second);
     let naturalHeight=340;
     const ruleHeight = () => Number(document.querySelector('style[data-dual-read-layout-style]')?.textContent?.match(/min-height: ([\d.]+)px/)?.[1] || 0);
-    vi.spyOn(box,'getBoundingClientRect').mockImplementation(() => {
+    // Give each element its own geometry; spying on an inherited spy reuses
+    // the prototype mock in Vitest 4+, changing every element's geometry.
+    Object.defineProperty(box, 'getBoundingClientRect', { configurable: true, value: () => {
       const height=box.hasAttribute('data-dual-read-layout-height')?Math.max(naturalHeight,ruleHeight()):80;
       return {x:0,y:0,width:320,height,top:0,bottom:height,left:0,right:320,toJSON(){}} as DOMRect;
-    });
-    vi.spyOn(second,'getBoundingClientRect').mockImplementation(() => ({x:0,y:20,width:320,height:naturalHeight-20,top:20,bottom:naturalHeight,left:0,right:320,toJSON(){}} as DOMRect));
+    } });
+    Object.defineProperty(second, 'getBoundingClientRect', { configurable: true, value: () => ({x:0,y:20,width:320,height:naturalHeight-20,top:20,bottom:naturalHeight,left:0,right:320,toJSON(){}} as DOMRect) });
     Object.defineProperty(box,'scrollHeight',{configurable:true,get:()=>naturalHeight});
     applyBoundedLayouts(readBoundedLayouts([target,second]));
     expect(ruleHeight()).toBe(340);

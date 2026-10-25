@@ -14,7 +14,7 @@ export const SETTINGS_SCHEMA_VERSION = 5 as const;
 export const MAX_CONCURRENT_BATCHES = 8;
 export const MAX_BATCH_SIZE = 20;
 export const DEFAULT_API_BASE = 'https://api.deepseek.com';
-export const DEFAULT_MODEL = 'deepseek-v4-flash';
+export const DEFAULT_MODEL = 'deepseek-flash';
 export const DEFAULT_PROXY_API_BASE = 'http://127.0.0.1:8080/v1';
 
 export type SettingsValidationCode =

@@ -92,3 +92,63 @@ after homepage-to-watch navigation, with no caption/provider requests:
 
 ![Chromium idle controls](../research/evidence/youtube-idle-controls-chromium.png)
 ![Firefox idle controls](../research/evidence/youtube-idle-controls-firefox.png)
+
+## Follow-up: automatic controls from the installed package
+
+The earlier change still required an optional YouTube grant. On a normal
+installation without that grant, opening the toolbar popup was still necessary
+to display the button. Its browser fixtures added the missing host permission
+to their disposable manifests, so they did not establish first-use behavior.
+
+The installation manifest now declares exactly `https://www.youtube.com/*`
+alongside the existing loopback origins. The existing top-frame bootstrap can
+therefore register and mount idle controls without a toolbar click. Translation
+continues to require a manual click unless the user explicitly enables the
+separate automatic-translation preference. No caption, CC or translation logic
+was changed for this follow-up. The permission consistency check now enforces
+the exact four-origin allowlist, including entries after the IPv6 address.
+
+A new regression launches freshly built, unmodified Chromium and Firefox
+bundles with clean browser profiles. It neither adds manifest entries nor
+pre-grants optional permissions, sends relay messages, seeds settings or opens
+the popup. Firefox's test library permission override is explicitly disabled.
+Both browsers reproduced the missing-button failure before the manifest change
+and passed after it. The scenario covers direct video entry, refresh and
+homepage-to-watch navigation. It checks one disabled button, unchanged native
+caption identity/visibility and CC state, and no additional HTTP requests. An
+unrelated origin receives no player UI. The existing configured-service cases
+separately check that a real user click starts translation and stopping restores
+native captions.
+
+The instrumented subtitle fixture no longer supplies a missing host permission;
+it requires the production manifest to include YouTube. Privacy disclosures,
+store listings and the restricted-access hint have been updated accordingly.
+
+### Follow-up verification
+
+TypeScript, ESLint and store/privacy consistency checks passed. Vitest passed
+**2,072 tests across 55 files**. Fresh Chromium and Firefox builds passed
+**64 browser tests**, 32 per engine: eight automatic/idle-control cases and
+24 production subtitle-flow cases. Idle mounting made zero caption/provider
+requests, and the configured-service cases still required activation to translate.
+The unmodified-package regression failed in both browsers before the manifest
+change and passed in both afterward.
+
+The local package is under `dist/youtube-auto-controls-2026-10-25/`. Its 64
+runtime/manifest files and two browser ZIPs were checked byte for byte against
+the tested builds. ZIP integrity, the exact host allowlist, and secret/test-relay
+checks passed. The previous package directories were retained.
+
+These screenshots are controlled fixture pages, not a logged-in YouTube session:
+
+![Chromium: automatic idle controls from the unmodified package](../research/evidence/youtube-auto-controls-chromium.png)
+![Firefox: automatic idle controls from the unmodified package](../research/evidence/youtube-auto-controls-firefox.png)
+
+### Upgrade
+
+Replace or reload the installed extension with the new build, then refresh any
+already open YouTube page. An old unpacked copy is not updated by rebuilding a
+different directory. Browsers may require one-time acceptance of the newly
+declared YouTube access when installing/updating. Explicitly withheld browser
+site access is still respected; the extension does not bypass that setting.
+The version remains 0.2.0 for the local test package.

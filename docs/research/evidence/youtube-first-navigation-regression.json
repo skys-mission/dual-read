@@ -1,0 +1,99 @@
+{
+  "date": "2026-10-25",
+  "fixture": true,
+  "extensionRuntime": "production builds installed in fresh browser profiles",
+  "provider": "local deterministic server",
+  "backgroundSourceSha256": {
+    "before": "485f0496f5846f07d39b448c4c4b932a8928d64a0a1bbcc3c6465f68967467ec",
+    "after": "6c2c290e4348768c1a14bf739cb469cb334dfd2bc1cc07b3bba6cdc0d2760009"
+  },
+  "beforeFixRefreshControl": [
+    {
+      "browser": "chromium",
+      "beforeRefresh": {
+        "sender": {
+          "url": "https://www.youtube.com/",
+          "origin": "https://www.youtube.com",
+          "frameId": 0,
+          "tabUrl": "https://www.youtube.com/watch?v=aaaaaaaaaaa"
+        },
+        "status": {
+          "enabled": true,
+          "state": "source-error"
+        }
+      },
+      "afterRefresh": {
+        "sender": {
+          "url": "https://www.youtube.com/watch?v=aaaaaaaaaaa",
+          "origin": "https://www.youtube.com",
+          "frameId": 0,
+          "tabUrl": "https://www.youtube.com/watch?v=aaaaaaaaaaa"
+        },
+        "status": {
+          "enabled": true,
+          "state": "ready",
+          "sourceLanguage": "en",
+          "kind": "manual"
+        },
+        "providerRequests": 1
+      }
+    },
+    {
+      "browser": "firefox",
+      "beforeRefresh": {
+        "sender": {
+          "url": "https://www.youtube.com/",
+          "origin": "https://www.youtube.com",
+          "frameId": 0,
+          "tabUrl": "https://www.youtube.com/watch?v=aaaaaaaaaaa"
+        },
+        "status": {
+          "enabled": true,
+          "state": "source-error"
+        }
+      },
+      "afterRefresh": {
+        "sender": {
+          "url": "https://www.youtube.com/watch?v=aaaaaaaaaaa",
+          "origin": "https://www.youtube.com",
+          "frameId": 0,
+          "tabUrl": "https://www.youtube.com/watch?v=aaaaaaaaaaa"
+        },
+        "status": {
+          "enabled": true,
+          "state": "ready",
+          "sourceLanguage": "en",
+          "kind": "manual"
+        },
+        "providerRequests": 1
+      }
+    }
+  ],
+  "results": {
+    "beforeFixHomeButton": {
+      "failed": 2
+    },
+    "beforeFixPopupAndRetryWithDirectWatchControls": {
+      "failed": 4,
+      "passed": 4
+    },
+    "beforeFixRefreshRecovery": {
+      "passed": 2
+    },
+    "afterFixControls": {
+      "passed": 26
+    },
+    "afterFixUnit": {
+      "passed": 2092,
+      "files": 56
+    },
+    "afterFixAdjacentSubtitles": {
+      "passed": 178
+    },
+    "afterFixBrowserTotal": {
+      "passed": 204,
+      "chromium": 102,
+      "firefox": 102
+    }
+  }
+}

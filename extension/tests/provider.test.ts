@@ -10,7 +10,7 @@ function settings(partial: Partial<Settings> = {}): Settings {
     connectionMode: 'direct',
     apiBase: 'https://api.deepseek.com',
     apiKey: 'sk-test',
-    model: 'deepseek-v4-flash',
+    model: 'deepseek-flash',
     targetLang: 'zh-CN',
     uiLocale: 'en',
     mode: 'bilingual',

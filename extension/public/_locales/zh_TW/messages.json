@@ -1,6 +1,6 @@
 {
   "subtitleYouTubeAccessHint": {
-    "message": "首次啟用會申請 YouTube 存取權限，以便自動顯示影片按鈕。字幕仍由你開啟。"
+    "message": "YouTube 網站存取已受限制。啟用字幕時會申請恢復存取，以便自動顯示影片按鈕。字幕仍由你手動開啟。"
   },
   "subtitleBilingual": {
     "message": "雙語"
@@ -115,9 +115,9 @@
   "targetLanguage": {"message": "目標語言"},
   "siteAuto": {"message": "在這個網站自動翻譯"},
   "optionsTitle": {"message": "Dual Read 設定"},
-  "apiBaseUrl": {"message": "API 基礎網址"},
+  "apiBaseUrl": {"message": "API 基礎網址（自動附加 /chat/completions）"},
   "connectionMode": {"message": "連線方式"},
-  "connectionModeDirect": {"message": "直接 API（預設 DeepSeek）"},
+  "connectionModeDirect": {"message": "直接 API"},
   "connectionModeProxy": {"message": "Dual Read Proxy"},
   "apiKey": {"message": "API 金鑰"},
   "model": {"message": "模型"},
@@ -161,7 +161,7 @@
   "siteRulesEmpty": {"message": "尚無網站規則。可在彈出式視窗啟用「在這個網站自動翻譯」，或在此新增規則。"},
   "optionsSubtitle": {"message": "設定 API 連線與預設翻譯選項。"},
   "sectionApi": {"message": "API 連線"},
-  "apiBaseHint": {"message": "兩種連線方式都使用 OpenAI V1 協定。"},
+  "apiBaseHint": {"message": "兩種連線方式都相容於 OpenAI Chat Completions API（v1）。"},
   "apiKeyHint": {"message": "依您的 API 服務商要求填寫 API 金鑰。"},
   "apiKeyDirectHint": {"message": "直接連線 API 時需要 API 金鑰。"},
   "apiKeyProxyHint": {"message": "由 Proxy 管理上游憑證時，API 金鑰可留白。"},
@@ -241,7 +241,7 @@
   "onboardingTitle": {"message": "歡迎使用 Dual Read"},
   "onboardingSubtitle": {"message": "只要三個簡短步驟，即可完成第一個雙語頁面。"},
   "onboardStep1Title": {"message": "選擇連線方式"},
-  "onboardStep1Hint": {"message": "直接 API 與 Dual Read Proxy 使用相同的 OpenAI V1 協定。頁面文字只會傳送至您設定的端點。"},
+  "onboardStep1Hint": {"message": "直接 API 與 Dual Read Proxy 均相容於 OpenAI Chat Completions API（v1）。頁面文字只會傳送至您設定的端點。"},
   "onboardPathServer": {"message": "本機 Dual Read 伺服器"},
   "onboardPathServerDesc": {"message": "最適合重視隱私與共用快取的情況。於您的電腦執行，通常不需要 API 金鑰。"},
   "onboardPathDirect": {"message": "我的 AI API（DeepSeek / OpenAI 相容）"},
@@ -290,7 +290,7 @@
   "confirmExportSecrets": {"message": "此匯出檔包含您的 API 金鑰。請只儲存在私密位置。要繼續嗎？"},
   "apiBasePlaceholder": {"message": "https://api.deepseek.com"},
   "apiKeyPlaceholder": {"message": "sk-..."},
-  "modelPlaceholder": {"message": "deepseek-v4-flash"},
+  "modelPlaceholder": {"message": "deepseek-flash"},
   "connectionNotConfigured": {"message": "需要先設定連線"},
   "connectionNotConfiguredHint": {"message": "填入 API 連線資訊，測試並儲存後再開始翻譯。"},
   "uiLanguageEn": {"message": "英文"},

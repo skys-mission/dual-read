@@ -31,9 +31,9 @@ path = "/admin"
 # key = "dr-alice-xxxxxxxx"
 
 # [models]
-# default = "deepseek-v4-flash"
+# default = "deepseek-flash"
 # [models.map]
-# flash = "deepseek-v4-flash"
+# flash = "deepseek-flash"
 
 # [limits]
 # enabled = false

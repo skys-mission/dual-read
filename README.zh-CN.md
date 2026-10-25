@@ -84,7 +84,7 @@
 ### 浏览器插件（Chrome / Edge / Firefox，Manifest V3）
 
 - **双语对照** 或 **直接替换**，Options 默认 + Popup 临时切换
-- **YouTube 双语字幕（开发版）**：在桌面视频观看页打开扩展，选择“字幕 → 开启双语字幕”，复用现有 API 和默认目标语言。低频选项仅译成、字号、位置、自动开启；自动翻译默认关闭。授予可选的 YouTube 访问权限后，新视频页会直接显示闲置快捷按钮，但不启动翻译；未授权时打开插件也可显示当前页按钮。支持已有的人工/自动字幕，首版不支持直播和 Shorts。
+- **YouTube 双语字幕（开发版）**：打开桌面视频观看页后，原生 CC 旁会自动显示双语快捷按钮，点击后才开始翻译，复用现有 API 和默认目标语言。低频选项仅译成、字号、位置、自动开启；自动翻译默认关闭。安装包声明仅限 `www.youtube.com` 的站点访问，无需每次先点插件图标；浏览器可能在安装或更新时要求确认这项访问权限。支持已有的人工/自动字幕，首版不支持直播和 Shorts。
 - **按需注入**：点击翻译时注入 content script，兼容更多站点
 - **视口懒翻译**：IntersectionObserver 仅翻译进入视口（含预取一屏）的内容，滚动时按需补齐，省 token
 - **增量翻译**：MutationObserver 持续监听动态内容，只索引新增节点
@@ -146,7 +146,7 @@ dual-read/
 |------|----------------|
 | API base URL | `https://api.deepseek.com` |
 | API key | 必填 |
-| Model | `deepseek-v4-flash` |
+| Model | `deepseek-flash` |
 
 ### 方案 B：本地服务端 + 插件（推荐，可缓存）
 
@@ -214,7 +214,7 @@ docker run --rm -p 8080:8080 --read-only --tmpfs /tmp:size=64m \
 Compose / Valkey / TLS 见 [`server/docs/DEPLOY.md`](server/docs/DEPLOY.md)。公网 / `0.0.0.0` 务必开启 `auth.enabled` 并设置 `admin.token`（可用 `DUAL_READ_ALLOW_INSECURE_PUBLIC=true` 仅作本地演示）。
 #### 2. 加载浏览器插件
 
-插件基于 **TypeScript + [WXT](https://wxt.dev)**，首次需要 `cd extension && npm install`（Node ≥ 18）。
+插件基于 **TypeScript + [WXT](https://wxt.dev)**，首次需要 `cd extension && npm ci`（Node 22.12+ 的 22.x，或受支持的 24.x / 26+）。
 
 **日常开发（HMR 热更新）：**
 
@@ -222,8 +222,9 @@ Compose / Valkey / TLS 见 [`server/docs/DEPLOY.md`](server/docs/DEPLOY.md)。�
 make dev-extension          # 等价于 cd extension && npm run dev
 ```
 
-在 Chrome / Edge：`chrome://extensions` → **Load unpacked** → 选择 **`extension/output/chrome-mv3`**。
-Firefox：`npm run dev:firefox`，加载 `extension/output/firefox-mv3`。
+在 Chrome / Edge：`chrome://extensions` → **Load unpacked** → 选择 **`extension/output/chrome-mv3-dev`**。
+Firefox：`npm run dev:firefox`，通过 `about:debugging` 临时加载 `extension/output/firefox-mv3-dev/manifest.json`。
+开发模式需要手动加载一次，之后由 WXT 热更新；为避开尚无补丁的依赖，未安装可选的浏览器自动启动工具。
 
 可选：复制 `extension/dev-settings.json.example` → 本地 JSON，填入 Key 后在扩展 Options 页导入。
 **不要**把含密钥的文件放到 `extension/public/`——该目录会进入生产 zip。
@@ -278,12 +279,12 @@ enabled = false
 # [[auth.keys]]
 # name = "alice"
 # key = "sk-server-alice"
-# models = { flash = "deepseek-v4-flash" }
+# models = { flash = "deepseek-flash" }
 
 [models]
-default = "deepseek-v4-flash"
+default = "deepseek-flash"
 [models.map]
-flash = "deepseek-v4-flash"
+flash = "deepseek-flash"
 
 [admin]
 enabled = true

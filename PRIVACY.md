@@ -26,11 +26,12 @@ Manifest permissions (see `extension/wxt.config.ts`):
 | `scripting` | Inject the translation engine **on demand** (not on every page load) |
 | `contextMenus` | “Translate selection” from the right-click menu |
 | `host_permissions` for localhost | Talk to a local `dual-read-server` over HTTP |
-| `optional_host_permissions: https://*/` | Call **your** remote HTTPS API or enable site automation only after you grant the relevant origin. YouTube player controls and optional subtitle automation request only `https://www.youtube.com/*`. |
+| `host_permissions: https://www.youtube.com/*` | Automatically display idle bilingual subtitle controls on desktop YouTube watch pages; translation stays off until enabled |
+| `optional_host_permissions: https://*/` | Call **your** remote HTTPS API or enable site automation only after you grant the relevant origin |
 
-Content scripts are **unlisted** and injected when you translate—Dual Read does not auto-inject into all websites at install time.
+Page translation scripts are **unlisted** and injected when you translate. YouTube has a site-specific startup script for idle player controls; Dual Read does not auto-inject into all websites.
 
-YouTube subtitle translation is off by default. Opening the popup can display idle player controls using the current tab grant. The first manual activation may request optional YouTube access so these controls can appear on future watch pages; declining does not block the current-tab action. After that permission is granted, a small startup script is registered only for YouTube. Idle controls do not read captions, change native CC, or send translation requests. Automatic translation remains a separate, off-by-default device preference. Turning automation off retains idle controls; revoking YouTube access removes future injection and idle controls. Imported or synchronized settings cannot grant host access or enable this local automation choice.
+YouTube subtitle translation is off by default. The extension declares access only to `https://www.youtube.com/*` for automatically displaying idle player controls, including when navigating from the homepage to a video. No toolbar click or separate runtime permission request is needed with that site access enabled. Browsers may ask you to accept the YouTube permission when installing or updating the extension. Idle controls do not read captions, change native CC, or send translation requests. Automatic translation remains a separate, off-by-default device preference. Turning automation off retains idle controls; withholding YouTube access removes future injection and idle controls. If site access is withheld, opening the popup can still show controls using the current tab's temporary grant. Imported or synchronized settings cannot grant host access or enable the local automation choice.
 
 ## Data the extension processes
 

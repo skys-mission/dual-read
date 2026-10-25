@@ -58,6 +58,38 @@ describe('native caption state and ownership', () => {
     response.captions!.playerCaptionsTracklistRenderer.captionTracks.push({ vssId: '.en.second', languageCode: 'en' });
     expect(readYouTubeState().trackId).toBeUndefined();
   });
+  it.each([false, true])('refreshes and restores language-only CC selection (initially on: %s)', async initiallyOn => {
+    const { player, cc } = prepare();
+    Object.assign(player, { getOption: () => ({ languageCode: 'en' }) });
+    if (initiallyOn) cc.click();
+    acquire('language-only');
+    const lease = (window as Window & { __dualReadSubtitleCCLease?: { refresh: () => boolean } }).__dualReadSubtitleCCLease!;
+    expect(lease.refresh()).toBe(true); await Promise.resolve();
+    release('language-only'); release('language-only');
+    expect(cc.getAttribute('aria-pressed')).toBe(String(initiallyOn));
+  });
+  it('distinguishes manual and ASR language-only selections and accepts metadata vss_id', () => {
+    const { player, cc, response } = prepare();
+    response.captions!.playerCaptionsTracklistRenderer.captionTracks.push({ vss_id: 'a.en', languageCode: 'en', kind: 'asr' });
+    Object.assign(player, { getOption: () => ({ languageCode: 'en', kind: 'asr' }) });
+    acquire('language-asr'); release('language-asr');
+    expect(cc.getAttribute('aria-pressed')).toBe('false');
+  });
+  it.each(['ambiguous', 'missing', 'changed', 'translated'])('does not guess or overwrite a language-only selection: %s', scenario => {
+    const { player, cc, response } = prepare();
+    const selected: { languageCode: string; translationLanguage?: { languageCode: string } } = { languageCode: 'en' };
+    Object.assign(player, { getOption: () => selected });
+    if (scenario === 'ambiguous') response.captions!.playerCaptionsTracklistRenderer.captionTracks.push({ vssId: '.en.second', languageCode: 'en' });
+    acquire('language-ownership');
+    if (scenario === 'missing') delete response.captions;
+    if (scenario === 'changed') {
+      selected.languageCode = 'es';
+      response.captions!.playerCaptionsTracklistRenderer.captionTracks.push({ vssId: '.es', languageCode: 'es' });
+    }
+    if (scenario === 'translated') selected.translationLanguage = { languageCode: 'es' };
+    release('language-ownership');
+    expect(cc.getAttribute('aria-pressed')).toBe('true');
+  });
   it('does not expose automatically translated DOM as original text', () => {
     const { track } = prepare();
     expect(readYouTubeState().captionText).toBeUndefined();

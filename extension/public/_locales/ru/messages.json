@@ -1,6 +1,6 @@
 {
   "subtitleYouTubeAccessHint": {
-    "message": "При первом включении запрашивается доступ к YouTube для автоматического показа кнопок в плеере. Перевод включается вручную."
+    "message": "Доступ к YouTube заблокирован. При включении субтитров будет запрошено его восстановление для автоматического показа кнопок в плеере. Перевод включается вручную."
   },
   "subtitleBilingual": {
     "message": "Два языка"
@@ -115,9 +115,9 @@
   "targetLanguage": {"message": "Целевой язык"},
   "siteAuto": {"message": "Автоматически переводить этот сайт"},
   "optionsTitle": {"message": "Настройки Dual Read"},
-  "apiBaseUrl": {"message": "Базовый URL API"},
+  "apiBaseUrl": {"message": "Базовый URL API (автоматически добавляется /chat/completions)"},
   "connectionMode": {"message": "Способ подключения"},
-  "connectionModeDirect": {"message": "Прямой API (DeepSeek по умолчанию)"},
+  "connectionModeDirect": {"message": "Прямой API"},
   "connectionModeProxy": {"message": "Прокси Dual Read"},
   "apiKey": {"message": "Ключ API"},
   "model": {"message": "Модель"},
@@ -161,7 +161,7 @@
   "siteRulesEmpty": {"message": "Правил для сайтов пока нет. Включите «Автоматически переводить этот сайт» во всплывающем окне или добавьте правило здесь."},
   "optionsSubtitle": {"message": "Настройте подключение к API и параметры перевода по умолчанию."},
   "sectionApi": {"message": "Подключение к API"},
-  "apiBaseHint": {"message": "Оба способа подключения используют протокол OpenAI V1."},
+  "apiBaseHint": {"message": "Оба способа подключения совместимы с OpenAI Chat Completions API (v1)."},
   "apiKeyHint": {"message": "Ключ API требуется вашим поставщиком API."},
   "apiKeyDirectHint": {"message": "Для прямого подключения к API требуется ключ API."},
   "apiKeyProxyHint": {"message": "Ключ API не требуется, если прокси хранит учётные данные для вышестоящего API."},
@@ -241,7 +241,7 @@
   "onboardingTitle": {"message": "Добро пожаловать в Dual Read"},
   "onboardingSubtitle": {"message": "Три коротких шага до вашей первой двуязычной страницы."},
   "onboardStep1Title": {"message": "Выберите способ подключения"},
-  "onboardStep1Hint": {"message": "Прямой API и прокси Dual Read используют один протокол OpenAI V1. Текст страницы отправляется только на настроенную вами конечную точку."},
+  "onboardStep1Hint": {"message": "Прямой API и прокси Dual Read совместимы с OpenAI Chat Completions API (v1). Текст страницы отправляется только на настроенную вами конечную точку."},
   "onboardPathServer": {"message": "Локальный сервер Dual Read"},
   "onboardPathServerDesc": {"message": "Лучший выбор для конфиденциальности и общего кэша. Работает на вашем компьютере. Ключ API обычно не нужен."},
   "onboardPathDirect": {"message": "Мой AI API (DeepSeek / совместимый с OpenAI)"},
@@ -290,7 +290,7 @@
   "confirmExportSecrets": {"message": "Этот экспорт содержит ваш ключ API. Сохраняйте его только в закрытом месте. Продолжить?"},
   "apiBasePlaceholder": {"message": "https://api.deepseek.com"},
   "apiKeyPlaceholder": {"message": "sk-..."},
-  "modelPlaceholder": {"message": "deepseek-v4-flash"},
+  "modelPlaceholder": {"message": "deepseek-flash"},
   "connectionNotConfigured": {"message": "Требуется подключение"},
   "connectionNotConfiguredHint": {"message": "Укажите параметры API, затем проверьте и сохраните подключение перед переводом."},
   "uiLanguageEn": {"message": "Английский"},

@@ -7,7 +7,8 @@ const scenarios = [
   'reload-manual', 'reload-auto', 'native-menu-off', 'native-keyboard-off', 'native-off-preparing',
   'unrelated-settings', 'caption-selection', 'late-metadata', 'missing-metadata', 'empty-metadata',
   'translated-dom', 'translated-dom-switch', 'translated-full-track', 'preference-focus', 'ad-cc', 'replace-cc',
-  'nested-controls',
+  'nested-controls', 'stale-poll', 'language-only-off', 'language-only-on', 'language-only-switch',
+  'active-controls-replace', 'active-controls-nested', 'active-controls-delayed', 'active-controls-pending',
 ] as const;
 
 async function installNativeControls(page: Page) {
@@ -37,7 +38,7 @@ async function installNativeControls(page: Page) {
 for (const scenario of scenarios) {
   test(`subtitle review regression: ${scenario}`, async ({}, info) => {
     const mock = await startMockServer();
-    const fx = await launchSubtitleExtension(info.project.name === 'firefox-ext' ? 'firefox' : 'chromium');
+    const fx = await launchSubtitleExtension(info.project.name === 'firefox-ext' ? 'firefox' : 'chromium', { subtitleStateBarrier: scenario === 'stale-poll' });
     try {
       const html = await fs.readFile(new URL('./fixtures/youtube-player.html', import.meta.url), 'utf8');
       const video = await fs.readFile(new URL('./fixtures/subtitle-clock.webm', import.meta.url));
@@ -63,6 +64,15 @@ for (const scenario of scenarios) {
       await fx.message(page, { action: 'test:seed', apiBase: mock.apiBase });
       await expect.poll(() => page.locator('video').evaluate(v => (v as HTMLVideoElement).readyState)).toBeGreaterThanOrEqual(2);
       await installNativeControls(page);
+      if (scenario.startsWith('language-only-')) await page.evaluate(() => {
+        const player = document.querySelector('#movie_player') as any;
+        const read = player.getOption;
+        player.getOption = () => {
+          const track = { ...read() }; delete track.vssId; delete track.vss_id; return track;
+        };
+      });
+      if (scenario === 'language-only-on') await page.locator('.ytp-subtitles-button').click();
+      if (scenario === 'active-controls-pending') mock.setResponseDelay(1800);
       if (scenario === 'nested-controls') await page.evaluate(() => {
         const controls = document.querySelector('.ytp-right-controls')!;
         const group = document.createElement('div'); group.className = 'ytp-right-controls-left';
@@ -130,7 +140,97 @@ for (const scenario of scenarios) {
         expect(mock.getSubtitleRequests().flat().some(item => item.text.includes('Texto'))).toBe(false);
         return;
       }
+      if (scenario.startsWith('active-controls-')) {
+        await expect(source).toHaveText('Original caption 1');
+        if (scenario === 'active-controls-pending') await expect.poll(() => mock.getRequestCount()).toBeGreaterThan(0);
+        else await expect(translation).toHaveText('译:Original caption 1');
+        const sourceCount = sourceRequests;
+        await page.evaluate(scenario => {
+          const player = document.querySelector('#movie_player')!;
+          const controls = player.querySelector('.ytp-right-controls')!;
+          const native = [...controls.childNodes].filter(node => !(node instanceof Element && node.hasAttribute('data-dual-read-subtitle-ui')));
+          const added = document.createElement('button'); added.textContent = 'Page control';
+          // Reorder and insert page-owned nodes before recording the contract.
+          const expected = [added, ...native.reverse()];
+          const replacement = document.createElement('div'); replacement.className = 'ytp-right-controls';
+          const group = scenario === 'active-controls-nested' ? document.createElement('div') : replacement;
+          if (group !== replacement) { group.className = 'ytp-right-controls-left'; replacement.append(group); }
+          group.append(...expected);
+          (window as any).expectedControlNodes = expected;
+          (window as any).expectedControlContainer = group;
+          (window as any).expectedCaptionLease = (window as any).__dualReadSubtitleCCLease;
+          const original = player.querySelector('.ytp-caption-segment')!;
+          original.append(document.createTextNode(' Page edit.'));
+          const caption = document.createElement('span'); caption.className = 'ytp-caption-segment'; caption.textContent = 'Page-added caption'; original.before(caption);
+          (window as any).expectedNativeNodes = [caption, original];
+          if (scenario === 'active-controls-delayed') {
+            controls.remove(); (window as any).replacementControls = replacement;
+          } else controls.replaceWith(replacement);
+        }, scenario);
+        if (scenario === 'active-controls-delayed') {
+          await page.waitForTimeout(1000);
+          await expect(page.getByRole('button', { name: 'Turn off subtitle translation', exact: true })).toHaveCount(0);
+          await expect(translation).toHaveText('译:Original caption 1');
+          await page.evaluate(() => document.querySelector('#movie_player')!.append((window as any).replacementControls));
+        }
+        const toggle = page.getByRole('button', { name: 'Turn off subtitle translation', exact: true });
+        await expect(toggle).toBeVisible(); await expect(toggle).toHaveCount(1);
+        await expect(translation).toHaveText('译:Original caption 1');
+        expect((await status()).enabled).toBe(true);
+        expect(sourceRequests).toBe(sourceCount);
+        expect(mock.getSubtitleRequests().flat().filter(item => item.text === 'Original caption 1')).toHaveLength(1);
+        expect(await page.evaluate(() => (window as any).expectedCaptionLease === (window as any).__dualReadSubtitleCCLease)).toBe(true);
+        await page.getByRole('button', { name: 'Subtitle options', exact: true }).click();
+        await page.getByLabel('Position', { exact: true }).selectOption('top');
+        await expect(page.locator('.lines')).toHaveAttribute('data-position', 'top');
+        await page.getByLabel('Position', { exact: true }).press('Escape');
+        if (scenario === 'active-controls-nested') {
+          await page.locator('#asr').click();
+          await expect(translation).toHaveText('译:Automatic caption 1');
+          await toggle.click();
+        } else if (scenario === 'active-controls-delayed') await page.locator('#cc-off').click();
+        else await toggle.click();
+        await expect.poll(async () => (await status()).enabled).toBe(false);
+        await fx.message(page, { action: 'subtitles:setEnabled', enabled: false });
+        await expect(page.locator('.ytp-subtitles-button')).toHaveAttribute('aria-pressed', scenario === 'active-controls-nested' ? 'true' : 'false');
+        await expect(page.locator('.ytp-caption-window-container')).toHaveCSS('visibility', 'visible');
+        await fx.message(page, { action: 'test:reinject' });
+        await expect(page.locator('[data-dual-read-subtitle-ui]')).toHaveCount(0);
+        expect(await page.evaluate(() => (window as any).expectedControlNodes.every((node: Node, i: number) =>
+          node === (window as any).expectedControlContainer.childNodes[i]))).toBe(true);
+        expect(await page.evaluate(() => (window as any).expectedNativeNodes.every((node: Node, i: number) =>
+          node === document.querySelectorAll('.ytp-caption-segment')[i]))).toBe(true);
+        await expect(page.locator('.ytp-caption-segment')).toHaveText(['Page-added caption', 'Native caption retained by the page Page edit.']);
+        return;
+      }
       await expect(translation).toHaveText('译:Original caption 1');
+      if (scenario === 'stale-poll') {
+        await fx.message(page, { action: 'test:holdSubtitleState' });
+        await expect.poll(async () => (await fx.message(page, { action: 'test:subtitleStateBarrier' })).held).toBe(true);
+        await fx.message(page, { action: 'subtitles:setEnabled', enabled: false });
+        await fx.message(page, { action: 'subtitles:setEnabled', enabled: true });
+        await expect(translation).toHaveText('译:Original caption 1');
+        await fx.message(page, { action: 'test:releaseSubtitleState' });
+        await expect.poll(async () => (await fx.message(page, { action: 'test:subtitleStateBarrier' })).result?.code).toBe('SESSION_CANCELLED');
+        await page.waitForTimeout(600);
+        expect((await status()).enabled).toBe(true);
+        await expect(translation).toHaveText('译:Original caption 1');
+        await page.locator('video').evaluate(video => { (video as HTMLVideoElement).currentTime = 8; });
+        await expect(translation).toHaveText('译:Original caption 3');
+        return;
+      }
+      if (scenario.startsWith('language-only-')) {
+        if (scenario === 'language-only-switch') {
+          await page.locator('#asr').click();
+          await expect(translation).toHaveText('译:Automatic caption 1');
+        }
+        for (let i = 0; i < 2; i++) await fx.message(page, { action: 'subtitles:setEnabled', enabled: false });
+        await expect.poll(async () => (await status()).enabled).toBe(false);
+        await expect(page.locator('.ytp-subtitles-button')).toHaveAttribute('aria-pressed', scenario === 'language-only-off' ? 'false' : 'true');
+        await expect(page.locator('.ytp-caption-window-container')).toHaveCSS('visibility', 'visible');
+        expect(await page.evaluate(() => (window as any).fixtureNativeNode === document.querySelector('.ytp-caption-segment'))).toBe(true);
+        return;
+      }
       if (scenario === 'replace-cc') {
         await page.locator('.ytp-subtitles-button').evaluate(cc => {
           const replacement = cc.cloneNode(true);
