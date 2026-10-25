@@ -25,7 +25,7 @@ else
         dependencies=true ;;
     esac
     case "$path" in
-      PRIVACY.md|docs/store/*|extension/wxt.config.ts|extension/package.json|extension/public/_locales/*|scripts/check-store-consistency.sh)
+      PRIVACY.md|extension/wxt.config.ts|extension/package.json|extension/public/_locales/*|scripts/check-store-consistency.sh)
         store=true ;;
     esac
     case "$path" in

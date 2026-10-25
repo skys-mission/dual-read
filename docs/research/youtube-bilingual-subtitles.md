@@ -220,7 +220,7 @@ interface SubtitleTrack {
 
 现有 Playwright `testMatch` 是白名单：只新增 `youtube.spec.ts` 不会被两个项目自动运行。应更新配置，或把共享场景接到现有 Chromium spec 和 `firefox.spec.ts`。实现后遵循仓库要求执行 TypeScript、ESLint、Vitest，并用新构建的两种浏览器做 E2E；如果修改服务端，再执行 `go test -race ./...` 等服务端检查。本文仅新增调研文档，没有运行上述实现测试。
 
-实现首版时同步更新 `PRIVACY.md`、`docs/store/PERMISSIONS.md` 和本地化文案，准确描述字幕文本及所选上下文会发送到用户配置的 API。手动开启沿用 activeTab；站点自动开启需要用户选择并授予相应 YouTube host 权限，不扩大为安装时读取所有站点。字幕功能的设置与既有“自动翻译网页”规则分开，避免升级后意外启动新的翻译任务。
+实现首版时同步更新 `PRIVACY.md`、本地维护的商店权限说明和本地化文案，准确描述字幕文本及所选上下文会发送到用户配置的 API。手动开启沿用 activeTab；站点自动开启需要用户选择并授予相应 YouTube host 权限，不扩大为安装时读取所有站点。字幕功能的设置与既有“自动翻译网页”规则分开，避免升级后意外启动新的翻译任务。
 
 ### 未决风险与关闭方式
 

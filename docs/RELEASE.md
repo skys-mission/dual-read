@@ -8,13 +8,18 @@ publishes a GitHub Release and GHCR image; it does not submit to browser stores.
 
 | Stage | Documentation and release work |
 |-------|--------------------------------|
-| 1. Before GitHub Releases | Commit the 0.2.0 README, changelog, installation/upgrade instructions, privacy disclosures, and store submission copy. Keep existing store links without claiming that they already offer 0.2.0. |
+| 1. Before GitHub Releases | Commit the 0.2.0 README, changelog, installation/upgrade instructions, and privacy disclosures. Prepare store submission copy locally. Keep existing store links without claiming that they already offer 0.2.0. |
 | 2. GitHub Releases | Finalize the changelog date, check versions and CI, then tag. Verify the published assets and use the release notes to explain installation while store updates are pending. |
-| 3. Browser stores | Submit the same CI-built browser packages and matching AMO sources. Use the [store checklists](store/README.md); record each store's review result separately. |
+| 3. Browser stores | Submit the same CI-built browser packages and matching AMO sources with the locally maintained submission copy; record each store's review result separately. |
 | 4. After store availability | Verify the publicly installable version in each store, then update both READMEs and release notes with confirmed versions, links, and installation guidance. |
 
 This document prepares stage 1. A GitHub Release, a submitted store update, and
 a publicly available store update are separate milestones.
+
+Store submission materials under `docs/store/` are local, ignored by Git, and
+not included in repository checkouts. `make check-store` validates the tracked
+privacy policy, manifest permissions, and localized extension metadata; review
+the actual store listing copy separately when submitting.
 
 ## Dry-run (no tag, no publish)
 
@@ -130,9 +135,11 @@ to load a browser package.
 
 1. Verify the release assets and GHCR image belong to the intended tag/commit.
    The workflow publishes immediately (`draft: false`); it does not stop at a draft.
-2. Use the [store overview](store/README.md) to submit the verified CI packages.
-   Keep version, listing copy, permission justifications, and privacy answers
-   aligned, including the new YouTube access.
+2. Submit the verified Chrome ZIP to Chrome Web Store / Microsoft Edge Add-ons,
+   and the Firefox ZIP plus matching AMO sources to Firefox Add-ons.
+   Use the locally maintained listing copy and review notes. Keep the version,
+   permission justifications, and privacy answers aligned with the package,
+   including the new YouTube access.
 3. Keep the GitHub release body explicit about pending store availability.
    It can link directly to the published `v0.2.0` assets while README store
    guidance continues to tell users to check the listing's version.

@@ -192,7 +192,6 @@ on YouTube and your configured provider.
 | [CHANGELOG.md](CHANGELOG.md) | Notable changes |
 | [server/README.md](server/README.md) | Server configuration |
 | [server/docs/DEPLOY.md](server/docs/DEPLOY.md) | Containers & production deploy |
-| [docs/store/](docs/store/) | Chrome / Edge / Firefox store checklists & listing copy |
 | [docs/RELEASE.md](docs/RELEASE.md) | Tag release, verify, attestations |
 | [docs/PERF_LAB.md](docs/PERF_LAB.md) | Performance budget lab |
 | [docs/FIREFOX_E2E.md](docs/FIREFOX_E2E.md) | Firefox E2E (Gecko harness notes) |
@@ -210,7 +209,7 @@ tests; CI configuration changes and manual dispatches run the full suite.
 | **Extension** | `tsc`, ESLint, runtime `npm audit`, Vitest, Chrome + Firefox builds, artifact secret scan, Playwright E2E |
 | **Server** | golangci-lint (including `govet`), combined race/coverage tests, coverage floor, `govulncheck`, Docker smoke |
 | **Server-only integration** | Chromium extension against the real proxy, without the full layout suite |
-| **Store** | Listing / privacy / permission consistency |
+| **Store** | Privacy / manifest permissions / locale metadata consistency |
 
 Nightly adds daily `PERF_STRICT` + `PERF_FULL` performance budgets and a weekly release dry-run with SBOMs ([`nightly.yml`](.github/workflows/nightly.yml)). Manual dispatch runs both.
 Tagged `vX.Y.Z` releases build zips, multi-arch binaries, GHCR image, checksums, and attestations ([`release.yml`](.github/workflows/release.yml)).
@@ -226,7 +225,7 @@ make test-e2e-perf        # perf budget lab (Chromium)
 make check-golangci       # Go lint
 make check-npm-audit      # runtime npm audit gate
 make sbom                 # CycloneDX + module SBOM → dist/sbom/
-make check-store          # store listing / privacy / permission consistency
+make check-store          # privacy / manifest permissions / locale metadata consistency
 VERSION=0.2.0 REQUIRE_PACKAGE_MATCH=1 make check-release  # version + changelog gate
 make package-amo-sources  # Firefox AMO sources zip → dist/store/
 make assemble-release     # flatten dist/release/ + SHA256SUMS

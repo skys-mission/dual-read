@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Machine checks that store listings, privacy, and manifest stay aligned.
+# Check tracked privacy, manifest permissions, and localized store metadata.
+# Store submission documents are maintained locally and are not required by CI.
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -19,10 +20,6 @@ ok() {
 }
 
 [[ -f "${PRIVACY}" ]] || fail "missing PRIVACY.md"
-[[ -f "${ROOT_DIR}/docs/store/CHROME_WEB_STORE.md" ]] || fail "missing CWS checklist"
-[[ -f "${ROOT_DIR}/docs/store/FIREFOX_AMO.md" ]] || fail "missing AMO checklist"
-[[ -f "${ROOT_DIR}/docs/store/PERMISSIONS.md" ]] || fail "missing PERMISSIONS.md"
-[[ -f "${ROOT_DIR}/docs/store/LISTING.en.md" ]] || fail "missing LISTING.en.md"
 
 grep -q 'HTTPS' "${PRIVACY}" || fail "PRIVACY.md must mention HTTPS"
 grep -qi 'telemetry' "${PRIVACY}" || fail "PRIVACY.md must mention telemetry stance"
@@ -78,6 +75,10 @@ for (const [locale, catalog] of entries) {
   for (const key of requiredManifestKeys) {
     if (!String(catalog[key]?.message || '').trim()) throw new Error(`${locale}: missing ${key}`);
   }
+  const descriptionLength = Array.from(String(catalog.extDescription.message)).length;
+  if (descriptionLength > 132) {
+    throw new Error(`${locale}: extDescription is ${descriptionLength} characters (limit 132)`);
+  }
   for (const key of baseKeys) {
     const expected = (String(baseline[key]?.message || '').match(/\$\d+/g) || []).sort().join(',');
     const actual = (String(catalog[key]?.message || '').match(/\$\d+/g) || []).sort().join(',');
@@ -89,23 +90,10 @@ NODE
 node -e "const p=require('${PKG}'); if(!/^\d+\.\d+\.\d+/.test(p.version)) process.exit(1)" \
   || fail "extension/package.json version must be semver-like"
 
-grep -q 'PRIVACY.md' "${ROOT_DIR}/docs/store/CHROME_WEB_STORE.md" || fail "CWS doc must link PRIVACY.md"
-grep -q 'PRIVACY.md' "${ROOT_DIR}/docs/store/FIREFOX_AMO.md" || fail "AMO doc must link PRIVACY.md"
-
-SHORT="$(awk '/^```text$/{flag=1;next}/^```$/{flag=0}flag' "${ROOT_DIR}/docs/store/LISTING.en.md" | head -n 1)"
-if [[ -n "${SHORT}" ]]; then
-  LEN="$(printf '%s' "${SHORT}" | wc -c | tr -d ' ')"
-  if [[ "${LEN}" -gt 132 ]]; then
-    fail "LISTING.en.md short description is ${LEN} chars (Chrome limit 132)"
-  else
-    ok "short description length ${LEN} ≤ 132"
-  fi
-fi
-
 if [[ "${FAIL}" -ne 0 ]]; then
   echo "[check-store] FAILED" >&2
   exit 1
 fi
 
-ok "store consistency checks passed"
+ok "privacy / manifest / locale metadata checks passed"
 ok "privacy URL for dashboards: https://github.com/skys-mission/dual-read/blob/main/PRIVACY.md"

@@ -63,7 +63,7 @@ For extension changes, the `Extension (WXT / TypeScript)` check requires the bui
 and all sixteen shards to pass; failed shards upload their Playwright traces.
 Server-only changes run the Chromium real-proxy integration spec instead of the
 full browser suite. Documentation-only changes skip unrelated builds and tests;
-store/privacy changes still run listing consistency checks. CI configuration and
+privacy/manifest changes still run metadata consistency checks. CI configuration and
 unknown code/config paths run all checks, as does a manual CI dispatch. The
 extension summary check always runs and rejects failed or unexpectedly skipped
 work. Routing and coverage-gate regressions can be checked with
@@ -159,7 +159,6 @@ prove. Keep ambiguous ownership fallbacks separate from complete recovery claims
 - Security reports: [`SECURITY.md`](SECURITY.md)
 - Server deploy: [`server/docs/DEPLOY.md`](server/docs/DEPLOY.md)
 - Release stages and post-store updates: [`docs/RELEASE.md`](docs/RELEASE.md)
-- Store submission copy and packages: [`docs/store/README.md`](docs/store/README.md)
 
 ## Code of Conduct
 

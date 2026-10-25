@@ -25,7 +25,7 @@ class CIRoutingTests(unittest.TestCase):
         cases = [
             ([], set()),
             (["README.md", "server/docs/DEPLOY.md", ".github/dependabot.yml"], set()),
-            (["docs/store/PERMISSIONS.md"], {"store"}),
+            (["docs/store/PERMISSIONS.md"], set()),
             (["PRIVACY.md"], {"store"}),
             (["extension/lib/renderer.ts"], {"extension"}),
             (["extension/e2e/fixtures/pages/article.html"], {"extension"}),

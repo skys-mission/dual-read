@@ -69,7 +69,6 @@ GitHub Releases 与插件商店分阶段发布。下方已有商店入口可能�
 | [CHANGELOG.md](CHANGELOG.md) | 变更记录 |
 | [server/README.md](server/README.md) | 服务端配置 |
 | [server/docs/DEPLOY.md](server/docs/DEPLOY.md) | 容器与生产部署 |
-| [docs/store/](docs/store/) | Chrome / Edge / Firefox 商店上架清单与文案 |
 | [docs/RELEASE.md](docs/RELEASE.md) | Tag 发布、校验与 attestation |
 | [docs/PERF_LAB.md](docs/PERF_LAB.md) | 性能预算 lab |
 | [docs/FIREFOX_E2E.md](docs/FIREFOX_E2E.md) | Firefox E2E（Gecko harness 说明） |
@@ -362,7 +361,7 @@ make test-e2e-perf    # 性能预算 lab（Chromium + mock API）
 make check-golangci   # 服务端 golangci-lint v2
 make check-npm-audit  # 插件运行时 npm audit 门禁
 make sbom             # 生成 CycloneDX / Go modules SBOM → dist/sbom/
-make check-store      # 商店文案 / 隐私 / 权限一致性检查
+make check-store      # 隐私 / manifest 权限 / 多语言元数据一致性检查
 VERSION=0.2.0 REQUIRE_PACKAGE_MATCH=1 make check-release  # 版本与变更记录门禁
 make package-amo-sources  # Firefox AMO sources zip → dist/store/
 make assemble-release # 汇总 dist/release/ + SHA256SUMS（需先构建产物）
