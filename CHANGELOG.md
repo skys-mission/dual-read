@@ -7,6 +7,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-25
+
 ### Added
 
 - YouTube bilingual subtitles for desktop watch pages, using the configured
@@ -15,7 +17,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
   fallback when a full track cannot be retrieved.
 - A subtitle/page switch in the YouTube popup and a compact player control.
   Subtitle language, size, position, and optional device-local automation are
-  the only new preferences. Automation requests only the YouTube origin.
+  the only new preferences. Automatic subtitle translation is off by default.
 - Separate subtitle cache keys, strict cue response validation, native CC
   restoration, and Chromium/Firefox source and production-addon regressions.
 
@@ -96,6 +98,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Upgrade extension build/test tooling to WXT 0.21, Vite 7, and Vitest 5.
+  Require Node.js 22.12+ on the 22.x line, or supported 24.x / 26+.
+  Keep all 100 DOM mutation scenarios in the restoration regression with an
+  explicit test timeout; browser performance budgets remain unchanged.
+- Use `deepseek-flash` as the default model for new extension and server
+  configurations; preserve existing configured model names.
 - Cache screen-reader-only ancestry during each collection slice, invalidating
   it across yields to reduce repeated indexing work without hiding page edits.
 - Update the pinned Go linter to support the project's Go toolchain and newer
