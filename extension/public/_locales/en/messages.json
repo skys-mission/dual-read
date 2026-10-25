@@ -717,5 +717,6 @@
   "openSettings": {"message": "Settings"},
   "onboardingStepsLabel": {"message": "Setup progress"},
   "statusTranslatedItems_one": {"message": "$1 segment translated"},
-  "statusTranslatedItems_other": {"message": "$1 segments translated"}
+  "statusTranslatedItems_other": {"message": "$1 segments translated"},
+  "subtitleStateOriginalRequired": {"message": "Switch YouTube captions to the original language to translate them."}
 }

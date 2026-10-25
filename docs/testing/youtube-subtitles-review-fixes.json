@@ -1,0 +1,90 @@
+{
+  "date": "2026-10-25",
+  "base": "69ec447",
+  "scope": "Six P2 review fixes and neighboring native-caption lifecycle cases",
+  "environment": "macOS; fresh Chromium and Firefox MV3 builds; silent-video fixtures and local mock translation API",
+  "browser_suite_run": {
+    "startTime": "2026-10-25T03:24:44.182Z",
+    "duration": 318281.713,
+    "expected": 143,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "browser_counts": [
+    {
+      "file": "firefox.spec.ts",
+      "project": "firefox-ext",
+      "passed": 2
+    },
+    {
+      "file": "popup.spec.ts",
+      "project": "chromium-ext",
+      "passed": 5
+    },
+    {
+      "file": "youtube-source.spec.ts",
+      "project": "chromium-ext",
+      "passed": 28
+    },
+    {
+      "file": "youtube-source.spec.ts",
+      "project": "firefox-ext",
+      "passed": 28
+    },
+    {
+      "file": "youtube-subtitles-regression.spec.ts",
+      "project": "chromium-ext",
+      "passed": 16
+    },
+    {
+      "file": "youtube-subtitles-regression.spec.ts",
+      "project": "firefox-ext",
+      "passed": 16
+    },
+    {
+      "file": "youtube-subtitles.spec.ts",
+      "project": "chromium-ext",
+      "passed": 24
+    },
+    {
+      "file": "youtube-subtitles.spec.ts",
+      "project": "firefox-ext",
+      "passed": 24
+    }
+  ],
+  "new_browser_cases_per_engine": 16,
+  "new_unit_tests": 10,
+  "unit_tests": {
+    "files": 49,
+    "passed": 2029
+  },
+  "checks": {
+    "typescript": "passed",
+    "eslint": "passed",
+    "chromium_build": "passed",
+    "firefox_build": "passed",
+    "artifact_secret_check": "passed"
+  },
+  "source_sha256": {
+    "extension/entrypoints/youtube-subtitles.ts": "80b3fec3bf572ab1bbbdf0103b1f7ec902d94dd361315bf5e24969c3dbaf0fe9",
+    "extension/lib/subtitles/background.ts": "6fe35e1ca7cb361a60ce3a91bffd73b6ea2be666976ad6791cd471b539726e92",
+    "extension/lib/subtitles/session.ts": "1e9318a27342b7feddd0fec5ec734fd172bd97bd1ec678ff80de946ac424a26e",
+    "extension/lib/subtitles/youtube-lease.ts": "556d088f4c0c56ba698d50d764b656d3be1ebda5cb95a9cc7e1cec1d8ba1fb13",
+    "extension/lib/subtitles/youtube-adapter.ts": "f318997c40d6ac235a31ff90fdcc1e48a50c1e5d8bf1d13f377dc766f3744488",
+    "extension/lib/subtitles/renderer.ts": "d0d555f89dff4cb47464d697b1fba8b15726eca8b84de7c75c02a73bfbed523e",
+    "extension/lib/subtitles/preferences-ui.ts": "50175d44dbd3d49fd4b5289f69820de1fdb7e8cde690ed6183629da60d0aac29",
+    "extension/lib/subtitles/popup.ts": "28754bb005bd9049ee62d67810fc99ee4f0ad6489fe607abee135ce46e876aaf",
+    "extension/lib/subtitles/types.ts": "c3243b9378c0e334c3dce234b071d45b7a9115a80509f1384e0be0f6fda6fa4b",
+    "extension/e2e/youtube-subtitles-regression.spec.ts": "972ee8519a3f8326933d3fa687ac15ce8f38b9570559108fd5a92c0e922fcaa4",
+    "extension/tests/subtitles-lifecycle.test.ts": "3249e31f5c9fdc6eaeb607a1a01cb19abd1da866e59c9d2b6e23e8ad5779f918"
+  },
+  "real_provider_requests": 0,
+  "authenticated_firefox_live_verified": false,
+  "limitations": [
+    "Controlled player and mock API, not new online source or real-provider evidence.",
+    "Integration addon copies have a test-only YouTube host grant and relay; activeTab permissions are not revalidated by these fixtures.",
+    "DOM fallback reads text and language state atomically on the existing 500ms status poll; full-track media-clock rendering is unchanged.",
+    "Authenticated live Firefox source validation remains pending after the previously documented Google sign-in rejection."
+  ]
+}

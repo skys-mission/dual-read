@@ -29,53 +29,69 @@ export async function setSubtitleAuto(enabled: boolean): Promise<boolean> {
   return true;
 }
 
+export interface SubtitlePreferencesForm extends HTMLDivElement {
+  update(config: SubtitleConfig): void;
+}
+
 export function subtitlePreferencesForm(config: SubtitleConfig, callbacks: {
   change: (preferences: SubtitlePreferences) => Promise<void>;
   auto: (enabled: boolean) => Promise<boolean>;
   /** Content scripts open the existing settings page for permission consent. */
   autoInSettings?: () => void;
-}): HTMLElement {
+}): SubtitlePreferencesForm {
   const root = document.createElement('div');
   root.className = 'subtitle-preferences';
   const t = (key: string) => subtitleText(config, key);
   let preferences = { ...config.preferences };
-  const select = (key: keyof SubtitlePreferences, labelKey: string, values: [string, string][]) => {
+  const updates: (() => void)[] = [];
+  const select = (key: keyof SubtitlePreferences, labelKey: string, values: () => [string, string][]) => {
     const label = document.createElement('label');
-    label.textContent = t(labelKey);
+    const caption = document.createTextNode('');
     const control = document.createElement('select');
-    control.setAttribute('aria-label', t(labelKey));
-    for (const [value, text] of values) {
+    for (const [value, text] of values()) {
       const option = document.createElement('option');
       option.value = value; option.textContent = text; control.append(option);
     }
-    control.value = String(preferences[key] ?? '');
+    updates.push(() => {
+      caption.data = t(labelKey); control.setAttribute('aria-label', t(labelKey));
+      values().forEach(([, text], index) => { control.options[index].textContent = text; });
+      const value = String(preferences[key] ?? '');
+      if (control.value !== value) control.value = value;
+    });
     control.addEventListener('change', () => {
       const before = preferences;
       preferences = { ...preferences, [key]: control.value || null };
       void callbacks.change(preferences).catch(() => { preferences = before; control.value = String(before[key] ?? ''); });
     });
-    label.append(control); root.append(label);
+    label.append(caption, control); root.append(label);
   };
-  select('targetLang', 'subtitleTarget', [['', t('subtitleFollowDefault')], ...SUPPORTED_TARGET_LANGS.map(code => [code, languageLabel(code, config.uiLocale)] as [string, string])]);
-  select('textSize', 'subtitleSize', [['small', t('subtitleSizeSmall')], ['medium', t('subtitleSizeMedium')], ['large', t('subtitleSizeLarge')]]);
-  select('position', 'subtitlePosition', [['bottom', t('subtitleBottom')], ['top', t('subtitleTop')]]);
+  select('targetLang', 'subtitleTarget', () => [['', t('subtitleFollowDefault')], ...SUPPORTED_TARGET_LANGS.map(code => [code, languageLabel(code, config.uiLocale)] as [string, string])]);
+  select('textSize', 'subtitleSize', () => [['small', t('subtitleSizeSmall')], ['medium', t('subtitleSizeMedium')], ['large', t('subtitleSizeLarge')]]);
+  select('position', 'subtitlePosition', () => [['bottom', t('subtitleBottom')], ['top', t('subtitleTop')]]);
   const auto = document.createElement('label');
   if (callbacks.autoInSettings) {
     const button = document.createElement('button');
     button.type = 'button';
-    button.textContent = `${t('subtitleAuto')} · ${t(config.youtubeAuto ? 'subtitleOn' : 'subtitleOff')} ↗`;
+    updates.push(() => { button.textContent = `${t('subtitleAuto')} · ${t(config.youtubeAuto ? 'subtitleOn' : 'subtitleOff')} ↗`; });
     button.addEventListener('click', callbacks.autoInSettings);
     auto.append(button);
   } else {
     const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox'; checkbox.checked = config.youtubeAuto;
+    checkbox.type = 'checkbox';
+    const caption = document.createTextNode('');
+    updates.push(() => { checkbox.checked = config.youtubeAuto; caption.data = t('subtitleAuto'); });
     checkbox.addEventListener('change', () => {
       checkbox.disabled = true;
       void callbacks.auto(checkbox.checked).then(value => { checkbox.checked = value; }, () => { checkbox.checked = config.youtubeAuto; })
         .finally(() => { checkbox.disabled = false; });
     });
-    auto.append(checkbox, document.createTextNode(t('subtitleAuto')));
+    auto.append(checkbox, caption);
   }
   root.append(auto);
-  return root;
+  const update = (next: SubtitleConfig) => {
+    config = next; preferences = { ...next.preferences };
+    for (const apply of updates) apply();
+  };
+  update(config);
+  return Object.assign(root, { update });
 }

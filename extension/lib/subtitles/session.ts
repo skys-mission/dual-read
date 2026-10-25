@@ -37,6 +37,8 @@ export class SubtitleSession {
   private adBlocked = false;
   private checkingTrack = false;
   private realtime = false;
+  private nativeCaptionText = '';
+  private awaitingTracks = false;
   private domCue?: SubtitleCue;
   private domCounter = 0;
   private domChangedAt = 0;
@@ -103,6 +105,11 @@ export class SubtitleSession {
     }
   }
 
+  private nativeOff(): void {
+    if (!this.status.enabled) return;
+    this.stop(); void this.message('setEnabled', { enabled: false }).catch(() => {});
+  }
+
   private bind(player: HTMLElement, video: HTMLVideoElement): void {
     this.binding.abort(); this.binding = new AbortController();
     if (this.player !== player || !this.renderer?.host.isConnected) {
@@ -127,7 +134,7 @@ export class SubtitleSession {
       // click handler runs. Read the native toggle in the next task instead.
       if (event.target.closest('.ytp-subtitles-button')) setTimeout(() => {
         if (!signal.aborted && this.status.enabled && player.querySelector('.ytp-subtitles-button')?.getAttribute('aria-pressed') === 'false') {
-          this.stop(); void this.message('setEnabled', { enabled: false }).catch(() => {});
+          this.nativeOff();
         }
       }, 0);
       if (event.target.closest('.ytp-settings-menu')) {
@@ -141,6 +148,7 @@ export class SubtitleSession {
     const generation = ++this.generation;
     this.cancelWork(); this.releaseLease();
     this.cues = []; this.translated.clear(); this.domCue = undefined; this.realtime = false;
+    this.nativeCaptionText = ''; this.awaitingTracks = false;
     this.trackId = ''; this.sourceLanguage = ''; delete this.status.sourceLanguage; delete this.status.kind;
     this.renderer?.show('', '', '');
     this.preparing = true; this.checkingTrack = true; this.setState('preparing');
@@ -151,11 +159,11 @@ export class SubtitleSession {
     try {
       let native: NativeState | undefined;
       // SPA often changes the URL before replacing the native player response.
-      // Wait only for identity readiness; never repeat the subtitle fetch here.
+      // Wait for identity and track metadata, never repeat subtitle fetches here.
       for (let attempt = 0; attempt < 8 && current(); attempt++) {
         const response = await this.message<{ state: NativeState }>('state');
         native = response.state;
-        if (native?.videoId === videoId) break;
+        if (native?.videoId === videoId && (native.hasTracks !== null || native.ad || native.live)) break;
         await new Promise(resolve => setTimeout(resolve, 300));
       }
       if (!current()) return;
@@ -167,8 +175,13 @@ export class SubtitleSession {
       if (native.live) { this.setState('unsupported'); return; }
       if (native.ad) { this.adBlocked = true; return; }
       this.adBlocked = false;
+      if (native.hasTracks === null) { this.awaitingTracks = true; this.setState('source-error'); return; }
       if (!native.hasTracks) { this.setState('no-tracks'); return; }
       this.lease = { token: `${this.config.sessionId}-${generation}`, videoId };
+      const token = this.lease.token;
+      document.addEventListener(`dual-read:subtitles-cc-off:${token}`, () => {
+        if (this.lease?.token === token && current()) this.nativeOff();
+      }, { signal: this.binding.signal });
       const { result } = await this.message<{ result: YouTubeSourceProbeResult }>('source', { videoId, generation });
       if (!current()) return;
       if (!result || result.videoId !== videoId || result.status === 'stale') { this.setState('source-error'); return; }
@@ -179,7 +192,14 @@ export class SubtitleSession {
       else if (result.status === 'no-tracks') { this.setState('no-tracks'); return; }
       else if (result.status === 'unsupported') { this.setState('unsupported'); return; }
       if (!this.cues.length) {
-        if (!this.trackId || !this.sourceLanguage || !this.nativeText()) { this.setState('source-error'); return; }
+        // DOM fallback must use text and language from the same MAIN snapshot.
+        // Native auto-translation is not an original-language caption source.
+        const fresh = await this.message<{ state: NativeState }>('state', { realtime: true });
+        if (!current()) return;
+        if (fresh.state?.videoId !== videoId || fresh.state.trackId !== this.trackId || !this.sourceLanguage) { this.setState('source-error'); return; }
+        if (fresh.state.autoTranslated) { this.setState('original-required'); return; }
+        this.nativeCaptionText = fresh.state.captionText ?? '';
+        if (!this.nativeCaptionText) { this.setState('source-error'); return; }
         this.realtime = true;
       }
       this.checkingTrack = false;
@@ -207,7 +227,7 @@ export class SubtitleSession {
         this.renderer?.dispose(); this.renderer = undefined;
         this.cancelWork(); this.releaseLease(); this.setState('unsupported'); return;
       }
-      const response = await this.message<{ state: NativeState; config: SubtitleConfig }>('state');
+      const response = await this.message<{ state: NativeState; config: SubtitleConfig }>('state', { realtime: this.realtime });
       if (!this.status.enabled || generation !== this.generation) return;
       this.apply(true, response.config);
       if (generation !== this.generation || this.preparing) return;
@@ -221,8 +241,17 @@ export class SubtitleSession {
       }
       const playerChanged = document.querySelector('#movie_player') !== this.player || this.player?.querySelector('video') !== this.video;
       if (native.videoId !== this.videoId || playerChanged || (native.trackId && this.trackId && native.trackId !== this.trackId)
-        || this.adBlocked && !this.cues.length) {
+        || this.adBlocked && !this.cues.length || this.awaitingTracks && native.hasTracks !== null
+        || this.status.state === 'no-tracks' && native.hasTracks === true
+        || this.status.state === 'original-required' && !native.autoTranslated) {
         void this.begin(); return;
+      }
+      if (this.realtime) {
+        if (native.autoTranslated) {
+          this.cancelWork(); this.domCue = undefined; this.nativeCaptionText = ''; this.translated.clear(); this.realtime = false;
+          this.renderer?.show('', '', ''); this.setState('original-required'); return;
+        }
+        this.nativeCaptionText = native.captionText ?? '';
       }
       this.adBlocked = false; this.checkingTrack = false;
       this.draw();
@@ -230,10 +259,6 @@ export class SubtitleSession {
       if (error instanceof DualReadError && error.code === 'SESSION_CANCELLED') this.stop();
       else { this.checkingTrack = true; this.renderer?.show('', '', ''); }
     } finally { this.polling = false; }
-  }
-
-  private nativeText(): string {
-    return [...this.player?.querySelectorAll('.ytp-caption-segment') ?? []].map(node => node.textContent ?? '').join('').trim();
   }
 
   private loop(): void {
@@ -252,10 +277,16 @@ export class SubtitleSession {
       || this.player.classList.contains('ad-showing') || this.player.classList.contains('ad-interrupting') || this.adBlocked || this.checkingTrack) {
       this.renderer.show('', '', ''); return;
     }
-    if (['translation-error', 'source-error', 'no-tracks', 'unsupported'].includes(this.status.state)) { this.renderer.show('', '', ''); return; }
+    // YouTube can replace just the CC button. The lease observes its original
+    // node; the active renderer must still honor the current control's off state.
+    if (this.lease && (this.cues.length || this.realtime || this.status.state === 'original-required')
+      && this.player.querySelector('.ytp-subtitles-button')?.getAttribute('aria-pressed') === 'false') {
+      this.nativeOff(); return;
+    }
+    if (['translation-error', 'source-error', 'no-tracks', 'unsupported', 'original-required'].includes(this.status.state)) { this.renderer.show('', '', ''); return; }
     const timeMs = this.video.currentTime * 1000;
     if (this.realtime) {
-      const text = this.nativeText();
+      const text = this.nativeCaptionText;
       if (text !== (this.domCue?.text ?? '')) {
         this.domCue = text ? { id: `d${++this.domCounter}`, revision: 1, text, context: '', startMs: timeMs, endMs: Number.MAX_SAFE_INTEGER } : undefined;
         this.domChangedAt = performance.now();

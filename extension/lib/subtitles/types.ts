@@ -36,7 +36,7 @@ export interface SubtitleTranslation {
 }
 
 export type SubtitleState = 'off' | 'preparing' | 'ready' | 'catching-up' | 'realtime'
-  | 'no-tracks' | 'source-error' | 'translation-error' | 'same-language' | 'unsupported';
+  | 'no-tracks' | 'source-error' | 'translation-error' | 'same-language' | 'unsupported' | 'original-required';
 
 export interface SubtitleStatus {
   enabled: boolean;

@@ -18,6 +18,7 @@ interface Intent {
   manual: boolean;
   sessionId: string;
   generation: number;
+  instanceId?: string;
   videoId?: string;
   trackId?: string;
   sourceLanguage?: string;
@@ -81,18 +82,38 @@ async function configFor(settings: Settings, intent: Intent): Promise<SubtitleCo
 async function send(tabId: number, message: unknown): Promise<unknown> {
   return chrome.tabs.sendMessage(tabId, message, { frameId: 0 }).catch(() => null);
 }
-async function ensureSession(tabId: number): Promise<void> {
-  if (await send(tabId, { action: 'subtitle:ping' })) return;
+async function ensureSession(tabId: number): Promise<string> {
+  const ping = async () => {
+    const reply = await send(tabId, { action: 'subtitle:ping' }) as { instanceId?: unknown } | null;
+    return typeof reply?.instanceId === 'string' ? reply.instanceId : undefined;
+  };
+  const existing = await ping();
+  if (existing) return existing;
   await chrome.scripting.executeScript({ target: { tabId, frameIds: [0] }, files: ['youtube-subtitles.js'] });
+  const instanceId = await ping();
+  if (!instanceId) throw new DualReadError('PAGE_UNSUPPORTED');
+  return instanceId;
 }
 async function start(tabId: number, intent: Intent, settings: Settings): Promise<void> {
   if (!intent.enabled || !isConnectionConfigured(settings) || effectiveForHost(settings, 'www.youtube.com').disabled) return;
-  await ensureSession(tabId);
-  await send(tabId, { action: 'subtitle:apply', enabled: true, config: await configFor(settings, intent) });
+  const instanceId = await ensureSession(tabId);
+  // Keep tab intent across reloads, but never reuse an old document's counters
+  // or authorization. The ping also detects explicit content-script reinjection.
+  const current = await updateIntent(tabId, latest => {
+    if (!latest?.enabled || latest.sessionId !== intent.sessionId) return latest;
+    if (latest.instanceId === instanceId) return latest;
+    return { ...newIntent(latest.enabled, latest.manual), instanceId };
+  });
+  if (current?.enabled && current.instanceId === instanceId) {
+    await send(tabId, { action: 'subtitle:apply', enabled: true, instanceId, config: await configFor(settings, current) });
+  }
 }
 
-/** Self-contained lightweight MAIN read. No URLs, captions, or credentials. */
-export function readYouTubeState(): { videoId?: string; trackId?: string; sourceLanguage?: string; ad: boolean; live: boolean; hasTracks: boolean } {
+/** MAIN snapshot. Optional DOM text and its language state are read together. */
+export function readYouTubeState(options?: { includeText?: boolean }): {
+  videoId?: string; trackId?: string; sourceLanguage?: string; ad: boolean; live: boolean;
+  hasTracks: boolean | null; autoTranslated: boolean; captionText?: string;
+} {
   const p = document.querySelector('#movie_player') as HTMLElement & {
     getPlayerResponse?: () => { videoDetails?: { videoId?: string; isLive?: boolean }; captions?: { playerCaptionsTracklistRenderer?: { captionTracks?: unknown[] } }; microformat?: { playerMicroformatRenderer?: { liveBroadcastDetails?: { isLiveNow?: boolean } } } };
     getVideoData?: () => { video_id?: string };
@@ -103,10 +124,16 @@ export function readYouTubeState(): { videoId?: string; trackId?: string; source
   const id = r?.videoDetails?.videoId;
   const dataId = p?.getVideoData?.().video_id;
   const matches = id === new URL(location.href).searchParams.get('v') && (!dataId || id === dataId);
+  const tracks = r?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+  const autoTranslated = Boolean(t?.translationLanguage);
   return { videoId: matches ? id : undefined, trackId: t?.vssId ?? t?.vss_id, sourceLanguage: t?.languageCode,
     ad: Boolean(p?.classList.contains('ad-showing') || p?.classList.contains('ad-interrupting')),
     live: Boolean(r?.videoDetails?.isLive || r?.microformat?.playerMicroformatRenderer?.liveBroadcastDetails?.isLiveNow),
-    hasTracks: Boolean(r?.captions?.playerCaptionsTracklistRenderer?.captionTracks?.length),
+    hasTracks: Array.isArray(tracks) ? tracks.length > 0 : null,
+    autoTranslated,
+    ...(options?.includeText && matches && !autoTranslated ? {
+      captionText: [...p?.querySelectorAll('.ytp-caption-segment') ?? []].map(node => node.textContent ?? '').join('').trim().slice(0, 4001),
+    } : {}),
   };
 }
 
@@ -251,7 +278,8 @@ export function installSubtitleBackground(): void {
       if (!contentSender(sender) || !intent?.enabled || intent.sessionId !== message.sessionId
         || effectiveForHost(settings, 'www.youtube.com').disabled) throw new DualReadError('SESSION_CANCELLED');
       if (message.action === 'subtitles:state') {
-        const result = await chrome.scripting.executeScript({ target: { tabId, frameIds: [0] }, world: 'MAIN', func: readYouTubeState });
+        const result = await chrome.scripting.executeScript({ target: { tabId, frameIds: [0] }, world: 'MAIN', func: readYouTubeState,
+          args: [{ includeText: message.realtime === true }] });
         return { success: true, state: result[0]?.result, config: await configFor(settings, intent) };
       }
       if (message.action === 'subtitles:source') {

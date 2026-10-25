@@ -2,7 +2,7 @@ import { openOnboardingPage } from '../settings/onboarding';
 import type { Settings } from '../types';
 import type { SubtitleConfig, SubtitleStatus } from './types';
 import { subtitleStateKey } from './renderer';
-import { languageLabel, setSubtitleAuto, subtitlePreferencesForm, subtitleText } from './preferences-ui';
+import { languageLabel, setSubtitleAuto, subtitlePreferencesForm, subtitleText, type SubtitlePreferencesForm } from './preferences-ui';
 
 interface Snapshot {
   success: boolean;
@@ -53,6 +53,7 @@ export async function initSubtitlePopup(tabId: number, settings: Settings, selec
   activate(true);
   let snapshot: Snapshot | undefined;
   let preferencesKey = '';
+  let preferencesForm: SubtitlePreferencesForm | undefined;
   let busy = false;
   let refreshing = false;
   const render = () => {
@@ -62,7 +63,7 @@ export async function initSubtitlePopup(tabId: number, settings: Settings, selec
     source.textContent = current.sourceLanguage
       ? `${languageLabel(current.sourceLanguage, config.uiLocale)}${current.kind ? ` · ${t(current.kind === 'asr' ? 'subtitleASR' : 'subtitleManual')}` : ''}` : '';
     source.hidden = !source.textContent;
-    const error = ['source-error', 'translation-error', 'no-tracks', 'unsupported'].includes(current.state);
+    const error = ['source-error', 'translation-error', 'no-tracks', 'unsupported', 'original-required'].includes(current.state);
     primary.textContent = snapshot.disabled ? t('openSettings') : !snapshot.configured ? t('subtitleSetup')
       : error ? t('subtitleRetry') : current.enabled ? t('subtitleDisable') : t('subtitleEnable');
     primary.className = current.enabled && !error ? '' : 'primary';
@@ -71,17 +72,20 @@ export async function initSubtitlePopup(tabId: number, settings: Settings, selec
     const key = JSON.stringify([config.preferences, config.youtubeAuto, config.uiLocale]);
     if (key !== preferencesKey) {
       preferencesKey = key;
-      const form = subtitlePreferencesForm(config, {
-        change: async preferences => {
-          const result = await chrome.runtime.sendMessage({ action: 'subtitles:preferences', preferences });
-          if (!result?.success) throw new Error('Preferences not saved');
-          await refresh();
-        },
-        auto: async enabled => { const result = await setSubtitleAuto(enabled); await refresh(); return result; },
-      });
-      language.replaceChildren(form.firstElementChild!);
-      language.className = 'subtitle-preferences';
-      options.querySelector('.subtitle-preferences')?.remove(); options.append(form);
+      if (preferencesForm) preferencesForm.update(config);
+      else {
+        const form = subtitlePreferencesForm(config, {
+          change: async preferences => {
+            const result = await chrome.runtime.sendMessage({ action: 'subtitles:preferences', preferences });
+            if (!result?.success) throw new Error('Preferences not saved');
+            await refresh();
+          },
+          auto: async enabled => { const result = await setSubtitleAuto(enabled); await refresh(); return result; },
+        });
+        language.replaceChildren(form.firstElementChild!);
+        language.className = 'subtitle-preferences';
+        options.append(form); preferencesForm = form;
+      }
     }
   };
   const refresh = async () => {
@@ -104,7 +108,7 @@ export async function initSubtitlePopup(tabId: number, settings: Settings, selec
     if (!snapshot || busy) return;
     if (snapshot.disabled) { void chrome.runtime.openOptionsPage(); return; }
     if (!snapshot.configured) { openOnboardingPage(); return; }
-    const retry = ['source-error', 'translation-error', 'no-tracks', 'unsupported'].includes(snapshot.status.state);
+    const retry = ['source-error', 'translation-error', 'no-tracks', 'unsupported', 'original-required'].includes(snapshot.status.state);
     void toggle(retry || !snapshot.status.enabled);
   });
   stop.addEventListener('click', () => { void toggle(false); });

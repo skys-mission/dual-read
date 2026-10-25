@@ -1,5 +1,5 @@
 import type { SubtitleConfig, SubtitlePreferences, SubtitleStatus } from './types';
-import { subtitlePreferencesForm, subtitleText } from './preferences-ui';
+import { subtitlePreferencesForm, subtitleText, type SubtitlePreferencesForm } from './preferences-ui';
 
 export const SUBTITLE_OWNED = '[data-dual-read-subtitle-ui]';
 export const SUBTITLE_MANAGED = '[data-dual-read-subtitle-source]';
@@ -25,6 +25,7 @@ export class SubtitleRenderer {
   private readonly abort = new AbortController();
   private lastText = '';
   private config: SubtitleConfig;
+  private preferences?: SubtitlePreferencesForm;
 
   constructor(readonly player: HTMLElement, config: SubtitleConfig, private readonly callbacks: {
     toggle: () => void;
@@ -110,8 +111,11 @@ export class SubtitleRenderer {
     this.translation.lang = config.targetLang;
     const label = subtitleText(config, 'subtitleOptions');
     this.arrow.setAttribute('aria-label', label); this.panel.setAttribute('aria-label', label);
-    this.panel.querySelector('.subtitle-preferences')?.remove();
-    this.panel.append(subtitlePreferencesForm(config, { change: this.callbacks.preferences, auto: async () => config.youtubeAuto, autoInSettings: this.callbacks.options }));
+    if (this.preferences) this.preferences.update(config);
+    else {
+      this.preferences = subtitlePreferencesForm(config, { change: this.callbacks.preferences, auto: async () => this.config.youtubeAuto, autoInSettings: this.callbacks.options });
+      this.panel.append(this.preferences);
+    }
     this.layout();
   }
   updateStatus(value: SubtitleStatus): void {

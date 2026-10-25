@@ -333,5 +333,6 @@
   "openSettings": {"message": "Paramètres"},
   "onboardingStepsLabel": {"message": "Progression de la configuration"},
   "statusTranslatedItems_one": {"message": "$1 segment traduit"},
-  "statusTranslatedItems_other": {"message": "$1 segments traduits"}
+  "statusTranslatedItems_other": {"message": "$1 segments traduits"},
+  "subtitleStateOriginalRequired": {"message": "Sélectionnez la langue originale des sous-titres YouTube pour les traduire."}
 }

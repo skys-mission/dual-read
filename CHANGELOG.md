@@ -21,6 +21,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Renew YouTube subtitle sessions after reload, honor native CC off from menus
+  and keyboard, recover delayed track metadata, and restore CC after unrelated
+  player settings changes. Keep keyboard focus when updating subtitle options,
+  and avoid translating YouTube's automatic translations as original captions.
 - Respect conditional and opaque footer sizing, external shadow-part styles,
   closed shadow roots, and hover/focus changes when releasing translation
   layout overrides. Read closed roots through both Chromium and Firefox APIs.

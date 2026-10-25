@@ -333,5 +333,6 @@
   "openSettings": {"message": "设置"},
   "onboardingStepsLabel": {"message": "设置进度"},
   "statusTranslatedItems_one": {"message": "已翻译 $1 个片段"},
-  "statusTranslatedItems_other": {"message": "已翻译 $1 个片段"}
+  "statusTranslatedItems_other": {"message": "已翻译 $1 个片段"},
+  "subtitleStateOriginalRequired": {"message": "请将 YouTube 字幕切回原始语言后翻译。"}
 }

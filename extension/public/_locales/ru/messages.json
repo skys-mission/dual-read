@@ -333,5 +333,6 @@
   "openSettings": {"message": "Настройки"},
   "onboardingStepsLabel": {"message": "Ход настройки"},
   "statusTranslatedItems_one": {"message": "Переведён $1 сегмент"},
-  "statusTranslatedItems_other": {"message": "Переведено $1 сегментов"}
+  "statusTranslatedItems_other": {"message": "Переведено $1 сегментов"},
+  "subtitleStateOriginalRequired": {"message": "Выберите исходный язык субтитров YouTube, чтобы перевести их."}
 }
