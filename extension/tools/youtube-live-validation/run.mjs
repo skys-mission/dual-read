@@ -144,7 +144,7 @@ const rl=readline.createInterface({input:process.stdin});
 for await(const line of rl){
  try{
   const {command}=JSON.parse(line);
-  if(command==='exit'){await close();break;}
+  if(command==='exit')break;
   if(command==='status')await record(command,{page:await state(),extension:await message({action:'validation:status'})});
   else if(command==='metrics')await record(command,await message({action:'validation:metrics'}));
   else if(command==='source')await record(command,await message({action:'validation:source',options:{expectedVideoId:new URL(page.url()).searchParams.get('v'),enableNativeCC:true,timeoutMs:6000}}));
@@ -155,4 +155,7 @@ for await(const line of rl){
   else out({error:'unknown-command'});
  }catch(error){out({error:String(error.message).split('\n')[0].replace(/https?:\/\/\S+/g,'[url]').slice(0,160)});}
 }
+rl.close();
+process.stdin.pause();
+await close();
 }
