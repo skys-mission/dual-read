@@ -1,4 +1,106 @@
 {
+  "subtitleBilingual": {
+    "message": "Два языка"
+  },
+  "subtitleOptions": {
+    "message": "Настройки субтитров"
+  },
+  "subtitleEnable": {
+    "message": "Включить два языка"
+  },
+  "subtitleDisable": {
+    "message": "Выключить перевод субтитров"
+  },
+  "subtitleRetry": {
+    "message": "Повторить"
+  },
+  "subtitleSetup": {
+    "message": "Настроить сервис перевода"
+  },
+  "subtitleTarget": {
+    "message": "Перевести на"
+  },
+  "subtitleFollowDefault": {
+    "message": "По умолчанию"
+  },
+  "subtitleSize": {
+    "message": "Размер текста"
+  },
+  "subtitleSizeSmall": {
+    "message": "Маленький"
+  },
+  "subtitleSizeMedium": {
+    "message": "Обычный"
+  },
+  "subtitleSizeLarge": {
+    "message": "Большой"
+  },
+  "subtitlePosition": {
+    "message": "Положение"
+  },
+  "subtitleBottom": {
+    "message": "Внизу"
+  },
+  "subtitleTop": {
+    "message": "Вверху"
+  },
+  "subtitleAuto": {
+    "message": "Автоматически переводить субтитры YouTube"
+  },
+  "subtitleOn": {
+    "message": "Вкл."
+  },
+  "subtitleOff": {
+    "message": "Выкл."
+  },
+  "subtitleTab": {
+    "message": "Субтитры"
+  },
+  "subtitlePageTab": {
+    "message": "Страница"
+  },
+  "subtitleUsesService": {
+    "message": "Используется настроенный сервис перевода."
+  },
+  "subtitleNativeHint": {
+    "message": "Исходный язык можно изменить в меню субтитров YouTube."
+  },
+  "subtitleManual": {
+    "message": "Ручные субтитры"
+  },
+  "subtitleASR": {
+    "message": "Автоматические субтитры"
+  },
+  "subtitleStateOff": {
+    "message": "Двуязычные субтитры выключены"
+  },
+  "subtitleStatePreparing": {
+    "message": "Подготовка субтитров…"
+  },
+  "subtitleStateReady": {
+    "message": "Двуязычные субтитры включены"
+  },
+  "subtitleStateCatchingUp": {
+    "message": "Подготовка следующих переводов"
+  },
+  "subtitleStateRealtime": {
+    "message": "Перевод текущих субтитров может задерживаться"
+  },
+  "subtitleStateNoTracks": {
+    "message": "Для этого видео нет доступных субтитров"
+  },
+  "subtitleStateSourceError": {
+    "message": "YouTube не предоставил субтитры. Повторите позже."
+  },
+  "subtitleStateTranslationError": {
+    "message": "Перевод не удался. Исходные субтитры сохранены."
+  },
+  "subtitleStateSameLanguage": {
+    "message": "Субтитры уже на выбранном языке"
+  },
+  "subtitleStateUnsupported": {
+    "message": "Этот формат видео пока не поддерживается"
+  },
   "extName": {"message": "Двуязычный переводчик Dual Read"},
   "extDescription": {"message": "Двуязычный перевод или замена текста на веб-страницах с помощью любого API, совместимого с OpenAI."},
   "cmdToggleTranslate": {"message": "Перевести / восстановить текущую страницу"},

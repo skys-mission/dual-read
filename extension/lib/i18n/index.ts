@@ -67,6 +67,13 @@ export function getUiMessage(
   }
 }
 
+/** Trusted contexts can send a small UI-only catalog to isolated scripts. */
+export async function getUiMessagesByPrefix(prefix: string, uiLocale: string): Promise<Record<string, string>> {
+  await ensureCatalogs();
+  return Object.fromEntries(Object.keys(catalogs.en ?? {}).filter(key => key.startsWith(prefix))
+    .map(key => [key, getUiMessage(key, null, uiLocale)]));
+}
+
 /** Resolve a message variant using the plural category for the active UI locale. */
 export function getUiPluralMessage(
   key: string,

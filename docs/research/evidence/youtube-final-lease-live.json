@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-25",
+  "execution": "Final production lease and adapter functions in the authenticated page MAIN world via CDP; not a live production toolbar injection",
+  "beforeProbe": "false",
+  "elapsedMs": 527,
+  "events": 466,
+  "final": "false",
+  "initial": "false",
+  "muted": true,
+  "observations": [
+    {
+      "bytes": 65976,
+      "outcome": "json3",
+      "status": 200,
+      "via": "player"
+    }
+  ],
+  "paused": true,
+  "prepared": true,
+  "status": "ready",
+  "textEvents": 466,
+  "trackId": ".en",
+  "adapter_sha256": "f318997c40d6ac235a31ff90fdcc1e48a50c1e5d8bf1d13f377dc766f3744488",
+  "lease_sha256": "3525d09b67651bb91d73218c80c583ba4493c44622557f9f2060151336d8a7cb"
+}

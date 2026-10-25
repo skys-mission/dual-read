@@ -20,7 +20,7 @@ export interface SiteRule {
 /** Full settings — trusted contexts only (background / options / popup). */
 export interface Settings {
   /** Schema version; older storage is migrated before use. */
-  schemaVersion: 4;
+  schemaVersion: 5;
   /**
    * Direct requests use the extension's API key. Proxy requests use the
    * repository's OpenAI V1-compatible Dual Read proxy and may omit that key.
@@ -37,6 +37,9 @@ export interface Settings {
   batchSize: number;
   customHeaders: Record<string, string>;
   siteRules: SiteRule[];
+  subtitles: import('./subtitles/types').SubtitlePreferences;
+  /** Device-local opt-in; imports/sync cannot grant YouTube access. */
+  youtubeAuto: boolean;
   /**
    * Monotonic revision bumped on every save that affects translation or
    * provider identity. Content sessions compare this instead of deep equality.

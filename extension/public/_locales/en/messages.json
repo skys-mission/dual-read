@@ -1,4 +1,106 @@
 {
+  "subtitleBilingual": {
+    "message": "Bilingual"
+  },
+  "subtitleOptions": {
+    "message": "Subtitle options"
+  },
+  "subtitleEnable": {
+    "message": "Enable bilingual subtitles"
+  },
+  "subtitleDisable": {
+    "message": "Turn off subtitle translation"
+  },
+  "subtitleRetry": {
+    "message": "Retry"
+  },
+  "subtitleSetup": {
+    "message": "Set up translation service"
+  },
+  "subtitleTarget": {
+    "message": "Translate into"
+  },
+  "subtitleFollowDefault": {
+    "message": "Follow default"
+  },
+  "subtitleSize": {
+    "message": "Text size"
+  },
+  "subtitleSizeSmall": {
+    "message": "Small"
+  },
+  "subtitleSizeMedium": {
+    "message": "Standard"
+  },
+  "subtitleSizeLarge": {
+    "message": "Large"
+  },
+  "subtitlePosition": {
+    "message": "Position"
+  },
+  "subtitleBottom": {
+    "message": "Bottom"
+  },
+  "subtitleTop": {
+    "message": "Top"
+  },
+  "subtitleAuto": {
+    "message": "Automatically translate YouTube subtitles"
+  },
+  "subtitleOn": {
+    "message": "On"
+  },
+  "subtitleOff": {
+    "message": "Off"
+  },
+  "subtitleTab": {
+    "message": "Subtitles"
+  },
+  "subtitlePageTab": {
+    "message": "Page"
+  },
+  "subtitleUsesService": {
+    "message": "Uses your configured translation service."
+  },
+  "subtitleNativeHint": {
+    "message": "Change the source language in YouTube’s subtitle menu."
+  },
+  "subtitleManual": {
+    "message": "Manual captions"
+  },
+  "subtitleASR": {
+    "message": "Auto-generated captions"
+  },
+  "subtitleStateOff": {
+    "message": "Bilingual subtitles are off"
+  },
+  "subtitleStatePreparing": {
+    "message": "Preparing subtitles…"
+  },
+  "subtitleStateReady": {
+    "message": "Bilingual subtitles are on"
+  },
+  "subtitleStateCatchingUp": {
+    "message": "Preparing the next translations"
+  },
+  "subtitleStateRealtime": {
+    "message": "Using live captions; translations may arrive later"
+  },
+  "subtitleStateNoTracks": {
+    "message": "This video has no available caption track"
+  },
+  "subtitleStateSourceError": {
+    "message": "YouTube could not provide captions. Try again later."
+  },
+  "subtitleStateTranslationError": {
+    "message": "Translation failed. Original captions are preserved."
+  },
+  "subtitleStateSameLanguage": {
+    "message": "Captions already use the selected language"
+  },
+  "subtitleStateUnsupported": {
+    "message": "This video format is not supported yet"
+  },
   "extName": {
     "message": "Dual Read Translator"
   },

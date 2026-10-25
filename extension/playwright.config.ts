@@ -14,11 +14,11 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium-ext',
-      testMatch: /(popup|translate|lab|regression|perf|connection|real-proxy|live-upstream)\.spec\.ts/,
+      testMatch: /(popup|translate|lab|regression|perf|connection|real-proxy|live-upstream|youtube-source|youtube-subtitles)\.spec\.ts/,
     },
     {
       name: 'firefox-ext',
-      testMatch: /firefox\.spec\.ts/,
+      testMatch: /(firefox|youtube-source|youtube-subtitles)\.spec\.ts/,
       use: { browserName: 'firefox' },
     },
   ],

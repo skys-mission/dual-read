@@ -183,3 +183,16 @@ a:focus-visible {
     --track: #374151;
   }
 }
+/* YouTube scope controls retain the existing compact popup width. */
+.scope-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+.scope-tabs button { flex: 1; border-radius: 6px; }
+.scope-tabs [aria-selected="true"] { background: #2563eb; color: #fff; }
+#subtitlePanel .subtitle-status { margin: 0 0 6px; line-height: 1.45; }
+#subtitlePanel > button { width: 100%; margin: 5px 0; }
+.subtitle-preferences label { display: block; margin: 10px 0; line-height: 1.5; }
+.subtitle-preferences select { display: block; width: 100%; margin-top: 4px; }
+.subtitle-preferences input[type="checkbox"] { margin-right: 6px; }
+#subtitleOptions { margin-top: 12px; }
+#subtitleOptions summary { cursor: pointer; }
+.subtitle-stop { border: 0; background: transparent; font-size: 12px; }
+[role="tabpanel"][hidden], #subtitleStop[hidden] { display: none; }

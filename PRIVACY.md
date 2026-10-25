@@ -1,6 +1,6 @@
 # Privacy Policy — Dual Read
 
-**Last updated:** 2026-07-14
+**Last updated:** 2026-10-25
 **Applies to:** Dual Read browser extension and the optional self-hosted `dual-read-server`.
 
 Dual Read is designed as a **BYOK / self-hosted** bilingual reading tool. We (the open-source project) do **not** operate a cloud translation service that receives your browsing content by default.
@@ -11,7 +11,7 @@ Dual Read is designed as a **BYOK / self-hosted** bilingual reading tool. We (th
 |----------|--------|
 | Do we collect your browsing history? | **No.** |
 | Do we run product analytics / telemetry? | **No** (zero telemetry by default). |
-| Where does page text go? | Only to the **API endpoint you configure** (your LLM provider or your own `dual-read-server`). |
+| Where does translated text go? | Page, selection, or enabled YouTube subtitle text goes only to the **API endpoint you configure** (your LLM provider or your own `dual-read-server`). |
 | Are API keys sent to us? | **No.** Keys stay in your browser (and optionally on your self-hosted server). |
 | Do we sell data? | **No.** |
 
@@ -26,20 +26,24 @@ Manifest permissions (see `extension/wxt.config.ts`):
 | `scripting` | Inject the translation engine **on demand** (not on every page load) |
 | `contextMenus` | “Translate selection” from the right-click menu |
 | `host_permissions` for localhost | Talk to a local `dual-read-server` over HTTP |
-| `optional_host_permissions: https://*/` | Call **your** remote HTTPS API only after you grant it |
+| `optional_host_permissions: https://*/` | Call **your** remote HTTPS API or enable site automation only after you grant the relevant origin. YouTube subtitle automation requests only `https://www.youtube.com/*`. |
 
 Content scripts are **unlisted** and injected when you translate—Dual Read does not auto-inject into all websites at install time.
+
+YouTube subtitle translation is off by default. Manual activation uses the current tab grant. If you explicitly enable automatic YouTube subtitles on this device, a small startup script is registered only for YouTube after permission is granted. Revoking that permission or disabling automation removes future automatic injection. Imported or synchronized settings cannot enable this local permission choice.
 
 ## Data the extension processes
 
 ### Sent to your configured API
 
-When you translate a page or selection, the extension sends **page or selection text** (and related prompt metadata) to:
+When you translate a page, selection, or YouTube subtitles, the extension sends the selected **text** (and related prompt metadata) to:
 
 - the OpenAI-compatible base URL you set in Options, **or**
 - your self-hosted `dual-read-server` (which may forward to an upstream LLM).
 
 Remote endpoints must use **HTTPS**. HTTP is allowed only for loopback (`localhost` / `127.0.0.1` / `::1`).
+
+For YouTube, the extension reads the selected caption track in the current page session and translates a bounded window around playback, with short adjacent text for context. Caption requests may use the browser's existing YouTube session; YouTube cookies and signed caption URLs are not included in translation requests or exported to a proxy. Raw caption tracks remain in page memory. If complete caption data is unavailable while native captions are visible, the extension can translate the current visible captions instead. It does not record audio or generate speech transcripts.
 
 ### Stored locally in the browser
 
@@ -47,6 +51,10 @@ Remote endpoints must use **HTTPS**. HTTP is allowed only for loopback (`localho
 - API key in `chrome.storage.local` and/or `chrome.storage.session` (never synced as a secret across devices via the sync API)
 - Custom HTTP headers in `chrome.storage.local` only (never synced); they are excluded from exports unless you explicitly include them
 - Translation cache entries in `chrome.storage.local` (TTL + LRU)
+- Subtitle language/appearance preferences in sync storage; the automatic YouTube startup preference stays on this device and is excluded from settings export/import
+- Temporary tab intent and current video/track identity in `chrome.storage.session`, cleared on tab closure, cross-origin navigation, or a new browser session; no caption body or cookie is stored there
+
+Subtitle translations use a separate cache namespace with source language and context in the key. Incognito translation caches stay in memory. The existing clear-cache action removes page and subtitle translations together.
 
 Clearing the translation cache in Options removes cached translations. Uninstalling the extension removes its storage.
 
@@ -54,7 +62,7 @@ Clearing the translation cache in Options removes cached translations. Uninstall
 
 The Dual Read project maintainers do **not** receive:
 
-- page contents
+- page contents or subtitles
 - API keys
 - browsing history
 - crash telemetry
@@ -70,7 +78,7 @@ See [`server/docs/DEPLOY.md`](server/docs/DEPLOY.md) and [`SECURITY.md`](SECURIT
 
 ## Firefox / Chrome Web Store disclosures
 
-- Firefox declares `websiteContent` data transmission because page/selection text is sent to **your** configured endpoint (AMO honesty requirement).
+- Firefox declares `websiteContent` data transmission because page, selection, and enabled subtitle text is sent to **your** configured endpoint (AMO honesty requirement).
 - Store listings should link to this document and match the permission explanations above.
 
 ## Contact

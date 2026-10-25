@@ -25,6 +25,9 @@
     "probe:live": "node tools/live-translate-probe/run.mjs",
     "probe:live:chrome": "node tools/live-translate-probe/run.mjs --browser=chrome",
     "probe:live:firefox": "node tools/live-translate-probe/run.mjs --browser=firefox",
+    "probe:youtube": "node tools/youtube-source-probe/run.mjs",
+    "test:youtube-source": "playwright test e2e/youtube-source.spec.ts",
+    "test:youtube-subtitles": "playwright test e2e/youtube-subtitles.spec.ts",
     "test:layout-policy": "node tools/layout-policy-probe/run.mjs",
     "e2e:layout-policy": "node tools/layout-policy-probe/regression.mjs"
   },

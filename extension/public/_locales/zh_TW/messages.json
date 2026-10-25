@@ -1,4 +1,106 @@
 {
+  "subtitleBilingual": {
+    "message": "雙語"
+  },
+  "subtitleOptions": {
+    "message": "字幕選項"
+  },
+  "subtitleEnable": {
+    "message": "開啟雙語字幕"
+  },
+  "subtitleDisable": {
+    "message": "關閉字幕翻譯"
+  },
+  "subtitleRetry": {
+    "message": "重試"
+  },
+  "subtitleSetup": {
+    "message": "設定翻譯服務"
+  },
+  "subtitleTarget": {
+    "message": "譯成"
+  },
+  "subtitleFollowDefault": {
+    "message": "跟隨預設"
+  },
+  "subtitleSize": {
+    "message": "字級"
+  },
+  "subtitleSizeSmall": {
+    "message": "小"
+  },
+  "subtitleSizeMedium": {
+    "message": "標準"
+  },
+  "subtitleSizeLarge": {
+    "message": "大"
+  },
+  "subtitlePosition": {
+    "message": "位置"
+  },
+  "subtitleBottom": {
+    "message": "底部"
+  },
+  "subtitleTop": {
+    "message": "頂部"
+  },
+  "subtitleAuto": {
+    "message": "自動翻譯 YouTube 字幕"
+  },
+  "subtitleOn": {
+    "message": "開啟"
+  },
+  "subtitleOff": {
+    "message": "關閉"
+  },
+  "subtitleTab": {
+    "message": "字幕"
+  },
+  "subtitlePageTab": {
+    "message": "網頁"
+  },
+  "subtitleUsesService": {
+    "message": "字幕使用已設定的翻譯服務。"
+  },
+  "subtitleNativeHint": {
+    "message": "原文語言可在 YouTube 字幕選單中切換。"
+  },
+  "subtitleManual": {
+    "message": "人工字幕"
+  },
+  "subtitleASR": {
+    "message": "自動字幕"
+  },
+  "subtitleStateOff": {
+    "message": "雙語字幕未開啟"
+  },
+  "subtitleStatePreparing": {
+    "message": "正在準備字幕…"
+  },
+  "subtitleStateReady": {
+    "message": "正在顯示雙語字幕"
+  },
+  "subtitleStateCatchingUp": {
+    "message": "正在準備接下來的譯文"
+  },
+  "subtitleStateRealtime": {
+    "message": "已切換為即時字幕，譯文可能稍晚"
+  },
+  "subtitleStateNoTracks": {
+    "message": "這個影片暫無可用字幕"
+  },
+  "subtitleStateSourceError": {
+    "message": "YouTube 暫時無法提供字幕，請稍後重試"
+  },
+  "subtitleStateTranslationError": {
+    "message": "翻譯失敗，已保留原文，請檢查連線後重試"
+  },
+  "subtitleStateSameLanguage": {
+    "message": "原文已是所選語言，直接顯示原文"
+  },
+  "subtitleStateUnsupported": {
+    "message": "暫不支援此影片類型"
+  },
   "extName": {"message": "Dual Read 雙語翻譯"},
   "extDescription": {"message": "使用任何相容於 OpenAI 的 API，提供雙語對照或直接取代的網頁翻譯。"},
   "cmdToggleTranslate": {"message": "翻譯 / 還原目前頁面"},

@@ -26,6 +26,8 @@ import { createFairGate, GLOBAL_TRANSLATE_LIMIT } from '../lib/scheduler/global-
 import { getOnboardingState, openOnboardingPage } from '../lib/settings/onboarding';
 import { isConnectionConfigured } from '../lib/provider/connection';
 import { createContextMenuManager } from '../lib/context-menu';
+import { authorizeSubtitleBatch, installSubtitleBackground } from '../lib/subtitles/background';
+import { translateSubtitleItems } from '../lib/subtitles/translate';
 
 const CONTEXT_MENU_ID = 'dual-read-translate-selection';
 const translateGate = createFairGate(GLOBAL_TRANSLATE_LIMIT);
@@ -48,6 +50,7 @@ function isActivatePendingSiteAutoMessage(message: unknown): message is { action
 }
 
 export default defineBackground(() => {
+  installSubtitleBackground();
   const activatingSiteAutoTabs = new Set<number>();
 
   // MV3 kills the service worker after ~30s of *extension* idleness — and an
@@ -181,25 +184,31 @@ export default defineBackground(() => {
         controllers.delete(raw.requestId);
         return;
       }
-      if (!isBatchRequest(raw)) return;
+      if (!isBatchRequest(raw) && raw.action !== 'translateSubtitles') return;
 
       void (async () => {
         const ac = new AbortController();
         controllers.set(raw.requestId, ac);
         trackBatchStart();
         try {
-          const settings = await settingsForBatch(await getSettings(), raw);
+          const settings = raw.action === 'translateSubtitles'
+            ? await authorizeSubtitleBatch(raw, port.sender!, await getSettings())
+            : await settingsForBatch(await getSettings(), raw);
           const translations = await translateGate.run(
-            () => translateTexts(raw.texts, settings, ac.signal),
+            async () => raw.action === 'translateSubtitles'
+              ? translateSubtitleItems(raw.items, raw.sourceLanguage, settings, ac.signal)
+              : translateTexts(raw.texts, settings, ac.signal),
             ac.signal,
           );
           if (ac.signal.aborted) return;
           port.postMessage({
-            action: 'batchResult',
+            action: raw.action === 'translateSubtitles' ? 'subtitleBatchResult' : 'batchResult',
             requestId: raw.requestId,
             sessionId: raw.sessionId,
             success: true,
-            translations,
+            ...(raw.action === 'translateSubtitles' ? {
+              items: translations, videoId: raw.videoId, trackId: raw.trackId, generation: raw.generation,
+            } : { translations }),
           });
         } catch (err) {
           if (ac.signal.aborted) return;
@@ -212,12 +221,13 @@ export default defineBackground(() => {
           console.error('[Dual Read] batch translation failed:', uf.code, message);
           try {
             port.postMessage({
-              action: 'batchResult',
+              action: raw.action === 'translateSubtitles' ? 'subtitleBatchResult' : 'batchResult',
               requestId: raw.requestId,
               sessionId: raw.sessionId,
               success: false,
               error: uf.detail || uf.code,
               code: uf.code,
+              ...(raw.action === 'translateSubtitles' ? { videoId: raw.videoId, trackId: raw.trackId, generation: raw.generation } : {}),
             });
           } catch {
             /* port gone */

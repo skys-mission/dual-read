@@ -10,7 +10,7 @@ z.config({ jitless: true });
 
 export const SUPPORTED_TARGET_LANGS = ['zh-CN', 'en', 'ru', 'es', 'fr'] as const;
 export const SUPPORTED_UI_LOCALES = ['en', 'zh-CN', 'zh-TW', 'ru', 'es', 'fr'] as const;
-export const SETTINGS_SCHEMA_VERSION = 4 as const;
+export const SETTINGS_SCHEMA_VERSION = 5 as const;
 export const MAX_CONCURRENT_BATCHES = 8;
 export const MAX_BATCH_SIZE = 20;
 export const DEFAULT_API_BASE = 'https://api.deepseek.com';
@@ -203,6 +203,12 @@ const targetLangSchema = z.unknown().optional().transform((v) => normalizeTarget
 const uiLocaleSchema = z.unknown().optional().transform((v) => normalizeUiLocale(v));
 const connectionModeSchema = z.enum(['direct', 'proxy']).catch('direct').default('direct');
 
+export const subtitlePreferencesSchema = z.object({
+  targetLang: z.enum(SUPPORTED_TARGET_LANGS).nullable().catch(null).default(null),
+  textSize: z.enum(['small', 'medium', 'large']).catch('medium').default('medium'),
+  position: z.enum(['bottom', 'top']).catch('bottom').default('bottom'),
+}).catch({ targetLang: null, textSize: 'medium', position: 'bottom' });
+
 export const settingsSchema = z.object({
   schemaVersion: z.literal(SETTINGS_SCHEMA_VERSION).default(SETTINGS_SCHEMA_VERSION),
   connectionMode: connectionModeSchema,
@@ -230,6 +236,8 @@ export const settingsSchema = z.object({
   batchSize: z.coerce.number().int().min(1).max(MAX_BATCH_SIZE).catch(6).default(6),
   customHeaders: z.unknown().transform(normalizeCustomHeaders).default({}),
   siteRules: z.unknown().transform(normalizeSiteRules).default([]),
+  subtitles: subtitlePreferencesSchema.default({ targetLang: null, textSize: 'medium', position: 'bottom' }),
+  youtubeAuto: z.boolean().catch(false).default(false),
   revision: z.coerce.number().int().min(0).catch(0).default(0),
 });
 
@@ -248,6 +256,8 @@ export function createDefaultSettings(): Settings {
     batchSize: 6,
     customHeaders: {},
     siteRules: [],
+    subtitles: { targetLang: null, textSize: 'medium', position: 'bottom' },
+    youtubeAuto: false,
     revision: 0,
   };
 }

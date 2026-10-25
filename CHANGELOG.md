@@ -7,6 +7,18 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- YouTube bilingual subtitles for desktop watch pages, using the configured
+  translation service and a bounded window around playback. Support manual
+  and automatic captions, seek/track/navigation changes, and visible-caption
+  fallback when a full track cannot be retrieved.
+- A subtitle/page switch in the YouTube popup and a compact player control.
+  Subtitle language, size, position, and optional device-local automation are
+  the only new preferences. Automation requests only the YouTube origin.
+- Separate subtitle cache keys, strict cue response validation, native CC
+  restoration, and Chromium/Firefox source and production-addon regressions.
+
 ### Fixed
 
 - Respect conditional and opaque footer sizing, external shadow-part styles,

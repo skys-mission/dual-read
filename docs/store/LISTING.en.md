@@ -18,6 +18,8 @@ What it does
 • Bilingual overlay or replace mode (Alt+M to switch)
 • Viewport-first translation to save tokens; incremental updates for dynamic pages
 • Optional per-site auto-translate rules
+• YouTube bilingual subtitles with your existing API, a separate language preference, and simple size/position presets
+• Subtitle automation is optional and asks only for YouTube access; live streams and Shorts are not supported
 • Works with any OpenAI-compatible endpoint, or a local dual-read-server cache proxy
 
 What it does NOT do

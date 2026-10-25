@@ -1,4 +1,106 @@
 {
+  "subtitleBilingual": {
+    "message": "Bilingüe"
+  },
+  "subtitleOptions": {
+    "message": "Opciones de subtítulos"
+  },
+  "subtitleEnable": {
+    "message": "Activar subtítulos bilingües"
+  },
+  "subtitleDisable": {
+    "message": "Desactivar traducción de subtítulos"
+  },
+  "subtitleRetry": {
+    "message": "Reintentar"
+  },
+  "subtitleSetup": {
+    "message": "Configurar servicio de traducción"
+  },
+  "subtitleTarget": {
+    "message": "Traducir a"
+  },
+  "subtitleFollowDefault": {
+    "message": "Usar idioma predeterminado"
+  },
+  "subtitleSize": {
+    "message": "Tamaño del texto"
+  },
+  "subtitleSizeSmall": {
+    "message": "Pequeño"
+  },
+  "subtitleSizeMedium": {
+    "message": "Estándar"
+  },
+  "subtitleSizeLarge": {
+    "message": "Grande"
+  },
+  "subtitlePosition": {
+    "message": "Posición"
+  },
+  "subtitleBottom": {
+    "message": "Abajo"
+  },
+  "subtitleTop": {
+    "message": "Arriba"
+  },
+  "subtitleAuto": {
+    "message": "Traducir automáticamente subtítulos de YouTube"
+  },
+  "subtitleOn": {
+    "message": "Activado"
+  },
+  "subtitleOff": {
+    "message": "Desactivado"
+  },
+  "subtitleTab": {
+    "message": "Subtítulos"
+  },
+  "subtitlePageTab": {
+    "message": "Página"
+  },
+  "subtitleUsesService": {
+    "message": "Usa el servicio de traducción configurado."
+  },
+  "subtitleNativeHint": {
+    "message": "Cambia el idioma original en el menú de subtítulos de YouTube."
+  },
+  "subtitleManual": {
+    "message": "Subtítulos manuales"
+  },
+  "subtitleASR": {
+    "message": "Subtítulos automáticos"
+  },
+  "subtitleStateOff": {
+    "message": "Subtítulos bilingües desactivados"
+  },
+  "subtitleStatePreparing": {
+    "message": "Preparando subtítulos…"
+  },
+  "subtitleStateReady": {
+    "message": "Subtítulos bilingües activados"
+  },
+  "subtitleStateCatchingUp": {
+    "message": "Preparando las siguientes traducciones"
+  },
+  "subtitleStateRealtime": {
+    "message": "Los subtítulos en tiempo real pueden traducirse con retraso"
+  },
+  "subtitleStateNoTracks": {
+    "message": "Este vídeo no tiene subtítulos disponibles"
+  },
+  "subtitleStateSourceError": {
+    "message": "YouTube no pudo proporcionar subtítulos. Inténtalo más tarde."
+  },
+  "subtitleStateTranslationError": {
+    "message": "Error de traducción. Se conservan los subtítulos originales."
+  },
+  "subtitleStateSameLanguage": {
+    "message": "Los subtítulos ya están en el idioma seleccionado"
+  },
+  "subtitleStateUnsupported": {
+    "message": "Este formato de vídeo aún no es compatible"
+  },
   "extName": {"message": "Traductor Dual Read"},
   "extDescription": {"message": "Traducción bilingüe o de sustitución de páginas con cualquier API compatible con OpenAI."},
   "cmdToggleTranslate": {"message": "Traducir / restaurar la página actual"},

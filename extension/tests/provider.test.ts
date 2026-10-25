@@ -4,7 +4,9 @@ import type { Settings } from '../lib/types';
 
 function settings(partial: Partial<Settings> = {}): Settings {
   return {
-    schemaVersion: 4,
+    schemaVersion: 5,
+    subtitles: { targetLang: null, textSize: 'medium', position: 'bottom' },
+    youtubeAuto: false,
     connectionMode: 'direct',
     apiBase: 'https://api.deepseek.com',
     apiKey: 'sk-test',

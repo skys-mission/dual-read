@@ -1,11 +1,13 @@
 # Firefox E2E notes
 
-## Why two layers
+## Test layers
 
 | Layer | What | Tooling |
 |-------|------|---------|
 | Temporary addon smoke | Manifest + gecko.id load, browse without crash | `playwright-webextext` |
 | Translate main path | collector / session / renderer / restore on Gecko | Content harness (`e2e/helpers/firefox-gecko.ts`) |
+| YouTube G0 source bridge | Real isolated/background/MAIN messaging, bounded fetch/XHR observation and CC ownership | Disposable MV3 diagnostic addon (`tools/youtube-source-probe/browser.mjs`), no API shim |
+| YouTube subtitle feature | Fresh built content/background/provider bundles, real video clock, translation Port and restoration | Temporary addon with a test-only YouTube grant and control relay (`e2e/helpers/subtitle-extension.ts`), no API shim |
 
 Playwright does **not** expose Firefox MV3 service workers or reliable `moz-extension://` navigation (unlike Chromium `--load-extension`). The harness therefore:
 
@@ -22,7 +24,26 @@ This matches the approach in `tools/live-translate-probe/run.mjs` (Firefox gecko
 cd extension
 npm run build:firefox
 npx playwright test --project=firefox-ext
+npm run test:youtube-source -- --project=firefox-ext
+npx playwright test e2e/youtube-subtitles.spec.ts --project=firefox-ext
 ```
+
+The YouTube source spec uses a synthetic watch page and controlled JSON3
+responses with a real temporary MV3 addon in each browser. Its diagnostic host
+grant is limited to YouTube. It does not validate the production toolbar's
+`activeTab` gesture or establish that live YouTube will provide captions.
+The optional live canary (`npm run probe:youtube -- --browser=firefox --headed`)
+uses a separate, signed-out profile and no model credentials; it is not a CI
+test. The feature suite uses the production bundles with a real addon, a
+test-only control relay and a YouTube host grant in a disposable profile. A
+silent 120-second WebM fixture supplies actual playback, seek and rate events;
+the local mock API receives real background requests. This is separate from
+toolbar activeTab and native installation-consent acceptance tests. See
+[the G0 report](research/youtube-subtitles-g0.md) for the release gate
+and explicit limits. Manual native-toolbar and optional-permission checks are
+recorded separately in [the subtitle v1 report](testing/youtube-subtitles-v1.md).
+Existing webpage translation tests still use the Gecko
+content harness described above.
 
 ## Coverage vs Chromium
 

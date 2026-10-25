@@ -5,6 +5,7 @@ import {
   normalizeTargetLang,
   normalizeUiLocale,
   assertSecureApiBase,
+  subtitlePreferencesSchema,
 } from './schema';
 
 const IMPORTABLE_FIELDS = [
@@ -32,6 +33,7 @@ export function buildSettingsExport(
   const output: Partial<Settings> = { ...settings };
   if (!options.includeApiKey) delete output.apiKey;
   if (!options.includeCustomHeaders) delete output.customHeaders;
+  delete output.youtubeAuto;
   return output;
 }
 
@@ -86,5 +88,6 @@ export function prepareSettingsImport(raw: unknown): Partial<Settings> {
   }
   if (data.customHeaders !== undefined) patch.customHeaders = normalizeCustomHeaders(data.customHeaders);
   if (data.siteRules !== undefined) patch.siteRules = normalizeImportedSiteRules(data.siteRules);
+  if (data.subtitles !== undefined) patch.subtitles = subtitlePreferencesSchema.parse(data.subtitles);
   return patch as Partial<Settings>;
 }

@@ -10,6 +10,7 @@ import type { PublicSessionConfig } from '../types';
 
 // c3 may contain translations produced with the global rather than site language.
 const NS = 'dr:c4:';
+const SUBTITLE_NS = 'dr:subtitle-v1:';
 /** Legacy namespaces purged on clear / eviction sweeps. */
 const LEGACY_NS = ['dr:c3:', 'dr:c2:', 'dr:c:'];
 const CLEAR_KEY = 'dualReadCacheGeneration';
@@ -31,7 +32,7 @@ interface CacheEntry {
   b: number;
 }
 
-type CacheSettings = Pick<PublicSessionConfig, 'targetLang' | 'providerFingerprint'>;
+type CacheSettings = Pick<PublicSessionConfig, 'targetLang' | 'providerFingerprint'> & { namespace?: 'subtitle-v1' };
 
 function forget(key: string): void {
   const entry = l1.get(key);
@@ -97,7 +98,7 @@ async function keyFor(text: string, settings: CacheSettings): Promise<string> {
   const hex = Array.from(new Uint8Array(buf))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
-  return NS + hex;
+  return (settings.namespace === 'subtitle-v1' ? SUBTITLE_NS : NS) + hex;
 }
 
 function isFresh(entry: CacheEntry, now = Date.now()): boolean {
@@ -105,7 +106,7 @@ function isFresh(entry: CacheEntry, now = Date.now()): boolean {
 }
 
 function isCacheKey(k: string): boolean {
-  if (k.startsWith(NS)) return true;
+  if (k.startsWith(NS) || k.startsWith(SUBTITLE_NS)) return true;
   return LEGACY_NS.some((p) => k.startsWith(p));
 }
 
@@ -203,7 +204,7 @@ async function evictIfNeeded(): Promise<void> {
     for (const [k, raw] of Object.entries(all)) {
       if (!isCacheKey(k)) continue;
       // Drop legacy namespaces immediately (wrong fingerprint era).
-      if (!k.startsWith(NS)) {
+      if (!k.startsWith(NS) && !k.startsWith(SUBTITLE_NS)) {
         expired.push(k);
         continue;
       }

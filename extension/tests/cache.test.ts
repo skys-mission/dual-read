@@ -53,6 +53,32 @@ describe('cache v4', () => {
     vi.useRealTimers();
   });
 
+  it('separates subtitle entries from page entries and clears both namespaces', async () => {
+    const { storeMap } = mockChrome(false);
+    const page = { targetLang: 'zh-CN' as const, providerFingerprint: 'same-provider' };
+    const subtitles = { ...page, namespace: 'subtitle-v1' as const };
+    await store([{ text: 'Same text', translation: 'Page translation' }], page);
+    expect(await lookup(['Same text'], subtitles)).toEqual([null]);
+    await store([{ text: 'Same text', translation: 'Subtitle translation' }], subtitles);
+    clearMemoryCache();
+    expect(await lookup(['Same text'], page)).toEqual(['Page translation']);
+    expect(await lookup(['Same text'], subtitles)).toEqual(['Subtitle translation']);
+    expect([...storeMap.keys()].some(key => key.startsWith('dr:subtitle-v1:'))).toBe(true);
+    await clearCache();
+    expect(await lookup(['Same text'], subtitles)).toEqual([null]);
+    expect(await lookup(['Same text'], page)).toEqual([null]);
+  });
+
+  it('keeps subtitle translations in memory only in incognito', async () => {
+    const { chromeMock } = mockChrome(true);
+    const config = { namespace: 'subtitle-v1' as const, targetLang: 'zh-CN' as const, providerFingerprint: 'fp' };
+    await store([{ text: 'Private caption', translation: 'Private translation' }], config);
+    expect(await lookup(['Private caption'], config)).toEqual(['Private translation']);
+    expect(chromeMock.storage.local.set).not.toHaveBeenCalled();
+    clearMemoryCache();
+    expect(await lookup(['Private caption'], config)).toEqual([null]);
+  });
+
   it('hits L1 after store in normal mode and persists to storage', async () => {
     const { storeMap, chromeMock } = mockChrome(false);
     const settings = { targetLang: 'zh-CN' as const, providerFingerprint: 'fp-1' };

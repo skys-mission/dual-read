@@ -9,6 +9,7 @@
 
 import { ensureTranslationStyles } from '../renderer/styles';
 import { composedContains, getShadowRoot } from '../dom-tree';
+import { SUBTITLE_EXCLUDED } from '../dom-const';
 export { getShadowRoot } from '../dom-tree';
 
 export type WatchRoot = Document | ShadowRoot | Element;
@@ -33,6 +34,7 @@ export function walkOpenShadowRoots(scope: ParentNode): ShadowRoot[] {
   const seen = new Set<ShadowRoot>();
 
   const visitElement = (el: Element): void => {
+    if (el.closest(SUBTITLE_EXCLUDED)) return;
     const sr = getShadowRoot(el);
     if (sr && !seen.has(sr)) {
       seen.add(sr);
@@ -127,6 +129,7 @@ export class RootRegistry {
   /** Watch a root if not already watched. Returns true when newly added. */
   watch(root: WatchRoot): boolean {
     if (this.disposed || this.watchers.has(root)) return false;
+    if (root instanceof ShadowRoot && root.host.closest(SUBTITLE_EXCLUDED)) return false;
     ensureTranslationStyles(root);
     const mo = new MutationObserver((mutations) => {
       if (this.disposed) return;
@@ -157,6 +160,7 @@ export class RootRegistry {
       for (const n of Array.from(m.addedNodes)) {
         if (n.nodeType !== 1) continue;
         const el = n as Element;
+        if (el.closest(SUBTITLE_EXCLUDED)) continue;
         for (const sr of [getShadowRoot(el), ...walkOpenShadowRoots(el)].filter(Boolean) as ShadowRoot[]) {
           if (this.watch(sr)) added.push(sr);
         }

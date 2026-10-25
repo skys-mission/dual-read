@@ -84,6 +84,7 @@
 ### 浏览器插件（Chrome / Edge / Firefox，Manifest V3）
 
 - **双语对照** 或 **直接替换**，Options 默认 + Popup 临时切换
+- **YouTube 双语字幕（开发版）**：在桌面视频观看页打开扩展，选择“字幕 → 开启双语字幕”，复用现有 API 和默认目标语言。低频选项仅译成、字号、位置、自动开启；自动开启默认关闭，并单独申请 YouTube 权限。支持已有的人工/自动字幕，首版不支持直播和 Shorts。
 - **按需注入**：点击翻译时注入 content script，兼容更多站点
 - **视口懒翻译**：IntersectionObserver 仅翻译进入视口（含预取一屏）的内容，滚动时按需补齐，省 token
 - **增量翻译**：MutationObserver 持续监听动态内容，只索引新增节点

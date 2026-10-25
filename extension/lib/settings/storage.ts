@@ -13,7 +13,7 @@ import {
 export const SECRET_KEYS = ['apiKey'] as const;
 type SecretKey = (typeof SECRET_KEYS)[number];
 /** Credentials often live in custom headers; never replicate them through sync. */
-export const DEVICE_LOCAL_KEYS = ['customHeaders'] as const;
+export const DEVICE_LOCAL_KEYS = ['customHeaders', 'youtubeAuto'] as const;
 type DeviceLocalKey = (typeof DEVICE_LOCAL_KEYS)[number];
 
 const META_LOCAL_KEY = 'dualReadSettingsMeta';
@@ -71,7 +71,7 @@ export async function getSettings(): Promise<Settings> {
   const [syncStored, legacyHeadersStored, localStored] = await Promise.all([
     chrome.storage.sync.get({ ...syncDefaults, apiKey: '' }),
     chrome.storage.sync.get('customHeaders'),
-    chrome.storage.local.get(['apiKey', 'customHeaders']),
+    chrome.storage.local.get(['apiKey', 'customHeaders', 'youtubeAuto']),
   ]);
   const meta = await readMeta();
 
@@ -106,6 +106,7 @@ export async function getSettings(): Promise<Settings> {
     ...syncStored,
     apiKey,
     customHeaders,
+    youtubeAuto: localStored.youtubeAuto === true,
     revision: meta.revision || Number(syncStored.revision) || 0,
   };
   const settings = parseSettings(merged);
@@ -194,6 +195,10 @@ export async function saveSettings(
     // Defensive cleanup prevents a concurrently running old extension page
     // from leaving credentials in sync after this version has saved.
     ops.push(chrome.storage.sync.remove('customHeaders'));
+  }
+  if ('youtubeAuto' in patch) {
+    ops.push(chrome.storage.local.set({ youtubeAuto: deviceLocal.youtubeAuto === true }));
+    ops.push(chrome.storage.sync.remove('youtubeAuto'));
   }
   await Promise.all(ops);
   return next;

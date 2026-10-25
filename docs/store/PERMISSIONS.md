@@ -1,6 +1,6 @@
 # Store permission justifications
 
-Single purpose: **bilingual / replacement reading of web pages** the user chooses to translate.
+Single purpose: **bilingual reading of web content** the user chooses to translate, including webpage text and YouTube captions.
 
 These texts are meant to be pasted into Chrome Web Store and Firefox AMO review forms.
 Keep them aligned with [`PRIVACY.md`](../../PRIVACY.md) and `extension/wxt.config.ts`.
@@ -19,7 +19,7 @@ Keep them aligned with [`PRIVACY.md`](../../PRIVACY.md) and `extension/wxt.confi
 | Permission | Justification |
 |------------|---------------|
 | `http://localhost/*`, `http://127.0.0.1/*`, `http://[::1]/*` | Allow the optional self-hosted `dual-read-server` on loopback over HTTP. |
-| `optional_host_permissions: https://*/` | Call the **user-configured** remote OpenAI-compatible HTTPS API (or a remote self-hosted server). Requested only when the user configures / uses a remote origin—not granted for all sites at install. |
+| `optional_host_permissions: https://*/` | Call the **user-configured** remote HTTPS API or enable explicitly chosen site automation. YouTube subtitle automation requests only `https://www.youtube.com/*`; it remains off until consent and is stored only on this device. No all-site grant at install. |
 
 **Not requested at install:** broad `http://*/*` or “read and change all your data on all websites”.
 
@@ -27,13 +27,19 @@ Keep them aligned with [`PRIVACY.md`](../../PRIVACY.md) and `extension/wxt.confi
 
 | Data | Collected by Dual Read project? | Sent where? |
 |------|----------------------------------|-------------|
-| Page / selection text | No (project operators do not receive it) | Only to the API endpoint **the user configures** |
+| Page / selection / enabled subtitle text and short adjacent context | No (project operators do not receive it) | Only to the API endpoint **the user configures** |
 | API keys and custom HTTP headers | No | Stored only on the current device; sent only to the configured endpoint. Both are excluded from settings exports unless the user explicitly includes them. |
 | Browsing history | No | — |
 | Analytics / telemetry | No | — |
 
 Remote endpoints must be **HTTPS**. HTTP is allowed only for loopback.
 
+Manual subtitles use `activeTab` and top-frame on-demand scripts. The optional
+YouTube startup script is registered only after permission and removed when
+automation or that permission is disabled. Subtitle requests use the existing
+YouTube page session; cookies and signed caption URLs are never sent to the
+translation API. There is no audio recording or transcription permission.
+
 ## Firefox AMO data collection
 
-`browser_specific_settings.gecko.data_collection_permissions.required = ["websiteContent"]` because translating a page or selection transmits website text to the user’s configured LLM endpoint. This matches real behavior and AMO honesty requirements (Firefox ≥ 140).
+`browser_specific_settings.gecko.data_collection_permissions.required = ["websiteContent"]` because translating a page, selection, or enabled captions transmits website text to the user’s configured LLM endpoint. This matches real behavior and AMO honesty requirements (Firefox ≥ 140).

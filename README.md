@@ -72,6 +72,11 @@ The extension translates pages through any OpenAI-compatible API. The server add
 ### Browser extension (Chrome / Edge / Firefox, Manifest V3)
 
 - Bilingual overlay or replace mode
+- YouTube bilingual subtitles (development build): open a desktop watch page,
+  click the extension → **Subtitles → Enable bilingual subtitles**. Uses your
+  existing API and target language. Optional subtitle settings are language,
+  size, position, and automatic startup on YouTube; startup is off by default.
+  Supports available manual/automatic captions, not live streams or Shorts.
 - On-demand content-script injection (`activeTab` + `scripting`)
 - Viewport-first lazy translation + MutationObserver incremental indexing
 - Automatic retry with backoff; click-to-retry on persistent failures
