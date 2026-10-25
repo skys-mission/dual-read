@@ -102,6 +102,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
   Require Node.js 22.12+ on the 22.x line, or supported 24.x / 26+.
   Keep all 100 DOM mutation scenarios in the restoration regression with an
   explicit test timeout; browser performance budgets remain unchanged.
+- Wait for installation defaults before seeding browser-test settings, avoiding
+  startup races that could replace the local mock service configuration.
+- Establish the full subtitle prefetch window before checking that appearance
+  changes do not trigger additional translation requests in browser tests.
 - Use `deepseek-flash` as the default model for new extension and server
   configurations; preserve existing configured model names.
 - Cache screen-reader-only ancestry during each collection slice, invalidating

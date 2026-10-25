@@ -211,6 +211,11 @@ test(`production subtitle path: ${scenario}`, async ({}, info) => {
     }
     if (scenario === 'appearance') {
       await page.getByRole('button', { name: 'Subtitle options', exact: true }).click();
+      // At media time zero the 30s window contains eight cues, sent in two
+      // batches. The first visible translation does not finish that prefetch.
+      await expect.poll(() => mock.getSubtitleRequests().flat().map(item => item.text).sort()).toEqual(
+        Array.from({ length: 8 }, (_, i) => `Original caption ${i + 1}`),
+      );
       const count = mock.getRequestCount();
       await page.getByLabel('Text size', { exact: true }).selectOption('large');
       await page.getByLabel('Position', { exact: true }).selectOption('top');
