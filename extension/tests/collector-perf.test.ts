@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 /**
- * Collector timing smoke (jsdom). 5k/p95<100ms is enforced in Chromium
- * E2E (`perf.spec.ts`); jsdom is slower and only catches catastrophic O(n²).
+ * Collector timing smoke (jsdom). A generous best-of-three budget catches
+ * catastrophic O(n²) slowdowns while allowing for machine timing variation.
  */
 import { afterEach, describe, expect, it } from 'vitest';
 import { collectUnits } from '../lib/collector';
