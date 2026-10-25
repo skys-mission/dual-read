@@ -28,10 +28,37 @@ G0 已取得真实人工/ASR 的完整 JSON3 时码，随后完成字幕首版�
 | G0 桥接合同 | Chromium / Firefox 的真实临时 MV3 扩展，受控 YouTube 页面 | MAIN/isolated/background、请求观察、身份与所有权，含真实脱敏样本 |
 | 首版功能 | 新构建的真实 MV3 内容脚本/后台/provider，测试专用授权与控制 relay | 时间轴、取消、缓存、错误、恢复与页面翻译共存；没有 `chrome.*` shim |
 | 工具栏和权限 | 原始生产 manifest 的隔离有界面配置，仅在后台初始化本地 mock API | 用户手势 `activeTab`、真实 popup、原生权限提示、设备偏好和播放器 UI |
+| 真实翻译服务 | Firefox 155.0 生产 MV3 扩展 + 受控人工/ASR 源 + 真实 MiMo | 实际跨源服务请求、严格解析、双语显示、缓存和恢复；不覆盖登录态 YouTube 在线源 |
 
 最终生产租约/适配器顺序还在用户登录的真实页面上复验：初始 CC 关闭，准备租约后仍关闭，安装监听后开启；**527ms** 从原生请求取得 **65,976 字节 / 466 条人工字幕**，释放后 CC 恢复关闭。随后把用户页面恢复为测试前的 CC 开启，保留静音、暂停。[结果](../research/evidence/youtube-final-lease-live.json) / [播放器截图](../research/evidence/youtube-final-live-muted.png)。此复验在 MAIN world 调用生产函数，未在用户会话中安装测试扩展或发送模型请求。
 
 自动化功能套件的测试 relay 与 YouTube 预授权只存在临时副本中。手工工具栏测试副本没有这些授权或静态内容脚本；仅将测试 API/语言填入 storage。API 使用 loopback mock，未消耗用户模型额度。Firefox 的临时安装不能代替商店正式安装时的同意流程。
+
+### 真实翻译服务补测
+
+2026-10-25 使用用户已有配置的 MiMo `mimo-v2.6-flash`，通过生产 `translateSubtitleItems`、provider 和严格 ID 解析器发送五条自编英文测试字幕，目标语言为简体中文。一次 HTTP 200 返回全部五个 ID/revision，无格式重试；网络请求耗时 **3,753ms**，用量 **297 prompt + 120 completion = 417 tokens**。译文保留了 640 像素、原始宽高比、字幕自动显示、暂停和播放同步等含义。完整受控样本及计数见[脱敏记录](../research/evidence/youtube-provider-canary-2026-10-25.json)。
+
+随后在 Firefox 155.0 的真实 MV3 生产后台/内容脚本中补测同一服务。播放器与时码源为明确标注的受控页面：五条自编人工字幕、五条含窗口/追加事件的 ASR 样本；视频为无音轨本地 WebM。模型请求没有 mock 或路由替换，走实际 HTTPS 服务。诊断副本只增加 YouTube 和配置 API origin 的授权，密钥经一次性 loopback 通道写入扩展 session storage，没有打包或记录到报告。
+
+| 真实服务场景 | 观察结果 |
+|---|---|
+| 人工样本 5 条 | 全部正确对齐并显示；首条译文在启用后约 3,474ms 被观察到；API 请求 3,030ms |
+| 切换 ASR 样本 5 条 | 追加事件合并后原文完整，译文逐条显示；切轨后首条约 12,952ms；API 请求 11,326ms |
+| 关闭、重新开启与 seek | 原生 CC 初始关闭被恢复；缓存重开约 85ms 显示首条，重开和 seek 共新增 0 次模型请求 |
+| 用户切轨后关闭 | 保留用户选择的 ASR / CC 开启；原生字幕节点身份和可见性恢复，自有字幕文本清空 |
+| 服务用量 | 两次 HTTP 200，共 695 prompt + 260 completion = 955 tokens；加上独立 canary，总计三次请求 / 1,372 tokens |
+
+请求耗时包括读取响应正文；UI 耗时从启用/切轨到测试首次观察到非空译文，包含测试轮询开销。所有数值均为这次单样本观测，不是性能保证。ASR 请求较慢说明真实服务延迟存在波动；本次没有评估长视频连续播放就绪率或每分钟费用。样本译文保留了追加字幕、切换语言取消旧请求、恢复原生字幕等含义，没有把相邻译文串给其他原文。
+
+证据：[Firefox 真实服务记录](../research/evidence/youtube-firefox-real-provider-2026-10-25.json)、[人工字幕截图](../research/evidence/firefox-real-provider-manual.png)、[ASR 截图](../research/evidence/firefox-real-provider-asr.png)。截图播放器内明确标注了受控源，不能作为真实 YouTube 登录态全链路截图。
+
+### Firefox 登录态阻塞
+
+用户尝试在独立 Firefox 测试配置中登录后，Google 显示“此浏览器或应用可能不安全”，未完成登录。Google 的[官方说明](https://support.google.com/accounts/answer/7675428?hl=en)列出受软件自动化控制的浏览器等可能原因；当前是 Playwright Nightly 配置，但不能据此排除其他原因。没有绕过登录检查、修改 UA 或移植其他浏览器的 Cookie。
+
+返回真实测试视频后，未登录源请求仍为 HTTP 200 / 0 字节，扩展进入 `source-error`，模型请求数为零；同一运行中原生播放器随后也显示播放错误。关闭扩展后状态回到 `off`。测试浏览器通过 `media.volume_scale=0` 保持输出静音；播放器错误重建媒体时曾读到媒体元素的默认音量属性，此时媒体暂停且未就绪，后续驱动已在 loadstart/emptied 等事件上补充静音保护。详见[脱敏失败记录](../research/evidence/youtube-firefox-live-unavailable-2026-10-25.json)。临时浏览器及测试配置已关闭清理。
+
+Firefox 登录态源验证仍保留为待验证。后续适合在用户能正常登录的普通 Firefox 配置里通过临时加载扩展验证；本次受控源 + 真实服务结果不能替代该关卡。
 
 ## 浏览器测试
 
@@ -78,6 +105,14 @@ npx playwright test e2e/popup.spec.ts
 npx playwright test e2e/firefox.spec.ts --grep 'firefox extension load'
 ```
 
+真实服务补测按需执行，会使用忽略的 `dev-settings.json` 中的服务并消耗模型额度，不纳入 CI。运行方式和诊断权限边界见[工具说明](../../extension/tools/youtube-live-validation/README.md)：
+
+```bash
+node tools/youtube-live-validation/provider.mjs
+node tools/youtube-live-validation/run.mjs --controlled-source
+node tools/youtube-live-validation/run.mjs
+```
+
 `subtitle-clock.webm` 是本地生成的 120 秒、640×360、10fps、VP8 纯色静音测试视频，无外部素材、无音轨。媒体路由支持 206 Range；字幕用人工 fixture，避免用墙上时钟伪装视频时钟。示例生成命令：
 
 ```bash
@@ -86,8 +121,8 @@ ffmpeg -f lavfi -i color=c=0x24304b:s=640x360:r=10 -t 120 -an -c:v libvpx -b:v 8
 
 ## 发布前保留项
 
-- Firefox 真实登录会话的在线源 canary 尚未完成。独立未登录配置曾返回 200/空正文，不能推断“必须登录”；内置未登录浏览器此前也出现过可用原生字幕。
-- 未通过用户实际模型服务评估翻译质量、首句网络延迟、每分钟成本、长视频就绪率；本轮用可控 mock 验证代码和请求边界。
+- Firefox 真实登录会话的在线源 canary 被 Google 登录拒绝阻塞。独立未登录配置仍返回 200/空正文，不能推断“必须登录”；内置未登录浏览器此前也出现过可用原生字幕。
+- 真实模型独立 canary、Firefox 受控人工/ASR 源的实际服务翻译显示、缓存与恢复已通过；Firefox 真实 YouTube 字幕的翻译显示、每分钟成本和长视频就绪率仍待补测。浏览器自动化套件继续使用可控 mock 验证代码和请求边界。
 - 多音轨、全部 JSON3 变体、真实广告切换、平台实验 UI 与系统高对比/屏幕阅读器的全面验收仍需补充。200% 手工缩放检查针对 Chromium；Firefox 有窄屏/短视口/键盘自动化覆盖。
 - 文档中的 150ms/250ms 仅是本地媒体时钟测试目标，不是在线模型响应 SLA。商店发布、签名和安装同意流程未执行。
 

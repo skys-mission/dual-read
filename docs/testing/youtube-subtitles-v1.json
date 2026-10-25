@@ -69,6 +69,53 @@
   "limitations": [
     "Authenticated live YouTube source validated only in in-app Chromium.",
     "Toolbar and permission checks performed separately with native UI.",
-    "No real translation-provider quality or network-latency claim."
-  ]
+    "Firefox real-provider rendering, cache and restoration passed with controlled source; authenticated live Firefox YouTube source remains blocked by Google sign-in rejection."
+  ],
+  "real_provider_canary": {
+    "date": "2026-10-25",
+    "model": "mimo-v2.6-flash",
+    "sample_kind": "self-authored controlled subtitles",
+    "items": 5,
+    "requests": 1,
+    "http_status": 200,
+    "elapsed_ms": 3753,
+    "prompt_tokens": 297,
+    "completion_tokens": 120,
+    "total_tokens": 417,
+    "ids_and_revisions_aligned": true,
+    "browser_end_to_end": false,
+    "evidence": "../research/evidence/youtube-provider-canary-2026-10-25.json"
+  },
+  "firefox_real_provider": {
+    "browser": "Firefox 155.0",
+    "source_fixture": true,
+    "provider_mock": false,
+    "model": "mimo-v2.6-flash",
+    "manual_items": 5,
+    "asr_items": 5,
+    "api_requests": 2,
+    "http_statuses": [
+      200,
+      200
+    ],
+    "request_elapsed_ms": [
+      3030,
+      11326
+    ],
+    "first_translation_observed_ms": 3474,
+    "track_switch_translation_observed_ms": 12952,
+    "cached_restart_translation_observed_ms": 85,
+    "cache_restart_and_seek_added_requests": 0,
+    "total_tokens": 955,
+    "native_restored": true,
+    "user_track_preserved": true,
+    "evidence": "../research/evidence/youtube-firefox-real-provider-2026-10-25.json"
+  },
+  "firefox_authenticated_live": {
+    "completed": false,
+    "reason": "Google rejected the automated browser sign-in; user unable to log in.",
+    "bypass_attempted": false,
+    "signed_out_source": "HTTP 200 with empty caption body; no model requests.",
+    "evidence": "../research/evidence/youtube-firefox-live-unavailable-2026-10-25.json"
+  }
 }

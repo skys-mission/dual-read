@@ -1,0 +1,54 @@
+{
+  "at": "2026-10-25T02:44:13.818Z",
+  "sampleKind": "self-authored controlled subtitles",
+  "apiOrigin": "https://api.xiaomimimo.com",
+  "model": "mimo-v2.6-flash",
+  "targetLang": "zh-CN",
+  "productionTransport": true,
+  "productionPromptAndParser": true,
+  "calls": [
+    {
+      "index": 1,
+      "status": 200,
+      "elapsedMs": 3753,
+      "usage": {
+        "completion_tokens": 120,
+        "prompt_tokens": 297,
+        "total_tokens": 417,
+        "completion_tokens_details": {
+          "reasoning_tokens": 9
+        },
+        "prompt_tokens_details": null
+      },
+      "finishReason": "stop"
+    }
+  ],
+  "passed": true,
+  "items": [
+    {
+      "id": "canary-1",
+      "source": "The player starts when you press the play button.",
+      "translation": "按下播放按钮时，播放器开始播放。"
+    },
+    {
+      "id": "canary-2",
+      "source": "Set the width to 640 pixels and keep the original aspect ratio.",
+      "translation": "将宽度设置为640像素，并保持原始宽高比。"
+    },
+    {
+      "id": "canary-3",
+      "source": "This option controls whether captions appear automatically.",
+      "translation": "此选项控制字幕是否自动显示。"
+    },
+    {
+      "id": "canary-4",
+      "source": "If the video is paused, the subtitle should stay on screen.",
+      "translation": "如果视频已暂停，字幕应保持在屏幕上。"
+    },
+    {
+      "id": "canary-5",
+      "source": "You can change the playback speed without losing synchronization.",
+      "translation": "您可以更改播放速度而不会失去同步。"
+    }
+  ]
+}
