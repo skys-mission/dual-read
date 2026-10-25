@@ -84,7 +84,7 @@
     "message": "正在准备接下来的译文"
   },
   "subtitleStateRealtime": {
-    "message": "已切换为实时字幕，译文可能稍晚"
+    "message": "实时双语字幕，显示可能稍有延迟"
   },
   "subtitleStateNoTracks": {
     "message": "这个视频暂无可用字幕"

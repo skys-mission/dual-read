@@ -13,6 +13,8 @@ export interface YouTubeSourceProbeOptions {
   enableNativeCC?: boolean;
   /** Production lease activates CC only after this probe installs its hooks. */
   captionLeaseToken?: string;
+  /** Once per production lease, ask native CC to renew an already-loaded track. */
+  refreshNativeCC?: boolean;
   timeoutMs?: number;
 }
 
@@ -28,7 +30,7 @@ export interface YouTubeSourceProbeResult {
     via: 'player' | 'replay' | 'track';
     status: number;
     bytes: number;
-    outcome: 'json3' | 'empty' | 'unsupported' | 'too-large' | 'network';
+    outcome: 'json3' | 'xml' | 'empty' | 'unsupported' | 'too-large' | 'network';
   }[];
   cc: {
     initial: string;
@@ -119,7 +121,7 @@ export async function probeYouTubeSource(options: YouTubeSourceProbeOptions): Pr
     result.status = 'no-tracks';
     return done();
   }
-  const tracks = rawTracks.slice(0, 100).filter(t => typeof t.vssId === 'string'
+  const tracks = rawTracks.slice(0, 100).map(t => ({ ...t, vssId: t.vssId ?? t.vss_id })).filter(t => typeof t.vssId === 'string'
     && typeof t.languageCode === 'string' && typeof t.baseUrl === 'string');
   result.tracks = tracks.map(t => ({ id: t.vssId!, language: t.languageCode!, kind: t.kind === 'asr' ? 'asr' : 'manual' }));
   const selected = readSelected();
@@ -127,7 +129,10 @@ export async function probeYouTubeSource(options: YouTubeSourceProbeOptions): Pr
   const matchSelected = (current: Track | undefined) => {
     const id = current?.vssId ?? current?.vss_id;
     if (id) return tracks.find(t => t.vssId === id);
-    if (current?.languageCode) return tracks.find(t => t.languageCode === current.languageCode && (t.kind ?? '') === (current.kind ?? ''));
+    if (current?.languageCode) {
+      const matching = tracks.filter(t => t.languageCode === current.languageCode && (t.kind ?? '') === (current.kind ?? ''));
+      return matching.length === 1 ? matching[0] : undefined;
+    }
     return undefined;
   };
   // Native CC's selected track wins. Never silently fall back to a different
@@ -172,6 +177,12 @@ export async function probeYouTubeSource(options: YouTubeSourceProbeOptions): Pr
   const pendingXHR = new Map<XMLHttpRequest, () => void>();
   const originalFetch = window.fetch;
   const originalOpen = XMLHttpRequest.prototype.open;
+  const lease = () => (window as Window & { __dualReadSubtitleCCLease?: {
+    token: string; activate: () => boolean; refresh?: () => boolean;
+  } }).__dualReadSubtitleCCLease;
+  const cancel = () => abort.abort();
+  const cancelEvents = options.captionLeaseToken ? ['yt-navigate-start', 'dual-read:subtitles-destroy',
+    `dual-read:subtitles-release:${options.captionLeaseToken}`, `dual-read:subtitles-cc-off:${options.captionLeaseToken}`] : [];
 
   const isCaptionUrl = (value: string): boolean => {
     refreshSelection();
@@ -186,6 +197,86 @@ export async function probeYouTubeSource(options: YouTubeSourceProbeOptions): Pr
         && !url.searchParams.has('tlang');
     } catch { return false; }
   };
+  // A small, bounded XML reader avoids DOMParser's TrustedHTML sink in MAIN.
+  // It accepts timedtext structure only, never creates DOM or a Trusted Types policy.
+  const parseXML = (body: string): YouTubeCaptionEvent[] => {
+    const entities: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
+    const decode = (value: string) => value.replace(/&(#x[\da-f]+|#\d+|amp|lt|gt|quot|apos);/gi, (raw, entity: string) => {
+      if (entity[0] !== '#') return entities[entity] ?? raw;
+      const n = entity[1].toLowerCase() === 'x' ? parseInt(entity.slice(2), 16) : Number(entity.slice(1));
+      return n > 0 && n <= 0x10ffff && !(n >= 0xd800 && n <= 0xdfff) ? String.fromCodePoint(n) : '\ufffd';
+    });
+    const events: YouTubeCaptionEvent[] = [];
+    const stack: string[] = [];
+    let root = ''; let offset = 0; let tags = 0;
+    let active: { event: YouTubeCaptionEvent; depth: number; text: string[] } | undefined;
+    const close = () => {
+      if (active?.depth === stack.length) {
+        active.event.segs = [{ utf8: active.text.join('') }]; events.push(active.event); active = undefined;
+        if (events.length > 50000) throw new Error('Caption count exceeded');
+      }
+      stack.pop();
+    };
+    while (offset < body.length) {
+      if (body[offset] !== '<') {
+        const next = body.indexOf('<', offset); const end = next < 0 ? body.length : next;
+        const value = body.slice(offset, end);
+        if (!stack.length && value.trim()) throw new Error('Text outside XML root');
+        active?.text.push(decode(value)); offset = end; continue;
+      }
+      const special = body.startsWith('<!--', offset) ? ['<!--', '-->']
+        : body.startsWith('<?', offset) ? ['<?', '?>'] : body.startsWith('<![CDATA[', offset) ? ['<![CDATA[', ']]>'] : undefined;
+      if (special) {
+        const end = body.indexOf(special[1], offset + special[0].length);
+        if (end < 0) throw new Error('Unclosed XML section');
+        if (special[0] === '<![CDATA[') active?.text.push(body.slice(offset + 9, end));
+        offset = end + special[1].length; continue;
+      }
+      let end = offset + 1; let quote = '';
+      for (; end < body.length; end++) {
+        const c = body[end];
+        if (quote) { if (c === quote) quote = ''; }
+        else if (c === '"' || c === "'") quote = c;
+        else if (c === '>') break;
+      }
+      if (end === body.length || end - offset > 10000 || ++tags > 200000) throw new Error('XML token limit');
+      const token = body.slice(offset, end + 1); offset = end + 1;
+      const closing = /^<\/([\w:.-]+)\s*>$/.exec(token);
+      if (closing) {
+        if (stack.at(-1) !== closing[1]) throw new Error('Mismatched XML close');
+        close(); continue;
+      }
+      const opening = /^<([A-Za-z][\w:.-]*)([\s\S]*?)(\/?)>$/.exec(token);
+      if (!opening) throw new Error('Unsupported XML token');
+      const [, name, rawAttributes, selfClosing] = opening;
+      const attrs: Record<string, string> = Object.create(null);
+      let rest = rawAttributes.trim(); let count = 0;
+      while (rest) {
+        const attr = /^([\w:.-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')\s*/.exec(rest);
+        if (!attr || ++count > 64) throw new Error('Invalid XML attributes');
+        attrs[attr[1]] = decode(attr[2] ?? attr[3]); rest = rest.slice(attr[0].length);
+      }
+      if (!stack.length) {
+        if (root || !['timedtext', 'transcript'].includes(name)) throw new Error('Unsupported XML root');
+        root = name;
+      }
+      const parent = stack.at(-1); stack.push(name);
+      if (stack.length > 64) throw new Error('XML depth limit');
+      if (root === 'transcript' && parent === 'transcript' && name === 'text'
+        || root === 'timedtext' && parent === 'body' && name === 'p') {
+        if (active) throw new Error('Nested caption');
+        const legacy = root === 'transcript';
+        active = { depth: stack.length, text: [], event: {
+          tStartMs: Number(attrs[legacy ? 'start' : 't'] ?? NaN) * (legacy ? 1000 : 1),
+          dDurationMs: Number(attrs[legacy ? 'dur' : 'd'] ?? 0) * (legacy ? 1000 : 1),
+          ...(attrs.w != null ? { wWinId: Number(attrs.w) } : {}), ...(attrs.a === '1' ? { aAppend: 1 } : {}),
+        } };
+      } else if (name === 'br') active?.text.push('\n');
+      if (selfClosing) close();
+    }
+    if (!root || stack.length) throw new Error('Incomplete XML');
+    return events;
+  };
   const record = (body: string, status: number, via: 'player' | 'replay' | 'track', trackId: string) => {
     if (disposed || trackId !== track.vssId || result.observations.length >= 8) return;
     const bytes = new TextEncoder().encode(body.slice(0, maxBytes + 1)).byteLength;
@@ -193,7 +284,15 @@ export async function probeYouTubeSource(options: YouTubeSourceProbeOptions): Pr
     if (bytes > maxBytes) outcome = 'too-large';
     else if (status === 200 && body.trim()) {
       try {
-        const parsed = JSON.parse(body) as { events?: YouTubeCaptionEvent[] };
+        let parsed: { events?: YouTubeCaptionEvent[] };
+        let format: 'json3' | 'xml' = 'json3';
+        if (body.trimStart().startsWith('<')) {
+          // Replay the player's exact format and signed URL. SRV3 and legacy
+          // timedtext XML carry timing too; arbitrary HTML is not a source.
+          if (/<!DOCTYPE/i.test(body)) throw new Error('Unsupported XML declaration');
+          parsed = { events: parseXML(body) };
+          format = 'xml';
+        } else parsed = JSON.parse(body) as { events?: YouTubeCaptionEvent[] };
         if (Array.isArray(parsed.events) && parsed.events.length <= 50_000) {
           const clean: YouTubeCaptionEvent[] = [];
           for (const event of parsed.events) {
@@ -210,11 +309,11 @@ export async function probeYouTubeSource(options: YouTubeSourceProbeOptions): Pr
             clean.push(entry);
           }
           if (clean.some(e => e.dDurationMs && e.segs?.some(s => s.utf8.trim()))) {
-            outcome = 'json3';
+            outcome = format;
             captured = clean;
           }
         }
-      } catch { /* Non-JSON3 is a diagnosed capability gap, not an empty track. */ }
+      } catch { /* Malformed or unsupported bodies are not an empty track. */ }
     }
     result.observations.push({ via, status, bytes, outcome });
   };
@@ -293,12 +392,13 @@ export async function probeYouTubeSource(options: YouTubeSourceProbeOptions): Pr
     }
   };
   const wait = async (until: number) => {
-    while (!captured && sameVideo() && sameTrack() && performance.now() < until) {
+    while (!captured && !abort.signal.aborted && sameVideo() && sameTrack() && performance.now() < until) {
       await new Promise(resolve => setTimeout(resolve, Math.min(40, Math.max(0, until - performance.now()))));
     }
   };
   const timer = setTimeout(() => abort.abort(), limit);
   try {
+    for (const event of cancelEvents) document.addEventListener(event, cancel, { once: true });
     // Performance entries are URL candidates only, never proof of caption data.
     for (const entry of performance.getEntriesByType('resource').slice(-2_000)) {
       if (isCaptionUrl(entry.name)) observedUrl = entry.name;
@@ -308,8 +408,8 @@ export async function probeYouTubeSource(options: YouTubeSourceProbeOptions): Pr
     cc?.addEventListener('click', onCCClick, true);
     if (cc) ccObserver?.observe(cc, { attributes: true, attributeFilter: ['aria-pressed'], attributeOldValue: true });
     if (options.captionLeaseToken) {
-      const lease = (window as Window & { __dualReadSubtitleCCLease?: { token: string; activate: () => boolean } }).__dualReadSubtitleCCLease;
-      if (lease?.token !== options.captionLeaseToken || !lease.activate()) throw new Error('Caption lease unavailable');
+      const currentLease = lease();
+      if (currentLease?.token !== options.captionLeaseToken || !currentLease.activate()) throw new Error('Caption lease unavailable');
     }
     if (options.enableNativeCC && cc && ccState() === 'false') {
       clickCC();
@@ -318,24 +418,30 @@ export async function probeYouTubeSource(options: YouTubeSourceProbeOptions): Pr
     }
     // Give a fresh native request a chance before making at most one replay.
     await wait(Math.min(deadline, started + Math.min(1_000, limit / 3)));
+    if (!captured && !abort.signal.aborted && options.refreshNativeCC && result.cc.initial === 'true'
+      && sameVideo() && sameTrack() && lease()?.token === options.captionLeaseToken && lease()?.refresh?.()) {
+      await wait(Math.min(deadline, performance.now() + 1000));
+    }
     if (!captured && sameVideo() && sameTrack() && !abort.signal.aborted) {
-      const candidate = observedUrl ?? track.baseUrl!;
-      if (isCaptionUrl(candidate)) {
-        const url = new URL(candidate, location.href);
-        // Preserve the player's token/signature/client parameters. Only the
-        // response format is requested; never generate or transplant tokens.
-        url.searchParams.set('fmt', 'json3');
+      const base = new URL(track.baseUrl!, location.href);
+      if (!base.searchParams.has('fmt')) base.searchParams.set('fmt', 'json3');
+      // Native URLs may bind format/token parameters. Try that exact URL, then
+      // at most one different metadata URL. Nothing is synthesized from v alone.
+      const candidates = [...new Set([observedUrl, base.href].filter((s): s is string => Boolean(s)))];
+      for (const candidate of candidates) {
+        if (captured || abort.signal.aborted || !sameVideo() || !sameTrack()) break;
+        if (!isCaptionUrl(candidate)) continue;
         const trackId = track.vssId!;
         try {
-          const fetched = await originalFetch.call(window, url.href, { credentials: 'include', signal: abort.signal });
-          await readBody(fetched, observedUrl ? 'replay' : 'track', trackId);
+          const fetched = await originalFetch.call(window, candidate, { credentials: 'include', signal: abort.signal });
+          await readBody(fetched, candidate === observedUrl ? 'replay' : 'track', trackId);
         } catch {
           if (result.observations.length < 8) result.observations.push({ via: observedUrl ? 'replay' : 'track', status: 0, bytes: 0, outcome: 'network' });
         }
       }
     }
     await wait(deadline);
-    if (!sameVideo() || !sameTrack()) {
+    if (!sameVideo() || !sameTrack() || options.captionLeaseToken && lease()?.token !== options.captionLeaseToken) {
       result.status = 'stale';
       result.reason = 'video-or-track-changed';
     } else if (captured) {
@@ -350,6 +456,7 @@ export async function probeYouTubeSource(options: YouTubeSourceProbeOptions): Pr
     disposed = true;
     clearTimeout(timer);
     abort.abort();
+    for (const event of cancelEvents) document.removeEventListener(event, cancel);
     if (window.fetch === wrappedFetch) window.fetch = originalFetch;
     if (XMLHttpRequest.prototype.open === wrappedOpen) XMLHttpRequest.prototype.open = originalOpen;
     for (const [xhr, listener] of pendingXHR) xhr.removeEventListener('loadend', listener);

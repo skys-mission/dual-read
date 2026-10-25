@@ -5,7 +5,7 @@
  * No credentials or caption payloads are retained in the page.
  */
 export function manageYouTubeCaptionLease(options: { action: 'acquire' | 'release'; token: string; videoId: string; deferActivation?: boolean }): boolean {
-  const page = window as Window & { __dualReadSubtitleCCLease?: { token: string; activate: () => boolean; dispose: () => void } };
+  const page = window as Window & { __dualReadSubtitleCCLease?: { token: string; activate: () => boolean; refresh: () => boolean; dispose: () => void } };
   if (options.action === 'release') {
     if (page.__dualReadSubtitleCCLease?.token === options.token) page.__dualReadSubtitleCCLease.dispose();
     return true;
@@ -36,6 +36,7 @@ export function manageYouTubeCaptionLease(options: { action: 'acquire' | 'releas
   let disposed = false;
   let touched = false;
   let activated = false;
+  let refreshed = false;
   let selected: string | undefined;
   let menuTimer: ReturnType<typeof setTimeout> | undefined;
   const inAd = () => player.classList.contains('ad-showing') || player.classList.contains('ad-interrupting');
@@ -67,13 +68,29 @@ export function manageYouTubeCaptionLease(options: { action: 'acquire' | 'releas
   observer.observe(cc, { attributes: true, attributeFilter: ['aria-pressed'], attributeOldValue: true });
   const activate = () => {
     attributes(observer.takeRecords());
-    if (disposed || !sameVideo() || touched) return false;
+    if (disposed || !sameVideo() || touched || inAd()) return false;
     if (!activated && initial === 'false' && cc.getAttribute('aria-pressed') === 'false') {
       clicking = true;
       try { cc.click(); owned = cc.getAttribute('aria-pressed') === 'true'; } finally { observer.takeRecords(); clicking = false; }
     }
     activated = true; selected = trackId();
     return cc.getAttribute('aria-pressed') === 'true';
+  };
+  const refresh = () => {
+    attributes(observer.takeRecords());
+    if (refreshed || disposed || touched || !activated || !sameVideo() || inAd()
+      || player.querySelector('.ytp-subtitles-button') !== cc || cc.getAttribute('aria-pressed') !== 'true'
+      || !selected || trackId() !== selected) return false;
+    refreshed = true;
+    // A single native off/on cycle lets YouTube issue its own fresh request.
+    // Both changes are synchronous and owned by this lease, never user input.
+    clicking = true;
+    try {
+      cc.click();
+      if (!disposed && sameVideo() && !inAd() && player.querySelector('.ytp-subtitles-button') === cc
+        && cc.getAttribute('aria-pressed') === 'false') cc.click();
+    } finally { observer.takeRecords(); clicking = false; }
+    return cc.getAttribute('aria-pressed') === 'true' && trackId() === selected;
   };
   const releaseEvent = `dual-read:subtitles-release:${options.token}`;
   const dispose = () => {
@@ -93,7 +110,7 @@ export function manageYouTubeCaptionLease(options: { action: 'acquire' | 'releas
         && trackId() === selected && cc.getAttribute('aria-pressed') === 'true') cc.click();
     } catch { /* Page teardown or private player API changed. */ }
   };
-  page.__dualReadSubtitleCCLease = { token: options.token, activate, dispose };
+  page.__dualReadSubtitleCCLease = { token: options.token, activate, refresh, dispose };
   document.addEventListener('dual-read:subtitles-destroy', dispose);
   document.addEventListener('yt-navigate-start', dispose);
   // A loaded content script must be able to release ownership even after

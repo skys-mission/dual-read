@@ -21,6 +21,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Renew already-loaded YouTube captions through native CC, preserve native
+  request formats, parse timedtext XML, and retry full-track acquisition a
+  bounded number of times while live translation continues. Keep delayed
+  original/translation pairs together through rolling ASR updates, and clear
+  obsolete pairs on seeking, track changes and stop.
 - Mount the YouTube bilingual control beside CC in nested player layouts.
   Clean up failed initialization and keep its retry cooldown from restarting
   on every status poll.

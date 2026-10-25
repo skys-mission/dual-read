@@ -32,7 +32,7 @@
     window.g0NativeBodies = [];
     function requestCaption() {
       const current = id;
-      const url = `${track(kind).baseUrl}&pot=fixture-only&fmt=json3`;
+      const url = `${track(kind).baseUrl}&pot=fixture-only&fmt=${new URL(location.href).searchParams.get('format') || 'json3'}`;
       window.g0Requests.push({ video: id, kind });
       const accept = body => {
         window.g0NativeBodies.push(body);

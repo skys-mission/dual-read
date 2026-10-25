@@ -6,6 +6,7 @@ import { SubtitleRenderer } from './renderer';
 import { sameSubtitleLanguage, SUBTITLE_PROTOCOL_VERSION, youtubeVideoId, type SubtitleConfig, type SubtitleCue, type SubtitleStatus } from './types';
 import type { YouTubeSourceProbeResult } from './youtube-adapter';
 import type { readYouTubeState } from './background';
+import { RealtimeCaptions } from './realtime';
 
 type NativeState = ReturnType<typeof readYouTubeState>;
 
@@ -39,9 +40,10 @@ export class SubtitleSession {
   private realtime = false;
   private nativeCaptionText = '';
   private awaitingTracks = false;
-  private domCue?: SubtitleCue;
-  private domCounter = 0;
-  private domChangedAt = 0;
+  private readonly realtimeCaptions = new RealtimeCaptions();
+  private sourceRetryAt = Infinity;
+  private sourceRetries = 0;
+  private recoveringSource = false;
   private domDispatchedAt = 0;
   private nextPumpAt = 0;
 
@@ -94,6 +96,8 @@ export class SubtitleSession {
     this.epoch++; this.work.abort(); this.work = new AbortController(); this.pending.clear();
     this.inFlight = 0; this.pumping = false;
     this.nextPumpAt = 0;
+    this.domDispatchedAt = 0;
+    this.realtimeCaptions.clear(); this.nativeCaptionText = '';
   }
 
   private releaseLease(): void {
@@ -130,7 +134,11 @@ export class SubtitleSession {
       video.addEventListener(type, () => this.draw(), { signal });
     }
     video.addEventListener('seeking', () => {
-      this.cancelWork(); this.renderer?.show('', '', ''); this.draw();
+      this.cancelWork(); this.renderer?.show('', '', '');
+      // A full timeline already maps the new media time. Only native DOM
+      // captions need a fresh player snapshot before they can be shown again.
+      if (this.realtime) this.checkingTrack = true;
+      this.draw();
     }, { signal });
     player.addEventListener('click', event => {
       if (!event.isTrusted || !(event.target instanceof Element)) return;
@@ -151,7 +159,8 @@ export class SubtitleSession {
     if (!this.status.enabled || !this.config || this.disposed) return;
     const generation = ++this.generation;
     this.cancelWork(); this.releaseLease();
-    this.cues = []; this.translated.clear(); this.domCue = undefined; this.realtime = false;
+    this.cues = []; this.translated.clear(); this.realtime = false;
+    this.sourceRetryAt = Infinity; this.sourceRetries = 0; this.recoveringSource = false;
     this.nativeCaptionText = ''; this.awaitingTracks = false;
     this.trackId = ''; this.sourceLanguage = ''; delete this.status.sourceLanguage; delete this.status.kind;
     this.renderer?.show('', '', '');
@@ -192,7 +201,9 @@ export class SubtitleSession {
       this.trackId = result.trackId ?? ''; this.sourceLanguage = result.sourceLanguage ?? '';
       this.status.sourceLanguage = this.sourceLanguage;
       this.status.kind = result.tracks.find(t => t.id === this.trackId)?.kind;
-      if (result.status === 'ready') this.cues = normalizeYouTubeEvents(result.events, this.status.kind ?? 'manual');
+      if (result.status === 'ready') {
+        try { this.cues = normalizeYouTubeEvents(result.events, this.status.kind ?? 'manual'); } catch { /* Try original native captions when timing is unusable. */ }
+      }
       else if (result.status === 'no-tracks') { this.setState('no-tracks'); return; }
       else if (result.status === 'unsupported') { this.setState('unsupported'); return; }
       if (!this.cues.length) {
@@ -203,8 +214,8 @@ export class SubtitleSession {
         if (fresh.state?.videoId !== videoId || fresh.state.trackId !== this.trackId || !this.sourceLanguage) { this.setState('source-error'); return; }
         if (fresh.state.autoTranslated) { this.setState('original-required'); return; }
         this.nativeCaptionText = fresh.state.captionText ?? '';
-        if (!this.nativeCaptionText) { this.setState('source-error'); return; }
         this.realtime = true;
+        this.sourceRetryAt = Date.now() + 8000;
       }
       this.checkingTrack = false;
       this.setState(this.realtime ? 'realtime' : sameSubtitleLanguage(this.sourceLanguage, this.config.targetLang) ? 'same-language' : 'catching-up');
@@ -213,6 +224,35 @@ export class SubtitleSession {
       if (current() && !isAbortError(error)) this.setState('source-error');
     } finally {
       if (current()) { this.preparing = false; this.status.retryAt = Date.now() + 5000; }
+    }
+  }
+
+  /** Recovery leaves the realtime queue and its authorization intact until a
+   * complete, matching timeline has actually been acquired and normalized. */
+  private async recoverSource(): Promise<void> {
+    if (this.recoveringSource || !this.realtime || Date.now() < this.sourceRetryAt) return;
+    const generation = this.generation;
+    const epoch = this.epoch;
+    this.recoveringSource = true;
+    this.sourceRetries++;
+    this.sourceRetryAt = Infinity;
+    try {
+      const { result } = await this.message<{ result: YouTubeSourceProbeResult }>('source', {
+        videoId: this.videoId, generation, recovery: true, trackId: this.trackId,
+      });
+      if (!this.status.enabled || generation !== this.generation || epoch !== this.epoch || !this.realtime
+        || result?.status !== 'ready' || result.videoId !== this.videoId || result.trackId !== this.trackId
+        || result.sourceLanguage !== this.sourceLanguage) return;
+      const cues = normalizeYouTubeEvents(result.events, this.status.kind ?? 'manual');
+      if (!cues.length) return;
+      this.cancelWork(); this.translated.clear(); this.cues = cues; this.realtime = false;
+      this.draw();
+    } catch { /* Keep the working realtime fallback, without resetting its CC lease. */ }
+    finally {
+      if (generation === this.generation) {
+        this.recoveringSource = false;
+        if (this.realtime && this.sourceRetries < 3) this.sourceRetryAt = Date.now() + (this.sourceRetries === 1 ? 20000 : 60000);
+      }
     }
   }
 
@@ -226,13 +266,14 @@ export class SubtitleSession {
     if (!this.status.enabled || !this.config || this.disposed || this.polling) return;
     this.polling = true;
     const generation = this.generation;
+    const epoch = this.epoch;
     try {
       if (!youtubeVideoId(location.href)) {
         this.renderer?.dispose(); this.renderer = undefined;
         this.cancelWork(); this.releaseLease(); this.setState('unsupported'); return;
       }
       const response = await this.message<{ state: NativeState; config: SubtitleConfig }>('state', { realtime: this.realtime });
-      if (!this.status.enabled || generation !== this.generation) return;
+      if (!this.status.enabled || generation !== this.generation || epoch !== this.epoch) return;
       this.apply(true, response.config);
       if (generation !== this.generation || this.preparing) return;
       const native = response.state;
@@ -250,15 +291,19 @@ export class SubtitleSession {
         || this.status.state === 'original-required' && !native.autoTranslated) {
         void this.begin(); return;
       }
+      if (this.realtime && this.video?.seeking) {
+        this.checkingTrack = true; this.renderer?.show('', '', ''); return;
+      }
       if (this.realtime) {
         if (native.autoTranslated) {
-          this.cancelWork(); this.domCue = undefined; this.nativeCaptionText = ''; this.translated.clear(); this.realtime = false;
+          this.cancelWork(); this.translated.clear(); this.realtime = false;
           this.renderer?.show('', '', ''); this.setState('original-required'); return;
         }
         this.nativeCaptionText = native.captionText ?? '';
       }
       this.adBlocked = false; this.checkingTrack = false;
       this.draw();
+      if (this.realtime) void this.recoverSource();
     } catch (error) {
       if (error instanceof DualReadError && error.code === 'SESSION_CANCELLED') this.stop();
       else { this.checkingTrack = true; this.renderer?.show('', '', ''); }
@@ -289,28 +334,30 @@ export class SubtitleSession {
     }
     if (['translation-error', 'source-error', 'no-tracks', 'unsupported', 'original-required'].includes(this.status.state)) { this.renderer.show('', '', ''); return; }
     const timeMs = this.video.currentTime * 1000;
-    if (this.realtime) {
-      const text = this.nativeCaptionText;
-      if (text !== (this.domCue?.text ?? '')) {
-        this.domCue = text ? { id: `d${++this.domCounter}`, revision: 1, text, context: '', startMs: timeMs, endMs: Number.MAX_SAFE_INTEGER } : undefined;
-        this.domChangedAt = performance.now();
-      }
-    }
-    const cue = this.realtime ? this.domCue : cueAt(this.cues, timeMs);
     const sameLanguage = sameSubtitleLanguage(this.sourceLanguage, this.config.targetLang);
+    if (this.realtime) {
+      this.realtimeCaptions.capture(this.nativeCaptionText, performance.now(), timeMs);
+      const pair = sameLanguage ? { source: this.nativeCaptionText, translation: '' } : this.realtimeCaptions.display(performance.now());
+      this.renderer.show(pair.source, pair.translation, this.sourceLanguage);
+      const state = sameLanguage ? 'same-language' : 'realtime';
+      if (this.status.state !== state) this.setState(state);
+      if (!sameLanguage) void this.pump(timeMs);
+      return;
+    }
+    const cue = cueAt(this.cues, timeMs);
     const translation = cue && !sameLanguage ? this.translated.get(cue.id) ?? '' : '';
     this.renderer.show(cue?.text ?? '', translation, this.sourceLanguage);
-    const nextState = sameLanguage ? 'same-language' : this.realtime ? 'realtime' : cue && !translation ? 'catching-up' : 'ready';
+    const nextState = sameLanguage ? 'same-language' : cue && !translation ? 'catching-up' : 'ready';
     if (this.status.state !== nextState) this.setState(nextState);
     if (!sameLanguage) void this.pump(timeMs);
   }
 
   private async pump(timeMs: number): Promise<void> {
     if (!this.config || this.pumping || this.inFlight >= Math.min(2, this.config.maxConcurrent) || !this.status.enabled) return;
-    if (this.realtime && (performance.now() - this.domChangedAt < 250 || performance.now() - this.domDispatchedAt < 1000)) return;
+    if (this.realtime && performance.now() - this.domDispatchedAt < 1000) return;
     if (performance.now() < this.nextPumpAt) return;
     this.nextPumpAt = performance.now() + 200;
-    const candidates = (this.realtime ? this.domCue ? [this.domCue] : [] : nearbyCues(this.cues, timeMs, this.video?.playbackRate ?? 1))
+    const candidates = (this.realtime ? this.realtimeCaptions.candidates(performance.now()) : nearbyCues(this.cues, timeMs, this.video?.playbackRate ?? 1))
       .filter(c => !this.translated.has(c.id) && !this.pending.has(c.id));
     const selected: SubtitleCue[] = [];
     let chars = 0;
@@ -328,12 +375,13 @@ export class SubtitleSession {
     const cacheConfig = { ...config, namespace: 'subtitle-v1' as const };
     const cacheText = (cue: SubtitleCue) => JSON.stringify([SUBTITLE_PROTOCOL_VERSION, sourceLanguage, cue.text, cue.context]);
     for (const cue of selected) this.pending.add(cue.id);
+    if (this.realtime) this.realtimeCaptions.submit(selected.map(c => c.id));
     this.pumping = true;
     let requested = false;
     try {
       const hits = await lookup(selected.map(cacheText), cacheConfig);
       if (!valid()) return;
-      hits.forEach((hit, i) => { if (hit) this.translated.set(selected[i].id, hit); });
+      hits.forEach((hit, i) => { if (hit) { this.translated.set(selected[i].id, hit); this.realtimeCaptions.complete(selected[i].id, hit); } });
       const missing = selected.filter((_, i) => !hits[i]);
       if (!missing.length) return;
       this.inFlight++; requested = true; this.pumping = false;
@@ -344,7 +392,7 @@ export class SubtitleSession {
           items: missing.map(({ id, revision, text, context }) => ({ id, revision, text, context })) },
       });
       if (!valid()) return;
-      missing.forEach((cue, i) => this.translated.set(cue.id, translations[i]));
+      missing.forEach((cue, i) => { this.translated.set(cue.id, translations[i]); this.realtimeCaptions.complete(cue.id, translations[i]); });
       while (this.translated.size > 1500) this.translated.delete(this.translated.keys().next().value!);
       // Cache complete, validated pairs only. A seek/navigation/clear that
       // supersedes this request cannot write or paint its late response.
@@ -369,7 +417,7 @@ export class SubtitleSession {
     this.status.enabled = false; this.generation++; this.preparing = false;
     this.cancelWork(); this.releaseLease(); this.binding.abort();
     if (this.frame) cancelAnimationFrame(this.frame); this.frame = 0;
-    this.cues = []; this.domCue = undefined; this.translated.clear();
+    this.cues = []; this.translated.clear(); this.sourceRetryAt = Infinity;
     this.renderer?.show('', '', ''); this.setState('off');
   }
 

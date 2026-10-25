@@ -84,7 +84,7 @@
     "message": "正在準備接下來的譯文"
   },
   "subtitleStateRealtime": {
-    "message": "已切換為即時字幕，譯文可能稍晚"
+    "message": "即時雙語字幕，顯示可能稍有延遲"
   },
   "subtitleStateNoTracks": {
     "message": "這個影片暫無可用字幕"

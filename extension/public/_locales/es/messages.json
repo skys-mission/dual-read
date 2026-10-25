@@ -84,7 +84,7 @@
     "message": "Preparando las siguientes traducciones"
   },
   "subtitleStateRealtime": {
-    "message": "Los subtítulos en tiempo real pueden traducirse con retraso"
+    "message": "Subtítulos bilingües en directo; pueden mostrarse con un ligero retraso"
   },
   "subtitleStateNoTracks": {
     "message": "Este vídeo no tiene subtítulos disponibles"

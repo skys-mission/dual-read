@@ -25,6 +25,24 @@ const release = (token: string) => manageYouTubeCaptionLease({ action: 'release'
 afterEach(() => { document.dispatchEvent(new Event('dual-read:subtitles-destroy')); vi.useRealTimers(); document.body.replaceChildren(); });
 
 describe('native caption state and ownership', () => {
+  for (const initiallyOn of [false, true]) {
+    it(`refreshes native CC once without changing ownership (initial on: ${initiallyOn})`, async () => {
+      const { cc } = prepare();
+      if (initiallyOn) cc.click();
+      const off = vi.fn();
+      document.addEventListener('dual-read:subtitles-cc-off:refresh', off, { once: true });
+      acquire('refresh');
+      const lease = (window as Window & { __dualReadSubtitleCCLease?: { refresh: () => boolean } }).__dualReadSubtitleCCLease!;
+      expect(lease.refresh()).toBe(true); await Promise.resolve();
+      expect(off).not.toHaveBeenCalled(); expect(lease.refresh()).toBe(false);
+      release('refresh'); expect(cc.getAttribute('aria-pressed')).toBe(String(initiallyOn));
+    });
+  }
+  it('does not refresh after a user changes native captions', async () => {
+    const { cc } = prepare(); acquire('no-refresh'); cc.click(); await Promise.resolve();
+    const lease = (window as Window & { __dualReadSubtitleCCLease?: { refresh: () => boolean } }).__dualReadSubtitleCCLease!;
+    expect(lease.refresh()).toBe(false); expect(cc.getAttribute('aria-pressed')).toBe('false');
+  });
   it('distinguishes absent metadata, an empty track list, and ready tracks', () => {
     const { response } = prepare();
     expect(readYouTubeState().hasTracks).toBe(true);
@@ -32,6 +50,13 @@ describe('native caption state and ownership', () => {
     expect(readYouTubeState().hasTracks).toBe(false);
     delete response.captions;
     expect(readYouTubeState().hasTracks).toBeNull();
+  });
+  it('resolves language-only native selection only when its track is unambiguous', () => {
+    const { player, response } = prepare();
+    Object.assign(player, { getOption: () => ({ languageCode: 'en' }) });
+    expect(readYouTubeState().trackId).toBe('.en');
+    response.captions!.playerCaptionsTracklistRenderer.captionTracks.push({ vssId: '.en.second', languageCode: 'en' });
+    expect(readYouTubeState().trackId).toBeUndefined();
   });
   it('does not expose automatically translated DOM as original text', () => {
     const { track } = prepare();

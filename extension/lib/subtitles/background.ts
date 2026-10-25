@@ -117,7 +117,7 @@ export function readYouTubeState(options?: { includeText?: boolean }): {
   const p = document.querySelector('#movie_player') as HTMLElement & {
     getPlayerResponse?: () => { videoDetails?: { videoId?: string; isLive?: boolean }; captions?: { playerCaptionsTracklistRenderer?: { captionTracks?: unknown[] } }; microformat?: { playerMicroformatRenderer?: { liveBroadcastDetails?: { isLiveNow?: boolean } } } };
     getVideoData?: () => { video_id?: string };
-    getOption?: (module: string, name: string) => { vssId?: string; vss_id?: string; languageCode?: string; translationLanguage?: unknown };
+    getOption?: (module: string, name: string) => { vssId?: string; vss_id?: string; languageCode?: string; kind?: string; translationLanguage?: unknown };
   } | null;
   const r = p?.getPlayerResponse?.();
   const t = p?.getOption?.('captions', 'track');
@@ -125,14 +125,18 @@ export function readYouTubeState(options?: { includeText?: boolean }): {
   const dataId = p?.getVideoData?.().video_id;
   const matches = id === new URL(location.href).searchParams.get('v') && (!dataId || id === dataId);
   const tracks = r?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+  const candidates = !t?.vssId && !t?.vss_id && t?.languageCode && Array.isArray(tracks)
+    ? (tracks as { vssId?: string; vss_id?: string; languageCode?: string; kind?: string }[])
+      .filter(track => track && track.languageCode === t.languageCode && (track.kind ?? '') === (t.kind ?? '')) : [];
+  const selected = candidates.length === 1 ? candidates[0] : undefined;
   const autoTranslated = Boolean(t?.translationLanguage);
-  return { videoId: matches ? id : undefined, trackId: t?.vssId ?? t?.vss_id, sourceLanguage: t?.languageCode,
+  return { videoId: matches ? id : undefined, trackId: t?.vssId ?? t?.vss_id ?? selected?.vssId ?? selected?.vss_id, sourceLanguage: t?.languageCode,
     ad: Boolean(p?.classList.contains('ad-showing') || p?.classList.contains('ad-interrupting')),
     live: Boolean(r?.videoDetails?.isLive || r?.microformat?.playerMicroformatRenderer?.liveBroadcastDetails?.isLiveNow),
     hasTracks: Array.isArray(tracks) ? tracks.length > 0 : null,
     autoTranslated,
     ...(options?.includeText && matches && !autoTranslated ? {
-      captionText: [...p?.querySelectorAll('.ytp-caption-segment') ?? []].map(node => node.textContent ?? '').join('').trim().slice(0, 4001),
+      captionText: [...p?.querySelectorAll('.ytp-caption-segment') ?? []].map(node => node.textContent ?? '').join(' ').replace(/\s+/g, ' ').trim().slice(0, 4001),
     } : {}),
   };
 }
@@ -284,11 +288,17 @@ export function installSubtitleBackground(): void {
       }
       if (message.action === 'subtitles:source') {
         const generation = message.generation;
+        const recovery = message.recovery === true;
         const videoId = youtubeVideoId(tab.url)!;
         if (!Number.isSafeInteger(generation) || (generation as number) < intent.generation || message.videoId !== videoId) throw new DualReadError('SESSION_CANCELLED');
+        if (recovery && (generation !== intent.generation || message.trackId !== intent.trackId || !intent.trackId)) throw new DualReadError('SESSION_CANCELLED');
         const sessionId = intent.sessionId;
         const next = await updateIntent(tabId, latest => {
           if (!latest?.enabled || latest.sessionId !== sessionId || latest.generation > (generation as number)) throw new DualReadError('SESSION_CANCELLED');
+          if (recovery) {
+            if (latest.generation !== generation || latest.trackId !== message.trackId) throw new DualReadError('SESSION_CANCELLED');
+            return latest;
+          }
           return { ...latest, generation: generation as number, videoId, trackId: undefined, sourceLanguage: undefined };
         });
         // Never install overlapping probes in a page. Older results cannot
@@ -301,16 +311,22 @@ export function installSubtitleBackground(): void {
             func: manageYouTubeCaptionLease, args: [{ action: 'acquire', token, videoId, deferActivation: true }] });
           if (!leased[0]?.result) throw new DualReadError('PAGE_UNSUPPORTED');
           try {
+            if (!matches(await readIntent(tabId))) {
+              await chrome.scripting.executeScript({ target: { tabId, frameIds: [0] }, world: 'MAIN',
+                func: manageYouTubeCaptionLease, args: [{ action: 'release', token, videoId }] }).catch(() => {});
+              throw new DualReadError('SESSION_CANCELLED');
+            }
             const source = await chrome.scripting.executeScript({ target: { tabId, frameIds: [0] }, world: 'MAIN',
-              func: probeYouTubeSource, args: [{ expectedVideoId: videoId, captionLeaseToken: token, enableNativeCC: false, timeoutMs: 6000 }] });
+              func: probeYouTubeSource, args: [{ expectedVideoId: videoId, captionLeaseToken: token, enableNativeCC: false, refreshNativeCC: !recovery, timeoutMs: 6000 }] });
             const result = source[0]?.result;
             await updateIntent(tabId, latest => {
               if (!matches(latest)) throw new DualReadError('SESSION_CANCELLED');
+              if (recovery) return latest;
               return { ...latest!, trackId: result?.trackId, sourceLanguage: result?.sourceLanguage };
             });
             return { success: true, result };
           } catch (error) {
-            await chrome.scripting.executeScript({ target: { tabId, frameIds: [0] }, world: 'MAIN',
+            if (!recovery) await chrome.scripting.executeScript({ target: { tabId, frameIds: [0] }, world: 'MAIN',
               func: manageYouTubeCaptionLease, args: [{ action: 'release', token, videoId }] }).catch(() => {});
             throw error;
           }

@@ -84,7 +84,7 @@
     "message": "Preparing the next translations"
   },
   "subtitleStateRealtime": {
-    "message": "Using live captions; translations may arrive later"
+    "message": "Live bilingual captions; display may be slightly delayed"
   },
   "subtitleStateNoTracks": {
     "message": "This video has no available caption track"

@@ -19,6 +19,7 @@ test.describe('G0 real extension source bridge', () => {
     'attribute-cc', 'replaced-cc', 'player-replaced', 'archived-live', 'live',
     'native-track-shape', 'native-track-id', 'stale-player-id', 'malformed', 'invalid-events', 'same-cc-attribute', 'ad',
     'asr-cc-off-hidden-selection', 'recorded-manual', 'recorded-asr',
+    'srv3', 'srv1', 'native-format-replay', 'stale-observed-url',
   ]) {
     test(scenario, async ({}, testInfo) => {
       const fx = await launchProbeBrowser(testInfo.project.name === 'firefox-ext' ? 'firefox' : 'chromium');
@@ -34,6 +35,10 @@ test.describe('G0 real extension source bridge', () => {
         const asrSource = scenario === 'recorded-asr' ? sample! : asr;
         let requests = 0;
         let unexpectedRequests = 0;
+        const xml = scenario === 'srv1' ? '<?xml version="1.0"?><transcript><text start="1" dur="2">&#65;&#32;synthetic caption.</text><text start="4" dur="2"><![CDATA[A synthetic caption.]]></text></transcript>'
+          : '<timedtext><head><pen id="1" /></head><body><p t="1000" d="2000"><s>A&#x20;</s><s><![CDATA[synthetic caption.]]></s></p><!-- timing remains intact --><p t="4000" d="2000">A synthetic caption.</p></body></timedtext>';
+        const xmlScenario = ['srv3', 'srv1', 'native-format-replay'].includes(scenario);
+        const preloaded = ['cc-on-midplay', 'native-format-replay', 'stale-observed-url'].includes(scenario);
         const delayed = ['late-spa', 'track-change', 'user-cc', 'hooks', 'attribute-cc', 'replaced-cc', 'player-replaced', 'same-cc-attribute'].includes(scenario);
         await page.route('**/*', async route => {
           const url = new URL(route.request().url());
@@ -41,18 +46,22 @@ test.describe('G0 real extension source bridge', () => {
           if (url.pathname === '/api/timedtext') {
             requests++;
             if (delayed) await new Promise(resolve => setTimeout(resolve, 180));
-            await route.fulfill({ status: 200, contentType: 'application/json', body: scenario === 'empty' ? ''
+            await route.fulfill({ status: 200, contentType: xmlScenario ? 'text/xml' : 'application/json', body: xmlScenario
+              ? url.searchParams.get('fmt') === (scenario === 'srv1' ? 'srv1' : 'srv3') ? xml : ''
+              : scenario === 'stale-observed-url' && requests > 1 && url.searchParams.has('pot') ? ''
+              : scenario === 'empty' ? ''
               : scenario === 'malformed' ? '<html>not captions</html>'
                 : scenario === 'invalid-events' ? JSON.stringify({ events: [{ tStartMs: -1, dDurationMs: 1000, segs: [{ utf8: 'Invalid timing' }] }] })
               : JSON.stringify(url.searchParams.get('kind') === 'asr' ? asrSource : manualSource) });
           } else {
             await route.fulfill({ contentType: 'text/html', body: fixture,
-              headers: { 'Content-Security-Policy': "script-src 'nonce-g0-fixture'; object-src 'none'" } });
+              headers: { 'Content-Security-Policy': "script-src 'nonce-g0-fixture'; object-src 'none'" + (xmlScenario ? "; require-trusted-types-for 'script'" : '') } });
           }
         });
-        const query = scenario === 'fetch-off' ? '&transport=fetch' : scenario === 'cc-on-midplay' ? '&cc=on' : '';
+        const query = (scenario === 'fetch-off' ? '&transport=fetch' : preloaded ? '&cc=on' : '')
+          + (xmlScenario ? `&format=${scenario === 'srv1' ? 'srv1' : 'srv3'}` : '');
         await page.goto(`https://www.youtube.com/watch?v=aaaaaaaaaaa${query}`);
-        if (scenario === 'cc-on-midplay') {
+        if (preloaded) {
           await expect.poll(() => page.evaluate(() => (window as any).g0NativeBodies.length)).toBe(1);
           await page.locator('video').evaluate(v => { (v as HTMLVideoElement).currentTime = 33; });
         }
@@ -160,11 +169,11 @@ test.describe('G0 real extension source bridge', () => {
           expect(result.events).toEqual([]);
           if (scenario === 'empty') {
             expect(result.reason).toBe('empty-caption-body');
-            expect(requests).toBeLessThanOrEqual(2);
+            expect(requests).toBeLessThanOrEqual(3);
             expect(result.cc.restored).toBe(true);
           } else if (scenario === 'malformed' || scenario === 'invalid-events') {
             expect(result.reason).toBe('caption-source-unavailable');
-            expect(requests).toBeLessThanOrEqual(2);
+            expect(requests).toBeLessThanOrEqual(3);
             expect(result.cc.restored).toBe(true);
           } else expect(requests).toBe(0);
         } else {
@@ -173,12 +182,13 @@ test.describe('G0 real extension source bridge', () => {
           const expected = isASR ? asrSource : manualSource;
           expect(result.trackId).toBe(isASR ? 'a.en' : '.en');
           expect(result.events).toEqual(expected.events);
-          expect(state.nativeBodies[0]).toBe(JSON.stringify(expected));
-          if (scenario === 'cc-on-midplay') {
+          expect(state.nativeBodies[0]).toBe(xmlScenario ? xml : JSON.stringify(expected));
+          if (preloaded) {
             expect(result.cc.enabledByProbe).toBe(false);
             expect(state.cc).toBe('true');
             expect(state.time).toBe(33);
             expect(result.observations.some((o: { via: string }) => o.via === 'replay')).toBe(true);
+            if (scenario === 'stale-observed-url') expect(result.observations.some((o: { via: string; outcome: string }) => o.via === 'track' && o.outcome === 'json3')).toBe(true);
           } else if (scenario === 'user-cc') {
             expect(result.cc.externalChange).toBe(true);
             expect(result.cc.restored).toBe(false);
