@@ -3,6 +3,9 @@
 *.zip
 *.tar.gz
 
+# Local store submission materials
+/docs/store/
+
 # Extension (WXT) build + tooling
 /extension/node_modules/
 /extension/output/

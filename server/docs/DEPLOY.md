@@ -12,17 +12,14 @@ cd server
 docker build -t dual-read-server:local .
 ```
 
-Multi-arch (requires Buildx):
+Local image using the build script (run from the repository root):
 
 ```bash
 ./scripts/docker-build.sh          # from repo root; tags dual-read-server:local
-# or:
-cd server
-docker buildx build --platform linux/amd64,linux/arm64 \
-  -t dual-read-server:local --load .
 ```
 
-`--load` only works for a single platform; for dual-arch push to a registry:
+For a multi-arch registry image, run from `server/` and use `--push` rather than
+the local single-platform `--load` path:
 
 ```bash
 docker buildx build --platform linux/amd64,linux/arm64 \
@@ -42,7 +39,7 @@ docker buildx build --platform linux/amd64,linux/arm64 \
 ## Run (single container)
 
 ```bash
-docker run --rm -p 8080:8080 \
+docker run --rm -p 127.0.0.1:8080:8080 \
   --read-only \
   --tmpfs /tmp:size=64m,mode=1777 \
   --user 10001:10001 \

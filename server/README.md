@@ -1,14 +1,9 @@
 # Dual Read Server
-#
-# Quick start (no config file):
-#   export OPENAI_API_KEY=sk-your-key
-#   go run ./cmd/dual-read-server
-#
-# Monitor: http://127.0.0.1:8080/admin
-# API:     POST http://127.0.0.1:8080/v1/chat/completions
-#
-# Optional TOML: copy config.example.toml → config.toml
-#   go run ./cmd/dual-read-server -config config.toml
+
+Optional OpenAI-compatible caching proxy for the Dual Read extension.
+Source commands below run from `server/` unless stated otherwise and require
+Go **1.26.10+** (see [`go.mod`](go.mod)). Published binaries do not require a
+local Go installation.
 
 ## Features
 
@@ -35,6 +30,10 @@ go run ./cmd/dual-read-server
 ```
 
 Defaults: `127.0.0.1:8080`, DeepSeek upstream, local cache on, admin UI on, auth off.
+
+Monitor: `http://127.0.0.1:8080/admin`. API: `POST /v1/chat/completions`.
+In the extension, choose **Dual Read Proxy** and set the API base to
+`http://127.0.0.1:8080/v1`. A client API key is optional until server auth is enabled.
 
 ### Config v2 layout
 
@@ -66,17 +65,26 @@ Bootstrap TOML (`-config`) only controls static items like listen address and ad
 
 ## Install
 
-```bash
-go install github.com/skys-mission/dual-read/server/cmd/dual-read-server@latest
-dual-read-server   # requires OPENAI_API_KEY
-```
+For a fixed release, download the matching `dual-read-server-<os>-<arch>` binary
+(Windows uses `.exe`) and `SHA256SUMS` from
+[GitHub Releases](https://github.com/skys-mission/dual-read/releases).
+Follow the [verification guide](../docs/RELEASE.md#verify-a-download), make the
+binary executable on macOS/Linux, and run it with `OPENAI_API_KEY` configured.
+The binary's `version` subcommand reports its release version and commit.
 
-From a local clone:
+From a local clone, starting at the repository root:
 
 ```bash
 cd server
 go install ./cmd/dual-read-server
+dual-read-server   # requires OPENAI_API_KEY; ensure GOBIN or GOPATH/bin is on PATH
 ```
+
+`server/` is a nested Go module. Repository tags such as `v0.2.0` drive the
+GitHub release workflow; they are not the `server/v0.2.0` semantic version tags
+Go expects for this module. Therefore `go install ...@latest` is not a reliable
+way to select the matching GitHub Release. Use its binary or build the intended
+checkout. See the [Go module tag rules](https://go.dev/ref/mod#vcs-version).
 
 ## Auth + model map (TOML)
 
@@ -105,10 +113,12 @@ the server rewrites to upstream model and uses the shared `OPENAI_API_KEY` (or
 See **[docs/DEPLOY.md](docs/DEPLOY.md)** for multi-arch builds, read-only rootfs,
 Compose (standalone / Valkey / TLS), and orchestrator probes.
 
+From the repository root:
+
 ```bash
 cd server
 docker build -t dual-read-server:local .
-docker run --rm -p 8080:8080 --read-only --tmpfs /tmp:size=64m \
+docker run --rm -p 127.0.0.1:8080:8080 --read-only --tmpfs /tmp:size=64m \
   -v dual-read-data:/app/data \
   -e OPENAI_API_KEY=sk-xxx \
   -e DUAL_READ_ADMIN_TOKEN="$(openssl rand -hex 16)" \

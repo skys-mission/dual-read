@@ -7,7 +7,8 @@
 | Temporary addon smoke | Manifest + gecko.id load, browse without crash | `playwright-webextext` |
 | Translate main path | collector / session / renderer / restore on Gecko | Content harness (`e2e/helpers/firefox-gecko.ts`) |
 | YouTube G0 source bridge | Real isolated/background/MAIN messaging, bounded fetch/XHR observation and CC ownership | Disposable MV3 diagnostic addon (`tools/youtube-source-probe/browser.mjs`), no API shim |
-| YouTube subtitle feature | Fresh built content/background/provider bundles, real video clock, translation Port and restoration | Temporary addon with a test-only YouTube grant and control relay (`e2e/helpers/subtitle-extension.ts`), no API shim |
+| YouTube subtitle feature | Fresh built content/background/provider bundles, real video clock, translation Port and restoration | Temporary addon with production YouTube host access and a test-only control relay (`e2e/helpers/subtitle-extension.ts`), no API shim |
+| YouTube idle controls from the package | First load, refresh, homepage-to-watch navigation, no caption/provider traffic while idle | Unmodified production bundle in a fresh profile (`e2e/youtube-subtitles-controls.spec.ts`), no relay, settings seeding, popup, or added grants |
 
 Playwright does **not** expose Firefox MV3 service workers or reliable `moz-extension://` navigation (unlike Chromium `--load-extension`). The harness therefore:
 
@@ -25,7 +26,7 @@ cd extension
 npm run build:firefox
 npx playwright test --project=firefox-ext
 npm run test:youtube-source -- --project=firefox-ext
-npx playwright test e2e/youtube-subtitles.spec.ts --project=firefox-ext
+npm run test:youtube-subtitles -- --project=firefox-ext
 ```
 
 The YouTube source spec uses a synthetic watch page and controlled JSON3
@@ -35,13 +36,18 @@ grant is limited to YouTube. It does not validate the production toolbar's
 The optional live canary (`npm run probe:youtube -- --browser=firefox --headed`)
 uses a separate, signed-out profile and no model credentials; it is not a CI
 test. The feature suite uses the production bundles with a real addon, a
-test-only control relay and a YouTube host grant in a disposable profile. A
+test-only control relay and the manifest's YouTube host access in a disposable profile. A
 silent 120-second WebM fixture supplies actual playback, seek and rate events;
 the local mock API receives real background requests. This is separate from
 toolbar activeTab and native installation-consent acceptance tests. See
 [the G0 report](research/youtube-subtitles-g0.md) for the release gate
 and explicit limits. Manual native-toolbar and optional-permission checks are
 recorded separately in [the subtitle v1 report](testing/youtube-subtitles-v1.md).
+Its optional-only permission model was superseded by the later manifest change;
+see [the idle-controls follow-up](testing/youtube-idle-controls.md) for unmodified
+package verification. Temporary installation does not verify signed-install or
+upgrade consent. The v1 report's incomplete Firefox logged-in live-source check
+also remains distinct from the controlled-source suites.
 Existing webpage translation tests still use the Gecko
 content harness described above.
 
