@@ -68,7 +68,10 @@ for (const scenario of scenarios) {
         const group = document.createElement('div'); group.className = 'ytp-right-controls-left';
         group.style.cssText = 'display:flex;height:100%';
         group.append(...controls.childNodes); controls.append(group);
-        (window as any).expectedControlNodes = [...group.childNodes];
+        // Idle extension UI can already exist before this page-owned regrouping.
+        // Restoration must retain only the native nodes, in their original order.
+        (window as any).expectedControlNodes = [...group.childNodes].filter(node =>
+          !(node instanceof Element && node.matches('[data-dual-read-subtitle-ui]')));
       });
       if (scenario === 'late-metadata' || scenario === 'missing-metadata') await page.evaluate(() => {
         const p = document.querySelector('#movie_player') as any;
@@ -160,7 +163,8 @@ for (const scenario of scenarios) {
         await fx.message(page, { action: 'subtitles:setEnabled', enabled: false });
         await page.reload();
         await page.waitForTimeout(750);
-        await expect(page.locator('[data-dual-read-subtitle-ui]')).toHaveCount(0);
+        await expect(page.getByRole('button', { name: 'Enable bilingual subtitles', exact: true })).toBeVisible();
+        expect((await status()).enabled).toBe(false);
         return;
       }
       if (scenario === 'native-menu-off' || scenario === 'native-keyboard-off') {
@@ -175,7 +179,8 @@ for (const scenario of scenarios) {
         await page.locator('.ytp-subtitles-button').click();
         expect((await status()).enabled).toBe(false);
         await page.reload();
-        await expect(page.locator('[data-dual-read-subtitle-ui]')).toHaveCount(0);
+        await expect(page.getByRole('button', { name: 'Enable bilingual subtitles', exact: true })).toBeVisible();
+        expect((await status()).enabled).toBe(false);
         return;
       }
       if (scenario === 'preference-focus') {

@@ -1,4 +1,7 @@
 {
+  "subtitleYouTubeAccessHint": {
+    "message": "首次开启会申请 YouTube 访问权限，以便自动显示视频按钮。字幕仍由你开启。"
+  },
   "subtitleBilingual": {
     "message": "双语"
   },

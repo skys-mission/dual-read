@@ -1,4 +1,7 @@
 {
+  "subtitleYouTubeAccessHint": {
+    "message": "La première activation demande l’accès à YouTube pour afficher automatiquement les commandes vidéo. La traduction reste manuelle."
+  },
   "subtitleBilingual": {
     "message": "Bilingue"
   },

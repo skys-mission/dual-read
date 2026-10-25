@@ -109,6 +109,14 @@ async function start(tabId: number, intent: Intent, settings: Settings): Promise
   }
 }
 
+async function showControls(tabId: number, settings: Settings): Promise<void> {
+  if (effectiveForHost(settings, 'www.youtube.com').disabled) {
+    await send(tabId, { action: 'subtitle:destroy' }); return;
+  }
+  await ensureSession(tabId);
+  await send(tabId, { action: 'subtitle:controls', config: await configFor(settings, newIntent(false, false)) });
+}
+
 /** MAIN snapshot. Optional DOM text and its language state are read together. */
 export function readYouTubeState(options?: { includeText?: boolean }): {
   videoId?: string; trackId?: string; sourceLanguage?: string; ad: boolean; live: boolean;
@@ -180,9 +188,9 @@ export function installSubtitleBackground(): void {
       const settings = await getSettings();
       const granted = await chrome.permissions.contains({ origins: [YOUTUBE_PERMISSION] });
       const scripts = await chrome.scripting.getRegisteredContentScripts({ ids: [AUTO_SCRIPT] });
-      if (settings.youtubeAuto && granted && !scripts.length) {
+      if (granted && !scripts.length) {
         await chrome.scripting.registerContentScripts([{ id: AUTO_SCRIPT, matches: [YOUTUBE_PERMISSION], js: ['youtube-start.js'], runAt: 'document_idle', allFrames: false }]);
-      } else if ((!settings.youtubeAuto || !granted) && scripts.length) {
+      } else if (!granted && scripts.length) {
         await chrome.scripting.unregisterContentScripts({ ids: [AUTO_SCRIPT] });
       }
       if (!settings.youtubeAuto || !granted) {
@@ -197,6 +205,11 @@ export function installSubtitleBackground(): void {
             });
             if (stopped) await send(tabId, { action: 'subtitle:apply', enabled: false });
           });
+        }
+      }
+      if (granted) {
+        for (const tab of await chrome.tabs.query({})) {
+          if (tab.id && youtubeVideoId(tab.url)) await autoStart(tab.id).catch(() => {});
         }
       }
     });
@@ -215,12 +228,18 @@ export function installSubtitleBackground(): void {
     const tab = await chrome.tabs.get(tabId);
     if (!youtubeVideoId(tab.url)) return;
     const settings = await getSettings();
+    const granted = await chrome.permissions.contains({ origins: [YOUTUBE_PERMISSION] });
     let intent = await readIntent(tabId);
-    if (!intent && settings.youtubeAuto && await chrome.permissions.contains({ origins: [YOUTUBE_PERMISSION] })) {
+    if (!intent && settings.youtubeAuto && granted) {
       intent = newIntent(true, false);
       intent = await updateIntent(tabId, current => current ?? intent);
     }
+    if (effectiveForHost(settings, 'www.youtube.com').disabled) {
+      await updateIntent(tabId, current => current ? { ...current, enabled: false } : undefined);
+      await send(tabId, { action: 'subtitle:destroy' }); return;
+    }
     if (intent?.enabled && (intent.manual || settings.youtubeAuto)) await start(tabId, intent, settings);
+    else if (granted) await showControls(tabId, settings);
     });
   };
 
@@ -262,7 +281,10 @@ export function installSubtitleBackground(): void {
         return { success: true };
       }
       if (message.action === 'subtitles:describe') {
+        // Opening the popup grants activeTab even before permanent host access.
+        if (trustedUI(sender) && !intent?.enabled) await serial(controls, tabId, () => showControls(tabId, settings));
         return { success: true, supported: true, configured: isConnectionConfigured(settings), disabled: effectiveForHost(settings, 'www.youtube.com').disabled,
+          persistentAccess: await chrome.permissions.contains({ origins: [YOUTUBE_PERMISSION] }),
           config: await configFor(settings, intent ?? newIntent(false, false)),
           status: await send(tabId, { action: 'subtitle:status' }) ?? { enabled: intent?.enabled ?? false, state: 'off' } };
       }
@@ -355,7 +377,7 @@ export function installSubtitleBackground(): void {
       await syncAuto();
     })().catch(() => {});
   });
-  chrome.permissions.onAdded.addListener(() => { void acceptAutoGrant().catch(() => {}); });
+  chrome.permissions.onAdded.addListener(() => { void acceptAutoGrant().then(syncAuto).catch(() => {}); });
   chrome.permissions.onRemoved.addListener(() => {
     void (async () => {
       if (await chrome.permissions.contains({ origins: [YOUTUBE_PERMISSION] })) return;
@@ -364,7 +386,7 @@ export function installSubtitleBackground(): void {
       for (const tab of await chrome.tabs.query({})) {
         if (!tab.id) continue;
         const intent = await readIntent(tab.id);
-        if (!intent?.enabled) continue;
+        if (!intent?.enabled) { await send(tab.id, { action: 'subtitle:destroy' }); continue; }
         let allowed = false;
         if (intent.manual) {
           try { await chrome.scripting.executeScript({ target: { tabId: tab.id, frameIds: [0] }, func: () => true }); allowed = true; } catch { /* grant revoked */ }
@@ -372,14 +394,14 @@ export function installSubtitleBackground(): void {
         if (!allowed) {
           await serial(controls, tab.id, async () => {
             const next = await updateIntent(tab.id!, current => current?.sessionId === intent.sessionId ? { ...current, enabled: false } : current);
-            if (next?.sessionId === intent.sessionId) await send(tab.id!, { action: 'subtitle:apply', enabled: false });
+            if (next?.sessionId === intent.sessionId) await send(tab.id!, { action: 'subtitle:destroy' });
           });
         }
       }
     })().catch(() => {});
   });
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === 'local' && changes.youtubeAuto) void syncAuto().catch(() => {});
+    if (area === 'local' && changes.youtubeAuto || area === 'sync' && (changes.siteRules || changes.subtitles || changes.uiLocale)) void syncAuto().catch(() => {});
   });
   void syncAuto().catch(() => {});
 }

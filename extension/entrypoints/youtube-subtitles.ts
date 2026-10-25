@@ -11,6 +11,10 @@ export default defineUnlistedScript(() => {
     if (disposed) return;
     if (message?.action === 'subtitle:ping') { reply({ ready: true, instanceId }); return; }
     if (message?.action === 'subtitle:status') { reply(session.getStatus()); return; }
+    if (message?.action === 'subtitle:controls' && message.config) {
+      session.showControls(message.config); reply({ success: true }); return;
+    }
+    if (message?.action === 'subtitle:destroy') { destroy(); reply({ success: true }); return; }
     if (message?.action === 'subtitle:apply') {
       if (message.instanceId && message.instanceId !== instanceId) { reply({ success: false }); return; }
       session.apply(message.enabled === true, message.config);

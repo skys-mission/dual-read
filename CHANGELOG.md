@@ -21,6 +21,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Show idle YouTube player controls before translation starts when site access
+  is granted, and when the toolbar popup opens for the current tab. Keep
+  automatic translation separate from button visibility, preserve native CC,
+  and handle late/replaced controls and navigation without duplicate buttons.
 - Renew already-loaded YouTube captions through native CC, preserve native
   request formats, parse timedtext XML, and retry full-track acquisition a
   bounded number of times while live translation continues. Keep delayed

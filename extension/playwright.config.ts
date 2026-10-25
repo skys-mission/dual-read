@@ -14,11 +14,11 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium-ext',
-      testMatch: /(popup|translate|lab|regression|perf|connection|real-proxy|live-upstream|youtube-source|youtube-subtitles|youtube-subtitles-regression|youtube-subtitles-recovery)\.spec\.ts/,
+      testMatch: /(popup|translate|lab|regression|perf|connection|real-proxy|live-upstream|youtube-source|youtube-subtitles|youtube-subtitles-regression|youtube-subtitles-recovery|youtube-subtitles-controls)\.spec\.ts/,
     },
     {
       name: 'firefox-ext',
-      testMatch: /(firefox|youtube-source|youtube-subtitles|youtube-subtitles-regression|youtube-subtitles-recovery)\.spec\.ts/,
+      testMatch: /(firefox|youtube-source|youtube-subtitles|youtube-subtitles-regression|youtube-subtitles-recovery|youtube-subtitles-controls)\.spec\.ts/,
       use: { browserName: 'firefox' },
     },
   ],

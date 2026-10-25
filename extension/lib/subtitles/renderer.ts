@@ -27,6 +27,8 @@ export class SubtitleRenderer {
   private config: SubtitleConfig;
   private preferences?: SubtitlePreferencesForm;
 
+  get connected(): boolean { return this.host.isConnected && this.controlHost.isConnected; }
+
   constructor(readonly player: HTMLElement, config: SubtitleConfig, private readonly callbacks: {
     toggle: () => void;
     preferences: (value: SubtitlePreferences) => Promise<void>;
@@ -66,7 +68,10 @@ export class SubtitleRenderer {
     this.status.className = 'status'; this.status.setAttribute('role', 'status');
     this.panel.append(this.status);
     controls.append(controlStyle, this.button, this.arrow, this.panel);
-    this.button.addEventListener('click', event => { event.stopPropagation(); callbacks.toggle(); });
+    this.button.addEventListener('click', event => {
+      event.stopPropagation();
+      if (event.isTrusted) callbacks.toggle();
+    });
     this.arrow.addEventListener('click', event => { event.stopPropagation(); this.open(this.panel.hidden); });
     controls.addEventListener('focusin', () => this.updateControlVisibility());
     controls.addEventListener('focusout', () => { setTimeout(() => this.updateControlVisibility(), 0); });

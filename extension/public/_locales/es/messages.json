@@ -1,4 +1,7 @@
 {
+  "subtitleYouTubeAccessHint": {
+    "message": "La primera activación solicita acceso a YouTube para mostrar los controles del vídeo automáticamente. La traducción sigue siendo manual."
+  },
   "subtitleBilingual": {
     "message": "Bilingüe"
   },

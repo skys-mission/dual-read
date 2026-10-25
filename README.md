@@ -75,7 +75,10 @@ The extension translates pages through any OpenAI-compatible API. The server add
 - YouTube bilingual subtitles (development build): open a desktop watch page,
   click the extension → **Subtitles → Enable bilingual subtitles**. Uses your
   existing API and target language. Optional subtitle settings are language,
-  size, position, and automatic startup on YouTube; startup is off by default.
+  size, position, and automatic translation on YouTube; automatic translation is off by default.
+  Granting optional YouTube access lets idle player controls appear on new watch
+  pages without starting translation. Opening the popup also shows controls on
+  the current page using its temporary grant.
   Supports available manual/automatic captions, not live streams or Shorts.
 - On-demand content-script injection (`activeTab` + `scripting`)
 - Viewport-first lazy translation + MutationObserver incremental indexing

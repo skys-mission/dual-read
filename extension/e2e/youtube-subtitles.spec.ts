@@ -36,7 +36,8 @@ test(`production subtitle path: ${scenario}`, async ({}, info) => {
     expect(await fx.message(page, { action: 'test:seed', apiBase: mock.apiBase })).toEqual({ success: true });
     await page.bringToFront();
     await expect.poll(() => page.locator('video').evaluate(v => (v as HTMLVideoElement).readyState)).toBeGreaterThanOrEqual(2);
-    expect(await page.locator('[data-dual-read-subtitle-ui]').count()).toBe(0);
+    await expect(page.getByRole('button', { name: 'Enable bilingual subtitles', exact: true })).toBeVisible();
+    expect(mock.getRequestCount()).toBe(0);
     if (scenario === 'initial-on') await page.locator('.ytp-subtitles-button').click();
     if (scenario === 'no-tracks') await page.evaluate(() => { (window as any).noTracks = true; });
     if (scenario === 'observed-request') await page.evaluate(() => { (window as any).requiresObservedUrl = true; });
@@ -114,7 +115,8 @@ test(`production subtitle path: ${scenario}`, async ({}, info) => {
       await expect(page.locator('.ytp-subtitles-button')).toHaveAttribute('aria-pressed', 'false');
       await page.reload();
       await page.waitForTimeout(500);
-      await expect(page.locator('[data-dual-read-subtitle-ui]')).toHaveCount(0);
+      await expect(page.getByRole('button', { name: 'Enable bilingual subtitles', exact: true })).toBeVisible();
+      expect((await status()).enabled).toBe(false);
       // Changing the automatic default must not stop an explicit manual session.
       await fx.message(page, { action: 'subtitles:setEnabled', enabled: true });
       await expect(page.locator('.lines .line:not(.source)')).toHaveText('译:Original caption 1');
@@ -130,7 +132,8 @@ test(`production subtitle path: ${scenario}`, async ({}, info) => {
       await page.goto('https://example.com/');
       await page.goto('https://www.youtube.com/watch?v=aaaaaaaaaaa');
       await page.waitForTimeout(800);
-      await expect(page.locator('[data-dual-read-subtitle-ui]')).toHaveCount(0);
+      await expect(page.getByRole('button', { name: 'Enable bilingual subtitles', exact: true })).toBeVisible();
+      expect((await status()).enabled).toBe(false);
       return;
     }
     if (scenario === 'clock') {
@@ -243,7 +246,8 @@ test(`production subtitle path: ${scenario}`, async ({}, info) => {
       await page.locator('#next-video').click();
       await expect(page.locator('.lines .source')).toHaveText('');
       await page.reload();
-      await expect(page.locator('[data-dual-read-subtitle-ui]')).toHaveCount(0);
+      await expect(page.getByRole('button', { name: 'Enable bilingual subtitles', exact: true })).toBeVisible();
+      expect((await status()).enabled).toBe(false);
       return;
     }
     if (scenario === 'reinject') {

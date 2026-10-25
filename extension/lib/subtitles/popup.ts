@@ -1,6 +1,7 @@
 import { openOnboardingPage } from '../settings/onboarding';
 import type { Settings } from '../types';
 import type { SubtitleConfig, SubtitleStatus } from './types';
+import { YOUTUBE_PERMISSION } from './types';
 import { subtitleStateKey } from './renderer';
 import { languageLabel, setSubtitleAuto, subtitlePreferencesForm, subtitleText, type SubtitlePreferencesForm } from './preferences-ui';
 
@@ -8,6 +9,7 @@ interface Snapshot {
   success: boolean;
   configured: boolean;
   disabled: boolean;
+  persistentAccess?: boolean;
   config: SubtitleConfig;
   status: SubtitleStatus;
 }
@@ -59,6 +61,8 @@ export async function initSubtitlePopup(tabId: number, settings: Settings, selec
   const render = () => {
     if (!snapshot) return;
     const { config, status: current } = snapshot;
+    hint.textContent = snapshot.persistentAccess === false && !current.enabled && snapshot.configured
+      ? t('subtitleYouTubeAccessHint') : t('subtitleUsesService');
     status.textContent = snapshot.disabled ? t('sitePolicyNever') : !snapshot.configured ? t('subtitleSetup') : t(subtitleStateKey(current.state));
     source.textContent = current.sourceLanguage
       ? `${languageLabel(current.sourceLanguage, config.uiLocale)}${current.kind ? ` · ${t(current.kind === 'asr' ? 'subtitleASR' : 'subtitleManual')}` : ''}` : '';
@@ -100,7 +104,14 @@ export async function initSubtitlePopup(tabId: number, settings: Settings, selec
   const toggle = async (enabled: boolean) => {
     busy = true; render();
     try {
-      const result = await chrome.runtime.sendMessage({ action: 'subtitles:setEnabled', tabId, enabled });
+      // Start the explicit current-tab action independently of optional access.
+      // Native permission prompts can close the popup; onAdded registers the
+      // idle entry point even then. Firefox needs request() in this click stack.
+      const pending = chrome.runtime.sendMessage({ action: 'subtitles:setEnabled', tabId, enabled });
+      if (enabled && snapshot?.persistentAccess === false) {
+        void chrome.permissions.request({ origins: [YOUTUBE_PERMISSION] }).catch(() => false);
+      }
+      const result = await pending;
       if (!result?.success) status.textContent = t('subtitleStateSourceError');
     } finally { busy = false; await refresh(); }
   };

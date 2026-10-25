@@ -73,6 +73,9 @@ chrome.runtime.onMessage.addListener((m,s,reply) => {
   if(m.action==='test:autoPolicy') {
     chrome.storage.local.set({youtubeAuto:m.enabled===true}).then(()=>reply({success:true}));return true;
   }
+  if(m.action==='test:siteDisabled') {
+    chrome.storage.sync.set({siteRules:m.disabled?[{host:'www.youtube.com',disabled:true}]:[]}).then(()=>reply({success:true}));return true;
+  }
 });
 `);
   let context: BrowserContext | undefined;

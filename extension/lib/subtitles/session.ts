@@ -50,16 +50,43 @@ export class SubtitleSession {
   constructor() {
     this.pollTimer = setInterval(() => { void this.poll(); }, 500);
     document.addEventListener('yt-navigate-start', () => {
-      if (!this.status.enabled) return;
+      if (!this.status.enabled) { this.renderer?.dispose(); this.renderer = undefined; return; }
       this.checkingTrack = true; this.cancelWork(); this.renderer?.show('', '', '');
     }, { signal: this.lifetime.signal });
     document.addEventListener('yt-navigate-finish', () => {
       if (this.status.enabled) void this.begin();
+      else this.refreshControls();
     }, { signal: this.lifetime.signal });
     chrome.storage.onChanged.addListener(this.onStorage);
   }
 
   getStatus(): SubtitleStatus { return { ...this.status }; }
+
+  /** Display the entry point without reading captions or starting translation. */
+  showControls(config: SubtitleConfig): void {
+    if (this.disposed) return;
+    if (config.disabled) {
+      this.stop(); this.config = undefined;
+      this.renderer?.dispose(); this.renderer = undefined; return;
+    }
+    if (this.status.enabled) return;
+    this.config = config;
+    this.renderer?.configure(config);
+    this.refreshControls();
+  }
+
+  private refreshControls(): void {
+    if (this.disposed || this.status.enabled || !this.config) return;
+    const player = youtubeVideoId(location.href) ? document.querySelector<HTMLElement>('#movie_player') : null;
+    const video = player?.querySelector<HTMLVideoElement>('video');
+    if (!player || !video || !player.querySelector('.ytp-right-controls .ytp-subtitles-button')) {
+      this.renderer?.dispose(); this.renderer = undefined; return;
+    }
+    try {
+      if (this.player !== player || this.video !== video || !this.renderer?.connected) this.bind(player, video);
+      this.renderer?.updateStatus(this.status);
+    } catch { /* A late/replaced control can be mounted on the next idle tick. */ }
+  }
 
   private onStorage = (changes: Record<string, chrome.storage.StorageChange>, area: string): void => {
     if (area === 'local' && changes.dualReadCacheGeneration) {
@@ -120,12 +147,19 @@ export class SubtitleSession {
     // Remember the attempted binding even if UI setup fails. Otherwise every
     // poll sees a "new" player, retries setup, and postpones Retry indefinitely.
     this.player = player; this.video = video;
-    if (playerChanged || !this.renderer?.host.isConnected) {
+    if (playerChanged || !this.renderer?.connected) {
       this.renderer?.dispose();
       this.renderer = undefined;
       this.renderer = new SubtitleRenderer(player, this.config!, {
-        toggle: () => { void this.message('setEnabled', { enabled: !this.status.enabled }).catch(() => this.setState('source-error')); },
-        preferences: async preferences => { await this.message('preferences', { preferences }); await this.poll(); },
+        toggle: () => { void this.message('setEnabled', { enabled: !this.status.enabled }).catch(error => {
+          if (error instanceof DualReadError && error.code === 'CONFIG_REQUIRED') void this.message('openOptions').catch(() => {});
+          else this.setState('source-error');
+        }); },
+        preferences: async preferences => {
+          await this.message('preferences', { preferences });
+          if (!this.status.enabled && this.config) this.showControls({ ...this.config, preferences });
+          await this.poll();
+        },
         options: () => { void this.message('openOptions').catch(() => {}); },
       });
     }
@@ -263,7 +297,8 @@ export class SubtitleSession {
       document.dispatchEvent(new Event('dual-read:subtitles-destroy'));
       this.dispose(); return;
     }
-    if (!this.status.enabled || !this.config || this.disposed || this.polling) return;
+    if (!this.status.enabled) { this.refreshControls(); return; }
+    if (!this.config || this.disposed || this.polling) return;
     this.polling = true;
     const generation = this.generation;
     const epoch = this.epoch;

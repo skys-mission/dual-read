@@ -26,11 +26,11 @@ Manifest permissions (see `extension/wxt.config.ts`):
 | `scripting` | Inject the translation engine **on demand** (not on every page load) |
 | `contextMenus` | “Translate selection” from the right-click menu |
 | `host_permissions` for localhost | Talk to a local `dual-read-server` over HTTP |
-| `optional_host_permissions: https://*/` | Call **your** remote HTTPS API or enable site automation only after you grant the relevant origin. YouTube subtitle automation requests only `https://www.youtube.com/*`. |
+| `optional_host_permissions: https://*/` | Call **your** remote HTTPS API or enable site automation only after you grant the relevant origin. YouTube player controls and optional subtitle automation request only `https://www.youtube.com/*`. |
 
 Content scripts are **unlisted** and injected when you translate—Dual Read does not auto-inject into all websites at install time.
 
-YouTube subtitle translation is off by default. Manual activation uses the current tab grant. If you explicitly enable automatic YouTube subtitles on this device, a small startup script is registered only for YouTube after permission is granted. Revoking that permission or disabling automation removes future automatic injection. Imported or synchronized settings cannot enable this local permission choice.
+YouTube subtitle translation is off by default. Opening the popup can display idle player controls using the current tab grant. The first manual activation may request optional YouTube access so these controls can appear on future watch pages; declining does not block the current-tab action. After that permission is granted, a small startup script is registered only for YouTube. Idle controls do not read captions, change native CC, or send translation requests. Automatic translation remains a separate, off-by-default device preference. Turning automation off retains idle controls; revoking YouTube access removes future injection and idle controls. Imported or synchronized settings cannot grant host access or enable this local automation choice.
 
 ## Data the extension processes
 

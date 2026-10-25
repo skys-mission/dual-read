@@ -19,7 +19,7 @@ Keep them aligned with [`PRIVACY.md`](../../PRIVACY.md) and `extension/wxt.confi
 | Permission | Justification |
 |------------|---------------|
 | `http://localhost/*`, `http://127.0.0.1/*`, `http://[::1]/*` | Allow the optional self-hosted `dual-read-server` on loopback over HTTP. |
-| `optional_host_permissions: https://*/` | Call the **user-configured** remote HTTPS API or enable explicitly chosen site automation. YouTube subtitle automation requests only `https://www.youtube.com/*`; it remains off until consent and is stored only on this device. No all-site grant at install. |
+| `optional_host_permissions: https://*/` | Call the **user-configured** remote HTTPS API or enable explicitly chosen site automation. YouTube controls and optional subtitle automation request only `https://www.youtube.com/*`; automatic translation remains off by default and is stored only on this device. No all-site grant at install. |
 
 **Not requested at install:** broad `http://*/*` or “read and change all your data on all websites”.
 
@@ -34,9 +34,11 @@ Keep them aligned with [`PRIVACY.md`](../../PRIVACY.md) and `extension/wxt.confi
 
 Remote endpoints must be **HTTPS**. HTTP is allowed only for loopback.
 
-Manual subtitles use `activeTab` and top-frame on-demand scripts. The optional
-YouTube startup script is registered only after permission and removed when
-automation or that permission is disabled. Subtitle requests use the existing
+Manual subtitles use `activeTab` and top-frame on-demand scripts. With optional
+YouTube host access, a startup script displays idle player controls without
+reading captions, changing CC or contacting the translation service. Turning
+automatic translation off retains these controls; revoking host access removes
+future injection and idle controls. Subtitle requests use the existing
 YouTube page session; cookies and signed caption URLs are never sent to the
 translation API. There is no audio recording or transcription permission.
 
