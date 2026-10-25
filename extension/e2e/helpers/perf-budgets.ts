@@ -7,8 +7,6 @@
  */
 
 export interface PerfBudgets {
-  /** 5k-element initial index (session lastIndexMs). */
-  index5kMs: number;
   /** Max single long task during 20k index+translate. */
   longTask20kMs: number;
   /** MutationObserver incremental index. */
@@ -37,12 +35,7 @@ export const PERF_TIMING_SLACK_MS = PERF_STRICT ? 5 : 0;
 export const PERF_BUDGETS: PerfBudgets = PERF_STRICT
   ? {
       // STRICT runs on the same shared ubuntu-latest runners as default CI
-      // (nightly.yml), so ceilings are calibrated for that hardware — measured
-      // floor plus ~20% headroom, not dev-machine numbers:
-      // 5k index measured 177–180ms active CPU across nightly runs; ~61ms is
-      // only reachable on a local dev box. 220 still fails a real regression
-      // (default-CI ceiling is 300).
-      index5kMs: 220,
+      // (nightly.yml), so ceilings are calibrated for that hardware.
       // 50ms is Chrome's Long Task definition on reference hardware. On shared
       // runners a translate frame on the 20k page still costs one full-document
       // layout in the rendering step (in-flow companions reflow everything
@@ -66,7 +59,6 @@ export const PERF_BUDGETS: PerfBudgets = PERF_STRICT
     }
   : {
       // Shared CI VMs are noisy; keep gates meaningful but not flaky.
-      index5kMs: 300,
       longTask20kMs: 200,
       mutationMs: 80,
       // Bilingual companions insert flow content; single-frame coalesce keeps

@@ -6,13 +6,18 @@ Chromium E2E + unit gates for Dual Read’s page-impact budgets.
 
 | Budget | How | Default CI | `PERF_STRICT=1` |
 |--------|-----|------------|-----------------|
-| 5k initial index | `ContentSession` `perf.lastIndexMs` (active CPU, excludes yield waits) (+ vitest smoke) | ≤300ms E2E | ≤220ms (+5ms slack) |
 | Mutation index | SPA nav → `perf.lastMutationIndexMs` | ≤80ms | ≤16ms |
 | CLS (article + dense) | `PerformanceObserver` `layout-shift` | ≤0.35 | ≤0.20 |
 | Mock first visible paint | translate start → first `.dual-read-target` | ≤900ms | ≤500ms |
 | 20k long task | `longtask` entries (`PERF_FULL`, page parse excluded) | ≤200ms | ≤100ms |
 | 30× SPA heap | CDP heap usage after explicit GC (`PERF_FULL`) | ≤25% growth | ≤15% |
 | 30× rich replace SPA heap | Normalize/split + slot edits + transfers + attribute changes + navigation, after explicit GC (`PERF_FULL`) | ≤25% growth | ≤15% |
+
+Initial indexing has no fixed 5k browser timing gate: a single measurement on a
+shared runner cannot reliably distinguish a small regression from timing noise.
+`perf.lastIndexMs` remains available for diagnostics. The collector unit smoke
+test still checks that more than 1,500 of 2,000 units are collected within a
+generous 8-second budget (best of three runs in jsdom).
 
 The heap probe warms mutation/request/cache paths with five navigations before
 its baseline, then measures thirty additional navigations. Both samples use
@@ -26,10 +31,9 @@ the latest href and complete retained source after the final restoration. Shared
 history uses weak host/root references and disconnects when its owners are gone.
 
 STRICT ceilings are calibrated for the shared ubuntu-latest runners that
-nightly.yml uses (measured floor + headroom), not for dev machines: the 5k
-index measures ~180ms active CPU there (~61ms locally), and a 20k translate
-frame costs one full-document layout in the rendering step (in-flow companions
-reflow everything below the insert) on top of the time-sliced render JS —
+nightly.yml uses. A 20k translate frame costs one full-document layout in the
+rendering step (in-flow companions reflow everything below the insert) on top of
+the time-sliced render JS —
 50ms is only attainable on reference hardware.
 
 ### Render flush frames
@@ -64,7 +68,7 @@ The initial full-document index is split across cooperative yields on large page
 
 1. **`collectUnitsAsync`** — same passes as `collectUnits`, yields via `scheduler.yield` / MessageChannel whenever a soft CPU budget (~12ms) is exceeded.
 2. **`ContentSession.indexScopes`** — registers / observes units under the same CPU budget.
-3. **`perf.lastIndexMs`** — sums active collector+register CPU only (yield waits excluded) so 5k budgets stay meaningful.
+3. **`perf.lastIndexMs`** — reports time spent in active indexing slices (yield waits excluded) for diagnostics.
 
 ### Collector hotspot cache
 

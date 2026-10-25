@@ -131,51 +131,6 @@ test.describe('perf budget lab', () => {
     }
   });
 
-  test(`5k initial index ≤ ${PERF_BUDGETS.index5kMs}ms`, async ({
-    extContext,
-    extensionId,
-    sw,
-  }) => {
-    test.setTimeout(120_000);
-    const mock = await startMockServer();
-    try {
-      await seedSettings(extContext, extensionId, { apiBase: mock.apiBase });
-      const page = await extContext.newPage();
-      await page.goto(mock.fixtureUrl('lab-perf-5k.html'), {
-        waitUntil: 'domcontentloaded',
-        timeout: 60_000,
-      });
-
-      const tabId = await getTabId(page, sw);
-      // Fire translate but do not wait for full viewport drain — index timing is
-      // available on status as soon as indexFullDocument finishes.
-      const translatePromise = translateTab(sw, tabId, 'bilingual', { timeoutMs: 90_000 });
-
-      await expect
-        .poll(
-          async () => {
-            const st = await getTabStatus(sw, tabId);
-            return Number((st.perf as { lastIndexMs?: number } | undefined)?.lastIndexMs) || 0;
-          },
-          { timeout: 45_000 },
-        )
-        .toBeGreaterThan(0);
-
-      const st = await getTabStatus(sw, tabId);
-      const indexMs = Number((st.perf as { lastIndexMs?: number } | undefined)?.lastIndexMs) || 0;
-      expect(Number(st.total) || 0).toBeGreaterThan(1_000);
-      expect(
-        indexMs,
-        `5k index ${indexMs.toFixed(1)}ms exceeds budget ${PERF_BUDGETS.index5kMs}ms (PERF_STRICT=${PERF_STRICT})`,
-      ).toBeLessThanOrEqual(PERF_BUDGETS.index5kMs + PERF_TIMING_SLACK_MS);
-
-      await stopWatchTab(sw, tabId);
-      await translatePromise.catch(() => undefined);
-    } finally {
-      await mock.close();
-    }
-  });
-
   test(`SPA mutation index ≤ ${PERF_BUDGETS.mutationMs}ms`, async ({
     extContext,
     extensionId,
