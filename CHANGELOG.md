@@ -7,12 +7,27 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-## [0.2.0] - Unreleased
+## [0.2.0] - 2026-10-26
 
 YouTube bilingual subtitles join webpage translation in this release, alongside
 improvements to page layout, source restoration, and translation caching.
 GitHub packages and browser store updates are published separately; check the
 store's version before installing for a 0.2.0 feature.
+
+### Installation
+
+- Download the [Chrome / Edge ZIP](https://github.com/skys-mission/dual-read/releases/download/v0.2.0/dual-read-extension-0.2.0-chrome.zip),
+  extract it, enable Developer mode in `chrome://extensions` or
+  `edge://extensions`, and choose **Load unpacked** with the extracted folder.
+- The [Firefox ZIP](https://github.com/skys-mission/dual-read/releases/download/v0.2.0/dual-read-extension-0.2.0-firefox.zip)
+  is unsigned. For temporary testing in Firefox 140+, extract it and select its
+  `manifest.json` through `about:debugging#/runtime/this-firefox` → **Load
+  Temporary Add-on**. It is removed when Firefox restarts.
+- Browser store updates are pending separately from this GitHub release. For
+  normal Firefox installation, wait for a Mozilla-signed 0.2.0 store update.
+- Server binaries for Linux, macOS, and Windows, AMO sources, SBOMs, `SHA256SUMS`,
+  and verification instructions are available in this release's assets. The
+  server container is `ghcr.io/skys-mission/dual-read-server:0.2.0`.
 
 ### Upgrade notes
 
@@ -132,7 +147,7 @@ store's version before installing for a 0.2.0 feature.
 - Upgrade extension build/test tooling to WXT 0.21, Vite 7, and Vitest 5.
   Require Node.js 22.12+ on the 22.x line, or supported 24.x / 26+.
   Keep all 100 DOM mutation scenarios in the restoration regression with an
-  explicit test timeout; browser performance budgets remain unchanged.
+  explicit test timeout.
 - Wait for installation defaults before seeding browser-test settings, avoiding
   startup races that could replace the local mock service configuration.
 - Establish the full subtitle prefetch window before checking that appearance
@@ -144,7 +159,9 @@ store's version before installing for a 0.2.0 feature.
 - Update the pinned Go linter to support the project's Go toolchain and newer
   developer installations.
 - Measure SPA retained heap after warm-up and explicit GC instead of optional
-  page GC and quantized memory sampling; retain the existing performance budgets.
+  page GC and quantized memory sampling. Remove the fixed five-second 5k-block
+  indexing gate while retaining completion, long-task, responsiveness, and heap
+  checks.
 
 ## [0.1.1] - 2026-08-04
 
