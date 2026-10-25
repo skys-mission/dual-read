@@ -63,11 +63,15 @@ builds: 82 distinct browser checks total. An initial run's two new checks reache
 the restoration assertions but used the wrong localized button label; correcting
 the test label and rerunning them passed (2.6 s Chromium, 3.9 s Firefox).
 
-Final 0.2.1 ZIPs pass integrity, production-manifest, permission, credential and
+The initial 0.2.1 ZIPs pass integrity, production-manifest, permission, credential and
 test-relay checks. All 62 non-manifest runtime files are byte-identical to the
 build used for the full regression run; the manifests differ only in version.
-Manual-test archives and unpacked copies are in `dist/0.2.1/`, separate from
-the original `dist/0.2.0/` artifacts. No release or tag was published.
+At the user's request, the fixed build was then repackaged with version 0.2.0.
+Current manual-test archives and unpacked copies are in `dist/0.2.0/`; the
+earlier faulty 0.2.0 artifacts are backed up under
+`dist/archive/0.2.0-before-nested-controls/`. The repackaged runtime files are
+byte-identical to the tested fix, with only the manifest version changed.
+No release or tag was published.
 
 The live page also passed a component integration check using the production
 renderer, production ASR source/normalizer, and three captions translated by
