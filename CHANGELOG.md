@@ -21,6 +21,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Mount the YouTube bilingual control beside CC in nested player layouts.
+  Clean up failed initialization and keep its retry cooldown from restarting
+  on every status poll.
 - Renew YouTube subtitle sessions after reload, honor native CC off from menus
   and keyboard, recover delayed track metadata, and restore CC after unrelated
   player settings changes. Keep keyboard focus when updating subtitle options,

@@ -21,7 +21,7 @@ export class SubtitleRenderer {
   private readonly arrow = document.createElement('button');
   private readonly panel = document.createElement('div');
   private readonly status = document.createElement('p');
-  private readonly resize: ResizeObserver;
+  private resize?: ResizeObserver;
   private readonly abort = new AbortController();
   private lastText = '';
   private config: SubtitleConfig;
@@ -33,6 +33,13 @@ export class SubtitleRenderer {
     options: () => void;
   }) {
     this.config = config;
+    try { this.mount(); } catch (error) {
+      this.dispose();
+      throw error;
+    }
+  }
+  private mount(): void {
+    const { player, config, callbacks } = this;
     for (const host of [this.host, this.controlHost, this.nativeStyle]) host.setAttribute('data-dual-read-subtitle-ui', '');
     this.host.style.cssText = 'all:initial;position:absolute;inset:0;display:block;pointer-events:none;z-index:55;';
     const root = this.host.attachShadow({ mode: 'open' });
@@ -79,7 +86,9 @@ export class SubtitleRenderer {
     document.addEventListener('scroll', () => { if (!this.panel.hidden) this.layout(); }, { capture: true, passive: true, signal: this.abort.signal });
     const container = player.querySelector('.ytp-right-controls');
     const cc = container?.querySelector('.ytp-subtitles-button');
-    if (container && cc) container.insertBefore(this.controlHost, cc.nextSibling);
+    // YouTube may nest CC inside .ytp-right-controls-left. Insert beside the
+    // actual button; its next sibling need not belong to the outer container.
+    cc?.after(this.controlHost);
     this.resize = new ResizeObserver(() => this.layout()); this.resize.observe(player);
     this.configure(config);
   }
@@ -133,7 +142,7 @@ export class SubtitleRenderer {
     else if (this.player.getAttribute('data-dual-read-subtitle-source') === this.token) this.player.removeAttribute('data-dual-read-subtitle-source');
   }
   dispose(): void {
-    this.show('', '', ''); this.open(false); this.abort.abort(); this.resize.disconnect();
+    this.show('', '', ''); this.open(false); this.abort.abort(); this.resize?.disconnect();
     this.controlHost.remove(); this.host.remove(); this.nativeStyle.remove();
     this.updateControlVisibility();
   }

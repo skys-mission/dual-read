@@ -7,6 +7,7 @@ const scenarios = [
   'reload-manual', 'reload-auto', 'native-menu-off', 'native-keyboard-off', 'native-off-preparing',
   'unrelated-settings', 'caption-selection', 'late-metadata', 'missing-metadata', 'empty-metadata',
   'translated-dom', 'translated-dom-switch', 'translated-full-track', 'preference-focus', 'ad-cc', 'replace-cc',
+  'nested-controls',
 ] as const;
 
 async function installNativeControls(page: Page) {
@@ -62,6 +63,13 @@ for (const scenario of scenarios) {
       await fx.message(page, { action: 'test:seed', apiBase: mock.apiBase });
       await expect.poll(() => page.locator('video').evaluate(v => (v as HTMLVideoElement).readyState)).toBeGreaterThanOrEqual(2);
       await installNativeControls(page);
+      if (scenario === 'nested-controls') await page.evaluate(() => {
+        const controls = document.querySelector('.ytp-right-controls')!;
+        const group = document.createElement('div'); group.className = 'ytp-right-controls-left';
+        group.style.cssText = 'display:flex;height:100%';
+        group.append(...controls.childNodes); controls.append(group);
+        (window as any).expectedControlNodes = [...group.childNodes];
+      });
       if (scenario === 'late-metadata' || scenario === 'missing-metadata') await page.evaluate(() => {
         const p = document.querySelector('#movie_player') as any;
         const read = p.getPlayerResponse;
@@ -218,15 +226,22 @@ for (const scenario of scenarios) {
         node.before(added);
         (window as any).expectedNativeNodes = [added, node];
       });
-      if (scenario === 'caption-selection') {
+      if (scenario === 'caption-selection' || scenario === 'nested-controls') {
         await page.locator('#asr').click();
         await expect(translation).toHaveText('译:Automatic caption 1');
       } else await page.locator('#speed').click();
       for (let i = 0; i < 2; i++) await fx.message(page, { action: 'subtitles:setEnabled', enabled: false });
-      await expect(page.locator('.ytp-subtitles-button')).toHaveAttribute('aria-pressed', scenario === 'caption-selection' ? 'true' : 'false');
+      await expect(page.locator('.ytp-subtitles-button')).toHaveAttribute('aria-pressed', scenario === 'caption-selection' || scenario === 'nested-controls' ? 'true' : 'false');
       expect(await page.evaluate(() => (window as any).expectedNativeNodes.every((n: Node, i: number) => n === document.querySelectorAll('.ytp-caption-segment')[i]))).toBe(true);
       await expect(page.locator('.ytp-caption-segment')).toHaveText(['Page-added caption', 'Native caption retained by the page Page edit.']);
       await expect(page.locator('.ytp-caption-window-container')).toHaveCSS('visibility', 'visible');
+      if (scenario === 'nested-controls') {
+        await expect(page.getByRole('button', { name: 'Enable bilingual subtitles', exact: true })).toHaveCount(1);
+        await fx.message(page, { action: 'test:reinject' });
+        await expect(page.locator('[data-dual-read-subtitle-ui]')).toHaveCount(0);
+        expect(await page.evaluate(() => (window as any).expectedControlNodes.every((node: Node, i: number) =>
+          node === document.querySelector('.ytp-right-controls-left')!.childNodes[i]))).toBe(true);
+      }
     } finally { await fx.close(); await mock.close(); }
   });
 }

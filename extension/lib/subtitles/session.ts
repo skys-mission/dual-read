@@ -112,15 +112,19 @@ export class SubtitleSession {
 
   private bind(player: HTMLElement, video: HTMLVideoElement): void {
     this.binding.abort(); this.binding = new AbortController();
-    if (this.player !== player || !this.renderer?.host.isConnected) {
+    const playerChanged = this.player !== player;
+    // Remember the attempted binding even if UI setup fails. Otherwise every
+    // poll sees a "new" player, retries setup, and postpones Retry indefinitely.
+    this.player = player; this.video = video;
+    if (playerChanged || !this.renderer?.host.isConnected) {
       this.renderer?.dispose();
+      this.renderer = undefined;
       this.renderer = new SubtitleRenderer(player, this.config!, {
         toggle: () => { void this.message('setEnabled', { enabled: !this.status.enabled }).catch(() => this.setState('source-error')); },
         preferences: async preferences => { await this.message('preferences', { preferences }); await this.poll(); },
         options: () => { void this.message('openOptions').catch(() => {}); },
       });
     }
-    this.player = player; this.video = video;
     const signal = this.binding.signal;
     for (const type of ['timeupdate', 'pause', 'play', 'ratechange', 'seeked', 'loadedmetadata']) {
       video.addEventListener(type, () => this.draw(), { signal });
