@@ -1,5 +1,6 @@
 import type { PublicSessionConfig, TranslateStatus } from './types';
 import { DualReadError, isAbortError, type DualReadErrorCode } from './errors';
+import type { SubtitleIdentity, SubtitleItem, SubtitleTranslation } from './subtitles/types';
 
 export const PORT_NAME = 'dual-read-translate';
 export const PORT_TIMEOUT_MS = 60_000;
@@ -29,8 +30,28 @@ export interface BatchResultMsg {
   code?: DualReadErrorCode;
 }
 
-export type PortInboundMsg = BatchRequestMsg | BatchCancelMsg;
-export type PortOutboundMsg = BatchResultMsg;
+export interface SubtitleBatchRequestMsg extends SubtitleIdentity {
+  action: 'translateSubtitles';
+  requestId: string;
+  sessionId: string;
+  targetLang: PublicSessionConfig['targetLang'];
+  providerFingerprint: string;
+  sourceLanguage: string;
+  items: SubtitleItem[];
+}
+
+export interface SubtitleBatchResultMsg extends SubtitleIdentity {
+  action: 'subtitleBatchResult';
+  requestId: string;
+  sessionId: string;
+  success: boolean;
+  items?: SubtitleTranslation[];
+  error?: string;
+  code?: DualReadErrorCode;
+}
+
+export type PortInboundMsg = BatchRequestMsg | BatchCancelMsg | SubtitleBatchRequestMsg;
+export type PortOutboundMsg = BatchResultMsg | SubtitleBatchResultMsg;
 
 export type ContentRequest =
   | { action: 'ping' }
@@ -58,8 +79,8 @@ function newRequestId(): string {
   return `r-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-function isBatchResult(m: unknown): m is BatchResultMsg {
-  return Boolean(m && typeof m === 'object' && (m as BatchResultMsg).action === 'batchResult');
+function isBatchResult(m: unknown): m is PortOutboundMsg {
+  return Boolean(m && typeof m === 'object' && ['batchResult', 'subtitleBatchResult'].includes((m as PortOutboundMsg).action));
 }
 
 export { isAbortError };
@@ -76,6 +97,7 @@ export function translateBatchViaPort(
     config: Pick<PublicSessionConfig, 'sessionId' | 'targetLang' | 'providerFingerprint'>;
     ports?: Set<chrome.runtime.Port>;
     signal?: AbortSignal;
+    subtitle?: SubtitleIdentity & { sourceLanguage: string; items: SubtitleItem[] };
   },
 ): Promise<string[]> {
   const { sessionId, targetLang, providerFingerprint } = opts.config;
@@ -137,7 +159,17 @@ export function translateBatchViaPort(
 
     port.onMessage.addListener((m: unknown) => {
       if (!isBatchResult(m) || m.requestId !== requestId || m.sessionId !== sessionId) return;
-      if (m.success) finish(resolve as never, m.translations ?? []);
+      if (opts.subtitle && (m.action !== 'subtitleBatchResult' || m.videoId !== opts.subtitle.videoId
+        || m.trackId !== opts.subtitle.trackId || m.generation !== opts.subtitle.generation)) return;
+      if (!opts.subtitle && m.action !== 'batchResult') return;
+      if (m.success && m.action === 'subtitleBatchResult' && opts.subtitle) {
+        const rows = m.items ?? [];
+        const valid = rows.length === opts.subtitle.items.length && new Set(rows.map(r => r.id)).size === rows.length;
+        const translations = opts.subtitle.items.map(item => rows.find(r => r.id === item.id && r.revision === item.revision)?.text);
+        if (!valid || translations.some(t => typeof t !== 'string' || !t.trim())) {
+          finish(reject as never, new DualReadError('RESPONSE_MALFORMED'));
+        } else finish(resolve as never, translations);
+      } else if (m.success && m.action === 'batchResult') finish(resolve as never, m.translations ?? []);
       else {
         const code = m.code || 'UNKNOWN';
         finish(
@@ -162,14 +194,15 @@ export function translateBatchViaPort(
     });
 
     try {
-      port.postMessage({
-        action: 'translateBatch',
+      const identity = {
         requestId,
         sessionId,
         targetLang,
         providerFingerprint,
-        texts,
-      } satisfies BatchRequestMsg);
+      };
+      port.postMessage(opts.subtitle
+        ? { ...identity, ...opts.subtitle, action: 'translateSubtitles' } satisfies SubtitleBatchRequestMsg
+        : { ...identity, action: 'translateBatch', texts } satisfies BatchRequestMsg);
     } catch (err) {
       finish(reject as never, err instanceof Error ? err : new Error(String(err)));
     }

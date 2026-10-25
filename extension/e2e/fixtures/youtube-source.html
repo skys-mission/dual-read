@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>G0 synthetic player fixture</title></head>
+<body>
+  <main id="movie_player">
+    <video muted></video>
+    <div class="ytp-caption-window-container"><span class="ytp-caption-segment"></span></div>
+    <button class="ytp-subtitles-button" aria-pressed="false">CC</button>
+  </main>
+  <button id="next-video">Next video</button>
+  <button id="asr">Select automatic captions</button>
+  <button id="manual">Select manual captions</button>
+  <script nonce="g0-fixture">
+    // Handwritten synthetic data. This is not a captured YouTube response.
+    const player = document.querySelector('#movie_player');
+    const cc = player.querySelector('button');
+    let id = new URL(location.href).searchParams.get('v');
+    let kind = '';
+    const track = type => ({
+      vssId: type === 'asr' ? 'a.en' : '.en', languageCode: 'en',
+      ...(type ? { kind: type } : {}),
+      baseUrl: `https://www.youtube.com/api/timedtext?v=${id}&lang=en${type ? '&kind=asr' : ''}&signature=fixture-only`,
+    });
+    player.getPlayerResponse = () => ({ videoDetails: { videoId: id },
+      captions: { playerCaptionsTracklistRenderer: { captionTracks: [track(''), track('asr')] } },
+    });
+    player.getVideoData = () => ({ video_id: id });
+    player.getOption = () => track(kind);
+    window.g0InitialFetch = window.fetch;
+    window.g0InitialOpen = XMLHttpRequest.prototype.open;
+    window.g0Requests = [];
+    window.g0NativeBodies = [];
+    function requestCaption() {
+      const current = id;
+      const url = `${track(kind).baseUrl}&pot=fixture-only&fmt=${new URL(location.href).searchParams.get('format') || 'json3'}`;
+      window.g0Requests.push({ video: id, kind });
+      const accept = body => {
+        window.g0NativeBodies.push(body);
+        if (current === id && cc.getAttribute('aria-pressed') === 'true') {
+          player.querySelector('.ytp-caption-segment').textContent = body ? 'Native caption' : '';
+        }
+      };
+      if (new URL(location.href).searchParams.get('transport') === 'fetch') {
+        fetch(url).then(r => r.text()).then(accept);
+      } else {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+        xhr.addEventListener('load', () => accept(xhr.responseText));
+        xhr.send();
+      }
+    }
+    cc.addEventListener('click', () => {
+      const enabled = cc.getAttribute('aria-pressed') !== 'true';
+      cc.setAttribute('aria-pressed', String(enabled));
+      if (enabled) requestCaption();
+      else player.querySelector('.ytp-caption-segment').textContent = '';
+    });
+    document.querySelector('#next-video').onclick = () => {
+      id = 'bbbbbbbbbbb';
+      history.pushState({}, '', `/watch?v=${id}`);
+      if (cc.getAttribute('aria-pressed') === 'true') requestCaption();
+      document.dispatchEvent(new Event('yt-navigate-finish'));
+    };
+    for (const [selector, value] of [['#asr', 'asr'], ['#manual', '']]) {
+      document.querySelector(selector).onclick = () => {
+        kind = value;
+        if (cc.getAttribute('aria-pressed') === 'true') requestCaption();
+      };
+    }
+    if (new URL(location.href).searchParams.get('cc') === 'on') cc.click();
+  </script>
+</body>
+</html>

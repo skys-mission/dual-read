@@ -2,8 +2,9 @@
 set -euo pipefail
 
 # Runs WXT in dev mode with HMR. Usage: dev-extension.sh [chrome|firefox]
-# WXT auto-launches a fresh browser profile with the extension loaded, and
-# also writes an unpacked build to extension/output/<browser>-mv3.
+# Load the unpacked development build manually. WXT's optional web-ext
+# launcher is omitted because its Android tooling pulls in unpatched node-forge.
+# Development output is extension/output/<browser>-mv3-dev.
 #
 # Dev settings MUST NOT be copied into public/ — that path is packaged into
 # production artifacts. Seed settings via Options → Import instead.
@@ -12,8 +13,8 @@ EXT_DIR="${ROOT_DIR}/extension"
 
 BROWSER="${1:-chrome}"
 case "${BROWSER}" in
-  chrome)  DEV_SCRIPT="dev";         OUTPUT="chrome-mv3" ;;
-  firefox) DEV_SCRIPT="dev:firefox"; OUTPUT="firefox-mv3" ;;
+  chrome)  DEV_SCRIPT="dev";         OUTPUT="chrome-mv3-dev" ;;
+  firefox) DEV_SCRIPT="dev:firefox"; OUTPUT="firefox-mv3-dev" ;;
   *) echo "[dev-extension] unknown browser '${BROWSER}' (use chrome|firefox)"; exit 1 ;;
 esac
 
@@ -27,7 +28,7 @@ fi
 
 if [[ ! -d node_modules ]]; then
   echo "[dev-extension] installing dependencies..."
-  npm install
+  npm ci
 fi
 
 cat <<EOF
@@ -35,8 +36,9 @@ cat <<EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   WXT dev mode (HMR) — ${BROWSER}
 
-  WXT will auto-open a fresh ${BROWSER} profile with the extension loaded.
-  If it doesn't, load unpacked → extension/output/${OUTPUT}
+  Load the development build manually; WXT will keep it updated with HMR.
+  Chrome/Edge: load unpacked → extension/output/${OUTPUT}
+  Firefox: about:debugging → load temporary addon → output/${OUTPUT}/manifest.json
 
   Tip: copy extension/dev-settings.json.example → a local JSON file, fill
   your API key, then import it from the Options page. Do NOT place secrets

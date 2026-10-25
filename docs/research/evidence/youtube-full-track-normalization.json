@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-25",
+  "scope": "Previously captured live tracks, normalized locally; counts only, no caption text",
+  "checks": [
+    {
+      "kind": "manual",
+      "events": 466,
+      "cues": 466,
+      "inputWords": 3797,
+      "outputWords": 3797,
+      "sameWords": true,
+      "ordered": true
+    },
+    {
+      "kind": "asr",
+      "events": 1144,
+      "cues": 572,
+      "inputWords": 4073,
+      "outputWords": 4073,
+      "sameWords": true,
+      "ordered": true
+    }
+  ]
+}

@@ -21,13 +21,19 @@ async function callLLM(texts: string[], settings: Settings, signal?: AbortSignal
   texts.forEach((t, i) => {
     indexed[String(i)] = t;
   });
+  return requestCompletion(buildSystemPrompt(settings.targetLang), JSON.stringify(indexed), texts, settings, signal, true);
+}
 
+/** Shared trusted transport; subtitle callers supply a fixed, strict prompt. */
+export async function requestCompletion(
+  system: string, user: string, texts: string[], settings: Settings, signal?: AbortSignal, allowReasoningFallback = false,
+): Promise<string> {
   const body = withThinkingDisabled(
     {
-      model: settings.model || 'deepseek-v4-flash',
+      model: settings.model || 'deepseek-flash',
       messages: [
-        { role: 'system', content: buildSystemPrompt(settings.targetLang) },
-        { role: 'user', content: JSON.stringify(indexed) },
+        { role: 'system', content: system },
+        { role: 'user', content: user },
       ],
       temperature: 0.3,
       max_tokens: estimateMaxTokens(texts),
@@ -67,7 +73,7 @@ async function callLLM(texts: string[], settings: Settings, signal?: AbortSignal
   // Last-resort: some thinking models truncate content to empty while still
   // emitting a usable JSON blob inside reasoning_content.
   const reasoning = message?.reasoning_content;
-  if (typeof reasoning === 'string' && reasoning.trim()) {
+  if (allowReasoningFallback && typeof reasoning === 'string' && reasoning.trim()) {
     const jsonish = reasoning.match(/\{[\s\S]*\}/);
     if (jsonish?.[0]) return jsonish[0];
   }

@@ -1,0 +1,260 @@
+{
+  "date": "2026-10-25",
+  "browser": "Firefox 155.0 (Playwright Nightly)",
+  "fixture": true,
+  "authenticated": false,
+  "apiOrigin": "https://api.xiaomimimo.com",
+  "model": "mimo-v2.6-flash",
+  "production_extension_bundles": true,
+  "production_prompt_transport_parser": true,
+  "mock_provider": false,
+  "diagnostic_host_grants": [
+    "https://www.youtube.com/*",
+    "https://api.xiaomimimo.com/*"
+  ],
+  "source_scope": "Self-authored manual and synthetic ASR append events; local silent media fixture. Not authenticated live YouTube.",
+  "events": [
+    {
+      "at": "2026-10-25T02:48:59.344Z",
+      "command": "controlled-manual",
+      "value": {
+        "fixture": true,
+        "realProvider": true,
+        "firstTranslationMs": 3474,
+        "status": {
+          "enabled": true,
+          "state": "ready",
+          "sourceLanguage": "en",
+          "kind": "manual",
+          "retryAt": 1792896540838
+        },
+        "page": {
+          "signedIn": null,
+          "videoId": "aaaaaaaaaaa",
+          "muted": true,
+          "volume": 0,
+          "paused": true,
+          "time": 0.15,
+          "readyState": 4,
+          "cc": "true",
+          "trackId": ".en",
+          "nativeCharacters": 35,
+          "sourceCharacters": 49,
+          "translationCharacters": 13
+        },
+        "metrics": {
+          "initialized": true,
+          "requests": [
+            {
+              "index": 1,
+              "start": 1792896535847,
+              "status": 200,
+              "elapsedMs": 3030,
+              "usage": {
+                "completion_tokens": 130,
+                "prompt_tokens": 361,
+                "total_tokens": 491,
+                "completion_tokens_details": {
+                  "reasoning_tokens": 9
+                },
+                "prompt_tokens_details": null
+              }
+            }
+          ]
+        },
+        "pairs": [
+          {
+            "source": "The player starts when you press the play button.",
+            "translation": "点击播放按钮即可开始播放。"
+          },
+          {
+            "source": "Set the width to 640 pixels and keep the original aspect ratio.",
+            "translation": "将宽度设置为640像素，并保持原始宽高比。"
+          },
+          {
+            "source": "This option controls whether captions appear automatically.",
+            "translation": "此选项控制字幕是否自动显示。"
+          },
+          {
+            "source": "If the video is paused, the subtitle should stay on screen.",
+            "translation": "如果视频暂停，字幕应保留在屏幕上。"
+          },
+          {
+            "source": "You can change the playback speed without losing synchronization.",
+            "translation": "您可以更改播放速度而不会失去同步。"
+          }
+        ],
+        "screenshot": "firefox-real-provider-manual.png"
+      }
+    },
+    {
+      "at": "2026-10-25T02:48:59.450Z",
+      "command": "controlled-cache",
+      "value": {
+        "cachedFirstTranslationMs": 85,
+        "requestsBefore": 1,
+        "requestsAfterRestartAndSeek": 1,
+        "ccRestoredOnFirstStop": true
+      }
+    },
+    {
+      "at": "2026-10-25T02:49:12.511Z",
+      "command": "controlled-asr",
+      "value": {
+        "fixture": true,
+        "realProvider": true,
+        "trackSwitchFirstTranslationMs": 12952,
+        "status": {
+          "enabled": true,
+          "state": "ready",
+          "retryAt": 1792896545838,
+          "sourceLanguage": "en",
+          "kind": "asr"
+        },
+        "page": {
+          "signedIn": null,
+          "videoId": "aaaaaaaaaaa",
+          "muted": true,
+          "volume": 0,
+          "paused": true,
+          "time": 0.15,
+          "readyState": 4,
+          "cc": "true",
+          "trackId": "a.en",
+          "nativeCharacters": 35,
+          "sourceCharacters": 49,
+          "translationCharacters": 11
+        },
+        "metrics": {
+          "initialized": true,
+          "requests": [
+            {
+              "index": 1,
+              "start": 1792896535847,
+              "status": 200,
+              "elapsedMs": 3030,
+              "usage": {
+                "completion_tokens": 130,
+                "prompt_tokens": 361,
+                "total_tokens": 491,
+                "completion_tokens_details": {
+                  "reasoning_tokens": 9
+                },
+                "prompt_tokens_details": null
+              }
+            },
+            {
+              "index": 2,
+              "start": 1792896540854,
+              "status": 200,
+              "elapsedMs": 11326,
+              "usage": {
+                "completion_tokens": 130,
+                "prompt_tokens": 334,
+                "total_tokens": 464,
+                "completion_tokens_details": {
+                  "reasoning_tokens": 10
+                },
+                "prompt_tokens_details": {
+                  "cached_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        "pairs": [
+          {
+            "source": "Automatic captions can arrive one word at a time.",
+            "translation": "自动字幕可能逐字显示。"
+          },
+          {
+            "source": "The next sentence replaces the previous caption window.",
+            "translation": "下一句会替换上一句的字幕窗口。"
+          },
+          {
+            "source": "Keep the translation aligned when the speaker pauses.",
+            "translation": "说话人停顿时保持译文对齐。"
+          },
+          {
+            "source": "Changing the language should cancel the old translation request.",
+            "translation": "切换语言时应取消旧的翻译请求。"
+          },
+          {
+            "source": "Turn off bilingual subtitles to restore the original captions.",
+            "translation": "关闭双语字幕以恢复原始字幕。"
+          }
+        ],
+        "screenshot": "firefox-real-provider-asr.png"
+      }
+    },
+    {
+      "at": "2026-10-25T02:49:12.524Z",
+      "command": "controlled-complete",
+      "value": {
+        "passed": true,
+        "fixture": true,
+        "authenticated": false,
+        "nativeNodeAndVisibilityRestored": true,
+        "userSelectedTrackPreserved": true,
+        "page": {
+          "signedIn": null,
+          "videoId": "aaaaaaaaaaa",
+          "muted": true,
+          "volume": 0,
+          "paused": true,
+          "time": 0.15,
+          "readyState": 4,
+          "cc": "true",
+          "trackId": "a.en",
+          "nativeCharacters": 35,
+          "sourceCharacters": 0,
+          "translationCharacters": 0
+        },
+        "status": {
+          "enabled": false,
+          "state": "off",
+          "retryAt": 1792896545838,
+          "sourceLanguage": "en",
+          "kind": "asr"
+        },
+        "metrics": {
+          "initialized": true,
+          "requests": [
+            {
+              "index": 1,
+              "start": 1792896535847,
+              "status": 200,
+              "elapsedMs": 3030,
+              "usage": {
+                "completion_tokens": 130,
+                "prompt_tokens": 361,
+                "total_tokens": 491,
+                "completion_tokens_details": {
+                  "reasoning_tokens": 9
+                },
+                "prompt_tokens_details": null
+              }
+            },
+            {
+              "index": 2,
+              "start": 1792896540854,
+              "status": 200,
+              "elapsedMs": 11326,
+              "usage": {
+                "completion_tokens": 130,
+                "prompt_tokens": 334,
+                "total_tokens": 464,
+                "completion_tokens_details": {
+                  "reasoning_tokens": 10
+                },
+                "prompt_tokens_details": {
+                  "cached_tokens": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

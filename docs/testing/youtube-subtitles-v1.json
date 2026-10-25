@@ -1,0 +1,121 @@
+{
+  "date": "2026-10-25",
+  "environment": "macOS; Playwright Chromium and Firefox; disposable MV3 addons; local API and silent-video fixtures",
+  "browser_suite_run": {
+    "startTime": "2026-10-25T02:27:00.140Z",
+    "duration": 168261.85,
+    "expected": 109,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "production_feature_tests": {
+    "chromium-ext": 24,
+    "firefox-ext": 24
+  },
+  "source_contract_tests": {
+    "chromium": 28,
+    "firefox": 28,
+    "failures": 0
+  },
+  "existing_regressions": {
+    "chromium_popup_options_axe": 5,
+    "firefox_real_addon_load": 2,
+    "failures": 0
+  },
+  "browser_checks_total": 111,
+  "unit_tests": {
+    "files": 48,
+    "passed": 2019
+  },
+  "clock_measurements": {
+    "chromium-ext": {
+      "seekMs": 17.200000047683716,
+      "playbackDeltaMs": 16.110000000000127
+    },
+    "firefox-ext": {
+      "seekMs": 11,
+      "playbackDeltaMs": 18.92699999999968
+    }
+  },
+  "clock_scope": "Single local run; source cue paint, not model latency; seek target <250ms, playback boundary <150ms",
+  "source_sha256": {
+    "extension/lib/subtitles/background.ts": "5fae15c33b8a01c96216f52305b586465a8b6cbe84a8642c530fff8df4c66125",
+    "extension/lib/subtitles/session.ts": "dd173223bf1361584dcd328d56ff367df3919b2d53bb9479f512a432f05e0efb",
+    "extension/lib/subtitles/renderer.ts": "2e22d29cdce80ea26f8bb455c983ed0c48519e8b879c52c13c1f6396901da085",
+    "extension/lib/subtitles/youtube-adapter.ts": "f318997c40d6ac235a31ff90fdcc1e48a50c1e5d8bf1d13f377dc766f3744488",
+    "extension/lib/subtitles/youtube-lease.ts": "3525d09b67651bb91d73218c80c583ba4493c44622557f9f2060151336d8a7cb"
+  },
+  "live_normalization": [
+    {
+      "kind": "manual",
+      "events": 466,
+      "cues": 466,
+      "inputWords": 3797,
+      "outputWords": 3797,
+      "sameWords": true,
+      "ordered": true
+    },
+    {
+      "kind": "asr",
+      "events": 1144,
+      "cues": 572,
+      "inputWords": 4073,
+      "outputWords": 4073,
+      "sameWords": true,
+      "ordered": true
+    }
+  ],
+  "limitations": [
+    "Authenticated live YouTube source validated only in in-app Chromium.",
+    "Toolbar and permission checks performed separately with native UI.",
+    "Firefox real-provider rendering, cache and restoration passed with controlled source; authenticated live Firefox YouTube source remains blocked by Google sign-in rejection."
+  ],
+  "real_provider_canary": {
+    "date": "2026-10-25",
+    "model": "mimo-v2.6-flash",
+    "sample_kind": "self-authored controlled subtitles",
+    "items": 5,
+    "requests": 1,
+    "http_status": 200,
+    "elapsed_ms": 3753,
+    "prompt_tokens": 297,
+    "completion_tokens": 120,
+    "total_tokens": 417,
+    "ids_and_revisions_aligned": true,
+    "browser_end_to_end": false,
+    "evidence": "../research/evidence/youtube-provider-canary-2026-10-25.json"
+  },
+  "firefox_real_provider": {
+    "browser": "Firefox 155.0",
+    "source_fixture": true,
+    "provider_mock": false,
+    "model": "mimo-v2.6-flash",
+    "manual_items": 5,
+    "asr_items": 5,
+    "api_requests": 2,
+    "http_statuses": [
+      200,
+      200
+    ],
+    "request_elapsed_ms": [
+      3030,
+      11326
+    ],
+    "first_translation_observed_ms": 3474,
+    "track_switch_translation_observed_ms": 12952,
+    "cached_restart_translation_observed_ms": 85,
+    "cache_restart_and_seek_added_requests": 0,
+    "total_tokens": 955,
+    "native_restored": true,
+    "user_track_preserved": true,
+    "evidence": "../research/evidence/youtube-firefox-real-provider-2026-10-25.json"
+  },
+  "firefox_authenticated_live": {
+    "completed": false,
+    "reason": "Google rejected the automated browser sign-in; user unable to log in.",
+    "bypass_attempted": false,
+    "signed_out_source": "HTTP 200 with empty caption body; no model requests.",
+    "evidence": "../research/evidence/youtube-firefox-live-unavailable-2026-10-25.json"
+  }
+}

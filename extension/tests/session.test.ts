@@ -185,6 +185,7 @@ describe('ContentSession scheduling state machine', () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     vi.unstubAllGlobals();
     Element.prototype.getBoundingClientRect = realRect;
     document.body.innerHTML = '';

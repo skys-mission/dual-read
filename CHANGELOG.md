@@ -7,8 +7,42 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-25
+
+### Added
+
+- YouTube bilingual subtitles for desktop watch pages, using the configured
+  translation service and a bounded window around playback. Support manual
+  and automatic captions, seek/track/navigation changes, and visible-caption
+  fallback when a full track cannot be retrieved.
+- A subtitle/page switch in the YouTube popup and a compact player control.
+  Subtitle language, size, position, and optional device-local automation are
+  the only new preferences. Automatic subtitle translation is off by default.
+- Separate subtitle cache keys, strict cue response validation, native CC
+  restoration, and Chromium/Firefox source and production-addon regressions.
+
 ### Fixed
 
+- Declare YouTube-only host access in the installation manifest so idle bilingual
+  controls appear on video pages without opening the toolbar popup or granting
+  optional access first. Subtitle translation remains off by default. Add a
+  Chromium/Firefox regression using unmodified bundles and fresh browser profiles.
+- Show idle YouTube player controls before translation starts when site access
+  is granted, and when the toolbar popup opens for the current tab. Keep
+  automatic translation separate from button visibility, preserve native CC,
+  and handle late/replaced controls and navigation without duplicate buttons.
+- Renew already-loaded YouTube captions through native CC, preserve native
+  request formats, parse timedtext XML, and retry full-track acquisition a
+  bounded number of times while live translation continues. Keep delayed
+  original/translation pairs together through rolling ASR updates, and clear
+  obsolete pairs on seeking, track changes and stop.
+- Mount the YouTube bilingual control beside CC in nested player layouts.
+  Clean up failed initialization and keep its retry cooldown from restarting
+  on every status poll.
+- Renew YouTube subtitle sessions after reload, honor native CC off from menus
+  and keyboard, recover delayed track metadata, and restore CC after unrelated
+  player settings changes. Keep keyboard focus when updating subtitle options,
+  and avoid translating YouTube's automatic translations as original captions.
 - Respect conditional and opaque footer sizing, external shadow-part styles,
   closed shadow roots, and hover/focus changes when releasing translation
   layout overrides. Read closed roots through both Chromium and Firefox APIs.
@@ -64,6 +98,16 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Upgrade extension build/test tooling to WXT 0.21, Vite 7, and Vitest 5.
+  Require Node.js 22.12+ on the 22.x line, or supported 24.x / 26+.
+  Keep all 100 DOM mutation scenarios in the restoration regression with an
+  explicit test timeout; browser performance budgets remain unchanged.
+- Wait for installation defaults before seeding browser-test settings, avoiding
+  startup races that could replace the local mock service configuration.
+- Establish the full subtitle prefetch window before checking that appearance
+  changes do not trigger additional translation requests in browser tests.
+- Use `deepseek-flash` as the default model for new extension and server
+  configurations; preserve existing configured model names.
 - Cache screen-reader-only ancestry during each collection slice, invalidating
   it across yields to reduce repeated indexing work without hiding page edits.
 - Update the pinned Go linter to support the project's Go toolchain and newer

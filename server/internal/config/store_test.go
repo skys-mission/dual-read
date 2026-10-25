@@ -77,7 +77,7 @@ func TestUpdateRuntimeKeepsSecrets(t *testing.T) {
     "extra_headers": {}
   },
   "clients": { "enabled": false, "items": [] },
-  "models": { "default": "deepseek-v4-flash", "map": { "flash": "deepseek-v4-flash" } },
+  "models": { "default": "deepseek-flash", "map": { "flash": "deepseek-flash" } },
   "cache": {
     "local": { "enabled": true, "ttl": "10m", "max_mb": 256 },
     "valkey": { "enabled": false, "addr": "127.0.0.1:6379", "password": "", "db": 0, "key_prefix": "dual_read:", "ttl": "24h" }
@@ -407,7 +407,7 @@ func TestUpdateRuntimeUIShapePreservesLimitsAndClientAdvancedFields(t *testing.T
       "models": { "a": "b" }, "upstream_base_url": "https://other.example.com",
       "upstream_api_key": "uk-1" }
   ] },
-  "models": { "default": "deepseek-v4-flash", "map": {} },
+  "models": { "default": "deepseek-flash", "map": {} },
   "cache": { "local": { "enabled": true, "ttl": "10m", "max_mb": 256 }, "valkey": { "enabled": false, "addr": "127.0.0.1:6379", "db": 0, "key_prefix": "dual_read:", "ttl": "24h" } },
   "log": { "level": "info" },
   "admin": { "token": "" },
@@ -427,7 +427,7 @@ func TestUpdateRuntimeUIShapePreservesLimitsAndClientAdvancedFields(t *testing.T
       "models": { "a": "b" }, "upstream_base_url": "https://other.example.com",
       "upstream_api_key": "__KEEP__" }
   ] },
-  "models": { "default": "deepseek-v4-flash", "map": {} },
+  "models": { "default": "deepseek-flash", "map": {} },
   "cache": { "local": { "enabled": true, "ttl": "10m", "max_mb": 256 }, "valkey": { "enabled": false, "addr": "127.0.0.1:6379", "password": "", "db": 0, "key_prefix": "dual_read:", "ttl": "24h" } },
   "log": { "level": "info" },
   "admin": { "token": "" },

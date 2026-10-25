@@ -2,7 +2,7 @@ import type { TranslationUnit, UnitKind } from '../types';
 import {
   A11Y, AUX_NAV, BLOCKS, CHROME, CLS_BLOCK, CLS_ERR, CLS_REPLACE, DONE, EDITABLE,
   HIDE, INLINE_HOST, INLINE_MAX, INTERACTIVE, NAV, NAV_CHROME, NO_TEXT, OURS_SEL, P,
-  PAGE_NAV, PAGE_NAV_EL, SKIP,
+  PAGE_NAV, PAGE_NAV_EL, SKIP, SUBTITLE_EXCLUDED,
 } from '../dom-const';
 import { isCompactControlHost, isEllipsizedTextHost } from '../dom-role';
 import { composedContains, composedParent } from '../dom-tree';
@@ -106,6 +106,7 @@ async function withCollectCacheAsync<T>(fn: () => Promise<T>): Promise<T> {
 export function isOursElement(el: Element | null): boolean {
   if (!el?.classList) return false;
   return (
+    el.matches(SUBTITLE_EXCLUDED) ||
     el.classList.contains(CLS_BLOCK) ||
     el.classList.contains(P_NAV_SUB) ||
     el.classList.contains(P_INLINE) ||

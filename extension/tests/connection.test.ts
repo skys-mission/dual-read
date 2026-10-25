@@ -79,7 +79,7 @@ describe('testConnection', () => {
       connectionMode: 'direct',
       apiBase: 'https://api.deepseek.com',
       apiKey: 'test-key',
-      model: 'deepseek-v4-flash',
+      model: 'deepseek-flash',
       customHeaders: {},
       targetLang: 'zh-CN',
     });

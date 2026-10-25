@@ -182,7 +182,7 @@ func defaultConfig() *Config {
 		},
 		Auth: AuthConfig{Enabled: false},
 		Models: ModelsConfig{
-			Default: "deepseek-v4-flash",
+			Default: "deepseek-flash",
 			Map:     map[string]string{},
 		},
 		Admin: AdminConfig{

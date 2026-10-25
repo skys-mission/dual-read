@@ -30,7 +30,6 @@ interface DualReadGlobal {
 }
 
 declare global {
-  // eslint-disable-next-line no-var
   var __DUAL_READ__: DualReadGlobal | undefined;
 }
 

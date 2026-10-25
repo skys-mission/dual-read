@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>YouTube subtitle integration fixture</title>
+<style>
+body{margin:24px;background:#14171e;color:#f5f7ff;font:16px system-ui}main{max-width:1000px;margin:auto}p{max-width:48rem}
+#movie_player{width:800px;max-width:100%;height:450px;position:relative;background:#24304b;overflow:hidden}#movie_player:fullscreen{width:100%;height:100%}#movie_player.theater{width:1000px;height:560px}
+video{width:100%;height:100%;object-fit:cover}.ytp-right-controls{position:absolute;bottom:0;right:8px;height:40px;display:flex;align-items:stretch;z-index:60}button{cursor:pointer;background:#1e293b;color:white;border:1px solid #64748b;padding:8px}
+.ytp-caption-window-container{position:absolute;bottom:60px;left:8%;right:8%;text-align:center;pointer-events:none}.ytp-caption-segment{background:#111b;padding:3px}.ytp-settings-menu{position:absolute;top:8px;right:8px}
+.fixture-controls{margin:12px 0;display:flex;gap:8px;flex-wrap:wrap}
+</style></head><body><main>
+<h1>Dual Read · Subtitle playback lab</h1>
+<div id="movie_player">
+  <video muted preload="auto" src="/fixture.webm"></video>
+  <div class="ytp-caption-window-container"><span class="ytp-caption-segment">Native caption retained by the page</span></div>
+  <div class="ytp-right-controls"><button class="ytp-subtitles-button" aria-label="Native CC" aria-pressed="false">CC</button><button id="theater">Theater</button><button id="fullscreen">Fullscreen</button></div>
+  <div class="ytp-settings-menu"><button class="ytp-menuitem" id="manual">English</button><button class="ytp-menuitem" id="asr">English (auto-generated)</button></div>
+</div>
+<div class="fixture-controls"><button id="next-video">Next video</button><button id="ad">Toggle ad</button><button id="replace-player">Replace player</button></div>
+<p id="article">This page paragraph can be translated independently of the video captions.</p>
+<p id="page-edit">A page-owned editable note.</p>
+<script nonce="subtitle-fixture">
+(() => {
+  let videoId = new URL(location.href).searchParams.get('v');
+  let kind = 'manual';
+  let p = document.querySelector('#movie_player');
+  const track = type => ({vssId:type === 'asr' ? 'a.en' : '.en',languageCode:'en',...(type === 'asr' ? {kind:'asr'} : {}),baseUrl:`https://www.youtube.com/api/timedtext?v=${videoId}&lang=en${type === 'asr' ? '&kind=asr' : ''}&fmt=json3`});
+  function wire() {
+    const cc = p.querySelector('.ytp-subtitles-button');
+    const video = p.querySelector('video');
+    video.muted = true;
+    p.getPlayerResponse = () => ({videoDetails:{videoId},captions:{playerCaptionsTracklistRenderer:{captionTracks:window.noTracks ? [] : [track('manual'),track('asr')]}}});
+    p.getVideoData = () => ({video_id:videoId});
+    p.getOption = () => cc.getAttribute('aria-pressed') === 'true' ? {...track(kind),vss_id:track(kind).vssId} : {};
+    cc.onclick = () => {
+      const on = cc.getAttribute('aria-pressed') !== 'true'; cc.setAttribute('aria-pressed',String(on));
+      if(on) { const xhr = new XMLHttpRequest(); xhr.open('GET',track(kind).baseUrl+(window.requiresObservedUrl ? '&observed=1' : '')); xhr.send(); }
+    };
+    p.querySelector('#manual').onclick = () => { kind='manual'; if(cc.getAttribute('aria-pressed')==='true')fetch(track(kind).baseUrl); };
+    p.querySelector('#asr').onclick = () => { kind='asr'; if(cc.getAttribute('aria-pressed')==='true')fetch(track(kind).baseUrl); };
+    p.querySelector('#fullscreen').onclick = () => p.requestFullscreen();
+    p.querySelector('#theater').onclick = () => p.classList.toggle('theater');
+  }
+  wire();
+  document.querySelector('#next-video').onclick = () => {
+    document.dispatchEvent(new Event('yt-navigate-start'));
+    videoId = videoId === 'aaaaaaaaaaa' ? 'bbbbbbbbbbb' : 'aaaaaaaaaaa';
+    history.pushState({},'',`/watch?v=${videoId}`);
+    p.querySelector('video').currentTime=0;
+    document.dispatchEvent(new Event('yt-navigate-finish'));
+  };
+  document.querySelector('#ad').onclick = () => { p.classList.toggle('ad-showing'); };
+  document.querySelector('#replace-player').onclick = () => {
+    const next = p.cloneNode(true); p.replaceWith(next); p=next;
+    p.querySelectorAll('[data-dual-read-subtitle-ui]').forEach(node=>node.remove());
+    p.removeAttribute('data-dual-read-subtitle-source'); wire();
+  };
+  window.fixtureNativeNode = p.querySelector('.ytp-caption-segment');
+})();
+</script></main></body></html>

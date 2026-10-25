@@ -4,7 +4,9 @@ import { buildSettingsExport, prepareSettingsImport } from '../lib/settings/tran
 
 function settings(): Settings {
   return {
-    schemaVersion: 4,
+    schemaVersion: 5,
+    subtitles: { targetLang: null, textSize: 'medium', position: 'bottom' },
+    youtubeAuto: false,
     connectionMode: 'direct',
     apiBase: 'https://api.example.com/v1',
     apiKey: 'private-key',

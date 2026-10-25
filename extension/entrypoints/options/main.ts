@@ -2,6 +2,7 @@ import type {
   ConnectionMode, Settings, SiteRule, TargetLang, TranslationMode, UiLocale,
 } from '../../lib/types';
 import { getSettings, isApiKeyPersisted, saveSettings } from '../../lib/settings/storage';
+import { setSubtitleAuto, subtitlePreferencesForm } from '../../lib/subtitles/preferences-ui';
 import {
   MAX_BATCH_SIZE, MAX_CONCURRENT_BATCHES, SettingsValidationError, assertSecureApiBase,
   createDefaultSettings, normalizeCustomHeaders, normalizeSiteHost, normalizeTargetLang,
@@ -416,7 +417,23 @@ function applyConnectionModeDefaults(mode: ConnectionMode): void {
   refreshDirty();
 }
 
+function renderSubtitlePreferences(settings: Settings): void {
+  document.getElementById('subtitlePreferences')?.replaceChildren(subtitlePreferencesForm({
+    sessionId: 'preferences', revision: settings.revision, targetLang: settings.subtitles.targetLang ?? settings.targetLang,
+    uiLocale: settings.uiLocale, mode: 'bilingual', maxConcurrent: settings.maxConcurrent, batchSize: settings.batchSize,
+    providerFingerprint: '', disabled: false, preferences: settings.subtitles, youtubeAuto: settings.youtubeAuto,
+  }, {
+    change: async subtitles => { await saveSettings({ subtitles }); },
+    auto: setSubtitleAuto,
+  }));
+}
+
 async function loadSettings(settings: Settings): Promise<void> {
+  renderSubtitlePreferences(settings);
+  if (location.hash === '#subtitleSettings') {
+    const subtitles = document.getElementById('subtitleSettings') as HTMLDetailsElement | null;
+    if (subtitles) { subtitles.open = true; subtitles.scrollIntoView({ block: 'center' }); }
+  }
   for (const field of fields) {
     const el = document.getElementById(field) as HTMLInputElement | HTMLSelectElement | null;
     if (!el) continue;
@@ -729,6 +746,7 @@ document.addEventListener('DOMContentLoaded', () => {
   (document.getElementById('uiLocale') as HTMLSelectElement | null)?.addEventListener('change', async (e) => {
     uiLocale = normalizeUiLocale((e.target as HTMLSelectElement).value);
     await localizePage(uiLocale);
+    renderSubtitlePreferences({ ...await getSettings(), uiLocale });
     updateConnectionModeHints(
       (document.getElementById('connectionMode') as HTMLSelectElement).value as ConnectionMode,
     );

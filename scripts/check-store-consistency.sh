@@ -32,12 +32,19 @@ grep -q "https://\*/" "${WXT}" || fail "wxt.config.ts must allow optional https:
 grep -q "strict_min_version: '140.0'" "${WXT}" || fail "Firefox strict_min_version must be 140.0"
 grep -q "websiteContent" "${WXT}" || fail "gecko data_collection_permissions must declare websiteContent"
 
-# Install-time host_permissions should stay loopback-only (no https://* or http://*).
-HOST_BLOCK="$(awk '/host_permissions:/{flag=1} flag{print; if (/\]/) exit}' "${WXT}")"
-echo "${HOST_BLOCK}" | grep -q 'localhost' || fail "host_permissions should include localhost"
-if echo "${HOST_BLOCK}" | grep -E "https://\*/\*|http://\*/\*" >/dev/null; then
-  fail "install-time host_permissions must not include https://*/ or http://*"
-fi
+# Required access is limited to loopback and the YouTube player entry point.
+# Parse quoted strings so the IPv6 literal's closing bracket cannot hide later hosts.
+node - "${WXT}" <<'NODE' || fail "host_permissions must contain only loopback and YouTube"
+const fs = require('node:fs');
+const source = fs.readFileSync(process.argv[2], 'utf8');
+const block = source.match(/^\s*host_permissions:\s*\[((?:'[^']*'|[^\]'])*)\]/m);
+if (!block) throw new Error('host_permissions array not found');
+const hosts = [...block[1].matchAll(/'([^']+)'/g)].map(match => match[1]).sort();
+const expected = ['http://localhost/*', 'http://127.0.0.1/*', 'http://[::1]/*', 'https://www.youtube.com/*'].sort();
+if (JSON.stringify(hosts) !== JSON.stringify(expected)) {
+  throw new Error(`Unexpected install-time hosts: ${JSON.stringify(hosts)}`);
+}
+NODE
 
 EN_DESC="$(node -e "const m=require('${EXT_DIR}/public/_locales/en/messages.json'); process.stdout.write(m.extDescription.message)")"
 echo "${EN_DESC}" | grep -qi 'translat' || fail "en extDescription should mention translation"

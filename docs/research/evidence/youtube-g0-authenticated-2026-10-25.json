@@ -1,0 +1,314 @@
+{
+  "date": "2026-10-25T01:45:39.212Z",
+  "browser": "Codex in-app Chromium browser",
+  "authenticated": true,
+  "videoId": "M7lc1UVf-VE",
+  "muted": true,
+  "observations": [
+    {
+      "kind": "asr",
+      "via": "native-response-cdp",
+      "status": 200,
+      "bytes": 429168,
+      "eventCount": 1144,
+      "timedTextEventCount": 572,
+      "wordOffsetCount": 3497,
+      "firstStartMs": 0,
+      "lastStartMs": 1342600
+    },
+    {
+      "stage": "asr-midplay-cc-on",
+      "status": "ready",
+      "videoId": "M7lc1UVf-VE",
+      "trackId": "a.en",
+      "sourceLanguage": "en",
+      "tracks": [
+        {
+          "id": ".en",
+          "kind": "manual",
+          "language": "en"
+        },
+        {
+          "id": "a.en",
+          "kind": "asr",
+          "language": "en"
+        }
+      ],
+      "observations": [
+        {
+          "bytes": 429168,
+          "outcome": "json3",
+          "status": 200,
+          "via": "replay"
+        }
+      ],
+      "cc": {
+        "enabledByProbe": false,
+        "externalChange": false,
+        "final": "true",
+        "initial": "true",
+        "restored": false
+      },
+      "elapsedMs": 1283,
+      "eventCount": 1144,
+      "textEventCount": 572,
+      "wordOffsetCount": 3497
+    },
+    {
+      "stage": "manual-midplay-cc-on",
+      "status": "ready",
+      "videoId": "M7lc1UVf-VE",
+      "trackId": ".en",
+      "sourceLanguage": "en",
+      "tracks": [
+        {
+          "id": ".en",
+          "kind": "manual",
+          "language": "en"
+        },
+        {
+          "id": "a.en",
+          "kind": "asr",
+          "language": "en"
+        }
+      ],
+      "observations": [
+        {
+          "bytes": 65976,
+          "outcome": "json3",
+          "status": 200,
+          "via": "replay"
+        }
+      ],
+      "cc": {
+        "enabledByProbe": false,
+        "externalChange": false,
+        "final": "true",
+        "initial": "true",
+        "restored": false
+      },
+      "elapsedMs": 1226,
+      "eventCount": 466,
+      "textEventCount": 466,
+      "wordOffsetCount": 0
+    },
+    {
+      "stage": "manual-cc-off-restoration",
+      "status": "ready",
+      "videoId": "M7lc1UVf-VE",
+      "trackId": ".en",
+      "sourceLanguage": "en",
+      "tracks": [
+        {
+          "id": ".en",
+          "kind": "manual",
+          "language": "en"
+        },
+        {
+          "id": "a.en",
+          "kind": "asr",
+          "language": "en"
+        }
+      ],
+      "observations": [
+        {
+          "bytes": 65976,
+          "outcome": "json3",
+          "status": 200,
+          "via": "player"
+        }
+      ],
+      "cc": {
+        "enabledByProbe": true,
+        "externalChange": false,
+        "final": "false",
+        "initial": "false",
+        "restored": true
+      },
+      "elapsedMs": 269,
+      "eventCount": 466,
+      "textEventCount": 466,
+      "wordOffsetCount": 0
+    },
+    {
+      "stage": "asr-cc-off-restoration",
+      "status": "ready",
+      "videoId": "M7lc1UVf-VE",
+      "trackId": "a.en",
+      "sourceLanguage": "en",
+      "tracks": [
+        {
+          "id": ".en",
+          "kind": "manual",
+          "language": "en"
+        },
+        {
+          "id": "a.en",
+          "kind": "asr",
+          "language": "en"
+        }
+      ],
+      "observations": [
+        {
+          "bytes": 429168,
+          "outcome": "json3",
+          "status": 200,
+          "via": "player"
+        }
+      ],
+      "cc": {
+        "enabledByProbe": true,
+        "externalChange": false,
+        "final": "false",
+        "initial": "false",
+        "restored": true
+      },
+      "elapsedMs": 318,
+      "eventCount": 1144,
+      "textEventCount": 572,
+      "wordOffsetCount": 3497
+    },
+    {
+      "stage": "spa-selected-track",
+      "status": "ready",
+      "videoId": "M6mYodf0dJM",
+      "trackId": "a.en",
+      "sourceLanguage": "en",
+      "tracks": [
+        {
+          "id": "a.ar",
+          "kind": "asr",
+          "language": "ar"
+        },
+        {
+          "id": "a.pl",
+          "kind": "asr",
+          "language": "pl"
+        },
+        {
+          "id": "a.de-DE",
+          "kind": "asr",
+          "language": "de-DE"
+        },
+        {
+          "id": "a.ru",
+          "kind": "asr",
+          "language": "ru"
+        },
+        {
+          "id": "a.fr-FR",
+          "kind": "asr",
+          "language": "fr-FR"
+        },
+        {
+          "id": "a.ko",
+          "kind": "asr",
+          "language": "ko"
+        },
+        {
+          "id": "a.nl-NL",
+          "kind": "asr",
+          "language": "nl-NL"
+        },
+        {
+          "id": "a.ml",
+          "kind": "asr",
+          "language": "ml"
+        },
+        {
+          "id": "a.bn",
+          "kind": "asr",
+          "language": "bn"
+        },
+        {
+          "id": "a.pt-BR",
+          "kind": "asr",
+          "language": "pt-BR"
+        },
+        {
+          "id": "a.ja",
+          "kind": "asr",
+          "language": "ja"
+        },
+        {
+          "id": "a.uk",
+          "kind": "asr",
+          "language": "uk"
+        },
+        {
+          "id": "a.es-US",
+          "kind": "asr",
+          "language": "es-US"
+        },
+        {
+          "id": "a.iw",
+          "kind": "asr",
+          "language": "iw"
+        },
+        {
+          "id": "a.it",
+          "kind": "asr",
+          "language": "it"
+        },
+        {
+          "id": "a.hi",
+          "kind": "asr",
+          "language": "hi"
+        },
+        {
+          "id": "a.id",
+          "kind": "asr",
+          "language": "id"
+        },
+        {
+          "id": "a.en",
+          "kind": "asr",
+          "language": "en"
+        }
+      ],
+      "observations": [
+        {
+          "bytes": 306251,
+          "outcome": "json3",
+          "status": 200,
+          "via": "replay"
+        }
+      ],
+      "cc": {
+        "enabledByProbe": false,
+        "externalChange": false,
+        "final": "true",
+        "initial": "true",
+        "restored": false
+      },
+      "elapsedMs": 1311,
+      "eventCount": 1010,
+      "textEventCount": 505,
+      "wordOffsetCount": 3210
+    },
+    {
+      "stage": "reject-previous-video-after-spa",
+      "status": "unsupported",
+      "videoId": "M7lc1UVf-VE",
+      "tracks": [],
+      "observations": [],
+      "cc": {
+        "enabledByProbe": false,
+        "externalChange": false,
+        "final": "unknown",
+        "initial": "unknown",
+        "restored": false
+      },
+      "elapsedMs": 0,
+      "eventCount": 0,
+      "textEventCount": 0,
+      "wordOffsetCount": 0
+    }
+  ],
+  "sameDocumentNavigation": true,
+  "adapterSha256": "c0b79ca2b482ada44fb1a5aaab765d38cbad6f9bcd186e6655e4ed0c0eabd380",
+  "execution": "Same G0 probe compiled without runtime dependencies, evaluated in current page MAIN context via CUA CDP. Real extension bridge tested separately in both engines.",
+  "productionActiveTabVerified": false,
+  "modelRequests": 0,
+  "credentialExported": false
+}

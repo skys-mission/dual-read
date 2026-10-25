@@ -2,6 +2,7 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { watchLayoutUpdates } from '../lib/renderer/layout-updates';
 
+// Frames are advanced explicitly by flushFrame; fake timers only drive the clocks.
 let frames: Map<number, FrameRequestCallback>;
 let sequence: number;
 const subscriptions: ReturnType<typeof watchLayoutUpdates>[] = [];
@@ -79,7 +80,7 @@ it.each(['host', 'slotted', 'descendant'] as const)('observes author shadow styl
 });
 
 it.each(['host', 'slotted'] as const)('detects CSSOM-only edits to the %s source shadow sheet', async scope => {
-  vi.useFakeTimers();
+  vi.useFakeTimers({ toNotFake: ['requestAnimationFrame', 'cancelAnimationFrame'] });
   const host = document.createElement('size-widget');
   const source = document.getElementById('source')!;
   document.body.append(host); host.append(source);
@@ -142,7 +143,7 @@ it('keeps interactions on a companion that can change source ancestor pseudo-cla
 });
 
 it.each(['chromium', 'firefox'] as const)('watches closed-root CSSOM inputs using the %s extension API', async browser => {
-  vi.useFakeTimers();
+  vi.useFakeTimers({ toNotFake: ['requestAnimationFrame', 'cancelAnimationFrame'] });
   const host = document.createElement('div'); document.body.append(host);
   const source = document.getElementById('source')!; host.append(source);
   const root = host.attachShadow({mode:'closed'}); root.innerHTML = '<slot></slot>';
@@ -230,7 +231,7 @@ it('an owned continuation wakes only its reader and disposal cancels deferred wo
 });
 
 it('checks opted-in source policies without a global reflow and cancels on disposal', async () => {
-  vi.useFakeTimers();
+  vi.useFakeTimers({ toNotFake: ['requestAnimationFrame', 'cancelAnimationFrame'] });
   const ordinary = vi.fn(), policy = vi.fn();
   subscribe(ordinary);
   await vi.advanceTimersByTimeAsync(3000); flushFrame();
@@ -246,7 +247,7 @@ it('checks opted-in source policies without a global reflow and cancels on dispo
 });
 
 it('retains a policy check across read-budget deferral and merges page changes', async () => {
-  vi.useFakeTimers();
+  vi.useFakeTimers({ toNotFake: ['requestAnimationFrame', 'cancelAnimationFrame'] });
   let time = 0;
   vi.spyOn(performance, 'now').mockImplementation(() => time);
   const first = vi.fn(() => { time += 30; return undefined; }), second = vi.fn();
@@ -259,7 +260,7 @@ it('retains a policy check across read-budget deferral and merges page changes',
 });
 
 it('suspends policy checks in the background and checks on visibility return', async () => {
-  vi.useFakeTimers();
+  vi.useFakeTimers({ toNotFake: ['requestAnimationFrame', 'cancelAnimationFrame'] });
   const visibility = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
   const read = vi.fn(); const subscription = subscribe(read, true);
   await vi.advanceTimersByTimeAsync(3000); flushFrame();
@@ -273,7 +274,7 @@ it('suspends policy checks in the background and checks on visibility return', a
 });
 
 it('skips unchanged stylesheets and detects CSSOM declaration and grouping-rule edits', async () => {
-  vi.useFakeTimers();
+  vi.useFakeTimers({ toNotFake: ['requestAnimationFrame', 'cancelAnimationFrame'] });
   const sheet = authorSheet('#source{height:80px}@media screen{#source{max-height:100px}}');
   const read = vi.fn(); subscribe(read, true);
   await vi.advanceTimersByTimeAsync(1000); drainFrames();
@@ -289,7 +290,7 @@ it('skips unchanged stylesheets and detects CSSOM declaration and grouping-rule 
 });
 
 it('ignores owned stylesheet changes but detects author sheet disablement and insertion', async () => {
-  vi.useFakeTimers();
+  vi.useFakeTimers({ toNotFake: ['requestAnimationFrame', 'cancelAnimationFrame'] });
   const sheet = authorSheet('#source{height:80px}'), owned = authorSheet('#source{min-height:90px}');
   (owned.ownerNode as Element).setAttribute('data-dual-read-layout-style', 'true');
   const read = vi.fn(); subscribe(read, true);
@@ -303,7 +304,7 @@ it('ignores owned stylesheet changes but detects author sheet disablement and in
 });
 
 it('yields during large stylesheet scans and cancels the unfinished scan on disposal', async () => {
-  vi.useFakeTimers();
+  vi.useFakeTimers({ toNotFake: ['requestAnimationFrame', 'cancelAnimationFrame'] });
   authorSheet(Array.from({ length: 1000 }, (_, i) => `.rule-${i}{height:80px}`).join(''));
   const read = vi.fn(); const subscription = subscribe(read, true);
   await vi.advanceTimersByTimeAsync(1000); flushFrame();
@@ -315,7 +316,7 @@ it('yields during large stylesheet scans and cancels the unfinished scan on disp
 });
 
 it('merges a CSSOM signal into an already queued local continuation', async () => {
-  vi.useFakeTimers();
+  vi.useFakeTimers({ toNotFake: ['requestAnimationFrame', 'cancelAnimationFrame'] });
   const read = vi.fn(); const subscription = subscribe(read, true);
   await vi.advanceTimersByTimeAsync(1000);
   subscription.refresh(false);

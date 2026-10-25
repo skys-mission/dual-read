@@ -1,7 +1,9 @@
-import type { BrowserContext, Page, Worker } from '@playwright/test';
+import { expect, type BrowserContext, type Page, type Worker } from '@playwright/test';
 import { buildPublicSessionConfig } from '../../lib/settings/session-config';
 import { parseSettings } from '../../lib/settings/schema';
 import { hostOf } from '../../lib/settings/storage';
+
+const initializedContexts = new WeakSet<BrowserContext>();
 
 export interface E2ESettings {
   apiBase: string;
@@ -65,6 +67,15 @@ export async function seedSettings(
   try {
     await page.goto(`chrome-extension://${extensionId}/popup.html`);
     await page.waitForSelector('#primaryBtn', { timeout: 15_000 });
+    if (!initializedContexts.has(context)) {
+      // Fresh profiles open onboarding only after onInstalled has saved its
+      // defaults. A live worker/popup alone does not fence those async writes.
+      await expect.poll(() => context.pages().some(p => p.url() === `chrome-extension://${extensionId}/onboarding.html`), {
+        message: 'extension installation must finish before seeding settings',
+        timeout: 15_000,
+      }).toBe(true);
+      initializedContexts.add(context);
+    }
     const written = await page.evaluate(async (s) => {
       await chrome.storage.local.set({
         apiKey: s.apiKey ?? 'e2e-test-key',

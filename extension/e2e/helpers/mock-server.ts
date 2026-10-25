@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const PAGES_DIR = path.resolve(dirname, '../fixtures/pages');
 
-export type MockMode = 'ok' | 'auth_fail' | 'malformed' | 'xss';
+export type MockMode = 'ok' | 'auth_fail' | 'malformed' | 'xss' | 'rate_limit';
 
 export type TranslateFn = (source: string) => string;
 
@@ -50,6 +50,7 @@ export interface MockServer {
   setResponseDelay(ms: number): void;
   getRequestCount(): number;
   getSystemPrompts(): string[];
+  getSubtitleRequests(): { id: string; text: string; context: string }[][];
   close(): Promise<void>;
 }
 
@@ -67,6 +68,7 @@ export async function startMockServer(): Promise<MockServer> {
   let responseDelayMs = 0;
   let requestCount = 0;
   const systemPrompts: string[] = [];
+  const subtitleRequests: { id: string; text: string; context: string }[][] = [];
 
   const server = http.createServer((req, res) => {
     const url = new URL(req.url || '/', 'http://127.0.0.1');
@@ -101,6 +103,7 @@ export async function startMockServer(): Promise<MockServer> {
       req.on('data', (c) => chunks.push(c));
       req.on('end', () => {
         const respond = () => {
+          if (mode === 'rate_limit') { res.writeHead(429); res.end('rate limited'); return; }
           if (mode === 'auth_fail') {
             res.writeHead(401, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: { message: 'invalid api key' } }));
@@ -124,6 +127,16 @@ export async function startMockServer(): Promise<MockServer> {
             res.end(JSON.stringify({
               choices: [{ message: { content: 'not-json-and-not-aligned' } }],
             }));
+            return;
+          }
+
+          if (Array.isArray(indexed.items)) {
+            const items = indexed.items as unknown as { id: string; text: string; context: string }[];
+            subtitleRequests.push(items);
+            const translations = items.map(item => ({ id: item.id, text: mode === 'xss'
+              ? `<img src=x onerror="window.__xss=1">${item.text}` : translate(item.text) }));
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ translations }) } }] }));
             return;
           }
 
@@ -177,6 +190,7 @@ export async function startMockServer(): Promise<MockServer> {
     });
 
   return {
+    getSubtitleRequests: () => subtitleRequests,
     apiBase: `${origin}/v1`,
     origin,
     barrierOrigin,

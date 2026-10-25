@@ -5,6 +5,8 @@ import { extractRichSlots } from '../lib/collector';
 
 // Fixed seed covers different original/current nesting, transfers, wrappers,
 // removals and text appends. Snapshot page positions before restoring source.
+// All 100 cases take ~7s on CI. Vitest 5 enforces synchronous timeouts too;
+// budget this correctness test separately from the browser performance gates.
 it('preserves original nodes and text after 100 combinations of page tree edits', () => {
   let seed = 47391;
   const pick = (n: number) => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed % n; };
@@ -60,4 +62,4 @@ it('preserves original nodes and text after 100 combinations of page tree edits'
     hosts.forEach((host, i) => check(host, expected[i]));
   }
   document.body.innerHTML = '';
-});
+}, 20_000);

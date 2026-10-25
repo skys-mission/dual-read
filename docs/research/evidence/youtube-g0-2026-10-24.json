@@ -1,0 +1,757 @@
+{
+  "timestamp": "2026-10-24T12:51:48.256Z",
+  "headless": false,
+  "authenticated": false,
+  "fixture": false,
+  "bridge": "real MV3 addon; isolated/background/MAIN; diagnostic YouTube host grant",
+  "adapterSha256": "c0b79ca2b482ada44fb1a5aaab765d38cbad6f9bcd186e6655e4ed0c0eabd380",
+  "productionActiveTabVerified": false,
+  "modelRequests": 0,
+  "results": [
+    {
+      "browser": "chromium",
+      "version": "153.0.8010.12",
+      "stage": "manual-cc-off",
+      "before": {
+        "videoId": "M7lc1UVf-VE",
+        "mediaTime": 2.420149,
+        "mediaReadyState": 4,
+        "paused": false,
+        "adShowing": false,
+        "cc": "false",
+        "selectedTrack": {
+          "id": null,
+          "language": null,
+          "kind": null
+        },
+        "nativeTextCharacters": 0
+      },
+      "after": {
+        "videoId": "M7lc1UVf-VE",
+        "mediaTime": 6.438568,
+        "mediaReadyState": 4,
+        "paused": false,
+        "adShowing": false,
+        "cc": "false",
+        "selectedTrack": {
+          "id": null,
+          "language": null,
+          "kind": null
+        },
+        "nativeTextCharacters": 0
+      },
+      "expectedKind": "manual",
+      "actualKind": "manual",
+      "expectedCC": "false",
+      "preconditionsMet": true,
+      "cc": {
+        "enabledByProbe": true,
+        "externalChange": false,
+        "final": "false",
+        "initial": "false",
+        "restored": true
+      },
+      "elapsedMs": 4003,
+      "observations": [
+        {
+          "bytes": 0,
+          "outcome": "empty",
+          "status": 200,
+          "via": "player"
+        },
+        {
+          "bytes": 0,
+          "outcome": "empty",
+          "status": 200,
+          "via": "replay"
+        }
+      ],
+      "reason": "empty-caption-body",
+      "sourceLanguage": "en",
+      "status": "unavailable",
+      "trackId": ".en",
+      "tracks": [
+        {
+          "id": ".en",
+          "kind": "manual",
+          "language": "en"
+        },
+        {
+          "id": "a.en",
+          "kind": "asr",
+          "language": "en"
+        }
+      ],
+      "videoId": "M7lc1UVf-VE",
+      "isolated": true,
+      "eventCount": 0,
+      "textEventCount": 0,
+      "firstStartMs": null,
+      "lastStartMs": null,
+      "wordOffsetCount": 0
+    },
+    {
+      "browser": "chromium",
+      "version": "153.0.8010.12",
+      "stage": "manual-midplay-cc-on",
+      "before": {
+        "videoId": "M7lc1UVf-VE",
+        "mediaTime": 6.856907,
+        "mediaReadyState": 4,
+        "paused": false,
+        "adShowing": false,
+        "cc": "true",
+        "selectedTrack": {
+          "id": ".en",
+          "language": "en",
+          "kind": ""
+        },
+        "nativeTextCharacters": 0
+      },
+      "after": {
+        "videoId": "M7lc1UVf-VE",
+        "mediaTime": 10.861732,
+        "mediaReadyState": 4,
+        "paused": false,
+        "adShowing": false,
+        "cc": "true",
+        "selectedTrack": {
+          "id": ".en",
+          "language": "en",
+          "kind": ""
+        },
+        "nativeTextCharacters": 0
+      },
+      "expectedKind": "manual",
+      "actualKind": "manual",
+      "expectedCC": "true",
+      "preconditionsMet": true,
+      "cc": {
+        "enabledByProbe": false,
+        "externalChange": false,
+        "final": "true",
+        "initial": "true",
+        "restored": false
+      },
+      "elapsedMs": 4002,
+      "observations": [
+        {
+          "bytes": 0,
+          "outcome": "empty",
+          "status": 200,
+          "via": "replay"
+        }
+      ],
+      "reason": "empty-caption-body",
+      "sourceLanguage": "en",
+      "status": "unavailable",
+      "trackId": ".en",
+      "tracks": [
+        {
+          "id": ".en",
+          "kind": "manual",
+          "language": "en"
+        },
+        {
+          "id": "a.en",
+          "kind": "asr",
+          "language": "en"
+        }
+      ],
+      "videoId": "M7lc1UVf-VE",
+      "isolated": true,
+      "eventCount": 0,
+      "textEventCount": 0,
+      "firstStartMs": null,
+      "lastStartMs": null,
+      "wordOffsetCount": 0
+    },
+    {
+      "browser": "chromium",
+      "version": "153.0.8010.12",
+      "stage": "asr-cc-off",
+      "before": {
+        "videoId": "M7lc1UVf-VE",
+        "mediaTime": 11.270791,
+        "mediaReadyState": 4,
+        "paused": false,
+        "adShowing": false,
+        "cc": "false",
+        "selectedTrack": {
+          "id": null,
+          "language": null,
+          "kind": null
+        },
+        "nativeTextCharacters": 0
+      },
+      "after": {
+        "videoId": "M7lc1UVf-VE",
+        "mediaTime": 15.279561,
+        "mediaReadyState": 4,
+        "paused": false,
+        "adShowing": false,
+        "cc": "false",
+        "selectedTrack": {
+          "id": null,
+          "language": null,
+          "kind": null
+        },
+        "nativeTextCharacters": 0
+      },
+      "expectedKind": "asr",
+      "actualKind": "manual",
+      "expectedCC": "false",
+      "preconditionsMet": true,
+      "cc": {
+        "enabledByProbe": true,
+        "externalChange": false,
+        "final": "false",
+        "initial": "false",
+        "restored": true
+      },
+      "elapsedMs": 4003,
+      "observations": [
+        {
+          "bytes": 0,
+          "outcome": "empty",
+          "status": 200,
+          "via": "player"
+        },
+        {
+          "bytes": 0,
+          "outcome": "empty",
+          "status": 200,
+          "via": "replay"
+        }
+      ],
+      "reason": "empty-caption-body",
+      "sourceLanguage": "en",
+      "status": "unavailable",
+      "trackId": ".en",
+      "tracks": [
+        {
+          "id": ".en",
+          "kind": "manual",
+          "language": "en"
+        },
+        {
+          "id": "a.en",
+          "kind": "asr",
+          "language": "en"
+        }
+      ],
+      "videoId": "M7lc1UVf-VE",
+      "isolated": true,
+      "eventCount": 0,
+      "textEventCount": 0,
+      "firstStartMs": null,
+      "lastStartMs": null,
+      "wordOffsetCount": 0
+    },
+    {
+      "browser": "chromium",
+      "version": "153.0.8010.12",
+      "stage": "asr-midplay-cc-on",
+      "before": {
+        "videoId": "M7lc1UVf-VE",
+        "mediaTime": 15.686298,
+        "mediaReadyState": 4,
+        "paused": false,
+        "adShowing": false,
+        "cc": "true",
+        "selectedTrack": {
+          "id": ".en",
+          "language": "en",
+          "kind": ""
+        },
+        "nativeTextCharacters": 0
+      },
+      "after": {
+        "videoId": "M7lc1UVf-VE",
+        "mediaTime": 19.689938,
+        "mediaReadyState": 4,
+        "paused": false,
+        "adShowing": false,
+        "cc": "true",
+        "selectedTrack": {
+          "id": ".en",
+          "language": "en",
+          "kind": ""
+        },
+        "nativeTextCharacters": 0
+      },
+      "expectedKind": "asr",
+      "actualKind": "manual",
+      "expectedCC": "true",
+      "preconditionsMet": true,
+      "cc": {
+        "enabledByProbe": false,
+        "externalChange": false,
+        "final": "true",
+        "initial": "true",
+        "restored": false
+      },
+      "elapsedMs": 4001,
+      "observations": [
+        {
+          "bytes": 0,
+          "outcome": "network",
+          "status": 0,
+          "via": "replay"
+        }
+      ],
+      "reason": "caption-source-unavailable",
+      "sourceLanguage": "en",
+      "status": "unavailable",
+      "trackId": ".en",
+      "tracks": [
+        {
+          "id": ".en",
+          "kind": "manual",
+          "language": "en"
+        },
+        {
+          "id": "a.en",
+          "kind": "asr",
+          "language": "en"
+        }
+      ],
+      "videoId": "M7lc1UVf-VE",
+      "isolated": true,
+      "eventCount": 0,
+      "textEventCount": 0,
+      "firstStartMs": null,
+      "lastStartMs": null,
+      "wordOffsetCount": 0
+    },
+    {
+      "browser": "chromium",
+      "version": "153.0.8010.12",
+      "stage": "spa-selected-track",
+      "before": {
+        "videoId": "lL47NCfqk3E",
+        "mediaTime": 0,
+        "mediaReadyState": 0,
+        "paused": false,
+        "adShowing": true,
+        "cc": "false",
+        "selectedTrack": {
+          "id": null,
+          "language": null,
+          "kind": null
+        },
+        "nativeTextCharacters": 0
+      },
+      "after": {
+        "videoId": "lL47NCfqk3E",
+        "mediaTime": 0,
+        "mediaReadyState": 0,
+        "paused": false,
+        "adShowing": true,
+        "cc": "false",
+        "selectedTrack": {
+          "id": null,
+          "language": null,
+          "kind": null
+        },
+        "nativeTextCharacters": 0
+      },
+      "expectedKind": null,
+      "actualKind": null,
+      "expectedCC": null,
+      "preconditionsMet": true,
+      "cc": {
+        "enabledByProbe": false,
+        "externalChange": false,
+        "final": "unknown",
+        "initial": "unknown",
+        "restored": false
+      },
+      "elapsedMs": 0,
+      "observations": [],
+      "reason": "ad-playing",
+      "status": "unavailable",
+      "tracks": [],
+      "videoId": "lL47NCfqk3E",
+      "isolated": true,
+      "eventCount": 0,
+      "textEventCount": 0,
+      "firstStartMs": null,
+      "lastStartMs": null,
+      "wordOffsetCount": 0
+    },
+    {
+      "browser": "firefox",
+      "version": "155.0",
+      "stage": "manual-cc-off",
+      "before": {
+        "videoId": "M7lc1UVf-VE",
+        "mediaTime": 2.41125,
+        "mediaReadyState": 4,
+        "paused": false,
+        "adShowing": false,
+        "cc": "false",
+        "selectedTrack": {
+          "id": null,
+          "language": null,
+          "kind": null
+        },
+        "nativeTextCharacters": 0
+      },
+      "after": {
+        "videoId": "M7lc1UVf-VE",
+        "mediaTime": 6.419416,
+        "mediaReadyState": 4,
+        "paused": false,
+        "adShowing": false,
+        "cc": "false",
+        "selectedTrack": {
+          "id": null,
+          "language": null,
+          "kind": null
+        },
+        "nativeTextCharacters": 0
+      },
+      "expectedKind": "manual",
+      "actualKind": "manual",
+      "expectedCC": "false",
+      "preconditionsMet": true,
+      "status": "unavailable",
+      "videoId": "M7lc1UVf-VE",
+      "tracks": [
+        {
+          "id": ".en",
+          "language": "en",
+          "kind": "manual"
+        },
+        {
+          "id": "a.en",
+          "language": "en",
+          "kind": "asr"
+        }
+      ],
+      "observations": [
+        {
+          "via": "player",
+          "status": 200,
+          "bytes": 0,
+          "outcome": "empty"
+        },
+        {
+          "via": "replay",
+          "status": 0,
+          "bytes": 0,
+          "outcome": "network"
+        }
+      ],
+      "cc": {
+        "initial": "false",
+        "final": "false",
+        "enabledByProbe": true,
+        "restored": true,
+        "externalChange": false
+      },
+      "elapsedMs": 4003,
+      "trackId": ".en",
+      "sourceLanguage": "en",
+      "reason": "empty-caption-body",
+      "isolated": true,
+      "eventCount": 0,
+      "textEventCount": 0,
+      "firstStartMs": null,
+      "lastStartMs": null,
+      "wordOffsetCount": 0
+    },
+    {
+      "browser": "firefox",
+      "version": "155.0",
+      "stage": "manual-midplay-cc-on",
+      "before": {
+        "videoId": "M7lc1UVf-VE",
+        "mediaTime": 6.853729,
+        "mediaReadyState": 4,
+        "paused": false,
+        "adShowing": false,
+        "cc": "true",
+        "selectedTrack": {
+          "id": ".en",
+          "language": "en",
+          "kind": ""
+        },
+        "nativeTextCharacters": 0
+      },
+      "after": {
+        "videoId": "M7lc1UVf-VE",
+        "mediaTime": 10.866166,
+        "mediaReadyState": 4,
+        "paused": false,
+        "adShowing": false,
+        "cc": "true",
+        "selectedTrack": {
+          "id": ".en",
+          "language": "en",
+          "kind": ""
+        },
+        "nativeTextCharacters": 0
+      },
+      "expectedKind": "manual",
+      "actualKind": "manual",
+      "expectedCC": "true",
+      "preconditionsMet": true,
+      "status": "unavailable",
+      "videoId": "M7lc1UVf-VE",
+      "tracks": [
+        {
+          "id": ".en",
+          "language": "en",
+          "kind": "manual"
+        },
+        {
+          "id": "a.en",
+          "language": "en",
+          "kind": "asr"
+        }
+      ],
+      "observations": [
+        {
+          "via": "replay",
+          "status": 0,
+          "bytes": 0,
+          "outcome": "network"
+        }
+      ],
+      "cc": {
+        "initial": "true",
+        "final": "true",
+        "enabledByProbe": false,
+        "restored": false,
+        "externalChange": false
+      },
+      "elapsedMs": 4001,
+      "trackId": ".en",
+      "sourceLanguage": "en",
+      "reason": "caption-source-unavailable",
+      "isolated": true,
+      "eventCount": 0,
+      "textEventCount": 0,
+      "firstStartMs": null,
+      "lastStartMs": null,
+      "wordOffsetCount": 0
+    },
+    {
+      "browser": "firefox",
+      "version": "155.0",
+      "stage": "asr-cc-off",
+      "before": {
+        "videoId": "M7lc1UVf-VE",
+        "mediaTime": 11.252875,
+        "mediaReadyState": 4,
+        "paused": false,
+        "adShowing": false,
+        "cc": "false",
+        "selectedTrack": {
+          "id": null,
+          "language": null,
+          "kind": null
+        },
+        "nativeTextCharacters": 0
+      },
+      "after": {
+        "videoId": "M7lc1UVf-VE",
+        "mediaTime": 15.272791,
+        "mediaReadyState": 4,
+        "paused": false,
+        "adShowing": false,
+        "cc": "false",
+        "selectedTrack": {
+          "id": null,
+          "language": null,
+          "kind": null
+        },
+        "nativeTextCharacters": 0
+      },
+      "expectedKind": "asr",
+      "actualKind": "manual",
+      "expectedCC": "false",
+      "preconditionsMet": true,
+      "status": "unavailable",
+      "videoId": "M7lc1UVf-VE",
+      "tracks": [
+        {
+          "id": ".en",
+          "language": "en",
+          "kind": "manual"
+        },
+        {
+          "id": "a.en",
+          "language": "en",
+          "kind": "asr"
+        }
+      ],
+      "observations": [
+        {
+          "via": "player",
+          "status": 200,
+          "bytes": 0,
+          "outcome": "empty"
+        },
+        {
+          "via": "replay",
+          "status": 200,
+          "bytes": 0,
+          "outcome": "empty"
+        }
+      ],
+      "cc": {
+        "initial": "false",
+        "final": "false",
+        "enabledByProbe": true,
+        "restored": true,
+        "externalChange": false
+      },
+      "elapsedMs": 4003,
+      "trackId": ".en",
+      "sourceLanguage": "en",
+      "reason": "empty-caption-body",
+      "isolated": true,
+      "eventCount": 0,
+      "textEventCount": 0,
+      "firstStartMs": null,
+      "lastStartMs": null,
+      "wordOffsetCount": 0
+    },
+    {
+      "browser": "firefox",
+      "version": "155.0",
+      "stage": "asr-midplay-cc-on",
+      "before": {
+        "videoId": "M7lc1UVf-VE",
+        "mediaTime": 15.674145,
+        "mediaReadyState": 4,
+        "paused": false,
+        "adShowing": false,
+        "cc": "true",
+        "selectedTrack": {
+          "id": ".en",
+          "language": "en",
+          "kind": ""
+        },
+        "nativeTextCharacters": 0
+      },
+      "after": {
+        "videoId": "M7lc1UVf-VE",
+        "mediaTime": 19.7035,
+        "mediaReadyState": 4,
+        "paused": false,
+        "adShowing": false,
+        "cc": "true",
+        "selectedTrack": {
+          "id": ".en",
+          "language": "en",
+          "kind": ""
+        },
+        "nativeTextCharacters": 0
+      },
+      "expectedKind": "asr",
+      "actualKind": "manual",
+      "expectedCC": "true",
+      "preconditionsMet": true,
+      "status": "unavailable",
+      "videoId": "M7lc1UVf-VE",
+      "tracks": [
+        {
+          "id": ".en",
+          "language": "en",
+          "kind": "manual"
+        },
+        {
+          "id": "a.en",
+          "language": "en",
+          "kind": "asr"
+        }
+      ],
+      "observations": [
+        {
+          "via": "replay",
+          "status": 200,
+          "bytes": 0,
+          "outcome": "empty"
+        }
+      ],
+      "cc": {
+        "initial": "true",
+        "final": "true",
+        "enabledByProbe": false,
+        "restored": false,
+        "externalChange": false
+      },
+      "elapsedMs": 4004,
+      "trackId": ".en",
+      "sourceLanguage": "en",
+      "reason": "empty-caption-body",
+      "isolated": true,
+      "eventCount": 0,
+      "textEventCount": 0,
+      "firstStartMs": null,
+      "lastStartMs": null,
+      "wordOffsetCount": 0
+    },
+    {
+      "browser": "firefox",
+      "version": "155.0",
+      "stage": "spa-selected-track",
+      "before": {
+        "videoId": "TVKD0DDNttg",
+        "mediaTime": 0,
+        "mediaReadyState": 0,
+        "paused": false,
+        "adShowing": true,
+        "cc": "true",
+        "selectedTrack": {
+          "id": "a.en",
+          "language": "en",
+          "kind": "asr"
+        },
+        "nativeTextCharacters": 0
+      },
+      "after": {
+        "videoId": "TVKD0DDNttg",
+        "mediaTime": 0,
+        "mediaReadyState": 0,
+        "paused": false,
+        "adShowing": true,
+        "cc": "true",
+        "selectedTrack": {
+          "id": "a.en",
+          "language": "en",
+          "kind": "asr"
+        },
+        "nativeTextCharacters": 0
+      },
+      "expectedKind": null,
+      "actualKind": null,
+      "expectedCC": null,
+      "preconditionsMet": true,
+      "status": "unavailable",
+      "videoId": "TVKD0DDNttg",
+      "tracks": [],
+      "observations": [],
+      "cc": {
+        "initial": "unknown",
+        "final": "unknown",
+        "enabledByProbe": false,
+        "restored": false,
+        "externalChange": false
+      },
+      "elapsedMs": 0,
+      "reason": "ad-playing",
+      "isolated": true,
+      "eventCount": 0,
+      "textEventCount": 0,
+      "firstStartMs": null,
+      "lastStartMs": null,
+      "wordOffsetCount": 0
+    }
+  ],
+  "gate": "not-passed"
+}

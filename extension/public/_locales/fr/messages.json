@@ -1,4 +1,109 @@
 {
+  "subtitleYouTubeAccessHint": {
+    "message": "L’accès à YouTube est bloqué. L’activation des sous-titres demandera de le rétablir pour afficher automatiquement les commandes vidéo. La traduction reste manuelle."
+  },
+  "subtitleBilingual": {
+    "message": "Bilingue"
+  },
+  "subtitleOptions": {
+    "message": "Options des sous-titres"
+  },
+  "subtitleEnable": {
+    "message": "Activer les sous-titres bilingues"
+  },
+  "subtitleDisable": {
+    "message": "Désactiver la traduction des sous-titres"
+  },
+  "subtitleRetry": {
+    "message": "Réessayer"
+  },
+  "subtitleSetup": {
+    "message": "Configurer le service de traduction"
+  },
+  "subtitleTarget": {
+    "message": "Traduire en"
+  },
+  "subtitleFollowDefault": {
+    "message": "Suivre la langue par défaut"
+  },
+  "subtitleSize": {
+    "message": "Taille du texte"
+  },
+  "subtitleSizeSmall": {
+    "message": "Petite"
+  },
+  "subtitleSizeMedium": {
+    "message": "Standard"
+  },
+  "subtitleSizeLarge": {
+    "message": "Grande"
+  },
+  "subtitlePosition": {
+    "message": "Position"
+  },
+  "subtitleBottom": {
+    "message": "En bas"
+  },
+  "subtitleTop": {
+    "message": "En haut"
+  },
+  "subtitleAuto": {
+    "message": "Traduire automatiquement les sous-titres YouTube"
+  },
+  "subtitleOn": {
+    "message": "Activé"
+  },
+  "subtitleOff": {
+    "message": "Désactivé"
+  },
+  "subtitleTab": {
+    "message": "Sous-titres"
+  },
+  "subtitlePageTab": {
+    "message": "Page"
+  },
+  "subtitleUsesService": {
+    "message": "Utilise votre service de traduction configuré."
+  },
+  "subtitleNativeHint": {
+    "message": "Changez la langue source dans le menu des sous-titres YouTube."
+  },
+  "subtitleManual": {
+    "message": "Sous-titres manuels"
+  },
+  "subtitleASR": {
+    "message": "Sous-titres automatiques"
+  },
+  "subtitleStateOff": {
+    "message": "Sous-titres bilingues désactivés"
+  },
+  "subtitleStatePreparing": {
+    "message": "Préparation des sous-titres…"
+  },
+  "subtitleStateReady": {
+    "message": "Sous-titres bilingues activés"
+  },
+  "subtitleStateCatchingUp": {
+    "message": "Préparation des prochaines traductions"
+  },
+  "subtitleStateRealtime": {
+    "message": "Sous-titres bilingues en direct, avec un léger délai possible"
+  },
+  "subtitleStateNoTracks": {
+    "message": "Aucune piste de sous-titres disponible pour cette vidéo"
+  },
+  "subtitleStateSourceError": {
+    "message": "YouTube n’a pas fourni de sous-titres. Réessayez plus tard."
+  },
+  "subtitleStateTranslationError": {
+    "message": "Échec de la traduction. Les sous-titres originaux sont préservés."
+  },
+  "subtitleStateSameLanguage": {
+    "message": "Les sous-titres utilisent déjà la langue sélectionnée"
+  },
+  "subtitleStateUnsupported": {
+    "message": "Ce format vidéo n’est pas encore pris en charge"
+  },
   "extName": {"message": "Traducteur Dual Read"},
   "extDescription": {"message": "Traduction de pages en mode bilingue ou remplacement avec toute API compatible avec OpenAI."},
   "cmdToggleTranslate": {"message": "Traduire / restaurer la page actuelle"},
@@ -10,9 +115,9 @@
   "targetLanguage": {"message": "Langue cible"},
   "siteAuto": {"message": "Traduire ce site automatiquement"},
   "optionsTitle": {"message": "Options de Dual Read"},
-  "apiBaseUrl": {"message": "URL de base de l'API"},
+  "apiBaseUrl": {"message": "URL de base de l'API (ajout automatique de /chat/completions)"},
   "connectionMode": {"message": "Mode de connexion"},
-  "connectionModeDirect": {"message": "API directe (DeepSeek par défaut)"},
+  "connectionModeDirect": {"message": "API directe"},
   "connectionModeProxy": {"message": "Proxy Dual Read"},
   "apiKey": {"message": "Clé API"},
   "model": {"message": "Modèle"},
@@ -56,7 +161,7 @@
   "siteRulesEmpty": {"message": "Aucune règle de site pour le moment. Activez « Traduire ce site automatiquement » dans la fenêtre contextuelle ou ajoutez-en une ici."},
   "optionsSubtitle": {"message": "Configurez la connexion à l'API et les paramètres de traduction par défaut."},
   "sectionApi": {"message": "Connexion à l'API"},
-  "apiBaseHint": {"message": "Les deux modes de connexion utilisent le protocole OpenAI V1."},
+  "apiBaseHint": {"message": "Les deux modes de connexion sont compatibles avec l'API Chat Completions d'OpenAI (v1)."},
   "apiKeyHint": {"message": "Votre fournisseur d'API requiert une clé API."},
   "apiKeyDirectHint": {"message": "Une clé API est requise pour une connexion directe."},
   "apiKeyProxyHint": {"message": "Elle est facultative lorsque le proxy gère les identifiants du fournisseur."},
@@ -136,7 +241,7 @@
   "onboardingTitle": {"message": "Bienvenue dans Dual Read"},
   "onboardingSubtitle": {"message": "Trois étapes rapides pour votre première page bilingue."},
   "onboardStep1Title": {"message": "Choisissez un mode de connexion"},
-  "onboardStep1Hint": {"message": "L'API directe et le proxy Dual Read utilisent le même protocole OpenAI V1. Le texte de la page est envoyé uniquement au point de terminaison que vous configurez."},
+  "onboardStep1Hint": {"message": "L'API directe et le proxy Dual Read sont compatibles avec l'API Chat Completions d'OpenAI (v1). Le texte de la page est envoyé uniquement au point de terminaison que vous configurez."},
   "onboardPathServer": {"message": "Serveur Dual Read local"},
   "onboardPathServerDesc": {"message": "Le meilleur choix pour la confidentialité et un cache partagé. S'exécute sur votre ordinateur. La clé API est généralement facultative."},
   "onboardPathDirect": {"message": "Mon API d'IA (DeepSeek / compatible avec OpenAI)"},
@@ -185,7 +290,7 @@
   "confirmExportSecrets": {"message": "Cette exportation contient votre clé API. Enregistrez-la uniquement dans un emplacement privé. Continuer ?"},
   "apiBasePlaceholder": {"message": "https://api.deepseek.com"},
   "apiKeyPlaceholder": {"message": "sk-..."},
-  "modelPlaceholder": {"message": "deepseek-v4-flash"},
+  "modelPlaceholder": {"message": "deepseek-flash"},
   "connectionNotConfigured": {"message": "Connexion requise"},
   "connectionNotConfiguredHint": {"message": "Ajoutez les informations de votre API, puis testez et enregistrez la connexion avant de traduire."},
   "uiLanguageEn": {"message": "Anglais"},
@@ -231,5 +336,6 @@
   "openSettings": {"message": "Paramètres"},
   "onboardingStepsLabel": {"message": "Progression de la configuration"},
   "statusTranslatedItems_one": {"message": "$1 segment traduit"},
-  "statusTranslatedItems_other": {"message": "$1 segments traduits"}
+  "statusTranslatedItems_other": {"message": "$1 segments traduits"},
+  "subtitleStateOriginalRequired": {"message": "Sélectionnez la langue originale des sous-titres YouTube pour les traduire."}
 }

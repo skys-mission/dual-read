@@ -148,12 +148,12 @@ enabled = true
 [[auth.keys]]
 name = "alice"
 key = "sk-alice"
-models = { flash = "deepseek-v4-flash" }
+models = { flash = "deepseek-flash" }
 
 [models]
-default = "deepseek-v4-flash"
+default = "deepseek-flash"
 [models.map]
-lite = "deepseek-v4-flash"
+lite = "deepseek-flash"
 `
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 		t.Fatalf("write config: %v", err)
@@ -165,10 +165,10 @@ lite = "deepseek-v4-flash"
 	if !cfg.Auth.Enabled || len(cfg.Auth.Keys) != 1 {
 		t.Fatalf("auth keys: %+v", cfg.Auth)
 	}
-	if cfg.Auth.Keys[0].Models["flash"] != "deepseek-v4-flash" {
+	if cfg.Auth.Keys[0].Models["flash"] != "deepseek-flash" {
 		t.Fatalf("per-key model map: %+v", cfg.Auth.Keys[0].Models)
 	}
-	if cfg.Models.Map["lite"] != "deepseek-v4-flash" {
+	if cfg.Models.Map["lite"] != "deepseek-flash" {
 		t.Fatalf("global map: %+v", cfg.Models.Map)
 	}
 }

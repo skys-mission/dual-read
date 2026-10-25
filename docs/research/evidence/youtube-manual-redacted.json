@@ -1,0 +1,548 @@
+{
+  "redacted": true,
+  "synthetic": false,
+  "videoId": "M7lc1UVf-VE",
+  "kind": "manual",
+  "events": [
+    {
+      "dDurationMs": 1000,
+      "segs": [
+        {
+          "utf8": "word1 word2: word3, word4."
+        }
+      ],
+      "tStartMs": 10349
+    },
+    {
+      "dDurationMs": 2681,
+      "segs": [
+        {
+          "utf8": "word5 word6 word7 word8 word9 word10\nword11 word12 word13."
+        }
+      ],
+      "tStartMs": 11349
+    },
+    {
+      "dDurationMs": 2150,
+      "segs": [
+        {
+          "utf8": "word14 word15 word16 word17 word6\nword18 word19 word20 word21 word22."
+        }
+      ],
+      "tStartMs": 14030
+    },
+    {
+      "dDurationMs": 3240,
+      "segs": [
+        {
+          "utf8": "word14 word23 word24 word10 word25 word26\nword27 word28."
+        }
+      ],
+      "tStartMs": 16180
+    },
+    {
+      "dDurationMs": 2070,
+      "segs": [
+        {
+          "utf8": "word29 word7 word30 word14 word31 word32\nword6 word33 word6 word18 word34"
+        }
+      ],
+      "tStartMs": 19420
+    },
+    {
+      "dDurationMs": 3050,
+      "segs": [
+        {
+          "utf8": "word35 word36 word10 word37\nword25 word38 word39."
+        }
+      ],
+      "tStartMs": 21490
+    },
+    {
+      "dDurationMs": 3489,
+      "segs": [
+        {
+          "utf8": "word40 word41 word42 word43 word44, word41\nword45 word23 word46 word10 word47 word48"
+        }
+      ],
+      "tStartMs": 24540
+    },
+    {
+      "dDurationMs": 3510,
+      "segs": [
+        {
+          "utf8": "word6 word49 word33 word34 word50 word51\nword52 word6 word53 word54 word55"
+        }
+      ],
+      "tStartMs": 28029
+    },
+    {
+      "dDurationMs": 1000,
+      "segs": [
+        {
+          "utf8": "word56 word9."
+        }
+      ],
+      "tStartMs": 31539
+    },
+    {
+      "dDurationMs": 1860,
+      "segs": [
+        {
+          "utf8": "word57 word58 word23 word59 word10 word35\nword60 word61, word62 word63"
+        }
+      ],
+      "tStartMs": 32539
+    },
+    {
+      "dDurationMs": 2401,
+      "segs": [
+        {
+          "utf8": "word64 word10 word36 word6 word65\nword66."
+        }
+      ],
+      "tStartMs": 34399
+    },
+    {
+      "dDurationMs": 3120,
+      "segs": [
+        {
+          "utf8": "word67 word68 word7 word69 word9,\nword51 word52 word6 word53 word70 word71"
+        }
+      ],
+      "tStartMs": 36800
+    },
+    {
+      "dDurationMs": 5250,
+      "segs": [
+        {
+          "utf8": "word37 word53 word72\nword39, word73 word74 word75 word76"
+        }
+      ],
+      "tStartMs": 39920
+    },
+    {
+      "dDurationMs": 3529,
+      "segs": [
+        {
+          "utf8": "word77 word78 word10 word79\nword80 word71 word81 word82."
+        }
+      ],
+      "tStartMs": 45170
+    },
+    {
+      "dDurationMs": 1520,
+      "segs": [
+        {
+          "utf8": "word29 word51 word52 word6 word83\nword84 word71 word25"
+        }
+      ],
+      "tStartMs": 48699
+    },
+    {
+      "dDurationMs": 4680,
+      "segs": [
+        {
+          "utf8": "word85 word86 word58 word87 word88\nword68 word89 word81 word90."
+        }
+      ],
+      "tStartMs": 50219
+    },
+    {
+      "dDurationMs": 3271,
+      "segs": [
+        {
+          "utf8": "word91 word59 word10 word92 word93\nword85 word94 word33 word34 word95"
+        }
+      ],
+      "tStartMs": 54899
+    },
+    {
+      "dDurationMs": 3989,
+      "segs": [
+        {
+          "utf8": "word96 word97 word98 word99 word100\nword101 word102, word103 word104 word105"
+        }
+      ],
+      "tStartMs": 58170
+    },
+    {
+      "dDurationMs": 1000,
+      "segs": [
+        {
+          "utf8": "word10 word66 word95."
+        }
+      ],
+      "tStartMs": 62159
+    },
+    {
+      "dDurationMs": 3341,
+      "segs": [
+        {
+          "utf8": "word29 word51 word52 word6 word49 word84\nword106 word71 word107 word92 word85"
+        }
+      ],
+      "tStartMs": 63159
+    },
+    {
+      "dDurationMs": 2100,
+      "segs": [
+        {
+          "utf8": "word108 word89 word102."
+        }
+      ],
+      "tStartMs": 66500
+    },
+    {
+      "dDurationMs": 2280,
+      "segs": [
+        {
+          "utf8": "word109 word110 word86 word51 word104\nword52 word6 word53 word54 word106 word74"
+        }
+      ],
+      "tStartMs": 68600
+    },
+    {
+      "dDurationMs": 4220,
+      "segs": [
+        {
+          "utf8": "word111 word25 word112 word113 word68\nword114 word102."
+        }
+      ],
+      "tStartMs": 70880
+    },
+    {
+      "dDurationMs": 1740,
+      "segs": [
+        {
+          "utf8": "word115 word74 word116 word23 word117\nword118 word119 word62 word23 word117"
+        }
+      ],
+      "tStartMs": 75100
+    },
+    {
+      "dDurationMs": 1920,
+      "segs": [
+        {
+          "utf8": "word120 word119, word121 word49 word23\nword122 word123 word124 word25 word125"
+        }
+      ],
+      "tStartMs": 76840
+    },
+    {
+      "dDurationMs": 1770,
+      "segs": [
+        {
+          "utf8": "word10 word50 word126 word127\nword6 word33 word34."
+        }
+      ],
+      "tStartMs": 78760
+    },
+    {
+      "dDurationMs": 2610,
+      "segs": [
+        {
+          "utf8": "word128 word51 word104 word52 word6 word53\nword54 word129 word10 word25 word130"
+        }
+      ],
+      "tStartMs": 80530
+    },
+    {
+      "dDurationMs": 2140,
+      "segs": [
+        {
+          "utf8": "word86 word18 word131 word132 word55 word112\nword6 word133 word102"
+        }
+      ],
+      "tStartMs": 83140
+    },
+    {
+      "dDurationMs": 4090,
+      "segs": [
+        {
+          "utf8": "word134 word135 word102, word134 word136\nword137 word138 word102"
+        }
+      ],
+      "tStartMs": 85280
+    },
+    {
+      "dDurationMs": 1910,
+      "segs": [
+        {
+          "utf8": "word139 word140 word55 word25 word39."
+        }
+      ],
+      "tStartMs": 89370
+    },
+    {
+      "dDurationMs": 2549,
+      "segs": [
+        {
+          "utf8": "word141 word126 word58 word52 word6 word53 word54\nword74 word142 word86 word58"
+        }
+      ],
+      "tStartMs": 91280
+    },
+    {
+      "dDurationMs": 4210,
+      "segs": [
+        {
+          "utf8": "word143 word55 word25 word144\nword71 word25 word145 word146, word147 word148"
+        }
+      ],
+      "tStartMs": 93829
+    },
+    {
+      "dDurationMs": 3281,
+      "segs": [
+        {
+          "utf8": "word18 word149 word86 word150, word94\nword151 word86 word99 word18."
+        }
+      ],
+      "tStartMs": 98039
+    },
+    {
+      "dDurationMs": 3439,
+      "segs": [
+        {
+          "utf8": "word29 word152 word14 word52 word153 word7\nword154, word23 word59 word10 word50 word14 word52"
+        }
+      ],
+      "tStartMs": 101320
+    },
+    {
+      "dDurationMs": 2500,
+      "segs": [
+        {
+          "utf8": "word6 word53 word54 word155 word6\nword145 word81 word82."
+        }
+      ],
+      "tStartMs": 104759
+    },
+    {
+      "dDurationMs": 2991,
+      "segs": [
+        {
+          "utf8": "word156 word126 word157 word158 word62 word159 word7\nword160 word71 word11, word161 word96"
+        }
+      ],
+      "tStartMs": 107259
+    },
+    {
+      "dDurationMs": 2369,
+      "segs": [
+        {
+          "utf8": "word162 word163 word6 word105 word25\nword81 word82, word147 word86 word18 word131"
+        }
+      ],
+      "tStartMs": 110250
+    },
+    {
+      "dDurationMs": 4331,
+      "segs": [
+        {
+          "utf8": "word157 word164 word62 word165 word66\nword166 word167."
+        }
+      ],
+      "tStartMs": 112619
+    },
+    {
+      "dDurationMs": 3959,
+      "segs": [
+        {
+          "utf8": "word128 word7 word74 word75 word168 word169 word170\nword171 word68 word172 word34"
+        }
+      ],
+      "tStartMs": 116950
+    },
+    {
+      "dDurationMs": 2151,
+      "segs": [
+        {
+          "utf8": "word25 word93 word86\nword18 word131 word95 word6 word25"
+        }
+      ],
+      "tStartMs": 120909
+    },
+    {
+      "dDurationMs": 3530,
+      "segs": [
+        {
+          "utf8": "word38\nword173 word39."
+        }
+      ],
+      "tStartMs": 123060
+    },
+    {
+      "dDurationMs": 3320,
+      "segs": [
+        {
+          "utf8": "word29 word18 word131 word42 word174 word19\nword75 word168 word12.word175"
+        }
+      ],
+      "tStartMs": 126590
+    },
+    {
+      "dDurationMs": 3170,
+      "segs": [
+        {
+          "utf8": "word176.word177/word178."
+        }
+      ],
+      "tStartMs": 129910
+    },
+    {
+      "dDurationMs": 4391,
+      "segs": [
+        {
+          "utf8": "word29 word179 word55 word7 word180\nword181 word55 word25 word182"
+        }
+      ],
+      "tStartMs": 133080
+    },
+    {
+      "dDurationMs": 3489,
+      "segs": [
+        {
+          "utf8": "word74 word183 word184 word68 word50 word51\nword52 word6 word33 word34 word185."
+        }
+      ],
+      "tStartMs": 137471
+    },
+    {
+      "dDurationMs": 3370,
+      "segs": [
+        {
+          "utf8": "word186 word187 word110 word188 word41\nword189 word42 word190 word191"
+        }
+      ],
+      "tStartMs": 140960
+    },
+    {
+      "dDurationMs": 2420,
+      "segs": [
+        {
+          "utf8": "word92 word192 word74 word193\nword25 word194 word35 word195 word10"
+        }
+      ],
+      "tStartMs": 144330
+    },
+    {
+      "dDurationMs": 4260,
+      "segs": [
+        {
+          "utf8": "word36 word86 word18 word196 word197 word25\nword72 word39 word198"
+        }
+      ],
+      "tStartMs": 146750
+    },
+    {
+      "dDurationMs": 1780,
+      "segs": [
+        {
+          "utf8": "word199 word81 word146."
+        }
+      ],
+      "tStartMs": 151010
+    },
+    {
+      "dDurationMs": 2790,
+      "segs": [
+        {
+          "utf8": "word29 word51 word200 word10 word201 word152\nword6 word25 word78 word55 word73 word18 word197"
+        }
+      ],
+      "tStartMs": 152790
+    },
+    {
+      "dDurationMs": 1830,
+      "segs": [
+        {
+          "utf8": "word202, word92 word192 word58 word52\nword6 word203 word25 word204 word78"
+        }
+      ],
+      "tStartMs": 155580
+    },
+    {
+      "dDurationMs": 1000,
+      "segs": [
+        {
+          "utf8": "word205."
+        }
+      ],
+      "tStartMs": 157410
+    },
+    {
+      "dDurationMs": 1980,
+      "segs": [
+        {
+          "utf8": "word67 word41 word49 word127 word6 word171 word166\nword86 word164 word58 word194 word35"
+        }
+      ],
+      "tStartMs": 158410
+    },
+    {
+      "dDurationMs": 2130,
+      "segs": [
+        {
+          "utf8": "word36 word10 word206 word202."
+        }
+      ],
+      "tStartMs": 160390
+    },
+    {
+      "dDurationMs": 5560,
+      "segs": [
+        {
+          "utf8": "word207 word208 word78 word74 word111 word25\nword209 word200 word10 word210 word11"
+        }
+      ],
+      "tStartMs": 162520
+    },
+    {
+      "dDurationMs": 1640,
+      "segs": [
+        {
+          "utf8": "word39, word211."
+        }
+      ],
+      "tStartMs": 168080
+    },
+    {
+      "dDurationMs": 1000,
+      "segs": [
+        {
+          "utf8": "word212 word213."
+        }
+      ],
+      "tStartMs": 169720
+    },
+    {
+      "dDurationMs": 2500,
+      "segs": [
+        {
+          "utf8": "word29 word7 word74 word23 word214 word215\nword78 word10 word216"
+        }
+      ],
+      "tStartMs": 170720
+    },
+    {
+      "dDurationMs": 1710,
+      "segs": [
+        {
+          "utf8": "word25 word173 word39 word198\nword199 word81 word146."
+        }
+      ],
+      "tStartMs": 173220
+    },
+    {
+      "dDurationMs": 3120,
+      "segs": [
+        {
+          "utf8": "word128 word41 word96 word7 word217 word218\nword174 word86 word219 word50"
+        }
+      ],
+      "tStartMs": 174930
+    }
+  ]
+}

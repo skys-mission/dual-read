@@ -73,4 +73,7 @@ export const A11Y = [
 export const EDITABLE = 'input, textarea, [contenteditable="true"], [contenteditable=""]';
 
 export const DONE_SEL = `[${DONE}]`;
-export const OURS_SEL = `.${CLS_BLOCK}, .${CLS_ERR}, .${HIDE}, .${CLS_REPLACE}`;
+// Native video captions are transient player UI, never page-translation input.
+// Keep them excluded even before subtitles start or while native CC is restored.
+export const SUBTITLE_EXCLUDED = '[data-dual-read-subtitle-ui], #movie_player .ytp-caption-window-container';
+export const OURS_SEL = `.${CLS_BLOCK}, .${CLS_ERR}, .${HIDE}, .${CLS_REPLACE}, ${SUBTITLE_EXCLUDED}`;

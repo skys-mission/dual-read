@@ -64,6 +64,25 @@ describe('settings storage', () => {
     vi.restoreAllMocks();
   });
 
+  it('never enables YouTube automation from sync and saves its choice only locally', async () => {
+    const storage = mockChromeStorage({ sync: { youtubeAuto: true } });
+    expect((await getSettings()).youtubeAuto).toBe(false);
+    await saveSettings({ youtubeAuto: true });
+    expect(storage.local.get('youtubeAuto')).toBe(true);
+    expect(storage.sync.has('youtubeAuto')).toBe(false);
+    expect((await getSettings()).youtubeAuto).toBe(true);
+  });
+
+  it('saves subtitle preferences without changing the page translation revision or target', async () => {
+    mockChromeStorage({ sync: { schemaVersion: 5, revision: 7, targetLang: 'zh-CN' } });
+    const preferences = { targetLang: 'en' as const, textSize: 'large' as const, position: 'top' as const };
+    await saveSettings({ subtitles: preferences });
+    const settings = await getSettings();
+    expect(settings.revision).toBe(7);
+    expect(settings.targetLang).toBe('zh-CN');
+    expect(settings.subtitles).toEqual(preferences);
+  });
+
   it('preserves a site rule when an unrelated save completes later', async () => {
     const storage = mockChromeStorage();
 

@@ -140,7 +140,7 @@ function judge(inspect) {
 async function apiSanity(settings) {
   const url = `${String(settings.apiBase).replace(/\/$/, '')}/chat/completions`;
   const body = {
-    model: settings.model || 'deepseek-v4-flash',
+    model: settings.model || 'deepseek-flash',
     messages: [
       { role: 'system', content: 'Translate to Simplified Chinese. Reply with JSON object {"0":"..."} only.' },
       { role: 'user', content: JSON.stringify({ '0': 'Hello world' }) },
@@ -441,7 +441,7 @@ async function translateBatchNode(texts, settings) {
   const chars = texts.reduce((n, t) => n + t.length, 0);
   const maxTokens = Math.min(8192, Math.max(1024, Math.ceil((chars / 4) * 3) + 128));
   const body = {
-    model: settings.model || 'deepseek-v4-flash',
+    model: settings.model || 'deepseek-flash',
     messages: [
       {
         role: 'system',

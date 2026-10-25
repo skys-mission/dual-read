@@ -21,7 +21,7 @@
 
     <section id="panel1" class="panel section-card" data-step="1">
       <h2 id="step1heading" data-i18n="onboardStep1Title">Choose a connection route</h2>
-      <p class="hint" data-i18n="onboardStep1Hint">Direct API and Dual Read Proxy use the same OpenAI V1 protocol. Page text is sent only to the endpoint you configure.</p>
+      <p class="hint" data-i18n="onboardStep1Hint">Direct API and Dual Read Proxy are both compatible with the OpenAI Chat Completions API (v1). Page text is sent only to the endpoint you configure.</p>
 
       <div class="actions">
         <button type="button" id="step1Next" class="btn-primary" data-i18n="onboardContinue">Continue</button>
@@ -35,14 +35,14 @@
       <div class="field">
         <label for="connectionMode" data-i18n="connectionMode">Connection route</label>
         <select id="connectionMode">
-          <option value="direct" data-i18n="connectionModeDirect">Direct API (DeepSeek default)</option>
+          <option value="direct" data-i18n="connectionModeDirect">Direct API</option>
           <option value="proxy" data-i18n="connectionModeProxy">Dual Read Proxy</option>
         </select>
         <p class="hint" id="connectionModeHint"></p>
       </div>
 
       <div class="field">
-        <label for="apiBase" data-i18n="apiBaseUrl">API base URL</label>
+        <label for="apiBase" data-i18n="apiBaseUrl">API base URL (automatically appends /chat/completions)</label>
         <input type="url" id="apiBase" placeholder="https://api.deepseek.com" autocomplete="off" />
       </div>
 
@@ -53,7 +53,7 @@
         </div>
         <div class="field">
           <label for="model" data-i18n="model">Model</label>
-          <input type="text" id="model" placeholder="deepseek-v4-flash" autocomplete="off" />
+          <input type="text" id="model" placeholder="deepseek-flash" autocomplete="off" />
         </div>
       </div>
 

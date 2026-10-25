@@ -17,7 +17,7 @@ test.describe('extension through a live DeepSeek upstream', () => {
     const proxy = await startRealProxy('https://api.deepseek.com', { apiKey: liveAPIKey });
     try {
       const body = JSON.stringify({
-        model: 'deepseek-v4-flash',
+        model: 'deepseek-flash',
         messages: [
           {
             role: 'system',
@@ -40,7 +40,7 @@ test.describe('extension through a live DeepSeek upstream', () => {
       };
       expect(first.status).toBe(200);
       expect(first.headers.get('x-cache')).toBe('MISS');
-      expect(first.headers.get('x-dual-read-model')).toBe('deepseek-v4-flash');
+      expect(first.headers.get('x-dual-read-model')).toBe('deepseek-flash');
       expect(firstData.choices?.[0]?.message?.content?.trim()).toBeTruthy();
 
       const second = await fetch(`${proxy.apiBase}/chat/completions`, {
@@ -57,7 +57,7 @@ test.describe('extension through a live DeepSeek upstream', () => {
       await options.locator('#uiLocale').selectOption('en');
       await options.locator('#connectionMode').selectOption('proxy');
       await options.locator('#apiBase').fill(proxy.apiBase);
-      await options.locator('#model').fill('deepseek-v4-flash');
+      await options.locator('#model').fill('deepseek-flash');
       await options.locator('#apiKey').fill('');
       await options.locator('#testConnectionBtn').click();
       await expect
@@ -71,7 +71,7 @@ test.describe('extension through a live DeepSeek upstream', () => {
         connectionMode: 'proxy',
         apiBase: proxy.apiBase,
         apiKey: '',
-        model: 'deepseek-v4-flash',
+        model: 'deepseek-flash',
       });
       const page = await extContext.newPage();
       await page.goto(fixtures.fixtureUrl('article.html'), { waitUntil: 'domcontentloaded' });

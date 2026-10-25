@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-25",
+  "browser": "chromium",
+  "authenticated": false,
+  "captionSource": "live YouTube",
+  "provider": "local deterministic test server",
+  "captionRequests": [
+    {
+      "status": 200
+    },
+    {
+      "status": 200
+    },
+    {
+      "status": 200
+    },
+    {
+      "status": 200
+    }
+  ],
+  "stage": "enable",
+  "browserVersion": "153.0.8010.12",
+  "homeStatus": 200,
+  "sender": {
+    "url": "https://www.youtube.com/",
+    "origin": "https://www.youtube.com",
+    "frameId": 0,
+    "tabUrl": "https://www.youtube.com/watch?v=M7lc1UVf-VE"
+  },
+  "error": "page.waitForFunction: Timeout 15000ms exceeded.",
+  "status": {
+    "enabled": true,
+    "state": "realtime",
+    "sourceLanguage": "en",
+    "kind": "manual"
+  },
+  "native": {
+    "videoId": "M7lc1UVf-VE",
+    "playability": "OK",
+    "trackCount": 2,
+    "mediaReady": 4,
+    "mediaTime": 14.944271,
+    "paused": false,
+    "cc": "true",
+    "nativeCharacters": 0
+  },
+  "providerRequests": 0
+}

@@ -88,12 +88,12 @@ enabled = true
 name = "alice"
 key = "sk-server-alice"
 [auth.keys.models]
-"flash" = "deepseek-v4-flash"
+"flash" = "deepseek-flash"
 
 [models]
-default = "deepseek-v4-flash"
+default = "deepseek-flash"
 [models.map]
-"flash" = "deepseek-v4-flash"
+"flash" = "deepseek-flash"
 ```
 
 Client calls with `Authorization: Bearer sk-server-alice` and `model: "flash"`;

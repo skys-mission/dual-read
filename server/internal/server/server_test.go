@@ -73,7 +73,7 @@ func TestServerHTTPIntegration(t *testing.T) {
 		t.Fatalf("readyz=%d %s", ready.StatusCode, body)
 	}
 
-	body := `{"model":"deepseek-v4-flash","messages":[{"role":"user","content":"ping"}]}`
+	body := `{"model":"deepseek-flash","messages":[{"role":"user","content":"ping"}]}`
 	req1, _ := http.NewRequest(http.MethodPost, ts.URL+"/v1/chat/completions", strings.NewReader(body))
 	req1.Header.Set("Content-Type", "application/json")
 	req1.Header.Set("X-Request-Id", "integ-req-1")

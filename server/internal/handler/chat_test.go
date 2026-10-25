@@ -224,7 +224,7 @@ func TestHandleModelMappingAndCacheHit(t *testing.T) {
 		raw, _ := io.ReadAll(r.Body)
 		var m map[string]interface{}
 		_ = json.Unmarshal(raw, &m)
-		if m["model"] != "deepseek-v4-flash" {
+		if m["model"] != "deepseek-flash" {
 			t.Errorf("expected mapped model, got %v", m["model"])
 		}
 		thinking, ok := m["thinking"].(map[string]interface{})
@@ -248,7 +248,7 @@ func TestHandleModelMappingAndCacheHit(t *testing.T) {
 	if rr1.Header().Get("X-Cache") != "MISS" {
 		t.Fatalf("expected MISS, got %s", rr1.Header().Get("X-Cache"))
 	}
-	if rr1.Header().Get("X-Dual-Read-Model") != "deepseek-v4-flash" {
+	if rr1.Header().Get("X-Dual-Read-Model") != "deepseek-flash" {
 		t.Fatalf("expected mapped model header")
 	}
 
@@ -354,7 +354,7 @@ func newTestChatWithTimeout(t *testing.T, upstreamURL string, authEnabled bool, 
 			Name: "test",
 			Key:  "sk-proxy-test",
 			Models: map[string]string{
-				"flash": "deepseek-v4-flash",
+				"flash": "deepseek-flash",
 			},
 		}}
 	}
@@ -367,8 +367,8 @@ func newTestChatWithTimeout(t *testing.T, upstreamURL string, authEnabled bool, 
 		},
 		Auth: authCfg,
 		Models: config.ModelsConfig{
-			Default: "deepseek-v4-flash",
-			Map:     map[string]string{"flash": "deepseek-v4-flash"},
+			Default: "deepseek-flash",
+			Map:     map[string]string{"flash": "deepseek-flash"},
 		},
 	}
 
@@ -384,7 +384,7 @@ func newTestChatWithTimeout(t *testing.T, upstreamURL string, authEnabled bool, 
 
 func TestExplicitThinkingSettingIsPreserved(t *testing.T) {
 	body := []byte(`{"model":"alias","messages":[],"thinking":{"type":"enabled"}}`)
-	rewritten, err := rewriteModel(body, "deepseek-v4-flash", true)
+	rewritten, err := rewriteModel(body, "deepseek-flash", true)
 	if err != nil {
 		t.Fatal(err)
 	}

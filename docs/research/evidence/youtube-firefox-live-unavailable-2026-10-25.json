@@ -1,0 +1,202 @@
+{
+  "date": "2026-10-25",
+  "browser": "Firefox 155.0 (Playwright Nightly)",
+  "fixture": false,
+  "authenticated": false,
+  "login_status": "Google rejected this browser: This browser or app may not be secure.",
+  "login_bypassed": false,
+  "profile_audio_volume_scale": 0,
+  "production_extension_bundles": true,
+  "diagnostic_youtube_host_grant": true,
+  "real_model_requests": 0,
+  "events": [
+    {
+      "at": "2026-10-25T02:43:42.611Z",
+      "command": "status",
+      "value": {
+        "page": {
+          "signedIn": false,
+          "videoId": "M7lc1UVf-VE",
+          "muted": true,
+          "volume": 0,
+          "paused": true,
+          "time": 0,
+          "readyState": 4,
+          "cc": "true",
+          "trackId": ".en",
+          "nativeCharacters": 0,
+          "sourceCharacters": 0,
+          "translationCharacters": 0
+        },
+        "extension": null
+      }
+    },
+    {
+      "at": "2026-10-25T02:47:02.233Z",
+      "command": "status",
+      "value": {
+        "page": {
+          "signedIn": false,
+          "videoId": "M7lc1UVf-VE",
+          "muted": true,
+          "volume": 0,
+          "paused": true,
+          "time": 0,
+          "readyState": 4,
+          "cc": "true",
+          "trackId": ".en",
+          "nativeCharacters": 0,
+          "sourceCharacters": 0,
+          "translationCharacters": 0
+        },
+        "extension": null
+      }
+    },
+    {
+      "at": "2026-10-25T02:47:09.325Z",
+      "command": "status",
+      "value": {
+        "page": {
+          "signedIn": false,
+          "videoId": "M7lc1UVf-VE",
+          "muted": true,
+          "volume": 0,
+          "paused": false,
+          "time": 2.311912,
+          "readyState": 4,
+          "cc": "true",
+          "trackId": ".en",
+          "nativeCharacters": 0,
+          "sourceCharacters": 0,
+          "translationCharacters": 0
+        },
+        "extension": null
+      }
+    },
+    {
+      "at": "2026-10-25T02:47:15.341Z",
+      "command": "source",
+      "value": {
+        "status": "unavailable",
+        "videoId": "M7lc1UVf-VE",
+        "tracks": [
+          {
+            "id": ".en",
+            "language": "en",
+            "kind": "manual"
+          },
+          {
+            "id": "a.en",
+            "language": "en",
+            "kind": "asr"
+          }
+        ],
+        "observations": [
+          {
+            "via": "track",
+            "status": 200,
+            "bytes": 0,
+            "outcome": "empty"
+          }
+        ],
+        "cc": {
+          "initial": "true",
+          "final": "true",
+          "enabledByProbe": false,
+          "restored": false,
+          "externalChange": false
+        },
+        "elapsedMs": 6002,
+        "trackId": ".en",
+        "sourceLanguage": "en",
+        "reason": "empty-caption-body",
+        "eventCount": 0,
+        "textEventCount": 0,
+        "cueCount": 0,
+        "sourceWords": 0,
+        "normalizedWords": 0,
+        "sameWords": true
+      }
+    },
+    {
+      "at": "2026-10-25T02:47:30.176Z",
+      "command": "metrics",
+      "value": {
+        "initialized": false,
+        "requests": []
+      }
+    },
+    {
+      "at": "2026-10-25T02:47:30.216Z",
+      "command": "start",
+      "value": {
+        "success": true
+      }
+    },
+    {
+      "at": "2026-10-25T02:47:55.599Z",
+      "command": "status",
+      "value": {
+        "page": {
+          "signedIn": false,
+          "videoId": "M7lc1UVf-VE",
+          "muted": false,
+          "volume": 1,
+          "paused": true,
+          "time": 0,
+          "readyState": 0,
+          "cc": "false",
+          "trackId": null,
+          "nativeCharacters": 0,
+          "sourceCharacters": 0,
+          "translationCharacters": 0
+        },
+        "extension": {
+          "enabled": true,
+          "state": "source-error",
+          "retryAt": 1792896480302
+        }
+      }
+    },
+    {
+      "at": "2026-10-25T02:47:55.606Z",
+      "command": "metrics",
+      "value": {
+        "initialized": false,
+        "requests": []
+      }
+    },
+    {
+      "at": "2026-10-25T02:47:55.770Z",
+      "command": "stop",
+      "value": {
+        "success": true
+      }
+    },
+    {
+      "at": "2026-10-25T02:48:15.295Z",
+      "command": "status",
+      "value": {
+        "page": {
+          "signedIn": false,
+          "videoId": "M7lc1UVf-VE",
+          "muted": false,
+          "volume": 1,
+          "paused": true,
+          "time": 0,
+          "readyState": 0,
+          "cc": "false",
+          "trackId": null,
+          "nativeCharacters": 0,
+          "sourceCharacters": 0,
+          "translationCharacters": 0
+        },
+        "extension": {
+          "enabled": false,
+          "state": "off",
+          "retryAt": 1792896480302
+        }
+      }
+    }
+  ]
+}

@@ -1,4 +1,8 @@
-import { extTest as test, expectExt as expect } from './helpers/ext-fixture';
+import { chromium, type BrowserContext } from '@playwright/test';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import { EXTENSION_PATH, extTest as test, expectExt as expect } from './helpers/ext-fixture';
 import { startMockServer } from './helpers/mock-server';
 import {
   seedSettings,
@@ -13,6 +17,57 @@ import {
 } from './helpers/ext-control';
 
 // Main path: local fixture page + loopback mock OpenAI API.
+
+test('settings seeding waits for delayed installation defaults', async () => {
+  const temporary = await fs.mkdtemp(path.join(os.tmpdir(), 'dual-read-install-e2e-'));
+  const addon = path.join(temporary, 'addon');
+  const mock = await startMockServer();
+  let context: BrowserContext | undefined;
+  try {
+    await fs.cp(EXTENSION_PATH, addon, { recursive: true });
+    const background = path.join(addon, 'background.js');
+    // Hold the real install handler's first settings write after it has read
+    // defaults, reproducing the CI race without changing the production code.
+    await fs.writeFile(background, `
+const originalSyncSet = chrome.storage.sync.set.bind(chrome.storage.sync);
+chrome.storage.sync.set = items => {
+  if (items.apiBase === 'https://api.deepseek.com' && !globalThis.releaseInstallDefaults) {
+    return new Promise(resolve => {
+      globalThis.releaseInstallDefaults = () => originalSyncSet(items).then(resolve);
+    });
+  }
+  return originalSyncSet(items);
+};
+` + await fs.readFile(background, 'utf8'));
+    context = await chromium.launchPersistentContext(path.join(temporary, 'profile'), {
+      channel: 'chromium', headless: true,
+      args: [`--disable-extensions-except=${addon}`, `--load-extension=${addon}`],
+    });
+    const sw = context.serviceWorkers()[0] ?? await context.waitForEvent('serviceworker');
+    const extensionId = sw.url().split('/')[2];
+    await expect.poll(() => sw.evaluate('typeof globalThis.releaseInstallDefaults')).toBe('function');
+    const popupOpened = context.waitForEvent('page');
+    const seeded = seedSettings(context, extensionId, { apiBase: mock.apiBase });
+    const popup = await popupOpened;
+    await popup.waitForURL(`chrome-extension://${extensionId}/popup.html`);
+    // Delay installation past the popup's first render and storage writes.
+    await sw.evaluate('setTimeout(() => globalThis.releaseInstallDefaults(), 2000)');
+    await seeded;
+    await expect.poll(() => context!.pages().some(p => p.url().endsWith('/onboarding.html'))).toBe(true);
+    expect(await sw.evaluate(() => chrome.storage.sync.get(['apiBase', 'model', 'targetLang'])))
+      .toEqual({ apiBase: mock.apiBase, model: 'e2e-mock', targetLang: 'zh-CN' });
+    const page = await context.newPage();
+    await page.goto(mock.fixtureUrl('article.html'));
+    const result = await translateTab(sw, await getTabId(page, sw));
+    expect(result.failed).toBe(0);
+    expect(Number(result.count)).toBeGreaterThan(0);
+    expect(mock.getRequestCount()).toBeGreaterThan(0);
+  } finally {
+    await context?.close();
+    await mock.close();
+    await fs.rm(temporary, { recursive: true, force: true });
+  }
+});
 
 test.describe('translate main path', () => {
   test('bilingual → restore leaves original DOM', async ({ extContext, extensionId, sw }) => {

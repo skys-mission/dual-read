@@ -14,6 +14,7 @@ import { ensureContentScript, isRestrictedUrl, originPattern, sendToContentFrame
 import { isConnectionConfigured } from '../../lib/provider/connection';
 import { openOnboardingPage } from '../../lib/settings/onboarding';
 import { derivePopupView, type PopupSnapshot, type PrimaryAction } from '../../lib/popup/state';
+import { youtubeVideoId } from '../../lib/subtitles/types';
 
 const els = {
   status: document.getElementById('statusText') as HTMLElement,
@@ -46,6 +47,7 @@ let snap: PopupSnapshot = {
 let pollTimer: ReturnType<typeof setInterval> | null = null;
 let primaryAction: PrimaryAction = 'none';
 let sitePolicySaving = false;
+let subtitleScopeActive = false;
 
 function t(key: string, subs?: (string | number)[]): string {
   return getUiMessage(key, subs ?? null, uiLocale);
@@ -142,6 +144,7 @@ function patchSnap(partial: Partial<PopupSnapshot>): void {
 }
 
 async function refreshFromPage(): Promise<void> {
+  if (subtitleScopeActive) { stopPolling(); return; }
   const tab = await getCurrentTab();
   const restricted = isRestrictedUrl(tab?.url);
   patchSnap({
@@ -431,5 +434,13 @@ void (async () => {
   await localizePage(uiLocale);
   // localizePage may overwrite primary button text — re-apply view.
   renderView();
+  if (tab?.id && youtubeVideoId(tab.url)) {
+    subtitleScopeActive = true;
+    const { initSubtitlePopup } = await import('../../lib/subtitles/popup');
+    await initSubtitlePopup(tab.id, settings, subtitles => {
+      subtitleScopeActive = subtitles;
+      if (!subtitles) void refreshFromPage();
+    });
+  }
   await refreshFromPage();
 })();

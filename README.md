@@ -72,7 +72,15 @@ The extension translates pages through any OpenAI-compatible API. The server add
 ### Browser extension (Chrome / Edge / Firefox, Manifest V3)
 
 - Bilingual overlay or replace mode
-- On-demand content-script injection (`activeTab` + `scripting`)
+- YouTube bilingual subtitles (development build): open a desktop watch page
+  and click the bilingual button beside CC to enable translation. Uses your
+  existing API and target language. Optional subtitle settings are language,
+  size, position, and automatic translation on YouTube; automatic translation is off by default.
+  Idle player controls appear automatically using the manifest's YouTube-only
+  host access, without a toolbar click or translation request. Browsers may ask
+  for this site permission when installing or updating the extension.
+  Supports available manual/automatic captions, not live streams or Shorts.
+- On-demand page translation (`activeTab` + `scripting`); idle controls load automatically only on YouTube
 - Viewport-first lazy translation + MutationObserver incremental indexing
 - Automatic retry with backoff; click-to-retry on persistent failures
 - Local translation cache (memory + `chrome.storage.local` LRU)

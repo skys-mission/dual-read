@@ -1,10 +1,13 @@
 {
   "name": "dual-read-extension",
-  "description": "Dual Read \u2014 bilingual/replacement page translation via any OpenAI-compatible API.",
+  "description": "Dual Read — bilingual/replacement page translation via any OpenAI-compatible API.",
   "private": true,
-  "version": "0.1.1",
+  "version": "0.2.0",
   "type": "module",
   "license": "Apache-2.0",
+  "engines": {
+    "node": "^22.12.0 || ^24.0.0 || >=26.0.0"
+  },
   "scripts": {
     "dev": "wxt",
     "dev:firefox": "wxt -b firefox",
@@ -25,6 +28,9 @@
     "probe:live": "node tools/live-translate-probe/run.mjs",
     "probe:live:chrome": "node tools/live-translate-probe/run.mjs --browser=chrome",
     "probe:live:firefox": "node tools/live-translate-probe/run.mjs --browser=firefox",
+    "probe:youtube": "node tools/youtube-source-probe/run.mjs",
+    "test:youtube-source": "playwright test e2e/youtube-source.spec.ts",
+    "test:youtube-subtitles": "playwright test e2e/youtube-subtitles.spec.ts e2e/youtube-subtitles-regression.spec.ts e2e/youtube-subtitles-recovery.spec.ts e2e/youtube-subtitles-controls.spec.ts",
     "test:layout-policy": "node tools/layout-policy-probe/run.mjs",
     "e2e:layout-policy": "node tools/layout-policy-probe/regression.mjs"
   },
@@ -33,13 +39,15 @@
     "@eslint/js": "^9.39.5",
     "@playwright/test": "^1.63.0",
     "@types/chrome": "^0.0.270",
-    "eslint": "^9.22.0",
+    "@types/node": "^22.20.5",
+    "eslint": "^9.39.5",
     "jsdom": "^25.0.1",
     "playwright-webextext": "^0.0.5",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.70.1",
-    "vitest": "^2.1.5",
-    "wxt": "^0.19.13"
+    "vite": "^7.3.7",
+    "vitest": "^5.0.5",
+    "wxt": "^0.21.4"
   },
   "dependencies": {
     "@csstools/selector-specificity": "6.0.1",
