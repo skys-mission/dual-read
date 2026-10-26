@@ -4,12 +4,15 @@
 
 Dual Read is an **open-source browser translation extension for Chrome, Edge, and Firefox**. Translate web pages and YouTube captions while keeping the original text visible, using your own OpenAI-compatible API — including DeepSeek, OpenAI, or a local Ollama endpoint.
 
-Use the extension on its own, or add the optional self-hosted Go caching proxy to reduce repeated API requests. **Configure a translation service before use**; third-party API usage may incur charges.
+**Install:** [Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/hpkdnnlmodeggabfieondnamlmamibik) · [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/dual-read-translator/) · [Chrome (manual installation)](#load-the-extension)
 
-[![GitHub Release](https://img.shields.io/github/v/release/skys-mission/dual-read?logo=github&label=Release)](https://github.com/skys-mission/dual-read/releases/latest)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![CI](https://github.com/skys-mission/dual-read/actions/workflows/ci.yml/badge.svg)](https://github.com/skys-mission/dual-read/actions/workflows/ci.yml)
-[![Zero telemetry](https://img.shields.io/badge/Telemetry-none-success)](PRIVACY.md)
+[![Latest GitHub release](https://img.shields.io/github/v/release/skys-mission/dual-read?logo=github&label=Release)](https://github.com/skys-mission/dual-read/releases/latest) [![Apache 2.0 license](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE) [![Privacy policy: zero telemetry by default](https://img.shields.io/badge/Telemetry-none-success)](PRIVACY.md)
+
+[![Go module and toolchain requirements](https://img.shields.io/badge/Go-1.26+-00ADD8?logo=go&logoColor=white)](server/go.mod) [![TypeScript 5.x configuration](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](extension/tsconfig.json) [![Manifest V3 extension configuration](https://img.shields.io/badge/Manifest-V3-4285F4?logo=googlechrome&logoColor=white)](extension/wxt.config.ts) [![Firefox 140+ compatibility and browser tests](https://img.shields.io/badge/Firefox-140%2B-FF7139?logo=firefoxbrowser&logoColor=white)](docs/FIREFOX_E2E.md)
+
+[![CI workflow status](https://github.com/skys-mission/dual-read/actions/workflows/ci.yml/badge.svg)](https://github.com/skys-mission/dual-read/actions/workflows/ci.yml) [![Nightly workflow status](https://github.com/skys-mission/dual-read/actions/workflows/nightly.yml/badge.svg)](https://github.com/skys-mission/dual-read/actions/workflows/nightly.yml) [![Release workflow status](https://github.com/skys-mission/dual-read/actions/workflows/release.yml/badge.svg)](https://github.com/skys-mission/dual-read/actions/workflows/release.yml) [![Playwright end-to-end test configuration](https://img.shields.io/badge/E2E-Playwright-2EAD33?logo=playwright&logoColor=white)](extension/playwright.config.ts) [![Vitest unit test configuration](https://img.shields.io/badge/Unit-Vitest-6E9F18?logo=vitest&logoColor=white)](extension/vitest.config.ts) [![golangci-lint configuration](https://img.shields.io/badge/Lint-golangci--lint-3A464F)](server/.golangci.yml)
+
+Use the extension on its own, or add the optional self-hosted Go caching proxy to reduce repeated API requests. **Configure a translation service before use**; third-party API usage may incur charges.
 
 ## Browser stores
 
