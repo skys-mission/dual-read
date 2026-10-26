@@ -4,12 +4,15 @@
 
 Dual Read 是一款支持 **Chrome、Edge 和 Firefox 的开源浏览器翻译插件**。通过你配置的 OpenAI 兼容 API（如 DeepSeek、OpenAI 或本地 Ollama），翻译网页和 YouTube 字幕，同时保留原文对照阅读。
 
-可以单独使用插件，也可以接入可选的自托管 Go 缓存代理，减少重复 API 请求。**使用前需要配置翻译服务**；第三方 API 可能按用量收费。
+**安装：**[Edge 加载项](https://microsoftedge.microsoft.com/addons/detail/hpkdnnlmodeggabfieondnamlmamibik) · [Firefox 附加组件](https://addons.mozilla.org/zh-CN/firefox/addon/dual-read-translator/) · [Chrome（手动安装）](#加载浏览器插件)
 
-[![GitHub Release](https://img.shields.io/github/v/release/skys-mission/dual-read?logo=github&label=Release)](https://github.com/skys-mission/dual-read/releases/latest)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![CI](https://github.com/skys-mission/dual-read/actions/workflows/ci.yml/badge.svg)](https://github.com/skys-mission/dual-read/actions/workflows/ci.yml)
-[![Zero telemetry](https://img.shields.io/badge/Telemetry-none-success)](PRIVACY.md)
+[![最新 GitHub 版本](https://img.shields.io/github/v/release/skys-mission/dual-read?logo=github&label=Release)](https://github.com/skys-mission/dual-read/releases/latest) [![Apache 2.0 许可证](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE) [![隐私政策：默认零遥测](https://img.shields.io/badge/Telemetry-none-success)](PRIVACY.md)
+
+[![Go 模块与工具链要求](https://img.shields.io/badge/Go-1.26+-00ADD8?logo=go&logoColor=white)](server/go.mod) [![TypeScript 5.x 配置](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](extension/tsconfig.json) [![Manifest V3 插件配置](https://img.shields.io/badge/Manifest-V3-4285F4?logo=googlechrome&logoColor=white)](extension/wxt.config.ts) [![Firefox 140+ 兼容性与浏览器测试](https://img.shields.io/badge/Firefox-140%2B-FF7139?logo=firefoxbrowser&logoColor=white)](docs/FIREFOX_E2E.md)
+
+[![CI 工作流状态](https://github.com/skys-mission/dual-read/actions/workflows/ci.yml/badge.svg)](https://github.com/skys-mission/dual-read/actions/workflows/ci.yml) [![Nightly 工作流状态](https://github.com/skys-mission/dual-read/actions/workflows/nightly.yml/badge.svg)](https://github.com/skys-mission/dual-read/actions/workflows/nightly.yml) [![Release 工作流状态](https://github.com/skys-mission/dual-read/actions/workflows/release.yml/badge.svg)](https://github.com/skys-mission/dual-read/actions/workflows/release.yml) [![Playwright 端到端测试配置](https://img.shields.io/badge/E2E-Playwright-2EAD33?logo=playwright&logoColor=white)](extension/playwright.config.ts) [![Vitest 单元测试配置](https://img.shields.io/badge/Unit-Vitest-6E9F18?logo=vitest&logoColor=white)](extension/vitest.config.ts) [![golangci-lint 配置](https://img.shields.io/badge/Lint-golangci--lint-3A464F)](server/.golangci.yml)
+
+可以单独使用插件，也可以接入可选的自托管 Go 缓存代理，减少重复 API 请求。**使用前需要配置翻译服务**；第三方 API 可能按用量收费。
 
 ## 浏览器商店
 
