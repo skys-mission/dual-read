@@ -1,124 +1,117 @@
-# Dual Read
+# Dual Read — Bilingual Web Translation & YouTube Subtitles
 
-[![CI](https://github.com/skys-mission/dual-read/actions/workflows/ci.yml/badge.svg)](https://github.com/skys-mission/dual-read/actions/workflows/ci.yml)
-[![Nightly](https://github.com/skys-mission/dual-read/actions/workflows/nightly.yml/badge.svg)](https://github.com/skys-mission/dual-read/actions/workflows/nightly.yml)
-[![Release](https://github.com/skys-mission/dual-read/actions/workflows/release.yml/badge.svg)](https://github.com/skys-mission/dual-read/actions/workflows/release.yml)
+**English** | [简体中文](README.zh-CN.md)
+
+Dual Read is an **open-source browser translation extension for Chrome, Edge, and Firefox**. Translate web pages and YouTube captions while keeping the original text visible, using your own OpenAI-compatible API — including DeepSeek, OpenAI, or a local Ollama endpoint.
+
+Use the extension on its own, or add the optional self-hosted Go caching proxy to reduce repeated API requests. **Configure a translation service before use**; third-party API usage may incur charges.
+
 [![GitHub Release](https://img.shields.io/github/v/release/skys-mission/dual-read?logo=github&label=Release)](https://github.com/skys-mission/dual-read/releases/latest)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Go](https://img.shields.io/badge/Go-1.26+-00ADD8?logo=go&logoColor=white)](server/go.mod)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](extension/tsconfig.json)
-[![Manifest V3](https://img.shields.io/badge/Manifest-V3-4285F4?logo=googlechrome&logoColor=white)](extension/wxt.config.ts)
-[![Firefox](https://img.shields.io/badge/Firefox-140%2B-FF7139?logo=firefoxbrowser&logoColor=white)](docs/FIREFOX_E2E.md)
-[![Playwright](https://img.shields.io/badge/E2E-Playwright-2EAD33?logo=playwright&logoColor=white)](extension/playwright.config.ts)
-[![Vitest](https://img.shields.io/badge/Unit-Vitest-6E9F18?logo=vitest&logoColor=white)](extension/vitest.config.ts)
-[![golangci-lint](https://img.shields.io/badge/Lint-golangci--lint-3A464F)](server/.golangci.yml)
+[![CI](https://github.com/skys-mission/dual-read/actions/workflows/ci.yml/badge.svg)](https://github.com/skys-mission/dual-read/actions/workflows/ci.yml)
 [![Zero telemetry](https://img.shields.io/badge/Telemetry-none-success)](PRIVACY.md)
-
-**English** | [中文](README.zh-CN.md)
-
-Open-source, self-hostable **bilingual web reading**: a browser extension plus an optional Go caching proxy (`dual-read-server`). Translate web pages and YouTube captions in Chrome, Edge, or Firefox using an OpenAI-compatible LLM API, such as DeepSeek, OpenAI, or a local Ollama endpoint.
-
-The extension translates text through the API you configure. The server adds local / Valkey caching to reduce repeated upstream requests; savings depend on cache hits and the provider you use.
-
-**Privacy in one line:** Dual Read has **zero telemetry by default**. Page, selection, and enabled subtitle text goes only to **the LLM / server you configure**. See [PRIVACY.md](PRIVACY.md).
-
-This guide describes **0.2.0**, currently being prepared for release. It adds
-YouTube bilingual subtitles and improves page layout, restoration, and cache
-handling. See the [changelog](CHANGELOG.md) for changes and upgrade notes.
 
 ## Browser stores
 
-GitHub Releases and browser stores are published separately. Existing store
-listings below may still provide an earlier version; check the version on the
-listing before installing for a 0.2.0 feature. Once published, the **v0.2.0**
-assets will be available on [GitHub Releases](https://github.com/skys-mission/dual-read/releases).
+**Version 0.2.0 is available on Edge Add-ons, Firefox Add-ons, and [GitHub Releases](https://github.com/skys-mission/dual-read/releases/tag/v0.2.0).** It adds YouTube bilingual subtitles and improves page layout, restoration, and caching. See the [changelog](CHANGELOG.md).
 
-| Browser | Installation channel |
-|---|---|
-| Chrome | Load a GitHub Release ZIP or a local build; no Chrome Web Store link is published here yet |
-| Firefox | [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/dual-read-translator/) (Firefox **140+**) |
-| Microsoft Edge | [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/hpkdnnlmodeggabfieondnamlmamibik) |
+| Browser | Install Dual Read | Installation notes |
+|---|---|---|
+| Microsoft Edge | [Install from Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/hpkdnnlmodeggabfieondnamlmamibik) | Store installation with automatic updates |
+| Firefox | [Install from Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/dual-read-translator/) | Desktop Firefox **140+**; automatic updates |
+| Chrome | [Download the 0.2.0 ZIP](https://github.com/skys-mission/dual-read/releases/download/v0.2.0/dual-read-extension-0.2.0-chrome.zip) | Manual installation; follow [Load the extension](#load-the-extension) |
 
-<!-- TODO: add a screenshot or GIF here -->
-<!-- ![Dual Read demo](docs/assets/demo.gif) -->
-
----
-
-## Table of Contents
-
-- [Why Dual Read?](#why-dual-read)
-- [Features](#features)
-- [Quick Start](#quick-start)
-- [Browser stores](#browser-stores)
-- [Documentation](#documentation)
-- [CI & Quality Gates](#ci--quality-gates)
-- [Make Targets](#make-targets-common)
-- [Verify Server](#verify-server)
-- [Contributing](#contributing)
-- [License](#license)
-
----
-
-## Why Dual Read?
-
-- **Read foreign-language docs, papers, and news** with side-by-side bilingual display
-- **Learn a language** by keeping the original text alongside the translation
-- **Cut LLM costs** with the caching proxy — repeated paragraphs hit cache, not the API
-- **Choose where text goes** — use your own server or a provider whose data policy you trust
-- **Inspect and self-host** — Apache 2.0 source, with no project-operated translation service required
-
----
-
-## Features
-
-### Browser extension (Chrome / Edge / Firefox, Manifest V3)
-
-- Bilingual overlay or replace mode
-- YouTube bilingual subtitles (new in 0.2.0): open a desktop watch page
-  and click the bilingual button beside CC to enable translation. Uses your
-  existing API and target language. Optional subtitle settings are language,
-  size, position, and automatic translation on YouTube; automatic translation is off by default.
-  Idle player controls appear automatically using the manifest's YouTube-only
-  host access, without a toolbar click or translation request. Browsers may ask
-  for this site permission when installing or updating the extension.
-  Supports available manual/automatic captions. Live streams, Shorts, mobile
-  pages, embedded players, audio transcription, and picture-in-picture subtitles
-  are outside the current scope.
-- On-demand page translation (`activeTab` + `scripting`); idle controls load automatically only on YouTube
-- Viewport-first lazy translation + MutationObserver incremental indexing
-- Automatic retry with backoff; click-to-retry on persistent failures
-- Local translation cache (memory + `chrome.storage.local` LRU)
-- Selection overlay + context menu
-- Shortcuts: `Alt+T` translate/restore, `Alt+M` mode toggle
-- Per-site rules (auto-translate / blocklist)
-- Local-only custom headers with explicit opt-in export
-- UI locales: English, Simplified Chinese, Traditional Chinese, Russian, Spanish, French · targets: zh-CN, en, ru, es, fr
-
-### Optional server
-
-- OpenAI-compatible reverse proxy (default upstream: DeepSeek)
-- Singleflight coalescing, BigCache / Valkey, auth keys, model aliases
-- Admin UI, `/livez` `/readyz` `/metrics`, hardened Docker image
-
----
+[Quick start](#quick-start) · [Features](#features) · [Supported APIs](#supported-apis) · [FAQ](#faq) · [Optional server](#optional-server) · [Development](#development)
 
 ## Quick start
 
-### A — Direct API (no server)
+1. **Install the extension** from the store for Edge or Firefox. For Chrome, use the ZIP and [manual installation steps](#load-the-extension).
+2. **Configure your translation service** in the extension's Options: choose **Direct API**, enter the API base URL, API key, and model, then choose your target language. Save, grant access to the API origin when prompted, and use **Test connection**. For a keyless local endpoint or your own proxy, see [Supported APIs](#supported-apis).
+3. **Start translating.** Click the extension icon and choose **Translate page**, or press `Alt+T`. For YouTube, open a desktop video with captions and click the bilingual button beside **CC**.
 
-1. Get an OpenAI-compatible endpoint + API key.
-2. Load the extension (below).
-3. In Options set API base, key, and model (e.g. `https://api.deepseek.com`).
+Page translation and subtitle translation have separate controls in the popup's **Page** and **Subtitles** tabs. YouTube subtitle translation is off by default.
 
-Use **Direct API** mode for a provider that requires an API key. Remote endpoints
-must use HTTPS; HTTP is supported only on loopback. For a keyless local endpoint
-such as Ollama, choose **Dual Read Proxy** mode and set its API base and model.
+## Why Dual Read?
 
-### B — Local server + extension (recommended)
+- **Read foreign-language articles, documentation, and research pages** with the original text and translation together.
+- **Learn with YouTube captions** by comparing the original subtitles with their translation.
+- **Choose your provider and model**, including a local Ollama endpoint, through an OpenAI-compatible API.
+- **Reuse translations** with the extension's local cache; add the optional proxy for server-side caching.
+- **Inspect the source and control where text goes.** Apache 2.0 licensed, with zero telemetry by default and no project-operated translation backend required.
 
-For a source run, use Go **1.26.10+** (see [`server/go.mod`](server/go.mod))
-and run the following from the repository root. Published server binaries are
-also available through [GitHub Releases](https://github.com/skys-mission/dual-read/releases).
+## Features
+
+### Bilingual web page translation
+
+- Keep the original text alongside translations, or switch to replacement mode.
+- Translate visible content first and pick up dynamically added text as you browse.
+- Restore the original page with `Alt+T`; switch display modes with `Alt+M`.
+- Translate selected text from the right-click menu and read it in an overlay.
+- Set per-site rules for automatic translation or sites you never want to translate.
+- Reuse locally cached translations, retry failed requests automatically, and click persistent errors to retry.
+
+### YouTube bilingual subtitles
+
+Translate available manual or automatically generated captions on **desktop YouTube watch pages**. Enable translation with the bilingual button beside **CC** or the popup's **Subtitles** tab, using your configured API and target language.
+
+Adjust subtitle language, size, and position in Options. Automatic subtitle translation is an optional setting for this device and is **off by default**. Idle controls do not read captions or send translation requests.
+
+Live streams, Shorts, mobile pages, embedded players, and picture-in-picture subtitles are not supported. Dual Read does not record audio or generate subtitles from speech. If a complete caption track is unavailable, it may fall back to translating visible native captions. Availability and latency depend on YouTube and your provider.
+
+### Language and settings support
+
+| Setting | Available options |
+|---|---|
+| Interface languages | English, Simplified Chinese, Traditional Chinese, Russian, Spanish, French |
+| Translation target languages | Simplified Chinese, English, Russian, Spanish, French |
+| Connection settings | API base URL, model, API key, and local-only custom HTTP headers |
+| Settings transfer | Import/export; API keys and custom headers are excluded unless explicitly included |
+
+## Supported APIs
+
+Webpage and subtitle translation use the **OpenAI-compatible Chat Completions API**. Choose the connection route that matches your setup:
+
+| Translation service | Connection route in Options | API key |
+|---|---|---|
+| DeepSeek, OpenAI, or another compatible provider | **Direct API** | Required |
+| A keyless local endpoint, such as Ollama | **Dual Read Proxy**, with your local endpoint's API base and model | Can be blank if the endpoint requires no key |
+| Your own `dual-read-server` | **Dual Read Proxy** | Required when server authentication is enabled |
+
+Enter the provider's API base URL, not the full completion URL: Dual Read appends `/chat/completions`. For example, the default DeepSeek base is `https://api.deepseek.com`. Choose a model available from your provider. Remote endpoints must use **HTTPS**; HTTP is supported only on loopback (`localhost`, `127.0.0.1`, or `::1`).
+
+Translation quality, speed, and costs depend on your model, provider, and network. API compatibility does not guarantee identical behavior across models.
+
+## FAQ
+
+### Do I need to deploy a server?
+
+No. The extension connects directly to your configured API. The [optional server](#optional-server) adds caching, request coalescing, and access controls; it is not required for webpage or YouTube translation.
+
+### Is Dual Read free to use?
+
+The source code is available under the [Apache 2.0 license](LICENSE). Dual Read does not include a translation service or API credits. Third-party providers may charge for usage; a local model uses your hardware. Cache savings depend on cache hits and provider pricing.
+
+### Can I use a local Ollama model?
+
+Yes, through Ollama's OpenAI-compatible endpoint. Set its API base and an installed model in Options. For a keyless endpoint, choose **Dual Read Proxy** so the API key can be blank; this also works without running `dual-read-server`. A local cache alone does not make a remote API local.
+
+### Where do my text and API key go?
+
+Page, selection, and enabled subtitle text goes to **the endpoint you configure**. Your own proxy can forward requests to its configured upstream. The project maintainers do not receive your browsing content or API keys, and Dual Read has zero telemetry by default. API keys and custom headers are stored locally and used in requests to your endpoint; some non-secret preferences can sync through your browser account. See the [privacy policy](PRIVACY.md).
+
+### Why does the extension request site access?
+
+Manual webpage translation uses access to the tab you invoke. Remote API connections and per-site automatic translation request access to the relevant origins. YouTube access enables idle player controls and, after you enable translation, caption reading. Browsers may request acceptance when installing or upgrading. See [permissions and data handling](PRIVACY.md#what-the-extension-can-access).
+
+### What should I do after upgrading from 0.1.x?
+
+Accept YouTube site access if prompted, then refresh already-open YouTube pages. For a manual installation, reload the extension from its installed directory first. Subtitle translation still needs to be enabled separately. See the [0.2.0 changes and upgrade notes](CHANGELOG.md).
+
+## Optional server
+
+`dual-read-server` is a self-hosted Go caching proxy with local BigCache or shared Valkey caching, identical-request coalescing, API keys, model aliases, and an admin UI for cache and request activity.
+
+For a source run, use the Go toolchain specified in [`server/go.mod`](server/go.mod) and run from the repository root:
 
 ```bash
 cd server
@@ -126,143 +119,51 @@ export OPENAI_API_KEY=sk-your-key
 go run ./cmd/dual-read-server
 ```
 
-Defaults: `http://127.0.0.1:8080`, local cache on, admin at `/admin`.  
-Production deploy: [`server/docs/DEPLOY.md`](server/docs/DEPLOY.md).
+Defaults: DeepSeek upstream, `http://127.0.0.1:8080`, local cache enabled, admin at `/admin`. In the extension, choose **Dual Read Proxy** and set the API base to `http://127.0.0.1:8080/v1`; a client key is optional until server authentication is enabled.
 
-### Load the extension
+[Published binaries](https://github.com/skys-mission/dual-read/releases) do not require Go. See the [server guide](server/README.md), [Docker and production deployment](server/docs/DEPLOY.md), and [security guidance](SECURITY.md) before exposing a server beyond loopback.
 
-**From a published GitHub Release:** select the intended release version and
-download its browser ZIP plus `SHA256SUMS` (verification:
-[`docs/RELEASE.md`](docs/RELEASE.md#verify-a-download)). For 0.2.0, use
-`dual-read-extension-0.2.0-chrome.zip` for Chrome/Edge or
-`dual-read-extension-0.2.0-firefox.zip` for Firefox, once available.
+## Load the extension
 
-- Chrome/Edge: extract the Chrome ZIP, open `chrome://extensions` or
-  `edge://extensions`, enable **Developer mode**, and choose **Load unpacked**.
-  Select the extracted directory containing `manifest.json`.
-- Firefox **140+**: the GitHub ZIP is **unsigned**. Extract it, open
-  `about:debugging#/runtime/this-firefox`, choose **Load Temporary Add-on**,
-  and select `manifest.json`. This lasts until Firefox restarts; normal
-  installation and automatic updates require the signed store version.
-  See Mozilla's [temporary installation guide](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/).
+For normal Edge and Firefox installation and automatic updates, use the [browser stores](#browser-stores). These steps are for Chrome or a manual test installation.
 
-**Build from source:** use Node.js **22.12+** on the 22.x line, or supported
-24.x / 26+. Run from the repository root:
+Download the matching ZIP and `SHA256SUMS` from the [0.2.0 release](https://github.com/skys-mission/dual-read/releases/tag/v0.2.0), and follow the [download verification guide](docs/RELEASE.md#verify-a-download):
+
+- **Chrome / Edge:** use `dual-read-extension-0.2.0-chrome.zip`. Extract it, open `chrome://extensions` or `edge://extensions`, enable **Developer mode**, and choose **Load unpacked**. Select the extracted directory containing `manifest.json`.
+- **Firefox 140+:** the GitHub ZIP, `dual-read-extension-0.2.0-firefox.zip`, is **unsigned**. Extract it, open `about:debugging#/runtime/this-firefox`, choose **Load Temporary Add-on**, and select `manifest.json`. This lasts until Firefox restarts; normal installation and automatic updates require the signed store version. See Mozilla's [temporary installation guide](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/).
+
+## Development
+
+The extension uses TypeScript and WXT; the optional server uses Go. To build the extension, use Node.js **22.12+** on the 22.x line, or supported 24.x / 26+, and run from the repository root:
 
 ```bash
 npm --prefix extension ci
 make build-extension
 ```
 
-Load `extension/output/chrome-mv3` in Chrome/Edge, or temporarily load
-`extension/output/firefox-mv3/manifest.json` in Firefox as above.
-For development with HMR, see [`CONTRIBUTING.md`](CONTRIBUTING.md#extension).
+Load `extension/output/chrome-mv3` in Chrome/Edge, or temporarily load `extension/output/firefox-mv3/manifest.json` in Firefox, using the [manual installation steps](#load-the-extension).
 
-When using the server, choose **Dual Read Proxy** mode and point the extension at
-`http://127.0.0.1:8080/v1` (API key optional until server auth is enabled).
-
-Copy `extension/dev-settings.json.example` for local imports if you like—**never** put secrets under `extension/public/` (that directory is packaged).
-
-### Use YouTube bilingual subtitles
-
-After configuring the API, open a desktop YouTube video with captions. Click the
-bilingual button beside **CC**, or open the extension popup and use its
-**Subtitles** tab. The **Page** tab controls webpage translation separately.
-Subtitle language, size, position, and optional automatic translation are in
-Options. Automatic translation is off by default and stays local to this device.
-
-After upgrading from 0.1.x, accept YouTube site access if the browser prompts,
-then refresh already-open YouTube pages. Reload an unpacked extension from its
-installed directory before refreshing. If YouTube does not provide a usable
-caption track, Dual Read may fall back to visible native captions; it cannot
-create subtitles from audio. Source availability and translation latency depend
-on YouTube and your configured provider.
-
----
+See [CONTRIBUTING.md](CONTRIBUTING.md) for hot reload, tests, and the DOM restoration contract, and the [Makefile](Makefile) for common commands. CI selects TypeScript, lint, unit, browser build/E2E, Go race/coverage, and store metadata checks according to changed paths; documentation-only changes skip unrelated builds and tests.
 
 ## Documentation
 
-| Doc | Purpose |
-|-----|---------|
-| [README.zh-CN.md](README.zh-CN.md) | Full Chinese guide |
-| [PRIVACY.md](PRIVACY.md) | What data leaves the browser and where |
-| [SECURITY.md](SECURITY.md) | Vulnerability reporting & operator hardening |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Dev setup, tests, PR expectations |
-| [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Community standards |
-| [CHANGELOG.md](CHANGELOG.md) | Notable changes |
-| [server/README.md](server/README.md) | Server configuration |
-| [server/docs/DEPLOY.md](server/docs/DEPLOY.md) | Containers & production deploy |
-| [docs/RELEASE.md](docs/RELEASE.md) | Tag release, verify, attestations |
-| [docs/PERF_LAB.md](docs/PERF_LAB.md) | Performance budget lab |
-| [docs/FIREFOX_E2E.md](docs/FIREFOX_E2E.md) | Firefox E2E (Gecko harness notes) |
-
----
-
-## CI & quality gates
-
-Every PR / push to `main` runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml),
-selecting checks for the changed paths. Documentation-only changes skip unrelated
-tests; CI configuration changes and manual dispatches run the full suite.
-
-| Job | Checks |
-|-----|--------|
-| **Extension** | `tsc`, ESLint, runtime `npm audit`, Vitest, Chrome + Firefox builds, artifact secret scan, Playwright E2E |
-| **Server** | golangci-lint (including `govet`), combined race/coverage tests, coverage floor, `govulncheck`, Docker smoke |
-| **Server-only integration** | Chromium extension against the real proxy, without the full layout suite |
-| **Store** | Privacy / manifest permissions / locale metadata consistency |
-
-Nightly adds daily `PERF_STRICT` + `PERF_FULL` performance budgets and a weekly release dry-run with SBOMs ([`nightly.yml`](.github/workflows/nightly.yml)). Manual dispatch runs both.
-Tagged `vX.Y.Z` releases build zips, multi-arch binaries, GHCR image, checksums, and attestations ([`release.yml`](.github/workflows/release.yml)).
-
----
-
-## Make targets (common)
-
-```bash
-make test                 # server + extension unit tests
-make test-e2e             # Playwright (build + Chromium/Firefox)
-make test-e2e-perf        # perf budget lab (Chromium)
-make check-golangci       # Go lint
-make check-npm-audit      # runtime npm audit gate
-make sbom                 # CycloneDX + module SBOM → dist/sbom/
-make check-store          # privacy / manifest permissions / locale metadata consistency
-VERSION=0.2.0 REQUIRE_PACKAGE_MATCH=1 make check-release  # version + changelog gate
-make package-amo-sources  # Firefox AMO sources zip → dist/store/
-make assemble-release     # flatten dist/release/ + SHA256SUMS
-VERSION=0.2.0 make release-dry-run  # build + verify release bundle (no publish)
-make docker-smoke         # non-root read-only container + /livez
-```
-
----
-
-## Verify server
-
-```bash
-curl -s http://127.0.0.1:8080/livez
-curl -s http://127.0.0.1:8080/readyz
-curl -s http://127.0.0.1:8080/health
-```
-
----
+| Guide | What it covers |
+|---|---|
+| [简体中文](README.zh-CN.md) | Chinese installation and usage guide |
+| [Privacy](PRIVACY.md) | Data destinations, storage, and browser permissions |
+| [Security](SECURITY.md) | Vulnerability reporting and server hardening |
+| [Changelog](CHANGELOG.md) | Version changes and upgrade notes |
+| [Server guide](server/README.md) | Installation, configuration, caching, and authentication |
+| [Deployment](server/docs/DEPLOY.md) | Containers, Valkey, TLS, and production deployment |
+| [Contributing](CONTRIBUTING.md) | Development setup, tests, and PR expectations |
+| [Releases and verification](docs/RELEASE.md) | Release process, checksums, and attestations |
+| [Performance lab](docs/PERF_LAB.md) | Performance budgets and validation |
+| [Firefox E2E](docs/FIREFOX_E2E.md) | Firefox browser test setup |
 
 ## Contributing
 
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a PR.
-
-- Report bugs via [Issues](https://github.com/skys-mission/dual-read/issues/new?template=bug_report.yml)
-- Request features via [Feature Request](https://github.com/skys-mission/dual-read/issues/new?template=feature_request.yml)
-- PRs must follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, etc.)
-
----
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=skys-mission/dual-read&type=Date)](https://star-history.com/#skys-mission/dual-read&Date)
-
----
+[Report a bug](https://github.com/skys-mission/dual-read/issues/new?template=bug_report.yml) or [request a feature](https://github.com/skys-mission/dual-read/issues/new?template=feature_request.yml). Before contributing code or documentation, read [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md). PR titles use Conventional Commits, such as `docs: clarify installation`.
 
 ## License
 
-[Apache License 2.0](LICENSE)
-
-By contributing, you agree to the [Code of Conduct](CODE_OF_CONDUCT.md) and [Contributing](CONTRIBUTING.md) guidelines.
+[Apache License 2.0](LICENSE).
